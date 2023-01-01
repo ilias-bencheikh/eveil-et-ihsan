@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activation de compte - GestionPro</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .activation-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .activation-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .activation-header h1 {
+            color: #1e3a5f;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .activation-header p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .welcome-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .welcome-box h3 {
+            color: #1e3a5f;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .welcome-box p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 4px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3a5f;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-requirements {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .password-requirements ul {
+            margin: 8px 0 0 20px;
+            padding: 0;
+        }
+
+        .password-requirements li {
+            margin: 4px 0;
+        }
+
+        .btn-activate {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-activate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-activate:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
+            font-size: 0.9em;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="activation-container">
+        <div class="activation-header">
+            <h1>🎓 Activation de compte</h1>
+            <p id="subtitle">Créez votre mot de passe pour accéder à votre espace</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Vérification du lien d'activation...</p>
+        </div>
+
+        <div id="activation-form" class="hidden">
+            <div class="welcome-box">
+                <h3>Bienvenue !</h3>
+                <p><strong>Nom:</strong> <span id="user-nom"></span></p>
+                <p><strong>Email:</strong> <span id="user-email"></span></p>
+            </div>
+
+            <div id="error-message" class="error-message hidden"></div>
+            <div id="success-message" class="success-message hidden"></div>
+
+            <form id="activationForm">
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" required minlength="6">
+                    <div class="password-requirements">
+                        <strong>Exigences:</strong>
+                        <ul>
+                            <li>Au moins 6 caractères</li>
+                            <li>Facile à retenir</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirmer le mot de passe</label>
+                    <input type="password" id="confirm-password" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn-activate">Activer mon compte</button>
+            </form>
+        </div>
+
+        <div id="error-state" class="hidden">
+            <div class="error-message">
+                ❌ Ce lien d'activation est invalide ou a déjà été utilisé.
+            </div>
+            <p style="text-align: center; color: #666; margin-top: 20px;">
+                Contactez votre établissement si vous pensez qu'il s'agit d'une erreur.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = `http://${window.location.hostname}:3000/api`;
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const type = urlParams.get('type') || 'eleve'; // Par défaut: élève
+
+        // Mettre à jour le sous-titre selon le type
+        const subtitle = document.getElementById('subtitle');
+        if (type === 'professeur') {
+            subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace professeur';
+        } else {
+            subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace élève';
+        }
+
+        // Vérifier le token au chargement
+        async function checkToken() {
+            if (!token) {
+                showError('Aucun token d\'activation fourni');
+                return;
+            }
+
+            try {
+                const endpoint = type === 'professeur' ? 'professeurs' : 'eleves';
+                const response = await fetch(`${API_URL}/${endpoint}/check-token/${token}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('user-nom').textContent = `${data.prenom} ${data.nom}`;
+                    document.getElementById('user-email').textContent = data.email || 'Non renseigné';
+                    
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('activation-form').classList.remove('hidden');
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError();
+            }
+        }
+
+        function showError() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error-state').classList.remove('hidden');
+        }
+
+        // Gérer la soumission du formulaire
+        document.getElementById('activationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+
+            // Réinitialiser les messages
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            // Validation
+            if (password.length < 6) {
+                errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Les mots de passe ne correspondent pas';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Désactiver le bouton
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Activation en cours...';
+
+            try {
+                const endpoint = type === 'professeur' ? 'professeurs' : 'eleves';
+                const response = await fetch(`${API_URL}/${endpoint}/activate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successDiv.textContent = data.message;
+                    successDiv.classList.remove('hidden');
+                    
+                    // Rediriger vers la page de connexion après 2 secondes
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.error || 'Une erreur est survenue';
+                    errorDiv.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Activer mon compte';
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorDiv.textContent = 'Erreur de connexion au serveur';
+                errorDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Activer mon compte';
+            }
+        });
+
+        // Vérifier le token au chargement
+        checkToken();
+    </script>
+</body>
+</html>

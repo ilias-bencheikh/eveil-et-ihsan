@@ -6,7 +6,112 @@
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Already a pro? Just edit this # 🎓 Système de Gestion Scolaire - Badr Eveil Ihsan
+
+Application web complète pour la gestion des élèves, professeurs, classes, absences et appréciations.
+
+## 📋 Fonctionnalités
+
+- **Gestion des Élèves** : Ajouter, modifier, supprimer et consulter les élèves
+- **Gestion des Professeurs** : Gérer les informations des enseignants
+- **Gestion des Classes** : Créer et organiser les classes par niveau
+- **Gestion des Absences** : Enregistrer et suivre les absences (justifiées, non justifiées, retards)
+- **Gestion des Appréciations** : Ajouter des notes et commentaires par matière et par période
+
+## 🚀 Installation
+
+1. Installer les dépendances :
+```bash
+npm install
+```
+
+2. Démarrer le serveur :
+```bash
+npm start
+```
+
+Ou en mode développement avec rechargement automatique :
+```bash
+npm run dev
+```
+
+3. Ouvrir dans le navigateur :
+```
+http://localhost:3000
+```
+
+## 🛠️ Technologies utilisées
+
+- **Backend** : Node.js, Express
+- **Frontend** : HTML5, CSS3, JavaScript vanilla
+- **Stockage** : Fichiers JSON (peut être remplacé par une base de données)
+
+## 📁 Structure du projet
+
+```
+projet_badr_eveil_ihsan/
+├── server.js              # Serveur Express avec toutes les routes API
+├── package.json           # Dépendances et scripts
+├── public/                # Fichiers frontend
+│   ├── index.html        # Interface principale
+│   ├── styles.css        # Styles de l'application
+│   └── app.js            # Logique frontend
+├── data/                  # Stockage des données (créé automatiquement)
+│   ├── eleves.json
+│   ├── professeurs.json
+│   ├── classes.json
+│   ├── absences.json
+│   └── appreciations.json
+└── README.md
+```
+
+## 🔧 API Endpoints
+
+### Élèves
+- `GET /api/eleves` - Liste tous les élèves
+- `POST /api/eleves` - Ajouter un élève
+- `PUT /api/eleves/:id` - Modifier un élève
+- `DELETE /api/eleves/:id` - Supprimer un élève
+
+### Professeurs
+- `GET /api/professeurs` - Liste tous les professeurs
+- `POST /api/professeurs` - Ajouter un professeur
+- `PUT /api/professeurs/:id` - Modifier un professeur
+- `DELETE /api/professeurs/:id` - Supprimer un professeur
+
+### Classes
+- `GET /api/classes` - Liste toutes les classes
+- `POST /api/classes` - Ajouter une classe
+
+### Absences
+- `GET /api/absences` - Liste toutes les absences
+- `GET /api/absences/eleve/:eleveId` - Absences d'un élève
+- `POST /api/absences` - Enregistrer une absence
+
+### Appréciations
+- `GET /api/appreciations` - Liste toutes les appréciations
+- `GET /api/appreciations/eleve/:eleveId` - Appréciations d'un élève
+- `POST /api/appreciations` - Ajouter une appréciation
+
+## 📝 Améliorations possibles
+
+- Ajouter une authentification (login professeurs/admin)
+- Intégrer une vraie base de données (MongoDB, PostgreSQL)
+- Ajouter des statistiques et graphiques
+- Système d'export PDF des bulletins
+- Notifications par email aux parents
+- Application mobile
+- Gestion des emplois du temps
+- Module de messagerie interne
+
+## 👨‍💻 Développement
+
+Pour contribuer au projet :
+1. Cloner le dépôt
+2. Créer une branche (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Committer les changements (`git commit -m 'Ajout nouvelle fonctionnalité'`)
+4. Pousser vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Ouvrir une Pull Request and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
 ## Add your files
 

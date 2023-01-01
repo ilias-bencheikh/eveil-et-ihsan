@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion École - Badr Eveil Ihsan</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar style Pronote -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🎓 GestionPro</h1>
+                <div class="user-badge">
+                    <span>👤</span>
+                    <span id="user-info"></span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="eleves">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span>Élèves</span>
+                </div>
+                <div class="nav-item" data-tab="bureau" id="nav-bureau" style="display: none;">
+                    <span class="nav-icon">🏢</span>
+                    <span>Bureau</span>
+                </div>
+                <div class="nav-item" data-tab="classes">
+                    <span class="nav-icon">📚</span>
+                    <span>Classes</span>
+                </div>
+                <div class="nav-item" data-tab="inscriptions" id="nav-inscriptions" style="display: none;">
+                    <span class="nav-icon">📋</span>
+                    <span>Dossier d'inscription</span>
+                </div>
+                <div class="nav-item" data-tab="appel" id="nav-appel" style="display: none;">
+                    <span class="nav-icon">✅</span>
+                    <span>Faire l'appel</span>
+                </div>
+                <div class="nav-item" data-tab="appreciations">
+                    <span class="nav-icon">📝</span>
+                    <span>Appréciations</span>
+                </div>
+                <div class="nav-item" data-tab="messagerie">
+                    <span class="nav-icon">💬</span>
+                    <span>Messagerie</span>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">
+                    <span>🚪</span>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <header>
+                <h1 id="page-title">Gestion des Élèves</h1>
+                <p id="page-description">Consulter et gérer les élèves de l'établissement</p>
+                <p id="prof-info" style="margin-top: 10px; color: #4a9eff; font-weight: 500; display: none;">
+                    📌 Vous ne voyez que les élèves et classes dont vous êtes responsable
+                </p>
+            </header>
+
+            <div class="content-wrapper">
+
+        <!-- Section Élèves -->
+        <div id="eleves" class="tab-content active">
+            <div class="section-header">
+                <h2>Gestion des Élèves</h2>
+                <button class="btn btn-primary" onclick="showAddEleveForm()">+ Ajouter un élève</button>
+            </div>
+
+            <!-- Barre de recherche -->
+            <div class="search-container" style="margin-bottom: 20px;">
+                <input type="text" id="search-eleve" placeholder="🔍 Rechercher par nom, prénom ou classe..." style="width: 100%; padding: 12px 20px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;" oninput="filterEleves()">
+            </div>
+
+            <div id="add-eleve-form" class="form-container" style="display: none;">
+                <h3>Nouvel Élève</h3>
+                <form id="eleveForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom:</label>
+                            <input type="text" id="eleve-nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom:</label>
+                            <input type="text" id="eleve-prenom" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date de naissance:</label>
+                            <input type="date" id="eleve-dateNaissance" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Classe:</label>
+                            <select id="eleve-classe">
+                                <option value="">Sélectionner une classe</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone parent:</label>
+                        <input type="tel" id="eleve-telephone">
+                    </div>
+                    <div class="form-group">
+                        <label>Email parent:</label>
+                        <input type="email" id="eleve-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Photo de profil:</label>
+                        <input type="file" id="eleve-photo" accept="image/*" onchange="previewElevePhoto(this)">
+                        <div id="photo-preview" style="margin-top: 10px; display: none;">
+                            <img id="preview-img" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddEleveForm()">Annuler</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <div id="eleves-grid" class="eleves-grid">
+                    <!-- Les élèves seront affichées ici en cartes -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Professeurs -->
+        <!-- Section Classes -->
+        <div id="classes" class="tab-content">
+            <div class="section-header">
+                <h2>Gestion des Classes</h2>
+                <button class="btn btn-primary" onclick="showAddClasseForm()">+ Ajouter une classe</button>
+            </div>
+
+            <div id="add-classe-form" class="form-container" style="display: none;">
+                <h3>Nouvelle Classe</h3>
+                <form id="classeForm">
+                    <div class="form-group">
+                        <label>Nom de la classe:</label>
+                        <input type="text" id="classe-nom" placeholder="Ex: 6ème A" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Niveau:</label>
+                        <select id="classe-niveau" required>
+                            <option value="">Sélectionner un niveau</option>
+                            <option value="Maternelle">Maternelle</option>
+                            <option value="CP">CP</option>
+                            <option value="CE1">CE1</option>
+                            <option value="CE2">CE2</option>
+                            <option value="CM1">CM1</option>
+                            <option value="CM2">CM2</option>
+                            <option value="6ème">6ème</option>
+                            <option value="5ème">5ème</option>
+                            <option value="4ème">4ème</option>
+                            <option value="3ème">3ème</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Professeur principal:</label>
+                        <select id="classe-professeur">
+                            <option value="">Sélectionner un professeur</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddClasseForm()">Annuler</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <div id="classes-list" class="classes-grid">
+                    <!-- Les classes seront affichées ici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Bureau -->
+        <div id="bureau" class="tab-content">
+            <div class="section-header">
+                <h2>Gestion du Bureau</h2>
+                <button class="btn btn-primary" onclick="showAddStaffForm()">+ Ajouter un membre</button>
+            </div>
+
+            <div id="add-staff-form" class="form-container" style="display: none;">
+                <h3>Nouveau membre du bureau</h3>
+                <form id="staffForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom:</label>
+                            <input type="text" id="staff-nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom:</label>
+                            <input type="text" id="staff-prenom" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="staff-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Rôle:</label>
+                        <select id="staff-role" required>
+                            <option value="">Sélectionner un rôle</option>
+                            <option value="directeur" id="role-directeur">Directeur</option>
+                            <option value="secretariat">Secrétariat</option>
+                            <option value="professeur">Professeur</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="matiere-group" style="display: none;">
+                        <label>Matière:</label>
+                        <input type="text" id="staff-matiere" placeholder="Ex: Mathématiques, Français...">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddStaffForm()">Annuler</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <table id="staff-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Matière</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-tbody">
+                        <!-- Les données seront chargées ici -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section Appel -->
+        <div id="appel" class="tab-content">
+            <div class="section-header">
+                <h2>Faire l'appel</h2>
+            </div>
+
+            <div id="appel-classe-selection" class="form-container">
+                <h3>Sélectionner une classe</h3>
+                <div class="form-group">
+                    <label>Classe:</label>
+                    <select id="appel-classe-select" onchange="loadClasseAppel()" style="font-size: 1.1em; padding: 12px;">
+                        <option value="">-- Choisir une classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="appel-date" style="font-size: 1.1em; padding: 12px;">
+                </div>
+            </div>
+
+            <div id="appel-liste" style="display: none;">
+                <div class="form-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 id="appel-classe-nom">Liste des élèves</h3>
+                        <button class="btn btn-primary" onclick="enregistrerAppel()">💾 Enregistrer l'appel</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Élève</th>
+                                    <th style="text-align: center; width: 16%;">Présent</th>
+                                    <th style="text-align: center; width: 16%;">Absent</th>
+                                    <th style="text-align: center; width: 18%;">Retard</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appel-tbody">
+                                <!-- Liste des élèves -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Appréciations -->
+        <div id="appreciations" class="tab-content">
+            <div class="section-header">
+                <h2>Gestion des Appréciations par Classe</h2>
+            </div>
+
+            <div class="form-container">
+                <h3>Sélectionner une classe</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Classe:</label>
+                        <select id="appreciation-classe-select" onchange="loadElevesForAppreciation()">
+                            <option value="">— Choisir une classe —</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Période:</label>
+                        <select id="appreciation-periode-select">
+                            <option value="Trimestre 1">Trimestre 1</option>
+                            <option value="Trimestre 2">Trimestre 2</option>
+                            <option value="Trimestre 3">Trimestre 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Matière:</label>
+                        <input type="text" id="appreciation-matiere-input" placeholder="Ex: Mathématiques">
+                    </div>
+                </div>
+            </div>
+
+            <div id="appreciation-eleves-list" class="table-container" style="display: none;">
+                <h3 id="appreciation-classe-nom"></h3>
+                <form id="appreciationsBulkForm">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Élève</th>
+                                <th>Note (/20)</th>
+                                <th>Appréciation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appreciation-eleves-tbody">
+                            <!-- Les élèves seront chargés ici -->
+                        </tbody>
+                    </table>
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">Enregistrer toutes les appréciations</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAppreciationsList()">Annuler</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="section-header" style="margin-top: 40px;">
+                <h3>Appréciations enregistrées</h3>
+            </div>
+
+            <div class="table-container">
+                <table id="appreciations-table">
+                    <thead>
+                        <tr>
+                            <th>Élève</th>
+                            <th>Classe</th>
+                            <th>Matière</th>
+                            <th>Période</th>
+                            <th>Note</th>
+                            <th>Par</th>
+                            <th>Commentaire</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appreciations-tbody">
+                        <!-- Les données seront chargées ici -->
+                    </tbody>
+                </table>
+            </div>
+            </div>
+
+            <!-- Section Dossier d'inscription -->
+            <div id="inscriptions" class="tab-content">
+                <div class="section-header">
+                    <h2>Dossier d'inscription</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="showInscriptionSolo()">📋 Inscription Solo</button>
+                        <button class="btn btn-primary" onclick="showInscriptionFamille()">👨‍👩‍👧‍👦 Inscription Famille</button>
+                    </div>
+                </div>
+
+                <!-- Formulaire inscription solo -->
+                <div id="inscription-solo-form" class="form-container" style="display: none;">
+                    <h3>📋 Inscription individuelle</h3>
+                    <form id="inscriptionSoloForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nom:</label>
+                                <input type="text" id="inscrip-solo-nom" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Prénom:</label>
+                                <input type="text" id="inscrip-solo-prenom" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date de naissance:</label>
+                                <input type="date" id="inscrip-solo-dateNaissance" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Classe:</label>
+                                <select id="inscrip-solo-classe">
+                                    <option value="">Sélectionner une classe</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Téléphone parent:</label>
+                            <input type="tel" id="inscrip-solo-telephone">
+                        </div>
+                        <div class="form-group">
+                            <label>Email parent:</label>
+                            <input type="email" id="inscrip-solo-email">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            <button type="button" class="btn btn-secondary" onclick="hideInscriptionSolo()">Annuler</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Formulaire inscription famille -->
+                <div id="inscription-famille-form" class="form-container" style="display: none;">
+                    <h3>👨‍👩‍👧‍👦 Inscription Famille</h3>
+                    <div class="form-group">
+                        <label>Nombre d'élèves dans la famille:</label>
+                        <input type="number" id="nombre-eleves-famille" min="2" max="10" value="2" onchange="generateFamilleFields()">
+                    </div>
+                    <div id="famille-fields-container">
+                        <!-- Les champs seront générés dynamiquement -->
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone parent (commun):</label>
+                        <input type="tel" id="inscrip-famille-telephone">
+                    </div>
+                    <div class="form-group">
+                        <label>Email parent (commun):</label>
+                        <input type="email" id="inscrip-famille-email">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="submitInscriptionFamille()">Enregistrer la famille</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideInscriptionFamille()">Annuler</button>
+                    </div>
+                </div>
+
+                <!-- Liste des inscriptions -->
+                <div class="table-container">
+                    <h3>Inscriptions récentes</h3>
+                    <table id="inscriptions-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Classe</th>
+                                <th>Type</th>
+                                <th>Famille</th>
+                                <th>Téléphone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inscriptions-tbody">
+                            <!-- Les données seront chargées ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section Appel -->
+            <div id="appel" class="tab-content">
+                <div class="section-header">
+                    <h2>Faire l'appel</h2>
+                </div>
+
+                <div class="form-container">
+                    <h3>Sélectionner une classe</h3>
+                    <div class="form-group">
+                        <label>Classe:</label>
+                        <select id="appel-classe" onchange="loadElevesForAppel()">
+                            <option value="">Sélectionner une classe</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="appel-list" class="table-container" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appel-tbody">
+                        </tbody>
+                    </table>
+                    <div style="padding: 20px; text-align: right; border-top: 2px solid #e0e0e0;">
+                        <button class="btn btn-primary" onclick="saveAppel()">Enregistrer l'appel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Messagerie (Style WhatsApp) -->
+            <div id="messagerie" class="tab-content">
+                <div class="whatsapp-container">
+                    <!-- Liste des conversations -->
+                    <div class="conversations-panel">
+                        <div class="conversations-header">
+                            <h3>💬 Conversations</h3>
+                            <button class="btn-new-chat" onclick="showNewConversationModal()" title="Nouvelle conversation">➕</button>
+                        </div>
+                        <div class="conversations-search">
+                            <input type="text" id="search-conversations" placeholder="🔍 Rechercher..." oninput="filterConversations()">
+                        </div>
+                        <div id="conversations-list" class="conversations-list">
+                            <!-- Les conversations seront chargées ici -->
+                        </div>
+                    </div>
+
+                    <!-- Zone de chat -->
+                    <div class="chat-panel">
+                        <div id="chat-empty" class="chat-empty">
+                            <div class="empty-state">
+                                <div class="empty-icon">💬</div>
+                                <h3>Sélectionnez une conversation</h3>
+                                <p>Choisissez une conversation dans la liste ou démarrez-en une nouvelle</p>
+                            </div>
+                        </div>
+
+                        <div id="chat-active" class="chat-active" style="display: none;">
+                            <!-- En-tête du chat -->
+                            <div class="chat-header">
+                                <div class="chat-header-info">
+                                    <div class="chat-avatar">👤</div>
+                                    <div>
+                                        <div class="chat-name" id="chat-name">Nom du contact</div>
+                                        <div class="chat-status" id="chat-status">En ligne</div>
+                                    </div>
+                                </div>
+                                <button class="btn-close-chat" onclick="closeChat()">✖</button>
+                            </div>
+
+                            <!-- Messages -->
+                            <div id="chat-messages" class="chat-messages">
+                                <!-- Les messages seront affichés ici -->
+                            </div>
+
+                            <!-- Zone de saisie -->
+                            <div class="chat-input-container">
+                                <form id="chatForm" onsubmit="sendMessage(event)">
+                                    <input type="text" id="chat-input" placeholder="Tapez votre message..." required autocomplete="off">
+                                    <button type="submit" class="btn-send">📤</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal nouvelle conversation -->
+            <div id="new-conversation-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Nouvelle conversation</h3>
+                        <button class="btn-close" onclick="closeNewConversationModal()">✖</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Sélectionner un contact:</label>
+                            <input type="text" id="search-contacts" placeholder="🔍 Rechercher un contact..." oninput="filterContacts()">
+                            <div id="contacts-list" class="contacts-list">
+                                <!-- Les contacts seront chargés ici -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="custom-modals.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
