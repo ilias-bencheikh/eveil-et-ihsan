@@ -273,23 +273,23 @@
                 </div>
             </div>
 
-            <!-- User Info -->
             <div class="sidebar-user">
                 <div class="sidebar-user-avatar" id="userAvatar">E</div>
-                <div class="sidebar-user-info">
-                    <h3 id="userName">Élève</h3>
-                    <span id="userClass">Classe</span>
-                </div>
-            </div>
+                
+                <div class="sidebar-user-info" style="width: 100%; text-align: center;">
+                    <div class="family-selector-wrapper" id="familySelectorWrapper">
+                        
+                        <div class="current-user-display">
+                            <h3 class="current-user-name" id="userName">Chargement...</h3>
+                            <span class="material-icons dropdown-arrow" id="switchIcon" style="display: none;">expand_more</span>
+                        </div>
 
-            <!-- Sélecteur de famille -->
-            <div class="family-switcher" id="familySwitcher">
-                <div class="family-switcher-label">
-                    <span class="material-icons" style="font-size: 18px;">family_restroom</span>
-                    Changer d'enfant
+                        <div class="family-dropdown-menu" id="familyDropdownList">
+                            </div>
+                    </div>
+                    
+                    <span id="userClass" style="display: block; font-size: 0.85rem; opacity: 0.7; margin-top: 4px;">Classe</span>
                 </div>
-                <select class="family-select" id="familySelect" onchange="switchChild()">
-                </select>
             </div>
 
             <!-- Navigation -->
@@ -634,6 +634,8 @@
             loadFamilyMembers();
         });
 
+        // --- GESTION DU SÉLECTEUR DE FAMILLE (Custom Dropdown) ---
+
         async function loadFamilyMembers() {
             try {
                 // Charger les membres de la famille par email
@@ -642,17 +644,31 @@
                 if (response.ok) {
                     familyMembers = await response.json();
                     
+                    const wrapper = document.getElementById('familySelectorWrapper');
+                    const icon = document.getElementById('switchIcon');
+                    
                     if (familyMembers.length > 1) {
-                        // Afficher le sélecteur de famille
-                        document.getElementById('familySwitcher').classList.add('show');
+                        // Activer le mode famille (plusieurs enfants)
+                        icon.style.display = 'block';
+                        wrapper.classList.add('has-multiple');
+                        wrapper.title = "Cliquez pour changer d'enfant";
                         
-                        const select = document.getElementById('familySelect');
-                        select.innerHTML = familyMembers.map(member => 
-                            `<option value="${member.id}" ${member.id === user.id ? 'selected' : ''}>
-                                ${member.prenom} ${member.nom} - ${member.classe || 'Non assigné'}
-                            </option>`
-                        ).join('');
+                        // Ajouter l'événement de clic pour ouvrir/fermer
+                        wrapper.onclick = (e) => {
+                            e.stopPropagation(); // Empêche la fermeture immédiate
+                            toggleFamilyMenu();
+                        };
+                    } else {
+                        // Mode enfant unique
+                        icon.style.display = 'none';
+                        wrapper.classList.remove('has-multiple');
+                        wrapper.onclick = null;
+                        wrapper.style.cursor = 'default';
+                        wrapper.title = "";
                     }
+                    
+                    // Générer la liste HTML une première fois
+                    renderFamilyList();
                 }
             } catch (error) {
                 console.error('Erreur chargement famille:', error);
@@ -662,31 +678,113 @@
             loadEleveData();
         }
 
-        function switchChild() {
-            const selectedId = document.getElementById('familySelect').value;
-            const selectedChild = familyMembers.find(m => m.id === selectedId);
-            
-            if (selectedChild) {
-                // Mettre à jour l'utilisateur courant
-                currentChild = {
-                    ...user,
-                    id: selectedChild.id,
-                    nom: selectedChild.nom,
-                    prenom: selectedChild.prenom,
-                    classe: selectedChild.classe
-                };
+        // Génère le HTML du menu déroulant
+        function renderFamilyList() {
+            const list = document.getElementById('familyDropdownList');
+            if (!list) return;
+
+            list.innerHTML = familyMembers.map(member => {
+                const initial = member.prenom ? member.prenom[0].toUpperCase() : 'E';
+                const isActive = member.id === currentChild.id ? 'active' : '';
                 
-                // Mettre à jour l'affichage
-                updateUserDisplay();
-                loadEleveData();
+                return `
+                    <div class="family-dropdown-item ${isActive}" onclick="selectChild('${member.id}')">
+                        <div class="item-avatar">${initial}</div>
+                        <div class="item-info">
+                            <span class="item-name">${member.prenom}</span>
+                            <span class="item-class">${member.classe || 'Sans classe'}</span>
+                        </div>
+                        ${isActive ? '<span class="material-icons check-icon">check_circle</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Ouvre ou ferme le menu
+        function toggleFamilyMenu() {
+            const wrapper = document.getElementById('familySelectorWrapper');
+            if (wrapper.classList.contains('active')) {
+                closeFamilyMenu();
+            } else {
+                wrapper.classList.add('active');
+                // Écouter les clics ailleurs pour fermer le menu
+                setTimeout(() => document.addEventListener('click', closeFamilyMenuOutside), 0);
             }
         }
 
+        // Ferme le menu
+        function closeFamilyMenu() {
+            const wrapper = document.getElementById('familySelectorWrapper');
+            if (wrapper) wrapper.classList.remove('active');
+            document.removeEventListener('click', closeFamilyMenuOutside);
+        }
+
+        // Ferme le menu si on clique en dehors
+        function closeFamilyMenuOutside(event) {
+            const wrapper = document.getElementById('familySelectorWrapper');
+            if (wrapper && !wrapper.contains(event.target)) {
+                closeFamilyMenu();
+            }
+        }
+
+        // Action quand on clique sur un enfant dans la liste
+        function selectChild(id) {
+            // Empêcher la propagation pour ne pas rouvrir le menu instantanément
+            if (window.event) window.event.stopPropagation();
+
+            const selectedChild = familyMembers.find(m => m.id === id);
+            
+            if (selectedChild) {
+                // Si c'est le même enfant, on ferme juste le menu
+                if (selectedChild.id === currentChild.id) {
+                    closeFamilyMenu();
+                    return;
+                }
+
+                // Mettre à jour l'utilisateur courant
+                currentChild = {
+                    ...user, // Garde le token
+                    id: selectedChild.id,
+                    nom: selectedChild.nom,
+                    prenom: selectedChild.prenom,
+                    classe: selectedChild.classe,
+                    photo: selectedChild.photo
+                };
+                
+                closeFamilyMenu();
+                updateUserDisplay(); // Met à jour l'affichage et la coche dans la liste
+                loadEleveData(); // Recharge toutes les données
+                
+                showSnackbar(`Profil actif : ${selectedChild.prenom}`);
+            }
+        }
+
+        // Mettre à jour l'affichage global
         function updateUserDisplay() {
             const prenom = currentChild.prenom || 'Élève';
-            document.getElementById('userName').textContent = prenom;
-            document.getElementById('userAvatar').textContent = prenom[0].toUpperCase();
+            const nom = currentChild.nom || '';
+            
+            // Sidebar textes
+            document.getElementById('userName').textContent = `${prenom} ${nom}`;
             document.getElementById('userClass').textContent = currentChild.classe || 'Non assigné';
+            
+            // Sidebar Avatar
+            const avatarEl = document.getElementById('userAvatar');
+            if (currentChild.photo) {
+                avatarEl.innerHTML = `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+            } else {
+                avatarEl.textContent = prenom[0].toUpperCase();
+            }
+
+            // Dashboard Header Infos
+            document.getElementById('eleveName').textContent = `${prenom} ${nom}`;
+            document.getElementById('eleveClass').textContent = currentChild.classe || 'Classe non assignée';
+            document.getElementById('eleveAvatar').innerHTML = currentChild.photo ? 
+                `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
+                (prenom[0].toUpperCase());
+
+            // Mettre à jour la coche "active" dans le menu déroulant
+            renderFamilyList();
         }
 
         function initializeUI() {
