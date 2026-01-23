@@ -234,8 +234,17 @@
         const subtitle = document.getElementById('subtitle');
         if (type === 'professeur') {
             subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace professeur';
+        } else if (type === 'staff') { // AJOUT ICI
+            subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace d\'administration';
         } else {
             subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace élève';
+        }
+
+        // Fonction pour déterminer l'endpoint API correct
+        function getEndpoint(userType) {
+            if (userType === 'professeur') return 'professeurs';
+            if (userType === 'staff') return 'staff'; // AJOUT ICI
+            return 'eleves';
         }
 
         // Vérifier le token au chargement
@@ -246,7 +255,10 @@
             }
 
             try {
-                const endpoint = type === 'professeur' ? 'professeurs' : 'eleves';
+                // CORRECTION ICI : Utilisation de la nouvelle logique
+                const endpoint = getEndpoint(type); 
+                
+                // Appel API: /api/staff/check-token/XYZ
                 const response = await fetch(`${API_URL}/${endpoint}/check-token/${token}`);
                 const data = await response.json();
 
@@ -302,7 +314,8 @@
             submitBtn.textContent = 'Activation en cours...';
 
             try {
-                const endpoint = type === 'professeur' ? 'professeurs' : 'eleves';
+                const endpoint = getEndpoint(type);
+                
                 const response = await fetch(`${API_URL}/${endpoint}/activate`, {
                     method: 'POST',
                     headers: {

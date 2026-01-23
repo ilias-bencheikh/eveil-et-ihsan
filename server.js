@@ -179,49 +179,76 @@ function checkPermission(action) {
 app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
 
-    // Vérifier dans tous les types de comptes
-    let user = null;
-
-    // Vérifier staff
-    user = DEMO_ACCOUNTS.staff.find(u => u.email === email && u.password === password);
+    // 1. Vérifier d'abord les comptes de démonstration (Staff hardcodé)
+    let user = DEMO_ACCOUNTS.staff.find(u => u.email === email && u.password === password);
     if (user) {
         return res.json({ user, token: 'demo-token' });
     }
 
-    // Vérifier professeurs dans la base de données
-    db.get('SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', 
+    // 2. Vérifier dans la table STAFF (C'est ce qui manquait !)
+    db.get('SELECT * FROM staff WHERE email = ? AND password = ? AND activated = 1', 
         [email, password], 
         (err, row) => {
-            if (row) {
-                const profUser = {
-                    id: row.id,
-                    email: row.email,
-                    role: 'professeur',
-                    nom: row.nom,
-                    prenom: row.prenom,
-                    matiere: row.matiere
-                };
-                return res.json({ user: profUser, token: 'demo-token' });
-            }
+            if (err) return res.status(500).json({ error: err.message });
             
-            // Vérifier élèves
-            // Vérifier élèves dans la base de données
-            db.get('SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', 
-        [email, password], 
-        (err, row) => {
             if (row) {
-                const eleveUser = {
-                    id: row.id,
-                    email: row.email,
-                    role: 'eleve',
-                    nom: row.nom,
-                    prenom: row.prenom
-                };
-                return res.json({ user: eleveUser, token: 'demo-token' });
+                // Utilisateur trouvé dans la table staff
+                return res.json({ 
+                    user: {
+                        id: row.id,
+                        email: row.email,
+                        role: row.role, // 'directeur', 'secretariat', etc.
+                        nom: row.nom,
+                        prenom: row.prenom,
+                        matiere: row.matiere
+                    }, 
+                    token: 'demo-token' 
+                });
             }
-            res.status(401).json({ message: 'Email ou mot de passe incorrect' });
-        });
-    });
+
+            // 3. Si pas trouvé, vérifier les PROFESSEURS
+            db.get('SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', 
+                [email, password], 
+                (err, row) => {
+                    if (row) {
+                        return res.json({ 
+                            user: {
+                                id: row.id,
+                                email: row.email,
+                                role: 'professeur',
+                                nom: row.nom,
+                                prenom: row.prenom,
+                                matiere: row.matiere
+                            }, 
+                            token: 'demo-token' 
+                        });
+                    }
+                    
+                    // 4. Si pas trouvé, vérifier les ÉLÈVES
+                    db.get('SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', 
+                        [email, password], 
+                        (err, row) => {
+                            if (row) {
+                                return res.json({ 
+                                    user: {
+                                        id: row.id,
+                                        email: row.email,
+                                        role: 'eleve',
+                                        nom: row.nom,
+                                        prenom: row.prenom
+                                    }, 
+                                    token: 'demo-token' 
+                                });
+                            }
+                            
+                            // Si personne n'est trouvé nulle part
+                            res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+                        }
+                    );
+                }
+            );
+        }
+    );
 });
 
 // Route pour activer un compte professeur
@@ -772,7 +799,7 @@ app.post('/api/staff', (req, res) => {
         [id, nom, prenom, email || '', role, matiere || null, null, activationToken, 0, null, null],
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
-            const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
+            const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}&type=staff`;
             res.status(201).json({ 
                 id, nom, prenom, email, role, matiere,
                 activationLink,
@@ -819,6 +846,41 @@ app.delete('/api/staff/:id', (req, res) => {
     });
 });
 
+// === ROUTES D'ACTIVATION MANQUANTES POUR LE STAFF ===
+
+// Route pour vérifier un token d'activation staff (nécessaire quand on clique sur le lien)
+app.get('/api/staff/check-token/:token', (req, res) => {
+    db.get('SELECT nom, prenom, email FROM staff WHERE activationToken = ? AND activated = 0', 
+        [req.params.token], 
+        (err, row) => {
+            if (err) return res.status(500).json({ error: err.message });
+            if (!row) return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
+            res.json(row);
+        }
+    );
+});
+
+// Route pour activer un compte staff (définition du mot de passe)
+app.post('/api/staff/activate', (req, res) => {
+    const { token, password } = req.body;
+    
+    db.get('SELECT * FROM staff WHERE activationToken = ? AND activated = 0', [token], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
+        
+        db.run('UPDATE staff SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
+            [password, row.id],
+            function(err) {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ 
+                    message: 'Compte activé avec succès! Vous pouvez maintenant vous connecter.',
+                    email: row.email
+                });
+            }
+        );
+    });
+});
+
 // Route principale
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
@@ -860,14 +922,29 @@ app.post('/api/send-activation-email', checkPermission('create'), async (req, re
     }
     
     try {
+        // CORRECTION ICI : Gestion correcte des 3 tables
+        let table;
+        let queryParams = '';
+        
+        if (type === 'eleve') {
+            table = 'eleves';
+        } else if (type === 'professeur') {
+            table = 'professeurs';
+            queryParams = '&type=professeur';
+        } else if (type === 'staff') {
+            table = 'staff';
+            queryParams = '&type=staff';
+        } else {
+            return res.status(400).json({ error: 'Type utilisateur invalide' });
+        }
+
         // Récupérer le token d'activation
-        const table = type === 'eleve' ? 'eleves' : 'professeurs';
         db.get(`SELECT activationToken, nom, prenom FROM ${table} WHERE id = ?`, [userId], async (err, user) => {
             if (err || !user) {
                 return res.status(404).json({ error: 'Utilisateur non trouvé' });
             }
             
-            const activationLink = `http://${req.headers.host}/activation.html?token=${user.activationToken}${type === 'professeur' ? '&type=professeur' : ''}`;
+            const activationLink = `http://${req.headers.host}/activation.html?token=${user.activationToken}${queryParams}`;
             
             // Préparer l'email
             const mailOptions = {
