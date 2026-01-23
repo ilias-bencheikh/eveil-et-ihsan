@@ -3,586 +3,2446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion École - Badr Eveil Ihsan</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Eveil & Ihsan - Gestion Scolaire</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="all">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" media="all">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <style>
+        /* S'assurer que les icônes s'affichent correctement */
+        .material-icons {
+            font-family: 'Material Icons' !important;
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            font-feature-settings: 'liga';
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar style Pronote -->
-        <aside class="sidebar">
+    <div class="dashboard-page">
+        <!-- Overlay Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h1>🎓 GestionPro</h1>
-                <div class="user-badge">
-                    <span>👤</span>
-                    <span id="user-info"></span>
+                <div class="sidebar-logo">E&I</div>
+                <div class="sidebar-brand">
+                    <h1>Eveil & Ihsan</h1>
+                    <span>Gestion Scolaire</span>
                 </div>
             </div>
-            
+
+            <!-- User Info -->
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="userAvatar">A</div>
+                <div class="sidebar-user-info">
+                    <h3 id="userName">Utilisateur</h3>
+                    <span id="userRole"><span class="sidebar-user-badge">Admin</span></span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
             <nav class="sidebar-nav">
-                <div class="nav-item active" data-tab="eleves">
-                    <span class="nav-icon">👨‍🎓</span>
-                    <span>Élèves</span>
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-section-title">Principal</span>
+                    <a href="#" class="sidebar-nav-item active" data-tab="dashboard">
+                        <span class="material-icons">dashboard</span>
+                        <span>Tableau de bord</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="eleves">
+                        <span class="material-icons">school</span>
+                        <span>Élèves</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="classes">
+                        <span class="material-icons">class</span>
+                        <span>Classes</span>
+                    </a>
                 </div>
-                <div class="nav-item" data-tab="bureau" id="nav-bureau" style="display: none;">
-                    <span class="nav-icon">🏢</span>
-                    <span>Bureau</span>
+
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-section-title">Suivi</span>
+                    <a href="#" class="sidebar-nav-item" data-tab="appel" id="nav-appel">
+                        <span class="material-icons">fact_check</span>
+                        <span>Faire l'appel</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="absences">
+                        <span class="material-icons">event_busy</span>
+                        <span>Absences</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="appreciations">
+                        <span class="material-icons">rate_review</span>
+                        <span>Appréciations</span>
+                    </a>
                 </div>
-                <div class="nav-item" data-tab="classes">
-                    <span class="nav-icon">📚</span>
-                    <span>Classes</span>
+
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-section-title">Communication</span>
+                    <a href="#" class="sidebar-nav-item" data-tab="actualites">
+                        <span class="material-icons">newspaper</span>
+                        <span>Actualités</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="messagerie">
+                        <span class="material-icons">mail</span>
+                        <span>Messagerie</span>
+                        <span class="nav-badge" id="messageBadge" style="display: none;">0</span>
+                    </a>
                 </div>
-                <div class="nav-item" data-tab="inscriptions" id="nav-inscriptions" style="display: none;">
-                    <span class="nav-icon">📋</span>
-                    <span>Dossier d'inscription</span>
-                </div>
-                <div class="nav-item" data-tab="appel" id="nav-appel" style="display: none;">
-                    <span class="nav-icon">✅</span>
-                    <span>Faire l'appel</span>
-                </div>
-                <div class="nav-item" data-tab="appreciations">
-                    <span class="nav-icon">📝</span>
-                    <span>Appréciations</span>
-                </div>
-                <div class="nav-item" data-tab="messagerie">
-                    <span class="nav-icon">💬</span>
-                    <span>Messagerie</span>
+
+                <div class="sidebar-nav-section" id="adminSection" style="display: none;">
+                    <span class="sidebar-nav-section-title">Administration</span>
+                    <a href="#" class="sidebar-nav-item" data-tab="bureau">
+                        <span class="material-icons">business</span>
+                        <span>Bureau</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="inscriptions">
+                        <span class="material-icons">assignment</span>
+                        <span>Inscriptions</span>
+                    </a>
                 </div>
             </nav>
-            
+
+            <!-- Footer -->
             <div class="sidebar-footer">
-                <button class="btn-logout" onclick="logout()">
-                    <span>🚪</span>
+                <button class="sidebar-logout" onclick="logout()">
+                    <span class="material-icons">logout</span>
                     <span>Déconnexion</span>
                 </button>
             </div>
         </aside>
 
-        <!-- Contenu principal -->
-        <main class="main-content">
-            <header>
-                <h1 id="page-title">Gestion des Élèves</h1>
-                <p id="page-description">Consulter et gérer les élèves de l'établissement</p>
-                <p id="prof-info" style="margin-top: 10px; color: #4a9eff; font-weight: 500; display: none;">
-                    📌 Vous ne voyez que les élèves et classes dont vous êtes responsable
-                </p>
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Top Bar -->
+            <header class="dashboard-topbar">
+                <div class="topbar-left">
+                    <button class="topbar-menu-btn" id="menuToggle">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    <h1 class="topbar-title" id="pageTitle">Tableau de bord</h1>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <span class="material-icons">search</span>
+                        <input type="text" placeholder="Rechercher..." id="globalSearch">
+                    </div>
+                    <button class="topbar-icon-btn" id="notifBtn">
+                        <span class="material-icons">notifications</span>
+                        <span class="badge" id="notifBadge" style="display: none;">0</span>
+                    </button>
+                </div>
             </header>
 
-            <div class="content-wrapper">
-
-        <!-- Section Élèves -->
-        <div id="eleves" class="tab-content active">
-            <div class="section-header">
-                <h2>Gestion des Élèves</h2>
-                <button class="btn btn-primary" onclick="showAddEleveForm()">+ Ajouter un élève</button>
-            </div>
-
-            <!-- Barre de recherche -->
-            <div class="search-container" style="margin-bottom: 20px;">
-                <input type="text" id="search-eleve" placeholder="🔍 Rechercher par nom, prénom ou classe..." style="width: 100%; padding: 12px 20px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;" oninput="filterEleves()">
-            </div>
-
-            <div id="add-eleve-form" class="form-container" style="display: none;">
-                <h3>Nouvel Élève</h3>
-                <form id="eleveForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nom:</label>
-                            <input type="text" id="eleve-nom" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Prénom:</label>
-                            <input type="text" id="eleve-prenom" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Date de naissance:</label>
-                            <input type="date" id="eleve-dateNaissance" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Classe:</label>
-                            <select id="eleve-classe">
-                                <option value="">Sélectionner une classe</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Téléphone parent:</label>
-                        <input type="tel" id="eleve-telephone">
-                    </div>
-                    <div class="form-group">
-                        <label>Email parent:</label>
-                        <input type="email" id="eleve-email">
-                    </div>
-                    <div class="form-group">
-                        <label>Photo de profil:</label>
-                        <input type="file" id="eleve-photo" accept="image/*" onchange="previewElevePhoto(this)">
-                        <div id="photo-preview" style="margin-top: 10px; display: none;">
-                            <img id="preview-img" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid #e0e0e0;">
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideAddEleveForm()">Annuler</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="table-container">
-                <div id="eleves-grid" class="eleves-grid">
-                    <!-- Les élèves seront affichées ici en cartes -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Professeurs -->
-        <!-- Section Classes -->
-        <div id="classes" class="tab-content">
-            <div class="section-header">
-                <h2>Gestion des Classes</h2>
-                <button class="btn btn-primary" onclick="showAddClasseForm()">+ Ajouter une classe</button>
-            </div>
-
-            <div id="add-classe-form" class="form-container" style="display: none;">
-                <h3>Nouvelle Classe</h3>
-                <form id="classeForm">
-                    <div class="form-group">
-                        <label>Nom de la classe:</label>
-                        <input type="text" id="classe-nom" placeholder="Ex: 6ème A" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Niveau:</label>
-                        <select id="classe-niveau" required>
-                            <option value="">Sélectionner un niveau</option>
-                            <option value="Maternelle">Maternelle</option>
-                            <option value="CP">CP</option>
-                            <option value="CE1">CE1</option>
-                            <option value="CE2">CE2</option>
-                            <option value="CM1">CM1</option>
-                            <option value="CM2">CM2</option>
-                            <option value="6ème">6ème</option>
-                            <option value="5ème">5ème</option>
-                            <option value="4ème">4ème</option>
-                            <option value="3ème">3ème</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Professeur principal:</label>
-                        <select id="classe-professeur">
-                            <option value="">Sélectionner un professeur</option>
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideAddClasseForm()">Annuler</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="table-container">
-                <div id="classes-list" class="classes-grid">
-                    <!-- Les classes seront affichées ici -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Bureau -->
-        <div id="bureau" class="tab-content">
-            <div class="section-header">
-                <h2>Gestion du Bureau</h2>
-                <button class="btn btn-primary" onclick="showAddStaffForm()">+ Ajouter un membre</button>
-            </div>
-
-            <div id="add-staff-form" class="form-container" style="display: none;">
-                <h3>Nouveau membre du bureau</h3>
-                <form id="staffForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nom:</label>
-                            <input type="text" id="staff-nom" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Prénom:</label>
-                            <input type="text" id="staff-prenom" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Email:</label>
-                        <input type="email" id="staff-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Rôle:</label>
-                        <select id="staff-role" required>
-                            <option value="">Sélectionner un rôle</option>
-                            <option value="directeur" id="role-directeur">Directeur</option>
-                            <option value="secretariat">Secrétariat</option>
-                            <option value="professeur">Professeur</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="matiere-group" style="display: none;">
-                        <label>Matière:</label>
-                        <input type="text" id="staff-matiere" placeholder="Ex: Mathématiques, Français...">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideAddStaffForm()">Annuler</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="table-container">
-                <table id="staff-table">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Email</th>
-                            <th>Rôle</th>
-                            <th>Matière</th>
-                            <th>Statut</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staff-tbody">
-                        <!-- Les données seront chargées ici -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Section Appel -->
-        <div id="appel" class="tab-content">
-            <div class="section-header">
-                <h2>Faire l'appel</h2>
-            </div>
-
-            <div id="appel-classe-selection" class="form-container">
-                <h3>Sélectionner une classe</h3>
-                <div class="form-group">
-                    <label>Classe:</label>
-                    <select id="appel-classe-select" onchange="loadClasseAppel()" style="font-size: 1.1em; padding: 12px;">
-                        <option value="">-- Choisir une classe --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Date:</label>
-                    <input type="date" id="appel-date" style="font-size: 1.1em; padding: 12px;">
-                </div>
-            </div>
-
-            <div id="appel-liste" style="display: none;">
-                <div class="form-container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 id="appel-classe-nom">Liste des élèves</h3>
-                        <button class="btn btn-primary" onclick="enregistrerAppel()">💾 Enregistrer l'appel</button>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 50%;">Élève</th>
-                                    <th style="text-align: center; width: 16%;">Présent</th>
-                                    <th style="text-align: center; width: 16%;">Absent</th>
-                                    <th style="text-align: center; width: 18%;">Retard</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appel-tbody">
-                                <!-- Liste des élèves -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Appréciations -->
-        <div id="appreciations" class="tab-content">
-            <div class="section-header">
-                <h2>Gestion des Appréciations par Classe</h2>
-            </div>
-
-            <div class="form-container">
-                <h3>Sélectionner une classe</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Classe:</label>
-                        <select id="appreciation-classe-select" onchange="loadElevesForAppreciation()">
-                            <option value="">— Choisir une classe —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Période:</label>
-                        <select id="appreciation-periode-select">
-                            <option value="Trimestre 1">Trimestre 1</option>
-                            <option value="Trimestre 2">Trimestre 2</option>
-                            <option value="Trimestre 3">Trimestre 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Matière:</label>
-                        <input type="text" id="appreciation-matiere-input" placeholder="Ex: Mathématiques">
-                    </div>
-                </div>
-            </div>
-
-            <div id="appreciation-eleves-list" class="table-container" style="display: none;">
-                <h3 id="appreciation-classe-nom"></h3>
-                <form id="appreciationsBulkForm">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Élève</th>
-                                <th>Note (/20)</th>
-                                <th>Appréciation</th>
-                            </tr>
-                        </thead>
-                        <tbody id="appreciation-eleves-tbody">
-                            <!-- Les élèves seront chargés ici -->
-                        </tbody>
-                    </table>
-                    <div class="form-actions" style="margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary">Enregistrer toutes les appréciations</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideAppreciationsList()">Annuler</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="section-header" style="margin-top: 40px;">
-                <h3>Appréciations enregistrées</h3>
-            </div>
-
-            <div class="table-container">
-                <table id="appreciations-table">
-                    <thead>
-                        <tr>
-                            <th>Élève</th>
-                            <th>Classe</th>
-                            <th>Matière</th>
-                            <th>Période</th>
-                            <th>Note</th>
-                            <th>Par</th>
-                            <th>Commentaire</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="appreciations-tbody">
-                        <!-- Les données seront chargées ici -->
-                    </tbody>
-                </table>
-            </div>
-            </div>
-
-            <!-- Section Dossier d'inscription -->
-            <div id="inscriptions" class="tab-content">
-                <div class="section-header">
-                    <h2>Dossier d'inscription</h2>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-primary" onclick="showInscriptionSolo()">📋 Inscription Solo</button>
-                        <button class="btn btn-primary" onclick="showInscriptionFamille()">👨‍👩‍👧‍👦 Inscription Famille</button>
-                    </div>
-                </div>
-
-                <!-- Formulaire inscription solo -->
-                <div id="inscription-solo-form" class="form-container" style="display: none;">
-                    <h3>📋 Inscription individuelle</h3>
-                    <form id="inscriptionSoloForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Nom:</label>
-                                <input type="text" id="inscrip-solo-nom" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Prénom:</label>
-                                <input type="text" id="inscrip-solo-prenom" required>
+            <!-- Content Area -->
+            <div class="dashboard-content">
+                
+                <!-- ========== DASHBOARD TAB ========== -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="stats-grid">
+                        <div class="stat-widget">
+                            <div class="stat-widget-icon primary"><span class="material-icons">school</span></div>
+                            <div class="stat-widget-content">
+                                <div class="stat-widget-value" id="totalEleves">0</div>
+                                <div class="stat-widget-label">Élèves inscrits</div>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Date de naissance:</label>
-                                <input type="date" id="inscrip-solo-dateNaissance" required>
+                        <div class="stat-widget">
+                            <div class="stat-widget-icon secondary"><span class="material-icons">class</span></div>
+                            <div class="stat-widget-content">
+                                <div class="stat-widget-value" id="totalClasses">0</div>
+                                <div class="stat-widget-label">Classes actives</div>
                             </div>
-                            <div class="form-group">
-                                <label>Classe:</label>
-                                <select id="inscrip-solo-classe">
-                                    <option value="">Sélectionner une classe</option>
+                        </div>
+                        <div class="stat-widget">
+                            <div class="stat-widget-icon tertiary"><span class="material-icons">person</span></div>
+                            <div class="stat-widget-content">
+                                <div class="stat-widget-value" id="totalProfesseurs">0</div>
+                                <div class="stat-widget-label">Professeurs</div>
+                            </div>
+                        </div>
+                        <div class="stat-widget">
+                            <div class="stat-widget-icon error"><span class="material-icons">event_busy</span></div>
+                            <div class="stat-widget-content">
+                                <div class="stat-widget-value" id="absencesToday">0</div>
+                                <div class="stat-widget-label">Absences aujourd'hui</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-grid">
+                        <div class="widget-card">
+                            <div class="widget-card-header"><h3 class="widget-card-title">Actions rapides</h3></div>
+                            <div class="widget-card-content">
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn" onclick="switchTab('eleves'); setTimeout(showAddEleveForm, 300)">
+                                        <span class="material-icons">person_add</span><span>Nouvel élève</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="switchTab('appel')">
+                                        <span class="material-icons">fact_check</span><span>Faire l'appel</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="switchTab('messagerie'); setTimeout(showComposeMessage, 300)">
+                                        <span class="material-icons">send</span><span>Envoyer message</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="switchTab('classes'); setTimeout(showAddClasseForm, 300)">
+                                        <span class="material-icons">add_circle</span><span>Nouvelle classe</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="widget-card">
+                            <div class="widget-card-header"><h3 class="widget-card-title">Activité récente</h3></div>
+                            <div class="widget-card-content">
+                                <ul class="activity-list" id="activityList">
+                                    <li class="activity-item">
+                                        <div class="activity-icon"><span class="material-icons">info</span></div>
+                                        <div class="activity-content">
+                                            <p class="activity-text">Bienvenue sur votre tableau de bord</p>
+                                            <span class="activity-time">Maintenant</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== ÉLÈVES TAB ========== -->
+                <div id="eleves" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Liste des élèves</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <div class="topbar-search" style="width: 100%; margin-bottom: 16px;">
+                                <span class="material-icons">search</span>
+                                <input type="text" placeholder="Rechercher un élève..." id="searchEleve" oninput="filterEleves()">
+                            </div>
+                            <div id="elevesGrid" class="md-grid md-grid-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== CLASSES TAB ========== -->
+                <div id="classes" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Gestion des classes</h3>
+                            <div class="widget-card-actions">
+                                <button class="md-btn md-btn-filled" onclick="showAddClasseForm()">
+                                    <span class="material-icons">add</span> Nouvelle classe
+                                </button>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="classesGrid" class="md-grid md-grid-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== APPEL TAB ========== -->
+                <div id="appel" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header"><h3 class="widget-card-title">Faire l'appel</h3></div>
+                        <div class="widget-card-content">
+                            <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                                <select id="appelClasse" class="md-select" onchange="loadElevesForAppel()">
+                                    <option value="">-- Sélectionner une classe --</option>
                                 </select>
+                                <input type="date" id="appelDate" class="md-select" value="">
+                            </div>
+                            <div id="appelList"></div>
+                            <button id="btnSaveAppel" class="md-btn md-btn-filled" style="display: none; margin-top: 16px;" onclick="saveAppel()">
+                                <span class="material-icons">save</span> Enregistrer l'appel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== ABSENCES TAB ========== -->
+                <div id="absences" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header"><h3 class="widget-card-title">Suivi des absences</h3></div>
+                        <div class="widget-card-content">
+                            <div id="absencesList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== APPRÉCIATIONS TAB ========== -->
+                <div id="appreciations" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Appréciations</h3>
+                            <div class="widget-card-actions">
+                                <button class="md-btn md-btn-filled" onclick="showAddAppreciationForm()">
+                                    <span class="material-icons">add</span> Nouvelle appréciation
+                                </button>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Téléphone parent:</label>
-                            <input type="tel" id="inscrip-solo-telephone">
+                        <div class="widget-card-content">
+                            <div id="appreciationsList"></div>
                         </div>
-                        <div class="form-group">
-                            <label>Email parent:</label>
-                            <input type="email" id="inscrip-solo-email">
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Enregistrer</button>
-                            <button type="button" class="btn btn-secondary" onclick="hideInscriptionSolo()">Annuler</button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Formulaire inscription famille -->
-                <div id="inscription-famille-form" class="form-container" style="display: none;">
-                    <h3>👨‍👩‍👧‍👦 Inscription Famille</h3>
-                    <div class="form-group">
-                        <label>Nombre d'élèves dans la famille:</label>
-                        <input type="number" id="nombre-eleves-famille" min="2" max="10" value="2" onchange="generateFamilleFields()">
-                    </div>
-                    <div id="famille-fields-container">
-                        <!-- Les champs seront générés dynamiquement -->
-                    </div>
-                    <div class="form-group">
-                        <label>Téléphone parent (commun):</label>
-                        <input type="tel" id="inscrip-famille-telephone">
-                    </div>
-                    <div class="form-group">
-                        <label>Email parent (commun):</label>
-                        <input type="email" id="inscrip-famille-email">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-primary" onclick="submitInscriptionFamille()">Enregistrer la famille</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideInscriptionFamille()">Annuler</button>
                     </div>
                 </div>
 
-                <!-- Liste des inscriptions -->
-                <div class="table-container">
-                    <h3>Inscriptions récentes</h3>
-                    <table id="inscriptions-table">
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Classe</th>
-                                <th>Type</th>
-                                <th>Famille</th>
-                                <th>Téléphone</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inscriptions-tbody">
-                            <!-- Les données seront chargées ici -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Section Appel -->
-            <div id="appel" class="tab-content">
-                <div class="section-header">
-                    <h2>Faire l'appel</h2>
-                </div>
-
-                <div class="form-container">
-                    <h3>Sélectionner une classe</h3>
-                    <div class="form-group">
-                        <label>Classe:</label>
-                        <select id="appel-classe" onchange="loadElevesForAppel()">
-                            <option value="">Sélectionner une classe</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="appel-list" class="table-container" style="display: none;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody id="appel-tbody">
-                        </tbody>
-                    </table>
-                    <div style="padding: 20px; text-align: right; border-top: 2px solid #e0e0e0;">
-                        <button class="btn btn-primary" onclick="saveAppel()">Enregistrer l'appel</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section Messagerie (Style WhatsApp) -->
-            <div id="messagerie" class="tab-content">
-                <div class="whatsapp-container">
-                    <!-- Liste des conversations -->
-                    <div class="conversations-panel">
-                        <div class="conversations-header">
-                            <h3>💬 Conversations</h3>
-                            <button class="btn-new-chat" onclick="showNewConversationModal()" title="Nouvelle conversation">➕</button>
+                <!-- ========== ACTUALITÉS TAB ========== -->
+                <div id="actualites" class="tab-content">
+                    <!-- Formulaire d'ajout/modification -->
+                    <div class="widget-card" id="actualiteFormCard" style="display: none;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title" id="actualiteFormTitle">Nouvelle actualité</h3>
+                            <button class="md-btn md-btn-text" onclick="hideActualiteForm()">
+                                <span class="material-icons">close</span>
+                            </button>
                         </div>
-                        <div class="conversations-search">
-                            <input type="text" id="search-conversations" placeholder="🔍 Rechercher..." oninput="filterConversations()">
-                        </div>
-                        <div id="conversations-list" class="conversations-list">
-                            <!-- Les conversations seront chargées ici -->
-                        </div>
-                    </div>
-
-                    <!-- Zone de chat -->
-                    <div class="chat-panel">
-                        <div id="chat-empty" class="chat-empty">
-                            <div class="empty-state">
-                                <div class="empty-icon">💬</div>
-                                <h3>Sélectionnez une conversation</h3>
-                                <p>Choisissez une conversation dans la liste ou démarrez-en une nouvelle</p>
-                            </div>
-                        </div>
-
-                        <div id="chat-active" class="chat-active" style="display: none;">
-                            <!-- En-tête du chat -->
-                            <div class="chat-header">
-                                <div class="chat-header-info">
-                                    <div class="chat-avatar">👤</div>
-                                    <div>
-                                        <div class="chat-name" id="chat-name">Nom du contact</div>
-                                        <div class="chat-status" id="chat-status">En ligne</div>
+                        <div class="widget-card-content">
+                            <input type="hidden" id="actualiteEditId">
+                            <div class="md-form-grid">
+                                <div class="md-text-field" style="grid-column: 1 / -1;">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="actualite_titre" class="md-text-field-input" placeholder=" " required>
+                                        <label class="md-text-field-label">Titre de l'actualité</label>
                                     </div>
                                 </div>
-                                <button class="btn-close-chat" onclick="closeChat()">✖</button>
+                                <div class="md-text-field" style="grid-column: 1 / -1;">
+                                    <div class="md-text-field-container">
+                                        <textarea id="actualite_description" class="md-text-field-input" placeholder=" " rows="4" required></textarea>
+                                        <label class="md-text-field-label">Description</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="date" id="actualite_date" class="md-text-field-input" placeholder=" ">
+                                        <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date</label>
+                                    </div>
+                                </div>
                             </div>
-
-                            <!-- Messages -->
-                            <div id="chat-messages" class="chat-messages">
-                                <!-- Les messages seront affichés ici -->
+                            
+                            <!-- Section ciblage -->
+                            <div style="margin-top: 24px; padding: 20px; background: var(--md-sys-color-surface-container); border-radius: 12px;">
+                                <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                    <span class="material-icons">groups</span> Destinataires
+                                </h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                                    <label class="cible-checkbox" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--md-sys-color-outline); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
+                                        <input type="checkbox" id="cible_tous" onchange="toggleCibleTous(this)" checked>
+                                        <span class="material-icons" style="font-size: 20px;">public</span> Tous
+                                    </label>
+                                    <label class="cible-checkbox" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--md-sys-color-outline); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
+                                        <input type="checkbox" class="cible-specific" id="cible_professeurs">
+                                        <span class="material-icons" style="font-size: 20px;">school</span> Professeurs
+                                    </label>
+                                    <label class="cible-checkbox" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--md-sys-color-outline); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
+                                        <input type="checkbox" class="cible-specific" id="cible_eleves">
+                                        <span class="material-icons" style="font-size: 20px;">face</span> Tous les élèves
+                                    </label>
+                                </div>
+                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 12px;">Ou sélectionnez des classes spécifiques :</p>
+                                <div id="cibleClassesContainer" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                             </div>
-
-                            <!-- Zone de saisie -->
-                            <div class="chat-input-container">
-                                <form id="chatForm" onsubmit="sendMessage(event)">
-                                    <input type="text" id="chat-input" placeholder="Tapez votre message..." required autocomplete="off">
-                                    <button type="submit" class="btn-send">📤</button>
-                                </form>
+                            
+                            <div style="display: flex; gap: 16px; margin-top: 24px;">
+                                <button class="md-btn md-btn-outlined" style="flex: 1;" onclick="hideActualiteForm()">
+                                    Annuler
+                                </button>
+                                <button class="md-btn md-btn-filled" style="flex: 1;" onclick="submitActualite()">
+                                    <span class="material-icons">check</span> Publier
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Modal nouvelle conversation -->
-            <div id="new-conversation-modal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Nouvelle conversation</h3>
-                        <button class="btn-close" onclick="closeNewConversationModal()">✖</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Sélectionner un contact:</label>
-                            <input type="text" id="search-contacts" placeholder="🔍 Rechercher un contact..." oninput="filterContacts()">
-                            <div id="contacts-list" class="contacts-list">
-                                <!-- Les contacts seront chargés ici -->
+                    
+                    <!-- Liste des actualités -->
+                    <div class="widget-card" id="actualitesListCard">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Actualités</h3>
+                            <div class="widget-card-actions" id="actualiteAddBtn" style="display: none;">
+                                <button class="md-btn md-btn-filled" onclick="showActualiteForm()">
+                                    <span class="material-icons">add</span> Nouvelle actualité
+                                </button>
                             </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="actualitesList" class="md-grid md-grid-auto"></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- ========== MESSAGERIE TAB ========== -->
+                <div id="messagerie" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Messagerie</h3>
+                            <div class="widget-card-actions">
+                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()">
+                                    <span class="material-icons">edit</span> Nouveau message
+                                </button>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="messagesList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== BUREAU TAB ========== -->
+                <div id="bureau" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Gestion du bureau</h3>
+                            <div class="widget-card-actions">
+                                <button class="md-btn md-btn-filled" onclick="showAddStaffForm()">
+                                    <span class="material-icons">add</span> Ajouter un membre
+                                </button>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="staffList" class="md-grid md-grid-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== INSCRIPTIONS TAB ========== -->
+                <div id="inscriptions" class="tab-content">
+                    <!-- Formulaire d'inscription -->
+                    <div class="widget-card" id="inscriptionFormCard" style="display: none;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title" id="inscriptionFormTitle">Nouvelle inscription</h3>
+                            <button class="md-btn md-btn-text" onclick="hideInscriptionForm()">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+                        <div class="widget-card-content">
+                            <!-- Type d'inscription -->
+                            <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                                <div class="inscription-type-option selected" data-type="seul" onclick="selectInscriptionType('seul')" style="flex: 1; padding: 20px; border: 2px solid var(--md-sys-color-primary); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
+                                    <span class="material-icons" style="font-size: 40px; color: var(--md-sys-color-primary);">person</span>
+                                    <h4 style="margin-top: 8px;">Élève seul</h4>
+                                    <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Inscrire un seul enfant</p>
+                                </div>
+                                <div class="inscription-type-option" data-type="famille" onclick="selectInscriptionType('famille')" style="flex: 1; padding: 20px; border: 2px solid var(--md-sys-color-outline); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
+                                    <span class="material-icons" style="font-size: 40px; color: var(--md-sys-color-secondary);">groups</span>
+                                    <h4 style="margin-top: 8px;">Famille</h4>
+                                    <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Inscrire plusieurs enfants</p>
+                                </div>
+                            </div>
+
+                            <!-- Info parent -->
+                            <div style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                                <h4 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                    <span class="material-icons">person</span> Informations du parent/tuteur
+                                </h4>
+                                <div class="md-form-grid">
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="insc_parentNom" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Nom du parent</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="insc_parentPrenom" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Prénom du parent</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="email" id="insc_parentEmail" class="md-text-field-input" placeholder=" " required>
+                                            <label class="md-text-field-label">Email (pour la connexion)</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="tel" id="insc_parentTel" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Téléphone</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Enfants -->
+                            <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <span class="material-icons">child_care</span>
+                                <span id="inscriptionEnfantsTitle">Informations de l'enfant</span>
+                            </h4>
+                            <div id="inscriptionEnfantsContainer"></div>
+                            
+                            <button type="button" id="addEnfantBtn" class="md-btn md-btn-outlined" style="width: 100%; margin-top: 16px; display: none;" onclick="addEnfantField()">
+                                <span class="material-icons">add</span> Ajouter un autre enfant
+                            </button>
+
+                            <div style="display: flex; gap: 16px; margin-top: 24px;">
+                                <button class="md-btn md-btn-outlined" style="flex: 1;" onclick="hideInscriptionForm()">
+                                    Annuler
+                                </button>
+                                <button class="md-btn md-btn-filled" style="flex: 1;" onclick="submitInscription()">
+                                    <span class="material-icons">check</span> Valider l'inscription
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des inscriptions -->
+                    <div class="widget-card" id="inscriptionsListCard">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Dossiers d'inscription en attente</h3>
+                            <div class="widget-card-actions">
+                                <button class="md-btn md-btn-filled" onclick="showInscriptionForm()">
+                                    <span class="material-icons">add</span> Nouvelle inscription
+                                </button>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="inscriptionsList" class="md-grid md-grid-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </main>
     </div>
 
-    <script src="custom-modals.js"></script>
-    <script src="app.js"></script>
+    <!-- Dialog Container -->
+    <div class="md-dialog-overlay" id="dialogOverlay">
+        <div class="md-dialog" id="dialogBox" style="max-width: 600px;">
+            <div class="md-dialog-header">
+                <h2 class="md-dialog-title" id="dialogTitle">Titre</h2>
+            </div>
+            <div class="md-dialog-content" id="dialogContent"></div>
+            <div class="md-dialog-actions" id="dialogActions">
+                <button class="md-btn md-btn-text" onclick="closeDialog()">Annuler</button>
+                <button class="md-btn md-btn-filled" id="dialogConfirm">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification (amélioré) -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Snackbar (fallback) -->
+    <div class="md-snackbar" id="snackbar">
+        <span id="snackbarMessage">Message</span>
+        <button class="md-snackbar-action" onclick="hideSnackbar()">OK</button>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const API_URL = `http://${window.location.hostname}:3000/api`;
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        
+        if (!user || !token) {
+            window.location.href = 'login.html';
+        }
+
+        // Variables globales
+        let allEleves = [];
+        let allClasses = [];
+        let allProfesseurs = [];
+        let allStaff = [];
+        let appelEleves = [];
+
+        // ==================== INITIALISATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeUI();
+            loadDashboardData();
+            document.getElementById('appelDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function initializeUI() {
+            document.getElementById('userName').textContent = user.prenom || user.nom || user.email.split('@')[0];
+            document.getElementById('userAvatar').textContent = (user.prenom || user.email)[0].toUpperCase();
+            document.getElementById('userRole').innerHTML = `<span class="sidebar-user-badge">${getRoleName(user.role)}</span>`;
+
+            if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
+                document.getElementById('adminSection').style.display = 'block';
+            }
+
+            document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(item.dataset.tab);
+                });
+            });
+
+            document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+        }
+
+        function getRoleName(role) {
+            const roles = { admin: 'Administrateur', directeur: 'Directeur', secretariat: 'Secrétariat', professeur: 'Professeur', eleve: 'Élève' };
+            return roles[role] || role;
+        }
+
+        function getHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'X-User-Role': user.role,
+                'X-User-Id': user.id
+            };
+        }
+
+        // ==================== NAVIGATION ====================
+        function switchTab(tabName) {
+            document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.toggle('active', tab.id === tabName);
+            });
+
+            const titles = {
+                dashboard: 'Tableau de bord', eleves: 'Gestion des élèves', classes: 'Gestion des classes',
+                appel: "Faire l'appel", absences: 'Suivi des absences', appreciations: 'Appréciations',
+                actualites: 'Actualités', messagerie: 'Messagerie', bureau: 'Gestion du bureau', inscriptions: "Dossiers d'inscription"
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
+            loadTabData(tabName);
+
+            if (window.innerWidth < 900) toggleSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        // ==================== CHARGEMENT DES DONNÉES ====================
+        async function loadDashboardData() {
+            try {
+                const [eleves, classes, professeurs, absences] = await Promise.all([
+                    fetch(`${API_URL}/eleves`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/classes`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/professeurs`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/absences`, { headers: getHeaders() }).then(r => r.json()).catch(() => [])
+                ]);
+
+                allEleves = Array.isArray(eleves) ? eleves : [];
+                allClasses = Array.isArray(classes) ? classes : [];
+                allProfesseurs = Array.isArray(professeurs) ? professeurs : [];
+
+                document.getElementById('totalEleves').textContent = allEleves.length;
+                document.getElementById('totalClasses').textContent = allClasses.length;
+                document.getElementById('totalProfesseurs').textContent = allProfesseurs.length;
+
+                const today = new Date().toISOString().split('T')[0];
+                const todayAbsences = Array.isArray(absences) ? absences.filter(a => a.date === today) : [];
+                document.getElementById('absencesToday').textContent = todayAbsences.length;
+            } catch (error) {
+                console.error('Erreur chargement:', error);
+            }
+        }
+
+        async function loadTabData(tabName) {
+            switch(tabName) {
+                case 'eleves': await loadEleves(); break;
+                case 'classes': await loadClasses(); break;
+                case 'appel': await loadClassesForSelect(); break;
+                case 'absences': await loadAbsences(); break;
+                case 'appreciations': await loadAppreciations(); break;
+                case 'actualites': await loadActualites(); break;
+                case 'messagerie': await loadMessages(); break;
+                case 'bureau': await loadStaff(); break;
+                case 'inscriptions': await loadInscriptions(); break;
+            }
+        }
+
+        // Fonction pour recharger toutes les données
+        async function loadAllData() {
+            try {
+                const [eleves, classes, professeurs] = await Promise.all([
+                    fetch(`${API_URL}/eleves`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/classes`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/professeurs`, { headers: getHeaders() }).then(r => r.json()).catch(() => [])
+                ]);
+                
+                allEleves = Array.isArray(eleves) ? eleves : [];
+                allClasses = Array.isArray(classes) ? classes : [];
+                allProfesseurs = Array.isArray(professeurs) ? professeurs : [];
+            } catch (error) {
+                console.error('Erreur loadAllData:', error);
+            }
+        }
+
+        // ==================== ÉLÈVES ====================
+        async function loadEleves() {
+            try {
+                const response = await fetch(`${API_URL}/eleves`, { headers: getHeaders() });
+                allEleves = await response.json();
+                renderEleves(allEleves);
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des élèves');
+            }
+        }
+
+        function renderEleves(eleves) {
+            document.getElementById('elevesGrid').innerHTML = eleves.length ? eleves.map(e => `
+                <div class="md-card md-card-elevated" style="padding: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div class="md-avatar" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                            ${(e.prenom || 'E')[0].toUpperCase()}
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="font-weight: 500;">${e.prenom} ${e.nom}</h4>
+                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
+                            ${!e.activated ? '<span style="font-size: 11px; color: var(--md-sys-color-error);">⏳ Non activé</span>' : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        ${!e.activated && e.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${e.id}', '${e.email}', 'eleve')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
+                        <button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')"><span class="material-icons">edit</span></button>
+                        <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteEleve('${e.id}')"><span class="material-icons">delete</span></button>
+                    </div>
+                </div>
+            `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève enregistré</p>';
+        }
+
+        function filterEleves() {
+            const search = document.getElementById('searchEleve').value.toLowerCase();
+            const filtered = allEleves.filter(e => 
+                e.nom.toLowerCase().includes(search) || 
+                e.prenom.toLowerCase().includes(search) || 
+                (e.classe && e.classe.toLowerCase().includes(search))
+            );
+            renderEleves(filtered);
+        }
+
+        function showAddEleveForm() {
+            showDialog('Nouvel élève', `
+                <form id="eleveForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="eleveNom" class="md-text-field-input" placeholder=" " required>
+                                <label class="md-text-field-label">Nom *</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="elevePrenom" class="md-text-field-input" placeholder=" " required>
+                                <label class="md-text-field-label">Prénom *</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="date" id="eleveDateNaissance" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Date de naissance</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="eleveClasse" class="md-text-field-input">
+                                <option value="">-- Sélectionner une classe --</option>
+                                ${allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('')}
+                            </select>
+                            <label class="md-text-field-label">Classe</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="email" id="eleveEmail" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Email parent</label>
+                        </div>
+                    </div>
+                </form>
+            `, saveEleve);
+        }
+
+        async function saveEleve() {
+            const data = {
+                nom: document.getElementById('eleveNom').value,
+                prenom: document.getElementById('elevePrenom').value,
+                dateNaissance: document.getElementById('eleveDateNaissance').value,
+                classe: document.getElementById('eleveClasse').value,
+                email: document.getElementById('eleveEmail').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/eleves`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showSnackbar('Élève ajouté avec succès');
+                    if (result.activationLink) {
+                        const userId = result.id;
+                        const email = data.email;
+                        showDialog('Lien d\'activation', `
+                            <p>L'élève a été créé avec succès. Vous pouvez :</p>
+                            <div style="margin: 16px 0;">
+                                ${email ? `<button class="md-btn md-btn-filled" onclick="sendActivationEmail('${userId}', '${email}', 'eleve')" style="width: 100%; margin-bottom: 12px;">
+                                    <span class="material-icons">email</span> Envoyer par email
+                                </button>` : ''}
+                            </div>
+                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Ou copier le lien d'activation :</p>
+                            <input type="text" value="${result.activationLink}" style="width: 100%; padding: 8px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;" onclick="this.select()" readonly>
+                        `, () => {});
+                    }
+                    loadEleves();
+                    loadDashboardData();
+                } else {
+                    showSnackbar(result.error || 'Erreur lors de l\'ajout');
+                }
+            } catch (error) {
+                showSnackbar('Erreur de connexion');
+            }
+        }
+
+        async function editEleve(id) {
+            const eleve = allEleves.find(e => e.id === id);
+            if (!eleve) return;
+
+            showDialog('Modifier l\'élève', `
+                <form id="eleveForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="eleveNom" class="md-text-field-input" value="${eleve.nom}" required>
+                                <label class="md-text-field-label">Nom *</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="elevePrenom" class="md-text-field-input" value="${eleve.prenom}" required>
+                                <label class="md-text-field-label">Prénom *</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
+                            <label class="md-text-field-label">Date de naissance</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="eleveClasse" class="md-text-field-input">
+                                <option value="">-- Sélectionner une classe --</option>
+                                ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
+                            </select>
+                            <label class="md-text-field-label">Classe</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
+                            <label class="md-text-field-label">Email parent</label>
+                        </div>
+                    </div>
+                </form>
+            `, async () => {
+                const data = {
+                    nom: document.getElementById('eleveNom').value,
+                    prenom: document.getElementById('elevePrenom').value,
+                    dateNaissance: document.getElementById('eleveDateNaissance').value,
+                    classe: document.getElementById('eleveClasse').value,
+                    email: document.getElementById('eleveEmail').value
+                };
+                try {
+                    const response = await fetch(`${API_URL}/eleves/${id}`, {
+                        method: 'PUT',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        showSnackbar('Élève modifié avec succès');
+                        loadEleves();
+                    } else {
+                        showSnackbar('Erreur lors de la modification');
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        async function deleteEleve(id) {
+            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer cet élève ? Cette action est irréversible.</p>', async () => {
+                try {
+                    const response = await fetch(`${API_URL}/eleves/${id}`, {
+                        method: 'DELETE',
+                        headers: getHeaders()
+                    });
+                    if (response.ok) {
+                        showSnackbar('Élève supprimé');
+                        loadEleves();
+                        loadDashboardData();
+                    } else {
+                        showSnackbar('Erreur lors de la suppression');
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        // ==================== CLASSES ====================
+        async function loadClasses() {
+            try {
+                const response = await fetch(`${API_URL}/classes`, { headers: getHeaders() });
+                allClasses = await response.json();
+                
+                document.getElementById('classesGrid').innerHTML = allClasses.length ? allClasses.map(c => `
+                    <div class="md-card md-card-elevated" style="padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div class="stat-widget-icon secondary" style="width: 48px; height: 48px;">
+                                <span class="material-icons">class</span>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-weight: 500;">${c.nom}</h4>
+                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${c.niveau || 'Niveau non défini'}</p>
+                            </div>
+                        </div>
+                        <p style="margin-bottom: 12px; font-size: 14px;">${allEleves.filter(e => e.classe === c.nom).length} élève(s)</p>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="md-btn md-btn-tonal" onclick="viewClasse('${c.id}')"><span class="material-icons">visibility</span></button>
+                            <button class="md-btn md-btn-tonal" onclick="editClasse('${c.id}')"><span class="material-icons">edit</span></button>
+                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>
+                        </div>
+                    </div>
+                `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune classe enregistrée</p>';
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des classes');
+            }
+        }
+
+        function showAddClasseForm() {
+            showDialog('Nouvelle classe', `
+                <form id="classeForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" id="classeNom" class="md-text-field-input" placeholder=" " required>
+                            <label class="md-text-field-label">Nom de la classe *</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="classeNiveau" class="md-text-field-input" required>
+                                <option value="">-- Sélectionner un niveau --</option>
+                                <option value="Maternelle">Maternelle</option>
+                                <option value="CP">CP</option>
+                                <option value="CE1">CE1</option>
+                                <option value="CE2">CE2</option>
+                                <option value="CM1">CM1</option>
+                                <option value="CM2">CM2</option>
+                                <option value="6ème">6ème</option>
+                                <option value="5ème">5ème</option>
+                                <option value="4ème">4ème</option>
+                                <option value="3ème">3ème</option>
+                            </select>
+                            <label class="md-text-field-label">Niveau *</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="classeProfesseur" class="md-text-field-input">
+                                <option value="">-- Professeur principal --</option>
+                                ${allProfesseurs.map(p => `<option value="${p.id}">${p.prenom} ${p.nom}</option>`).join('')}
+                            </select>
+                            <label class="md-text-field-label">Professeur principal</label>
+                        </div>
+                    </div>
+                </form>
+            `, async () => {
+                const data = {
+                    nom: document.getElementById('classeNom').value,
+                    niveau: document.getElementById('classeNiveau').value,
+                    professeurId: document.getElementById('classeProfesseur').value
+                };
+                try {
+                    const response = await fetch(`${API_URL}/classes`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        showSnackbar('Classe créée avec succès');
+                        loadClasses();
+                        loadDashboardData();
+                    } else {
+                        showSnackbar('Erreur lors de la création');
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        function viewClasse(id) {
+            const classe = allClasses.find(c => c.id === id);
+            if (!classe) return;
+            const elevesClasse = allEleves.filter(e => e.classe === classe.nom);
+            
+            showDialog(`Classe : ${classe.nom}`, `
+                <p><strong>Niveau :</strong> ${classe.niveau || 'Non défini'}</p>
+                <p><strong>Effectif :</strong> ${elevesClasse.length} élève(s)</p>
+                <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <h4 style="margin-bottom: 12px;">Liste des élèves :</h4>
+                ${elevesClasse.length ? `<ul style="list-style: none; padding: 0;">
+                    ${elevesClasse.map(e => `<li style="padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant);">${e.prenom} ${e.nom}</li>`).join('')}
+                </ul>` : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève dans cette classe</p>'}
+            `, () => {});
+        }
+
+        async function editClasse(id) {
+            const classe = allClasses.find(c => c.id === id);
+            if (!classe) return;
+
+            showDialog('Modifier la classe', `
+                <form id="classeForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" id="classeNom" class="md-text-field-input" value="${classe.nom}" required>
+                            <label class="md-text-field-label">Nom de la classe *</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="classeNiveau" class="md-text-field-input" required>
+                                <option value="">-- Sélectionner un niveau --</option>
+                                ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n => 
+                                    `<option value="${n}" ${n === classe.niveau ? 'selected' : ''}>${n}</option>`
+                                ).join('')}
+                            </select>
+                            <label class="md-text-field-label">Niveau *</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="classeProfesseur" class="md-text-field-input">
+                                <option value="">-- Professeur principal --</option>
+                                ${allProfesseurs.map(p => `<option value="${p.id}" ${p.id === classe.professeurId ? 'selected' : ''}>${p.prenom} ${p.nom}</option>`).join('')}
+                            </select>
+                            <label class="md-text-field-label">Professeur principal</label>
+                        </div>
+                    </div>
+                </form>
+            `, async () => {
+                const data = {
+                    nom: document.getElementById('classeNom').value,
+                    niveau: document.getElementById('classeNiveau').value,
+                    professeurId: document.getElementById('classeProfesseur').value
+                };
+                try {
+                    const response = await fetch(`${API_URL}/classes/${id}`, {
+                        method: 'PUT',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        showSnackbar('Classe modifiée avec succès');
+                        loadClasses();
+                    } else {
+                        showSnackbar('Erreur lors de la modification');
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        async function deleteClasse(id) {
+            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer cette classe ?</p>', async () => {
+                try {
+                    const response = await fetch(`${API_URL}/classes/${id}`, {
+                        method: 'DELETE',
+                        headers: getHeaders()
+                    });
+                    if (response.ok) {
+                        showSnackbar('Classe supprimée');
+                        loadClasses();
+                        loadDashboardData();
+                    } else {
+                        showSnackbar('Erreur lors de la suppression');
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        // ==================== APPEL ====================
+        async function loadClassesForSelect() {
+            try {
+                const response = await fetch(`${API_URL}/classes`, { headers: getHeaders() });
+                const classes = await response.json();
+                document.getElementById('appelClasse').innerHTML = '<option value="">-- Sélectionner une classe --</option>' +
+                    classes.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('');
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement');
+            }
+        }
+
+        async function loadElevesForAppel() {
+            const classeNom = document.getElementById('appelClasse').value;
+            if (!classeNom) {
+                document.getElementById('appelList').innerHTML = '';
+                document.getElementById('btnSaveAppel').style.display = 'none';
+                return;
+            }
+
+            appelEleves = allEleves.filter(e => e.classe === classeNom);
+            
+            if (appelEleves.length === 0) {
+                document.getElementById('appelList').innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève dans cette classe</p>';
+                document.getElementById('btnSaveAppel').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('appelList').innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${appelEleves.map(e => `
+                        <div class="md-card md-card-outlined" style="padding: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <span>${e.prenom} ${e.nom}</span>
+                            <div style="display: flex; gap: 8px;">
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="radio" name="appel_${e.id}" value="present" checked> Présent
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="radio" name="appel_${e.id}" value="absent"> Absent
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="radio" name="appel_${e.id}" value="retard"> Retard
+                                </label>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('btnSaveAppel').style.display = 'block';
+        }
+
+        async function saveAppel() {
+            const date = document.getElementById('appelDate').value;
+            const absences = [];
+
+            for (const eleve of appelEleves) {
+                const status = document.querySelector(`input[name="appel_${eleve.id}"]:checked`).value;
+                if (status !== 'present') {
+                    absences.push({
+                        eleveId: eleve.id,
+                        date: date,
+                        type: status,
+                        motif: ''
+                    });
+                }
+            }
+
+            try {
+                for (const absence of absences) {
+                    await fetch(`${API_URL}/absences`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify(absence)
+                    });
+                }
+                showSnackbar(`Appel enregistré : ${absences.length} absence(s)`);
+                loadDashboardData();
+            } catch (error) {
+                showSnackbar('Erreur lors de l\'enregistrement');
+            }
+        }
+
+        // ==================== ABSENCES ====================
+        async function loadAbsences() {
+            try {
+                const response = await fetch(`${API_URL}/absences`, { headers: getHeaders() });
+                const absences = await response.json();
+                
+                document.getElementById('absencesList').innerHTML = absences.length ? `
+                    <div class="md-table-container">
+                        <table class="md-table">
+                            <thead>
+                                <tr><th>Élève</th><th>Date</th><th>Type</th><th>Motif</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                ${absences.map(a => {
+                                    const eleve = allEleves.find(e => e.id === a.eleveId);
+                                    return `<tr>
+                                        <td>${eleve ? `${eleve.prenom} ${eleve.nom}` : 'Inconnu'}</td>
+                                        <td>${new Date(a.date).toLocaleDateString('fr-FR')}</td>
+                                        <td><span class="md-chip md-chip-${a.type === 'absent' ? 'error' : 'warning'}">${a.type}</span></td>
+                                        <td>${a.motif || '-'}</td>
+                                        <td>
+                                            <button class="md-icon-btn" onclick="deleteAbsence('${a.id}')">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune absence enregistrée</p>';
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des absences');
+            }
+        }
+
+        async function deleteAbsence(id) {
+            try {
+                const response = await fetch(`${API_URL}/absences/${id}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+                if (response.ok) {
+                    showSnackbar('Absence supprimée');
+                    loadAbsences();
+                    loadDashboardData();
+                }
+            } catch (error) {
+                showSnackbar('Erreur');
+            }
+        }
+
+        // ==================== APPRÉCIATIONS ====================
+        async function loadAppreciations() {
+            try {
+                const response = await fetch(`${API_URL}/appreciations`, { headers: getHeaders() });
+                const appreciations = await response.json();
+                
+                document.getElementById('appreciationsList').innerHTML = appreciations.length ? `
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        ${appreciations.map(a => {
+                            const eleve = allEleves.find(e => e.id === a.eleveId);
+                            return `<div class="md-card md-card-outlined" style="padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4 style="font-weight: 500;">${eleve ? `${eleve.prenom} ${eleve.nom}` : 'Inconnu'}</h4>
+                                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${a.matiere || 'Général'} - ${a.periode || ''}</p>
+                                    </div>
+                                    ${a.note ? `<span style="font-size: 24px; font-weight: 500; color: var(--md-sys-color-primary);">${a.note}/20</span>` : ''}
+                                </div>
+                                <p style="margin-top: 12px;">${a.commentaire || ''}</p>
+                                <div style="margin-top: 12px; display: flex; gap: 8px;">
+                                    <button class="md-icon-btn" onclick="deleteAppreciation('${a.id}')"><span class="material-icons">delete</span></button>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                ` : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune appréciation enregistrée</p>';
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement');
+            }
+        }
+
+        function showAddAppreciationForm() {
+            showDialog('Nouvelle appréciation', `
+                <form style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="appreciationEleve" class="md-text-field-input" required>
+                                <option value="">-- Sélectionner un élève --</option>
+                                ${allEleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom}</option>`).join('')}
+                            </select>
+                            <label class="md-text-field-label">Élève *</label>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="appreciationMatiere" class="md-text-field-input" placeholder=" ">
+                                <label class="md-text-field-label">Matière</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="number" id="appreciationNote" class="md-text-field-input" placeholder=" " min="0" max="20" step="0.5">
+                                <label class="md-text-field-label">Note /20</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="appreciationPeriode" class="md-text-field-input">
+                                <option value="">-- Période --</option>
+                                <option value="Trimestre 1">Trimestre 1</option>
+                                <option value="Trimestre 2">Trimestre 2</option>
+                                <option value="Trimestre 3">Trimestre 3</option>
+                            </select>
+                            <label class="md-text-field-label">Période</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <textarea id="appreciationCommentaire" class="md-text-field-input" rows="3" placeholder=" "></textarea>
+                            <label class="md-text-field-label">Commentaire</label>
+                        </div>
+                    </div>
+                </form>
+            `, async () => {
+                const data = {
+                    eleveId: document.getElementById('appreciationEleve').value,
+                    professeurId: user.id,
+                    matiere: document.getElementById('appreciationMatiere').value,
+                    periode: document.getElementById('appreciationPeriode').value,
+                    note: document.getElementById('appreciationNote').value || null,
+                    commentaire: document.getElementById('appreciationCommentaire').value,
+                    createdByRole: user.role
+                };
+                try {
+                    const response = await fetch(`${API_URL}/appreciations`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        showSnackbar('Appréciation ajoutée');
+                        loadAppreciations();
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur');
+                }
+            });
+        }
+
+        async function deleteAppreciation(id) {
+            try {
+                await fetch(`${API_URL}/appreciations/${id}`, { method: 'DELETE', headers: getHeaders() });
+                showSnackbar('Appréciation supprimée');
+                loadAppreciations();
+            } catch (error) {
+                showSnackbar('Erreur');
+            }
+        }
+
+        // ==================== MESSAGERIE ====================
+        async function loadMessages() {
+            try {
+                const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
+                const messages = await response.json();
+                
+                const received = messages.filter(m => m.destinataireId === user.id);
+                const sent = messages.filter(m => m.expediteurId === user.id);
+
+                document.getElementById('messagesList').innerHTML = `
+                    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                        <button class="md-btn md-btn-tonal active" onclick="showReceivedMessages()">Reçus (${received.length})</button>
+                        <button class="md-btn md-btn-tonal" onclick="showSentMessages()">Envoyés (${sent.length})</button>
+                    </div>
+                    <div id="messagesContent">
+                        ${received.length ? received.map(m => `
+                            <div class="md-card md-card-outlined" style="padding: 16px; margin-bottom: 12px; ${!m.lu ? 'border-left: 4px solid var(--md-sys-color-primary);' : ''}">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4 style="font-weight: 500;">De : ${m.expediteurNom || 'Inconnu'}</h4>
+                                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${new Date(m.date).toLocaleString('fr-FR')}</p>
+                                    </div>
+                                    ${!m.lu ? '<span class="md-badge">Nouveau</span>' : ''}
+                                </div>
+                                <p style="margin-top: 12px;">${m.contenu}</p>
+                                <div style="margin-top: 12px;">
+                                    <button class="md-btn md-btn-text" onclick="replyToMessage('${m.expediteurId}', '${m.expediteurNom}')">
+                                        <span class="material-icons">reply</span> Répondre
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun message reçu</p>'}
+                    </div>
+                `;
+
+                window.allMessages = { received, sent };
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des messages');
+            }
+        }
+
+        function showReceivedMessages() {
+            const received = window.allMessages?.received || [];
+            document.getElementById('messagesContent').innerHTML = received.length ? received.map(m => `
+                <div class="md-card md-card-outlined" style="padding: 16px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between;"><div>
+                        <h4 style="font-weight: 500;">De : ${m.expediteurNom}</h4>
+                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${new Date(m.date).toLocaleString('fr-FR')}</p>
+                    </div></div>
+                    <p style="margin-top: 12px;">${m.contenu}</p>
+                </div>
+            `).join('') : '<p>Aucun message reçu</p>';
+        }
+
+        function showSentMessages() {
+            const sent = window.allMessages?.sent || [];
+            document.getElementById('messagesContent').innerHTML = sent.length ? sent.map(m => `
+                <div class="md-card md-card-outlined" style="padding: 16px; margin-bottom: 12px;">
+                    <div><h4 style="font-weight: 500;">À : ${m.destinataireNom}</h4>
+                    <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${new Date(m.date).toLocaleString('fr-FR')}</p></div>
+                    <p style="margin-top: 12px;">${m.contenu}</p>
+                </div>
+            `).join('') : '<p>Aucun message envoyé</p>';
+        }
+
+        async function showComposeMessage(destinataireId = '', destinataireNom = '') {
+            try {
+                const response = await fetch(`${API_URL}/messagerie/destinataires`, { headers: getHeaders() });
+                const destinataires = await response.json();
+
+                showDialog('Nouveau message', `
+                    <form style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <select id="messageDestinataire" class="md-text-field-input" required>
+                                    <option value="">-- Sélectionner un destinataire --</option>
+                                    ${destinataires.map(d => `<option value="${d.id}" ${d.id === destinataireId ? 'selected' : ''}>${d.nom} (${d.role})</option>`).join('')}
+                                </select>
+                                <label class="md-text-field-label">Destinataire *</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <textarea id="messageContenu" class="md-text-field-input" rows="5" placeholder=" " required></textarea>
+                                <label class="md-text-field-label">Message *</label>
+                            </div>
+                        </div>
+                    </form>
+                `, async () => {
+                    const data = {
+                        expediteurId: user.id,
+                        destinataireId: document.getElementById('messageDestinataire').value,
+                        contenu: document.getElementById('messageContenu').value
+                    };
+                    try {
+                        const response = await fetch(`${API_URL}/messagerie`, {
+                            method: 'POST',
+                            headers: getHeaders(),
+                            body: JSON.stringify(data)
+                        });
+                        if (response.ok) {
+                            showSnackbar('Message envoyé');
+                            loadMessages();
+                        }
+                    } catch (error) {
+                        showSnackbar('Erreur lors de l\'envoi');
+                    }
+                });
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des destinataires');
+            }
+        }
+
+        function replyToMessage(destinataireId, destinataireNom) {
+            showComposeMessage(destinataireId, destinataireNom);
+        }
+
+        // ==================== BUREAU (STAFF) ====================
+        async function loadStaff() {
+            try {
+                const response = await fetch(`${API_URL}/staff`, { headers: getHeaders() });
+                allStaff = await response.json();
+                
+                document.getElementById('staffList').innerHTML = allStaff.length ? allStaff.map(s => `
+                    <div class="md-card md-card-elevated" style="padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div class="md-avatar" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                                ${(s.prenom || 'S')[0].toUpperCase()}
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-weight: 500;">${s.prenom} ${s.nom}</h4>
+                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${s.email || ''}</p>
+                            </div>
+                            <span class="md-chip md-chip-filter">${getRoleName(s.role)}</span>
+                        </div>
+                        <p style="font-size: 14px; margin-bottom: 12px;">${s.activated ? '✅ Compte activé' : '⏳ En attente d\'activation'}</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${!s.activated && s.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${s.id}', '${s.email}', 'staff')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
+                            <button class="md-btn md-btn-tonal" onclick="editStaff('${s.id}')"><span class="material-icons">edit</span></button>
+                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')"><span class="material-icons">delete</span></button>
+                        </div>
+                    </div>
+                `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun membre du bureau</p>';
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement');
+            }
+        }
+        function showAddStaffForm() {
+    // 1. On retire la balise <script> du HTML
+    showDialog('Nouveau membre du bureau', `
+        <form style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="md-text-field">
+                    <div class="md-text-field-container">
+                        <input type="text" id="staffNom" class="md-text-field-input" placeholder=" " required>
+                        <label class="md-text-field-label">Nom *</label>
+                    </div>
+                </div>
+                <div class="md-text-field">
+                    <div class="md-text-field-container">
+                        <input type="text" id="staffPrenom" class="md-text-field-input" placeholder=" " required>
+                        <label class="md-text-field-label">Prénom *</label>
+                    </div>
+                </div>
+            </div>
+            <div class="md-text-field">
+                <div class="md-text-field-container">
+                    <input type="email" id="staffEmail" class="md-text-field-input" placeholder=" " required>
+                    <label class="md-text-field-label">Email *</label>
+                </div>
+            </div>
+            <div class="md-text-field">
+                <div class="md-text-field-container">
+                    <select id="staffRole" class="md-text-field-input" required>
+                        <option value="">-- Sélectionner un rôle --</option>
+                        <option value="directeur">Directeur</option>
+                        <option value="secretariat">Secrétariat</option>
+                        <option value="professeur">Professeur</option>
+                    </select>
+                    <label class="md-text-field-label">Rôle *</label>
+                </div>
+            </div>
+            <div class="md-text-field" id="staffMatiereField" style="display: none;">
+                <div class="md-text-field-container">
+                    <input type="text" id="staffMatiere" class="md-text-field-input" placeholder=" ">
+                    <label class="md-text-field-label">Matière enseignée</label>
+                </div>
+            </div>
+        </form>
+    `, async () => {
+        const data = {
+            nom: document.getElementById('staffNom').value,
+            prenom: document.getElementById('staffPrenom').value,
+            email: document.getElementById('staffEmail').value,
+            role: document.getElementById('staffRole').value,
+            matiere: document.getElementById('staffMatiere')?.value || null
+        };
+        try {
+            const response = await fetch(`${API_URL}/staff`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (response.ok) {
+                showSnackbar('Membre ajouté avec succès');
+                if (result.activationLink) {
+                    const userId = result.id;
+                    const email = data.email;
+                    showDialog('Lien d\'activation', `
+                        <p>Le membre a été créé avec succès. Vous pouvez :</p>
+                        <div style="margin: 16px 0;">
+                            <button class="md-btn md-btn-filled" onclick="sendActivationEmail('${userId}', '${email}', 'staff')" style="width: 100%; margin-bottom: 12px;">
+                                <span class="material-icons">email</span> Envoyer par email
+                            </button>
+                        </div>
+                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Ou copier le lien d'activation :</p>
+                        <input type="text" value="${result.activationLink}" style="width: 100%; padding: 8px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;" onclick="this.select()" readonly>
+                    `, () => {});
+                }
+                loadStaff();
+            } else {
+                showSnackbar(result.error || 'Erreur lors de l\'ajout');
+            }
+        } catch (error) {
+            showSnackbar('Erreur de connexion');
+        }
+    });
+
+    // 2. On ajoute l'écouteur d'événement ICI, en JavaScript pur, juste après avoir ouvert le dialogue
+    setTimeout(() => {
+        const roleSelect = document.getElementById('staffRole');
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function() {
+                const matiereField = document.getElementById('staffMatiereField');
+                if (matiereField) {
+                    matiereField.style.display = this.value === 'professeur' ? 'block' : 'none';
+                }
+            });
+        }
+    }, 100); // Petit délai pour s'assurer que le HTML est bien inséré dans le DOM
+}
+
+        async function editStaff(id) {
+            const staff = allStaff.find(s => s.id === id);
+            if (!staff) return;
+
+            showDialog('Modifier le membre', `
+                <form style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="staffNom" class="md-text-field-input" value="${staff.nom}" required>
+                                <label class="md-text-field-label">Nom *</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="staffPrenom" class="md-text-field-input" value="${staff.prenom}" required>
+                                <label class="md-text-field-label">Prénom *</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="email" id="staffEmail" class="md-text-field-input" value="${staff.email || ''}" required>
+                            <label class="md-text-field-label">Email *</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="staffRole" class="md-text-field-input" required>
+                                <option value="directeur" ${staff.role === 'directeur' ? 'selected' : ''}>Directeur</option>
+                                <option value="secretariat" ${staff.role === 'secretariat' ? 'selected' : ''}>Secrétariat</option>
+                                <option value="professeur" ${staff.role === 'professeur' ? 'selected' : ''}>Professeur</option>
+                            </select>
+                            <label class="md-text-field-label">Rôle *</label>
+                        </div>
+                    </div>
+                </form>
+            `, async () => {
+                const data = {
+                    nom: document.getElementById('staffNom').value,
+                    prenom: document.getElementById('staffPrenom').value,
+                    email: document.getElementById('staffEmail').value,
+                    role: document.getElementById('staffRole').value
+                };
+                try {
+                    const response = await fetch(`${API_URL}/staff/${id}`, {
+                        method: 'PUT',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        showSnackbar('Membre modifié');
+                        loadStaff();
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur');
+                }
+            });
+        }
+
+        async function deleteStaff(id) {
+            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer ce membre ?</p>', async () => {
+                try {
+                    const response = await fetch(`${API_URL}/staff/${id}`, {
+                        method: 'DELETE',
+                        headers: getHeaders()
+                    });
+                    if (response.ok) {
+                        showSnackbar('Membre supprimé');
+                        loadStaff();
+                    }
+                } catch (error) {
+                    showSnackbar('Erreur');
+                }
+            });
+        }
+
+        // ==================== INSCRIPTIONS ====================
+        let inscriptionType = 'seul';
+        let inscriptionEnfantCount = 1;
+
+        async function loadInscriptions() {
+            // Les inscriptions sont gérées via les élèves non activés
+            const pendingEleves = allEleves.filter(e => !e.activated);
+            
+            // Grouper par familleLienId
+            const familles = {};
+            const seuls = [];
+            
+            pendingEleves.forEach(e => {
+                if (e.enFamille && e.familleLienId) {
+                    if (!familles[e.familleLienId]) {
+                        familles[e.familleLienId] = [];
+                    }
+                    familles[e.familleLienId].push(e);
+                } else {
+                    seuls.push(e);
+                }
+            });
+            
+            let html = '';
+            
+            // Afficher les familles
+            Object.keys(familles).forEach(familleId => {
+                const membres = familles[familleId];
+                const parentEmail = membres[0].email || 'Non renseigné';
+                const parentNom = membres[0].parentNom || '';
+                const parentPrenom = membres[0].parentPrenom || '';
+                
+                html += `
+                    <div class="md-card md-card-elevated" style="padding: 16px; border-left: 4px solid var(--md-sys-color-tertiary);">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div class="md-avatar" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                                <span class="material-icons">groups</span>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-weight: 500;">Famille ${parentNom || 'Non renseigné'}</h4>
+                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
+                            </div>
+                            <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-tertiary-container);">Famille</span>
+                        </div>
+                        <p style="font-size: 14px; margin-bottom: 8px;"><strong>Parent:</strong> ${parentPrenom} ${parentNom}</p>
+                        <p style="font-size: 14px; margin-bottom: 12px;"><strong>Email:</strong> ${parentEmail}</p>
+                        <div style="background: var(--md-sys-color-surface-container); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Enfants:</p>
+                            ${membres.map(m => `
+                                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                                    <span class="md-avatar" style="width: 32px; height: 32px; font-size: 14px;">${(m.prenom || 'E')[0]}</span>
+                                    <span style="flex: 1;">${m.prenom} ${m.nom}</span>
+                                    <span style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${m.classe || 'Non assigné'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${membres.map(m => `
+                                <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${m.id}', '${m.email}', 'eleve')">
+                                    <span class="material-icons">send</span> Activer ${m.prenom}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Afficher les élèves seuls
+            seuls.forEach(e => {
+                html += `
+                    <div class="md-card md-card-elevated" style="padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div class="md-avatar">${(e.prenom || 'E')[0].toUpperCase()}</div>
+                            <div style="flex: 1;">
+                                <h4 style="font-weight: 500;">${e.prenom} ${e.nom}</h4>
+                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
+                            </div>
+                            <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-secondary-container);">En attente</span>
+                        </div>
+                        ${e.parentNom ? `<p style="font-size: 14px;"><strong>Parent:</strong> ${e.parentPrenom || ''} ${e.parentNom}</p>` : ''}
+                        <p style="font-size: 14px;">Email : ${e.email || 'Non renseigné'}</p>
+                        <div style="margin-top: 12px; display: flex; gap: 8px;">
+                            <button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')">
+                                <span class="material-icons">edit</span> Modifier
+                            </button>
+                            <button class="md-btn md-btn-filled" onclick="sendActivationEmail('${e.id}', '${e.email}', 'eleve')">
+                                <span class="material-icons">send</span> Envoyer activation
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('inscriptionsList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun dossier d\'inscription en attente</p>';
+        }
+
+        function showInscriptionForm() {
+            document.getElementById('inscriptionFormCard').style.display = 'block';
+            document.getElementById('inscriptionsListCard').style.display = 'none';
+            inscriptionType = 'seul';
+            inscriptionEnfantCount = 1;
+            
+            // Reset form
+            document.getElementById('insc_parentNom').value = '';
+            document.getElementById('insc_parentPrenom').value = '';
+            document.getElementById('insc_parentEmail').value = '';
+            document.getElementById('insc_parentTel').value = '';
+            
+            // Reset type selection
+            document.querySelectorAll('.inscription-type-option').forEach(opt => {
+                opt.style.borderColor = opt.dataset.type === 'seul' ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)';
+            });
+            
+            document.getElementById('addEnfantBtn').style.display = 'none';
+            document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'enfant";
+            
+            // Créer le premier champ enfant
+            renderEnfantFields();
+        }
+
+        function hideInscriptionForm() {
+            document.getElementById('inscriptionFormCard').style.display = 'none';
+            document.getElementById('inscriptionsListCard').style.display = 'block';
+        }
+
+        function selectInscriptionType(type) {
+            inscriptionType = type;
+            
+            document.querySelectorAll('.inscription-type-option').forEach(opt => {
+                if (opt.dataset.type === type) {
+                    opt.style.borderColor = 'var(--md-sys-color-primary)';
+                } else {
+                    opt.style.borderColor = 'var(--md-sys-color-outline)';
+                }
+            });
+            
+            if (type === 'famille') {
+                document.getElementById('addEnfantBtn').style.display = 'flex';
+                document.getElementById('inscriptionEnfantsTitle').textContent = "Informations des enfants";
+            } else {
+                document.getElementById('addEnfantBtn').style.display = 'none';
+                document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'enfant";
+                inscriptionEnfantCount = 1;
+                renderEnfantFields();
+            }
+        }
+
+        function renderEnfantFields() {
+            let html = '';
+            for (let i = 0; i < inscriptionEnfantCount; i++) {
+                html += createEnfantFieldHTML(i);
+            }
+            document.getElementById('inscriptionEnfantsContainer').innerHTML = html;
+        }
+
+        function createEnfantFieldHTML(index) {
+            return `
+                <div class="enfant-field" data-index="${index}" style="background: var(--md-sys-color-surface-container); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h5 style="color: var(--md-sys-color-primary);">Enfant ${index + 1}</h5>
+                        ${index > 0 ? `<button type="button" class="md-btn md-btn-text" onclick="removeEnfantField(${index})" style="color: var(--md-sys-color-error);"><span class="material-icons">close</span></button>` : ''}
+                    </div>
+                    <div class="md-form-grid">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" class="md-text-field-input enfant-nom" data-index="${index}" placeholder=" " required>
+                                <label class="md-text-field-label">Nom</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" class="md-text-field-input enfant-prenom" data-index="${index}" placeholder=" " required>
+                                <label class="md-text-field-label">Prénom</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="date" class="md-text-field-input enfant-date" data-index="${index}" placeholder=" ">
+                                <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date de naissance</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <select class="md-text-field-input enfant-classe" data-index="${index}" style="padding: 16px 12px;">
+                                    <option value="">Sélectionner une classe</option>
+                                    ${allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addEnfantField() {
+            inscriptionEnfantCount++;
+            const container = document.getElementById('inscriptionEnfantsContainer');
+            container.insertAdjacentHTML('beforeend', createEnfantFieldHTML(inscriptionEnfantCount - 1));
+        }
+
+        function removeEnfantField(index) {
+            if (inscriptionEnfantCount > 1) {
+                document.querySelector(`.enfant-field[data-index="${index}"]`).remove();
+                inscriptionEnfantCount--;
+                // Re-numéroter
+                document.querySelectorAll('.enfant-field').forEach((field, i) => {
+                    field.dataset.index = i;
+                    field.querySelector('h5').textContent = `Enfant ${i + 1}`;
+                    field.querySelectorAll('input, select').forEach(input => input.dataset.index = i);
+                    const removeBtn = field.querySelector('button[onclick^="removeEnfantField"]');
+                    if (removeBtn) removeBtn.setAttribute('onclick', `removeEnfantField(${i})`);
+                });
+            }
+        }
+
+        async function submitInscription() {
+            const parentNom = document.getElementById('insc_parentNom').value.trim();
+            const parentPrenom = document.getElementById('insc_parentPrenom').value.trim();
+            const parentEmail = document.getElementById('insc_parentEmail').value.trim();
+            const parentTel = document.getElementById('insc_parentTel').value.trim();
+            
+            if (!parentEmail) {
+                showSnackbar('L\'email du parent est obligatoire');
+                return;
+            }
+            
+            // Collecter les enfants
+            const enfants = [];
+            const enfantFields = document.querySelectorAll('.enfant-field');
+            
+            for (const field of enfantFields) {
+                const index = field.dataset.index;
+                const nom = field.querySelector('.enfant-nom').value.trim();
+                const prenom = field.querySelector('.enfant-prenom').value.trim();
+                const dateNaissance = field.querySelector('.enfant-date').value;
+                const classe = field.querySelector('.enfant-classe').value;
+                
+                if (!nom || !prenom) {
+                    showSnackbar(`Veuillez remplir le nom et prénom de l'enfant ${parseInt(index) + 1}`);
+                    return;
+                }
+                
+                enfants.push({ nom, prenom, dateNaissance, classe });
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/eleves/inscription`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-user-role': user.role,
+                        'x-user-id': user.id
+                    },
+                    body: JSON.stringify({
+                        parentNom,
+                        parentPrenom,
+                        parentEmail,
+                        parentTel,
+                        enFamille: inscriptionType === 'famille' ? 1 : 0,
+                        enfants
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSnackbar(`${enfants.length} élève(s) inscrit(s) avec succès !`);
+                    hideInscriptionForm();
+                    await loadAllData();
+                    loadInscriptions();
+                } else {
+                    throw new Error(data.error || 'Erreur lors de l\'inscription');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'inscription');
+            }
+        }
+
+        function showNewInscriptionForm() {
+            showInscriptionForm();
+        }
+
+        // ==================== ACTUALITÉS ====================
+        let allActualites = [];
+        
+        async function loadActualites() {
+            // Montrer le bouton d'ajout si admin/directeur/secrétariat
+            if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
+                document.getElementById('actualiteAddBtn').style.display = 'flex';
+            }
+            
+            // Charger les classes pour le ciblage
+            if (allClasses.length === 0) {
+                try {
+                    const response = await fetch(`${API_URL}/classes`, { headers: getHeaders() });
+                    allClasses = await response.json();
+                } catch (e) {}
+            }
+            
+            // Remplir le conteneur des classes pour le ciblage
+            const classesContainer = document.getElementById('cibleClassesContainer');
+            if (classesContainer) {
+                classesContainer.innerHTML = allClasses.map(c => `
+                    <label class="cible-checkbox classe-cible" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 2px solid var(--md-sys-color-outline); border-radius: 16px; cursor: pointer; font-size: 13px; transition: all 0.2s;">
+                        <input type="checkbox" class="cible-specific cible-classe" value="${c.nom}">
+                        ${c.nom}
+                    </label>
+                `).join('');
+            }
+            
+            try {
+                const headers = getHeaders();
+                headers['x-user-classe'] = user.classe || '';
+                
+                const response = await fetch(`${API_URL}/actualites`, { headers });
+                allActualites = await response.json();
+                renderActualites();
+            } catch (error) {
+                console.error('Erreur chargement actualités:', error);
+                showToast('Erreur lors du chargement des actualités', 'error');
+            }
+        }
+        
+        function renderActualites() {
+            const isAdmin = ['admin', 'directeur', 'secretariat'].includes(user.role);
+            
+            const html = allActualites.length ? allActualites.map(actu => {
+                let cibleLabel = 'Tous';
+                if (actu.cible && actu.cible !== 'tous') {
+                    try {
+                        const cibles = JSON.parse(actu.cible);
+                        if (Array.isArray(cibles)) {
+                            cibleLabel = cibles.join(', ');
+                        }
+                    } catch { cibleLabel = actu.cible; }
+                }
+                
+                return `
+                    <div class="md-card md-card-elevated" style="padding: 0; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-tertiary-container)); padding: 20px;">
+                            <h3 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 4px;">${actu.titre}</h3>
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
+                                <span class="material-icons" style="font-size: 16px;">calendar_today</span>
+                                ${actu.date ? new Date(actu.date).toLocaleDateString('fr-FR') : 'Non daté'}
+                                <span style="margin-left: 8px;">par ${actu.auteurNom || 'Système'}</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p style="color: var(--md-sys-color-on-surface); line-height: 1.6; white-space: pre-wrap;">${actu.description}</p>
+                            ${isAdmin ? `
+                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                                    <span class="md-chip" style="font-size: 11px; background: var(--md-sys-color-surface-variant);">
+                                        <span class="material-icons" style="font-size: 14px;">groups</span> ${cibleLabel}
+                                    </span>
+                                    <div style="flex: 1;"></div>
+                                    <button class="md-btn md-btn-text" onclick="editActualite('${actu.id}')">
+                                        <span class="material-icons">edit</span>
+                                    </button>
+                                    <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteActualite('${actu.id}')">
+                                        <span class="material-icons">delete</span>
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 40px;">Aucune actualité pour le moment</p>';
+            
+            document.getElementById('actualitesList').innerHTML = html;
+        }
+        
+        function showActualiteForm(editMode = false) {
+            document.getElementById('actualiteFormCard').style.display = 'block';
+            document.getElementById('actualitesListCard').style.display = 'none';
+            document.getElementById('actualiteFormTitle').textContent = editMode ? 'Modifier l\'actualité' : 'Nouvelle actualité';
+            
+            if (!editMode) {
+                document.getElementById('actualiteEditId').value = '';
+                document.getElementById('actualite_titre').value = '';
+                document.getElementById('actualite_description').value = '';
+                document.getElementById('actualite_date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('cible_tous').checked = true;
+                document.querySelectorAll('.cible-specific').forEach(cb => cb.checked = false);
+            }
+        }
+        
+        function hideActualiteForm() {
+            document.getElementById('actualiteFormCard').style.display = 'none';
+            document.getElementById('actualitesListCard').style.display = 'block';
+        }
+        
+        function toggleCibleTous(checkbox) {
+            if (checkbox.checked) {
+                document.querySelectorAll('.cible-specific').forEach(cb => cb.checked = false);
+            }
+        }
+        
+        // Écouter les changements sur les cibles spécifiques
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('cible-specific') && e.target.checked) {
+                document.getElementById('cible_tous').checked = false;
+            }
+        });
+        
+        async function submitActualite() {
+            const editId = document.getElementById('actualiteEditId').value;
+            const titre = document.getElementById('actualite_titre').value.trim();
+            const description = document.getElementById('actualite_description').value.trim();
+            const date = document.getElementById('actualite_date').value;
+            
+            if (!titre || !description) {
+                showToast('Veuillez remplir le titre et la description', 'error');
+                return;
+            }
+            
+            // Déterminer les cibles
+            let cible = 'tous';
+            if (!document.getElementById('cible_tous').checked) {
+                const selectedCibles = [];
+                if (document.getElementById('cible_professeurs').checked) selectedCibles.push('professeurs');
+                if (document.getElementById('cible_eleves').checked) selectedCibles.push('eleves');
+                document.querySelectorAll('.cible-classe:checked').forEach(cb => {
+                    selectedCibles.push(cb.value);
+                });
+                if (selectedCibles.length > 0) {
+                    cible = selectedCibles;
+                }
+            }
+            
+            try {
+                const url = editId ? `${API_URL}/actualites/${editId}` : `${API_URL}/actualites`;
+                const method = editId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        titre,
+                        description,
+                        date,
+                        auteurId: user.id,
+                        auteurNom: `${user.prenom || ''} ${user.nom || user.email.split('@')[0]}`.trim(),
+                        cible
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast(editId ? 'Actualité modifiée avec succès' : 'Actualité publiée avec succès', 'success');
+                    hideActualiteForm();
+                    await loadActualites();
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Erreur lors de l\'opération');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast(error.message || 'Erreur lors de l\'opération', 'error');
+            }
+        }
+        
+        async function editActualite(id) {
+            const actu = allActualites.find(a => a.id === id);
+            if (!actu) return;
+            
+            showActualiteForm(true);
+            document.getElementById('actualiteEditId').value = id;
+            document.getElementById('actualite_titre').value = actu.titre;
+            document.getElementById('actualite_description').value = actu.description;
+            document.getElementById('actualite_date').value = actu.date || '';
+            
+            // Restaurer les cibles
+            document.getElementById('cible_tous').checked = !actu.cible || actu.cible === 'tous';
+            document.querySelectorAll('.cible-specific').forEach(cb => cb.checked = false);
+            
+            if (actu.cible && actu.cible !== 'tous') {
+                try {
+                    const cibles = JSON.parse(actu.cible);
+                    if (Array.isArray(cibles)) {
+                        cibles.forEach(c => {
+                            if (c === 'professeurs') document.getElementById('cible_professeurs').checked = true;
+                            else if (c === 'eleves') document.getElementById('cible_eleves').checked = true;
+                            else {
+                                const classeCheckbox = document.querySelector(`.cible-classe[value="${c}"]`);
+                                if (classeCheckbox) classeCheckbox.checked = true;
+                            }
+                        });
+                    }
+                } catch {}
+            }
+        }
+        
+        async function deleteActualite(id) {
+            showDialog('Supprimer l\'actualité', '<p>Êtes-vous sûr de vouloir supprimer cette actualité ?</p>', async () => {
+                try {
+                    const response = await fetch(`${API_URL}/actualites/${id}`, {
+                        method: 'DELETE',
+                        headers: getHeaders()
+                    });
+                    
+                    if (response.ok) {
+                        showToast('Actualité supprimée', 'success');
+                        await loadActualites();
+                    } else {
+                        showToast('Erreur lors de la suppression', 'error');
+                    }
+                } catch (error) {
+                    showToast('Erreur de connexion', 'error');
+                }
+            });
+        }
+
+        // ==================== UTILITAIRES UI ====================
+        
+        // Système de Toast amélioré
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: 'check_circle',
+                error: 'error',
+                warning: 'warning',
+                info: 'info'
+            };
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <span class="material-icons">${icons[type] || icons.info}</span>
+                </div>
+                <div class="toast-content">
+                    <p class="toast-message">${message}</p>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <span class="material-icons">close</span>
+                </button>
+                <div class="toast-progress"></div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animation d'entrée
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Auto-suppression après 4 secondes
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        // Garder l'ancienne fonction showSnackbar qui utilise maintenant showToast
+        function showSnackbar(message) {
+            // Déterminer le type basé sur le message
+            let type = 'info';
+            if (message.includes('succès') || message.includes('✅') || message.includes('envoyé')) {
+                type = 'success';
+            } else if (message.includes('erreur') || message.includes('Erreur') || message.includes('impossible')) {
+                type = 'error';
+            } else if (message.includes('attention') || message.includes('Attention')) {
+                type = 'warning';
+            }
+            showToast(message.replace('✅ ', '').replace('❌ ', ''), type);
+        }
+
+        function hideSnackbar() {
+            document.getElementById('snackbar').classList.remove('show');
+        }
+
+        function showDialog(title, content, onConfirm) {
+            document.getElementById('dialogTitle').textContent = title;
+            document.getElementById('dialogContent').innerHTML = content;
+            document.getElementById('dialogOverlay').classList.add('show');
+            
+            const confirmBtn = document.getElementById('dialogConfirm');
+            confirmBtn.onclick = () => {
+                if (onConfirm) onConfirm();
+                closeDialog();
+            };
+        }
+
+        function closeDialog() {
+            document.getElementById('dialogOverlay').classList.remove('show');
+        }
+
+        // ==================== ENVOI EMAIL ACTIVATION ====================
+        async function sendActivationEmail(userId, email, type) {
+            if (!email) {
+                showSnackbar('Aucun email associé à ce compte');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/send-activation-email`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ userId, email, type })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showSnackbar('✅ Email d\'activation envoyé avec succès');
+                } else {
+                    showSnackbar(result.error || 'Erreur lors de l\'envoi de l\'email');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSnackbar('Erreur de connexion');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <style>
+        /* Styles additionnels pour les selects et textareas */
+        .md-select {
+            padding: 12px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 4px;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .md-select:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+        }
+        .md-chip-error {
+            background: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+        .md-chip-warning {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+        textarea.md-text-field-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Toast Container */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+        }
+        
+        /* Toast Base */
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .toast-icon .material-icons {
+            font-size: 24px;
+        }
+        
+        .toast-content {
+            flex: 1;
+            padding-top: 8px;
+        }
+        
+        .toast-message {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            color: #666;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .toast-close:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+        
+        .toast-close .material-icons {
+            font-size: 20px;
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            animation: toastProgress 4s linear forwards;
+        }
+        
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        /* Toast Types */
+        .toast-success {
+            border-left-color: #10b981;
+        }
+        .toast-success .toast-icon {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #059669;
+        }
+        .toast-success .toast-progress {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        
+        .toast-error {
+            border-left-color: #ef4444;
+        }
+        .toast-error .toast-icon {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #dc2626;
+        }
+        .toast-error .toast-progress {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+        
+        .toast-warning {
+            border-left-color: #f59e0b;
+        }
+        .toast-warning .toast-icon {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #d97706;
+        }
+        .toast-warning .toast-progress {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+        
+        .toast-info {
+            border-left-color: #3b82f6;
+        }
+        .toast-info .toast-icon {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #2563eb;
+        }
+        .toast-info .toast-progress {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+        
+        /* Cible checkbox styles */
+        .cible-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--md-sys-color-primary);
+        }
+        
+        .cible-checkbox:has(input:checked) {
+            border-color: var(--md-sys-color-primary) !important;
+            background: var(--md-sys-color-primary-container);
+        }
+        
+        /* Responsive toasts */
+        @media (max-width: 500px) {
+            .toast-container {
+                left: 12px;
+                right: 12px;
+                max-width: none;
+            }
+        }
+    </style>
 </body>
 </html>

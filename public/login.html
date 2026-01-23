@@ -3,258 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Gestion École</title>
-    <script src="custom-modals.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', 'Arial', sans-serif;
-            background: #1e3a5f;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h1 {
-            color: #1e3a5f;
-            font-size: 2em;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-            font-size: 0.9em;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d0d0d0;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: all 0.2s;
-            background: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-login:hover {
-            background: #152d4a;
-            box-shadow: 0 3px 10px rgba(30, 58, 95, 0.3);
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: none;
-            font-size: 0.9em;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .info-box {
-            background: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 25px;
-            font-size: 13px;
-            color: #004085;
-        }
-
-        .info-box strong {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-    </style>
+    <title>Connexion - Eveil & Ihsan</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>🎓 Connexion</h1>
-            <p>Système de Gestion Scolaire</p>
+    <div class="login-page">
+        <!-- Formes décoratives -->
+        <div class="login-shapes">
+            <div class="login-shape login-shape-1"></div>
+            <div class="login-shape login-shape-2"></div>
+            <div class="login-shape login-shape-3"></div>
         </div>
 
-        <div id="alert" class="alert"></div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="email" required placeholder="votre.email@example.com">
+        <!-- Section Branding -->
+        <div class="login-branding">
+            <div class="login-branding-content">
+                <img src="https://via.placeholder.com/120x120/1e5aa8/ffffff?text=E%26I" alt="Logo" class="login-logo">
+                <h1>Eveil & Ihsan</h1>
+                <p>Plateforme de gestion scolaire moderne pour un suivi optimal de vos élèves et de votre établissement.</p>
+                
+                <div class="login-features">
+                    <div class="login-feature">
+                        <div class="login-feature-icon">
+                            <span class="material-icons">school</span>
+                        </div>
+                        <span>Gestion des élèves</span>
+                    </div>
+                    <div class="login-feature">
+                        <div class="login-feature-icon">
+                            <span class="material-icons">event_note</span>
+                        </div>
+                        <span>Suivi des absences</span>
+                    </div>
+                    <div class="login-feature">
+                        <div class="login-feature-icon">
+                            <span class="material-icons">message</span>
+                        </div>
+                        <span>Messagerie intégrée</span>
+                    </div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label>Mot de passe:</label>
-                <input type="password" id="password" required placeholder="••••••••">
-            </div>
-
-            <button type="submit" class="btn-login">Se connecter</button>
-        </form>
-
-        <div style="text-align: center; margin-top: 15px;">
-            <a href="#" id="forgotPasswordLink" style="color: #667eea; text-decoration: none; font-size: 0.9em;">Mot de passe oublié ?</a>
         </div>
 
-        <div class="info-box">
-            <strong>Comptes de démonstration:</strong>
-            <div style="margin-top: 5px; line-height: 1.6;">
-                <strong>Admin:</strong> admin@ecole.fr<br>
-                <strong>Directeur:</strong> directeur@ecole.fr<br>
-                <strong>Secrétariat:</strong> secretariat@ecole.fr<br>
-                <strong>Professeur:</strong> prof@ecole.fr<br>
-                <strong>Élève:</strong> eleve@ecole.fr<br>
-                <em style="font-size: 11px; display: block; margin-top: 5px;">Mot de passe: password</em>
+        <!-- Section Formulaire -->
+        <div class="login-form-container">
+            <div class="login-card">
+                <!-- Loading Overlay -->
+                <div class="login-loading" id="loginLoading">
+                    <div class="login-loading-spinner"></div>
+                    <span class="login-loading-text">Connexion en cours...</span>
+                </div>
+
+                <div class="login-card-header">
+                    <h2>Bienvenue</h2>
+                    <p>Connectez-vous pour accéder à votre espace</p>
+                </div>
+
+                <!-- Message d'erreur -->
+                <div class="login-error" id="loginError">
+                    <span class="material-icons">error_outline</span>
+                    <span id="errorMessage">Identifiants incorrects</span>
+                </div>
+
+                <form id="loginForm" class="login-form">
+                    <!-- Champ Email -->
+                    <div class="md-text-field">
+                        <div class="md-text-field-container with-icon">
+                            <span class="material-icons md-text-field-icon">email</span>
+                            <input type="email" id="email" class="md-text-field-input" placeholder=" " required autocomplete="email">
+                            <label class="md-text-field-label" style="left: 48px;">Adresse email</label>
+                        </div>
+                    </div>
+
+                    <!-- Champ Mot de passe -->
+                    <div class="md-text-field">
+                        <div class="md-text-field-container with-icon">
+                            <span class="material-icons md-text-field-icon">lock</span>
+                            <input type="password" id="password" class="md-text-field-input" placeholder=" " required autocomplete="current-password">
+                            <label class="md-text-field-label" style="left: 48px;">Mot de passe</label>
+                            <button type="button" class="md-text-field-toggle" id="togglePassword">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="login-options">
+                        <label class="login-remember">
+                            <input type="checkbox" class="md-checkbox-input" id="rememberMe">
+                            <span>Se souvenir de moi</span>
+                        </label>
+                        <a href="#" class="login-forgot" id="forgotPasswordLink">Mot de passe oublié ?</a>
+                    </div>
+
+                    <!-- Bouton de connexion -->
+                    <button type="submit" class="md-btn md-btn-filled login-submit">
+                        <span class="material-icons">login</span>
+                        Se connecter
+                    </button>
+                </form>
+
+                <!-- Comptes de démonstration -->
+                <div class="login-demo-section">
+                    <p class="login-demo-title">Comptes de démonstration</p>
+                    <div class="login-demo-accounts">
+                        <button type="button" class="login-demo-btn" data-email="admin@ecole.fr">
+                            <span class="material-icons">admin_panel_settings</span>
+                            <span>Admin</span>
+                        </button>
+                        <button type="button" class="login-demo-btn" data-email="directeur@ecole.fr">
+                            <span class="material-icons">business</span>
+                            <span>Directeur</span>
+                        </button>
+                        <button type="button" class="login-demo-btn" data-email="prof@ecole.fr">
+                            <span class="material-icons">person</span>
+                            <span>Professeur</span>
+                        </button>
+                        <button type="button" class="login-demo-btn" data-email="eleve@ecole.fr">
+                            <span class="material-icons">school</span>
+                            <span>Élève</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="login-footer">
+                    <p>© 2024 Eveil & Ihsan - Tous droits réservés</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Nettoyer les anciennes sessions au chargement de la page de connexion
+        // Nettoyer les anciennes sessions au chargement
         localStorage.clear();
 
-        // URL de base de l'API - Détection automatique de l'hôte
+        // URL de base de l'API
         const API_URL = `http://${window.location.hostname}:3000/api`;
 
-        // Gestion de la soumission du formulaire
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Éléments DOM
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('loginError');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginLoading = document.getElementById('loginLoading');
+        const togglePassword = document.getElementById('togglePassword');
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        // Toggle visibilité mot de passe
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.querySelector('.material-icons').textContent = 
+                type === 'password' ? 'visibility' : 'visibility_off';
+        });
+
+        // Comptes de démonstration
+        document.querySelectorAll('.login-demo-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                emailInput.value = btn.dataset.email;
+                passwordInput.value = 'password';
+                // Trigger focus pour animer les labels
+                emailInput.focus();
+                emailInput.blur();
+                passwordInput.focus();
+                passwordInput.blur();
+            });
+        });
+
+        // Gestion de la soumission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Cacher l'erreur précédente
+            loginError.classList.remove('show');
+            
+            // Afficher le chargement
+            loginLoading.classList.add('show');
 
             try {
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ 
+                        email: emailInput.value, 
+                        password: passwordInput.value 
+                    })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Stocker les informations de session
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('token', data.token);
                     
-                    showAlert('Connexion réussie! Redirection...', 'success');
+                    // Animation de succès puis redirection
+                    loginLoading.querySelector('.login-loading-text').textContent = 'Connexion réussie !';
                     
-                    // Rediriger vers la page appropriée
                     setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
+                        // Redirection selon le rôle de l'utilisateur
+                        if (data.user.role === 'eleve') {
+                            window.location.href = 'eleve-dashboard.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 800);
                 } else {
-                    showAlert(data.message || 'Identifiants incorrects', 'error');
+                    throw new Error(data.message || 'Identifiants incorrects');
                 }
             } catch (error) {
-                console.error('Erreur de connexion:', error);
-                showAlert('Erreur de connexion. Vérifiez que le serveur est démarré.', 'error');
+                loginLoading.classList.remove('show');
+                errorMessage.textContent = error.message || 'Erreur de connexion au serveur';
+                loginError.classList.add('show');
             }
         });
 
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = `alert alert-${type}`;
-            alert.style.display = 'block';
-
-            if (type === 'success') {
-                setTimeout(() => {
-                    alert.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // Gestion du lien "Mot de passe oublié"
+        // Mot de passe oublié
         document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
             e.preventDefault();
             
-            showCustomPrompt('Entrez votre adresse email pour réinitialiser votre mot de passe:', '', async (email) => {
-                if (!email) return;
+            const email = prompt('Entrez votre adresse email pour réinitialiser votre mot de passe:');
+            if (!email) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
                 
-                try {
-                    const response = await fetch(`${API_URL}/auth/forgot-password`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        showAlert('Un email de réinitialisation a été envoyé si cette adresse existe.', 'success');
-                    } else {
-                        showAlert(data.error || 'Erreur lors de l\'envoi de l\'email', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showAlert('Erreur de connexion au serveur', 'error');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Un email de réinitialisation a été envoyé si cette adresse existe.');
+                } else {
+                    alert(data.error || 'Erreur lors de l\'envoi de l\'email');
                 }
-            }, null, 'email');
+            } catch (error) {
+                alert('Erreur de connexion au serveur');
+            }
         });
     </script>
 </body>

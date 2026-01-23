@@ -3,224 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activation de compte - GestionPro</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Activation de compte - Eveil & Ihsan</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <style>
-        body {
+        .activation-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--spacing-lg);
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .activation-container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 450px;
-            width: 90%;
-        }
-
-        .activation-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .activation-header h1 {
-            color: #1e3a5f;
-            font-size: 1.8em;
-            margin-bottom: 10px;
-        }
-
-        .activation-header p {
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .welcome-box {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border-left: 4px solid #667eea;
-        }
-
-        .welcome-box h3 {
-            color: #1e3a5f;
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-
-        .welcome-box p {
-            color: #666;
-            font-size: 0.9em;
-            margin: 4px 0;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #1e3a5f;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.95em;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .password-requirements {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 8px;
-        }
-
-        .password-requirements ul {
-            margin: 8px 0 0 20px;
-            padding: 0;
-        }
-
-        .password-requirements li {
-            margin: 4px 0;
-        }
-
-        .btn-activate {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.05em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-activate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-activate:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #c62828;
-            font-size: 0.9em;
-        }
-
-        .success-message {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #2e7d32;
-            font-size: 0.9em;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            justify-content: center;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            background: var(--md-sys-color-primary-container);
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .activation-icon .material-icons {
+            font-size: 40px;
+            color: var(--md-sys-color-on-primary-container);
         }
-
-        .hidden {
-            display: none;
+        
+        .activation-icon.success {
+            background: var(--md-extended-color-green-container);
+        }
+        
+        .activation-icon.success .material-icons {
+            color: var(--md-extended-color-green);
+        }
+        
+        .activation-icon.error {
+            background: var(--md-sys-color-error-container);
+        }
+        
+        .activation-icon.error .material-icons {
+            color: var(--md-sys-color-error);
+        }
+        
+        .password-requirements {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-medium);
+        }
+        
+        .password-requirements h4 {
+            font: var(--md-sys-typescale-label-large);
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .password-requirements ul {
+            list-style: none;
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .password-requirements li {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-bottom: 4px;
+        }
+        
+        .password-requirements li .material-icons {
+            font-size: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .password-requirements li.valid .material-icons {
+            color: var(--md-extended-color-green);
         }
     </style>
 </head>
 <body>
-    <div class="activation-container">
-        <div class="activation-header">
-            <h1>🎓 Activation de compte</h1>
-            <p id="subtitle">Créez votre mot de passe pour accéder à votre espace</p>
+    <div class="login-page">
+        <div class="login-shapes">
+            <div class="login-shape login-shape-1"></div>
+            <div class="login-shape login-shape-2"></div>
         </div>
 
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p>Vérification du lien d'activation...</p>
-        </div>
+        <div class="login-form-container">
+            <div class="login-card">
+                <!-- Loading -->
+                <div class="login-loading" id="loading">
+                    <div class="login-loading-spinner"></div>
+                    <span class="login-loading-text">Vérification du lien...</span>
+                </div>
 
-        <div id="activation-form" class="hidden">
-            <div class="welcome-box">
-                <h3>Bienvenue !</h3>
-                <p><strong>Nom:</strong> <span id="user-nom"></span></p>
-                <p><strong>Email:</strong> <span id="user-email"></span></p>
-            </div>
-
-            <div id="error-message" class="error-message hidden"></div>
-            <div id="success-message" class="success-message hidden"></div>
-
-            <form id="activationForm">
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" required minlength="6">
-                    <div class="password-requirements">
-                        <strong>Exigences:</strong>
-                        <ul>
-                            <li>Au moins 6 caractères</li>
-                            <li>Facile à retenir</li>
-                        </ul>
+                <!-- État initial - Définir mot de passe -->
+                <div id="setPasswordState" style="display: none;">
+                    <div class="login-card-header">
+                        <div class="activation-icon">
+                            <span class="material-icons">lock_reset</span>
+                        </div>
+                        <h2>Bienvenue !</h2>
+                        <p>Créez votre mot de passe pour activer votre compte</p>
                     </div>
+
+                    <div class="login-error" id="activationError">
+                        <span class="material-icons">error_outline</span>
+                        <span id="errorMessage">Erreur</span>
+                    </div>
+
+                    <form id="activationForm" class="login-form">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container with-icon">
+                                <span class="material-icons md-text-field-icon">lock</span>
+                                <input type="password" id="password" class="md-text-field-input" placeholder=" " required minlength="8">
+                                <label class="md-text-field-label" style="left: 48px;">Nouveau mot de passe</label>
+                                <button type="button" class="md-text-field-toggle" onclick="togglePassword('password')">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="md-text-field">
+                            <div class="md-text-field-container with-icon">
+                                <span class="material-icons md-text-field-icon">lock_outline</span>
+                                <input type="password" id="confirmPassword" class="md-text-field-input" placeholder=" " required>
+                                <label class="md-text-field-label" style="left: 48px;">Confirmer le mot de passe</label>
+                                <button type="button" class="md-text-field-toggle" onclick="togglePassword('confirmPassword')">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-requirements">
+                            <h4>Le mot de passe doit contenir :</h4>
+                            <ul>
+                                <li id="req-length"><span class="material-icons">radio_button_unchecked</span> Au moins 8 caractères</li>
+                                <li id="req-upper"><span class="material-icons">radio_button_unchecked</span> Une lettre majuscule</li>
+                                <li id="req-lower"><span class="material-icons">radio_button_unchecked</span> Une lettre minuscule</li>
+                                <li id="req-number"><span class="material-icons">radio_button_unchecked</span> Un chiffre</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="md-btn md-btn-filled login-submit">
+                            <span class="material-icons">check</span>
+                            Activer mon compte
+                        </button>
+                    </form>
                 </div>
 
-                <div class="form-group">
-                    <label for="confirm-password">Confirmer le mot de passe</label>
-                    <input type="password" id="confirm-password" required minlength="6">
+                <!-- État succès -->
+                <div id="successState" style="display: none;">
+                    <div class="login-card-header">
+                        <div class="activation-icon success">
+                            <span class="material-icons">check_circle</span>
+                        </div>
+                        <h2>Compte activé !</h2>
+                        <p>Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.</p>
+                    </div>
+
+                    <a href="login.html" class="md-btn md-btn-filled login-submit" style="text-decoration: none;">
+                        <span class="material-icons">login</span>
+                        Se connecter
+                    </a>
                 </div>
 
-                <button type="submit" class="btn-activate">Activer mon compte</button>
-            </form>
-        </div>
+                <!-- État erreur -->
+                <div id="errorState" style="display: none;">
+                    <div class="login-card-header">
+                        <div class="activation-icon error">
+                            <span class="material-icons">error</span>
+                        </div>
+                        <h2>Lien invalide</h2>
+                        <p id="errorStateMessage">Ce lien d'activation n'est pas valide ou a expiré.</p>
+                    </div>
 
-        <div id="error-state" class="hidden">
-            <div class="error-message">
-                ❌ Ce lien d'activation est invalide ou a déjà été utilisé.
+                    <a href="login.html" class="md-btn md-btn-outlined login-submit" style="text-decoration: none;">
+                        <span class="material-icons">arrow_back</span>
+                        Retour à la connexion
+                    </a>
+                </div>
+
+                <div class="login-footer">
+                    <p>© 2024 Eveil & Ihsan</p>
+                </div>
             </div>
-            <p style="text-align: center; color: #666; margin-top: 20px;">
-                Contactez votre établissement si vous pensez qu'il s'agit d'une erreur.
-            </p>
         </div>
     </div>
 
@@ -228,129 +189,143 @@
         const API_URL = `http://${window.location.hostname}:3000/api`;
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
-        const type = urlParams.get('type') || 'eleve'; // Par défaut: élève
+        const type = urlParams.get('type') || 'eleve'; // Par défaut élève
 
-        // Mettre à jour le sous-titre selon le type
-        const subtitle = document.getElementById('subtitle');
-        if (type === 'professeur') {
-            subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace professeur';
-        } else if (type === 'staff') { // AJOUT ICI
-            subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace d\'administration';
-        } else {
-            subtitle.textContent = 'Créez votre mot de passe pour accéder à votre espace élève';
-        }
-
-        // Fonction pour déterminer l'endpoint API correct
-        function getEndpoint(userType) {
-            if (userType === 'professeur') return 'professeurs';
-            if (userType === 'staff') return 'staff'; // AJOUT ICI
-            return 'eleves';
-        }
-
-        // Vérifier le token au chargement
-        async function checkToken() {
+        document.addEventListener('DOMContentLoaded', async () => {
             if (!token) {
-                showError('Aucun token d\'activation fourni');
+                showError('Aucun token d\'activation fourni.');
                 return;
             }
 
+            // Vérifier le token selon le type d'utilisateur
             try {
-                // CORRECTION ICI : Utilisation de la nouvelle logique
-                const endpoint = getEndpoint(type); 
-                
-                // Appel API: /api/staff/check-token/XYZ
-                const response = await fetch(`${API_URL}/${endpoint}/check-token/${token}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    document.getElementById('user-nom').textContent = `${data.prenom} ${data.nom}`;
-                    document.getElementById('user-email').textContent = data.email || 'Non renseigné';
-                    
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('activation-form').classList.remove('hidden');
+                let checkUrl;
+                if (type === 'professeur') {
+                    checkUrl = `${API_URL}/professeurs/check-token/${token}`;
+                } else if (type === 'staff') {
+                    checkUrl = `${API_URL}/staff/check-token/${token}`;
                 } else {
-                    showError();
+                    checkUrl = `${API_URL}/eleves/check-token/${token}`;
+                }
+
+                const response = await fetch(checkUrl);
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('setPasswordState').style.display = 'block';
+                    
+                    // Afficher le nom de l'utilisateur dans le message de bienvenue
+                    const headerP = document.querySelector('#setPasswordState .login-card-header p');
+                    headerP.textContent = `Bonjour ${userData.prenom} ${userData.nom}, créez votre mot de passe pour activer votre compte`;
+                } else {
+                    showError('Ce lien d\'activation n\'est pas valide ou a expiré.');
                 }
             } catch (error) {
                 console.error('Erreur:', error);
-                showError();
+                showError('Erreur de connexion au serveur.');
+            }
+        });
+
+        // Vérification en temps réel du mot de passe
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            
+            updateRequirement('req-length', password.length >= 8);
+            updateRequirement('req-upper', /[A-Z]/.test(password));
+            updateRequirement('req-lower', /[a-z]/.test(password));
+            updateRequirement('req-number', /[0-9]/.test(password));
+        });
+
+        function updateRequirement(id, isValid) {
+            const element = document.getElementById(id);
+            const icon = element.querySelector('.material-icons');
+            
+            if (isValid) {
+                element.classList.add('valid');
+                icon.textContent = 'check_circle';
+            } else {
+                element.classList.remove('valid');
+                icon.textContent = 'radio_button_unchecked';
             }
         }
 
-        function showError() {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('error-state').classList.remove('hidden');
-        }
-
-        // Gérer la soumission du formulaire
         document.getElementById('activationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
+            
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const errorDiv = document.getElementById('error-message');
-            const successDiv = document.getElementById('success-message');
-
-            // Réinitialiser les messages
-            errorDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
-
-            // Validation
-            if (password.length < 6) {
-                errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
             if (password !== confirmPassword) {
-                errorDiv.textContent = 'Les mots de passe ne correspondent pas';
-                errorDiv.classList.remove('hidden');
+                showFormError('Les mots de passe ne correspondent pas.');
                 return;
             }
 
-            // Désactiver le bouton
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Activation en cours...';
+            if (password.length < 8) {
+                showFormError('Le mot de passe doit contenir au moins 8 caractères.');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('loading').querySelector('.login-loading-text').textContent = 'Activation en cours...';
 
             try {
-                const endpoint = getEndpoint(type);
-                
-                const response = await fetch(`${API_URL}/${endpoint}/activate`, {
+                let activateUrl;
+                if (type === 'professeur') {
+                    activateUrl = `${API_URL}/professeurs/activate`;
+                } else if (type === 'staff') {
+                    activateUrl = `${API_URL}/staff/activate`;
+                } else {
+                    activateUrl = `${API_URL}/eleves/activate`;
+                }
+
+                const response = await fetch(activateUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    successDiv.textContent = data.message;
-                    successDiv.classList.remove('hidden');
-                    
-                    // Rediriger vers la page de connexion après 2 secondes
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('setPasswordState').style.display = 'none';
+                    document.getElementById('successState').style.display = 'block';
                 } else {
-                    errorDiv.textContent = data.error || 'Une erreur est survenue';
-                    errorDiv.classList.remove('hidden');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Activer mon compte';
+                    document.getElementById('loading').style.display = 'none';
+                    showFormError(data.error || 'Erreur lors de l\'activation.');
                 }
             } catch (error) {
                 console.error('Erreur:', error);
-                errorDiv.textContent = 'Erreur de connexion au serveur';
-                errorDiv.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Activer mon compte';
+                document.getElementById('loading').style.display = 'none';
+                showFormError('Erreur de connexion au serveur.');
             }
         });
 
-        // Vérifier le token au chargement
-        checkToken();
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorStateMessage').textContent = message;
+            document.getElementById('errorState').style.display = 'block';
+        }
+
+        function showFormError(message) {
+            const errorDiv = document.getElementById('activationError');
+            document.getElementById('errorMessage').textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.parentElement.querySelector('.md-text-field-toggle .material-icons');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                button.textContent = 'visibility';
+            }
+        }
     </script>
 </body>
 </html>
