@@ -6,15 +6,6 @@ const SERVER_CONFIG = {
     HOST: '0.0.0.0'
 };
 
-// Comptes de démonstration
-const DEMO_ACCOUNTS = {
-    professeurs: [],
-    eleves: [],
-    staff: [
-        { id: 'admin1', email: 'admin@ecole.fr', password: 'admin', role: 'admin' }
-    ]
-};
-
 // Permissions par rôle
 const PERMISSIONS = {
     admin: ['create', 'read', 'update', 'delete'],
@@ -46,7 +37,6 @@ const TOKEN_EXPIRY = {
 
 module.exports = {
     SERVER_CONFIG,
-    DEMO_ACCOUNTS,
     PERMISSIONS,
     NIVEAUX,
     TOKEN_EXPIRY

@@ -256,6 +256,563 @@
             font: var(--md-sys-typescale-body-small);
             color: var(--md-sys-color-on-surface-variant);
         }
+
+        /* Styles spécifiques pour la section profil */
+        .profile-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .profile-info-display {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: var(--md-sys-shape-corner-small);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .profile-info-display .material-icons {
+            color: var(--md-sys-color-primary);
+            font-size: 20px;
+        }
+
+        .form-field {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            display: block;
+            font: var(--md-sys-typescale-body-large);
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-small);
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font: var(--md-sys-typescale-body-medium);
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+
+        .form-input[type="file"] {
+            padding: var(--spacing-xs);
+        }
+
+        .form-help {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: var(--spacing-xs);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-xs);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .md-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--md-sys-shape-corner-large);
+            font: var(--md-sys-typescale-label-large);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .md-btn-primary {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .md-btn-primary:hover {
+            background: var(--md-sys-color-primary-hover, var(--md-sys-color-primary));
+            transform: translateY(-1px);
+        }
+
+        .md-btn-text {
+            background: transparent;
+            color: var(--md-sys-color-primary);
+        }
+
+        .md-btn-text:hover {
+            background: var(--md-sys-color-primary-container);
+        }
+
+        /* ===== ACTUALITES STYLES ===== */
+
+        .actualite-card {
+            background: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-medium);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .actualite-card:hover {
+            background: var(--md-sys-color-surface-container-high);
+            transform: translateY(-2px);
+            box-shadow: var(--md-sys-elevation-2);
+        }
+
+        .actualite-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .actualite-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary-container);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-sys-color-on-primary-container);
+            flex-shrink: 0;
+        }
+
+        .actualite-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .actualite-title {
+            font: var(--md-sys-typescale-title-medium);
+            color: var(--md-sys-color-on-surface);
+            margin: 0 0 var(--spacing-xs) 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .actualite-date {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .actualite-preview {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.5;
+            margin: 0 0 var(--spacing-sm) 0;
+        }
+
+        .actualite-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .actualite-author {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+
+        .actualite-read-more {
+            font: var(--md-sys-typescale-label-medium);
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+
+        .actualites-grid {
+            display: grid;
+            gap: var(--spacing-lg);
+        }
+
+        .actualite-card-full {
+            background: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .actualite-card-full:hover {
+            background: var(--md-sys-color-surface-container-high);
+            transform: translateY(-2px);
+            box-shadow: var(--md-sys-elevation-3);
+        }
+
+        .actualite-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .actualite-icon-large {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--md-sys-shape-corner-full);
+            background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: var(--md-sys-elevation-2);
+        }
+
+        .actualite-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .actualite-title-full {
+            font: var(--md-sys-typescale-headline-small);
+            color: var(--md-sys-color-on-surface);
+            margin: 0 0 var(--spacing-sm) 0;
+            line-height: 1.3;
+        }
+
+        .actualite-meta-full {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .actualite-date-full {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .actualite-author-full {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+
+        .actualite-description {
+            font: var(--md-sys-typescale-body-large);
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.6;
+            margin: 0 0 var(--spacing-md) 0;
+        }
+
+        .actualite-actions {
+            text-align: right;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .empty-state .material-icons {
+            font-size: 64px;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            font: var(--md-sys-typescale-headline-small);
+            margin: 0 0 var(--spacing-sm) 0;
+        }
+
+        .empty-state p {
+            font: var(--md-sys-typescale-body-large);
+            margin: 0;
+        }
+
+        .messagerie-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .messages-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .message-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--md-sys-color-surface-container);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .message-card:hover {
+            background: var(--md-sys-color-surface-container-high);
+            transform: translateY(-1px);
+            box-shadow: var(--md-sys-elevation-2);
+        }
+
+        .message-card.unread {
+            background: var(--md-sys-color-primary-container);
+            border-left: 4px solid var(--md-sys-color-primary);
+        }
+
+        .message-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--md-sys-color-secondary-container);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-sys-color-on-secondary-container);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .message-sender {
+            font: var(--md-sys-typescale-title-small);
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+        }
+
+        .message-date {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .message-preview {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface-variant);
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .message-unread-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-state .material-icons {
+            font-size: 64px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h4 {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 20px;
+        }
+
+        /* Compose Message Styles */
+        .compose-message {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .destinataires-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .destinataires-label {
+            font: var(--md-sys-typescale-body-large);
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+        }
+
+        .destinataires-input {
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .selected-destinataires {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px;
+            min-height: 20px;
+        }
+
+        .destinataire-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-radius: 16px;
+            font-size: 14px;
+        }
+
+        .destinataire-chip button {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-primary-container);
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .destinataires-dropdown {
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .destinataires-dropdown input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            outline: none;
+            font: var(--md-sys-typescale-body-medium);
+        }
+
+        .destinataires-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .destinataire-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background 0.2s ease;
+        }
+
+        .destinataire-option:hover {
+            background: var(--md-sys-color-surface-container-high);
+        }
+
+        .destinataire-option:last-child {
+            border-bottom: none;
+        }
+
+        .destinataire-name {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .destinataire-role {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+            text-transform: capitalize;
+        }
+
+        .message-content-section textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            font: var(--md-sys-typescale-body-medium);
+            resize: vertical;
+            outline: none;
+        }
+
+        .message-content-section textarea:focus {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        /* Message Detail Styles */
+        .message-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message-detail-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px;
+            background: var(--md-sys-color-surface-container);
+            border-radius: 8px;
+        }
+
+        .message-detail-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .message-detail-label {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+        }
+
+        .message-detail-value {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .message-detail-content {
+            padding: 20px;
+            background: var(--md-sys-color-surface-container);
+            border-radius: 8px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -300,6 +857,11 @@
                     <a href="#accueil" class="sidebar-nav-item active" data-tab="accueil">
                         <span class="material-icons">home</span>
                         <span>Accueil</span>
+                    </a>
+                    
+                    <a href="#profil" class="sidebar-nav-item" data-tab="profil">
+                        <span class="material-icons">person</span>
+                        <span>Mon profil</span>
                     </a>
                     
                     <a href="#actualites" class="sidebar-nav-item" data-tab="actualites">
@@ -382,20 +944,6 @@
                         <h2 class="eleve-name" id="eleveName">Prénom Nom</h2>
                         <p class="eleve-class" id="eleveClass">Classe</p>
                         
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <span class="material-icons">cake</span>
-                                <span id="eleveBirthday">Date de naissance</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="material-icons">event_busy</span>
-                                <span id="eleveAbsences">0 absences</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="material-icons">star</span>
-                                <span id="eleveAppreciations">0 appréciations</span>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Quick Stats -->
@@ -456,6 +1004,82 @@
                     </div>
                 </div>
 
+                <!-- Profil Tab -->
+                <div id="profil" class="tab-content">
+                    <!-- Profil Card -->
+                    <div class="eleve-profile-card">
+                        <div class="eleve-avatar" id="profileAvatar">
+                            <span class="material-icons" style="font-size: 48px;">person</span>
+                        </div>
+                        <h2 class="eleve-name" id="profileName">Prénom Nom</h2>
+                        <p class="eleve-class" id="profileClass">Classe</p>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="material-icons">email</span>
+                                <span id="profileEmailDisplay">email@exemple.com</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="material-icons">phone</span>
+                                <span id="profilePhoneDisplay">06 12 34 56 78</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modification Section -->
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Modifier mes informations</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <form id="profileForm" enctype="multipart/form-data">
+                                <div class="form-grid">
+                                    <div class="form-field">
+                                        <label for="profileEmail" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">email</span>
+                                            Email
+                                        </label>
+                                        <input type="email" id="profileEmail" name="email" class="form-input" placeholder="votre.email@exemple.com" required>
+                                        <div class="form-help">Votre adresse email sera utilisée pour les communications importantes</div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="profilePhone" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">phone</span>
+                                            Numéro de téléphone
+                                        </label>
+                                        <input type="tel" id="profilePhone" name="parentTel" class="form-input" placeholder="06 12 34 56 78">
+                                        <div class="form-help">Format: 06 12 34 56 78 ou +33 6 12 34 56 78</div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="profilePhoto" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">photo_camera</span>
+                                            Photo de profil
+                                        </label>
+                                        <input type="file" id="profilePhoto" name="photo" class="form-input" accept="image/*">
+                                        <div class="form-help">
+                                            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
+                                            Formats acceptés: JPG, PNG, GIF. Taille max: 5MB
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions" style="margin-top: var(--spacing-lg);">
+                                    <button type="submit" class="md-btn md-btn-primary">
+                                        <span class="material-icons">save</span>
+                                        Enregistrer les modifications
+                                    </button>
+                                    <button type="button" class="md-btn md-btn-text" onclick="resetProfileForm()">
+                                        <span class="material-icons">refresh</span>
+                                        Annuler
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Actualités Tab -->
                 <div id="actualites" class="tab-content">
                     <div class="widget-card">
@@ -463,21 +1087,13 @@
                             <h3 class="widget-card-title">Actualités de l'école</h3>
                         </div>
                         <div class="widget-card-content">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Titre</th>
-                                        <th>Auteur</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="actualitesList">
-                                    <tr>
-                                        <td colspan="4" class="text-center text-on-surface-variant">Aucune actualité</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div id="actualitesList" class="actualites-grid">
+                                <div class="empty-state">
+                                    <span class="material-icons">newspaper</span>
+                                    <h4>Aucune actualité</h4>
+                                    <p>Les actualités de l'école apparaîtront ici.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -570,16 +1186,51 @@
                 <div id="messages" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Mes messages</h3>
+                            <h3 class="widget-card-title">Messagerie</h3>
                             <div class="widget-card-actions">
-                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()">
-                                    <span class="material-icons">edit</span>
-                                    Nouveau message
+                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()" style="min-height: 36px; padding: 0 16px; font-size: 14px;">
+                                    <span class="material-icons" style="font-size: 18px;">edit</span> Nouveau message
                                 </button>
                             </div>
                         </div>
-                        <div class="widget-card-content" id="messagesList">
-                            <p class="text-on-surface-variant">Aucun message</p>
+                        <div class="widget-card-content">
+                            <!-- Filtres et navigation -->
+                            <div class="messagerie-filters" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                                <div class="filter-tabs" style="display: flex; gap: 8px;">
+                                    <button class="md-btn md-btn-tonal active" id="btn-received" onclick="switchMessageView('received')">
+                                        <span class="material-icons">inbox</span> Reçus (<span id="received-count">0</span>)
+                                    </button>
+                                    <button class="md-btn md-btn-tonal" id="btn-sent" onclick="switchMessageView('sent')">
+                                        <span class="material-icons">send</span> Envoyés (<span id="sent-count">0</span>)
+                                    </button>
+                                </div>
+                                <div class="search-container" style="flex: 1; min-width: 200px;">
+                                    <div class="md-text-field" style="margin: 0;">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="messageSearch" class="md-text-field-input" placeholder="Rechercher dans les messages..." oninput="filterMessages()">
+                                            <label class="md-text-field-label">Recherche</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Liste des messages -->
+                            <div id="messagesContainer" class="messages-container">
+                                <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
+                                    <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
+                                    <p>Chargement des messages...</p>
+                                </div>
+                            </div>
+
+                            <!-- État vide -->
+                            <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
+                                <span class="material-icons" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; display: block;">mail</span>
+                                <h4 style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Aucun message</h4>
+                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">Vous n'avez pas encore de messages dans cette boîte.</p>
+                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()" style="min-height: 36px; padding: 0 16px; font-size: 14px;">
+                                    <span class="material-icons" style="font-size: 18px;">edit</span> Écrire un message
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -628,6 +1279,33 @@
         let familyMembers = [];
         let currentChild = user;
 
+        // Charger les données actuelles de l'élève depuis le serveur
+        async function loadCurrentChildData() {
+            try {
+                const response = await fetch(`${API_URL}/eleves/${currentChild.id}`);
+                
+                if (response.ok) {
+                    const eleveData = await response.json();
+                    
+                    // Mettre à jour currentChild avec les données du serveur
+                    currentChild = {
+                        ...currentChild,
+                        nom: eleveData.nom,
+                        prenom: eleveData.prenom,
+                        classe: eleveData.classe,
+                        email: eleveData.email,
+                        photo: eleveData.photo,
+                        parentTel: eleveData.parentTel
+                    };
+                    
+                    // Mettre à jour l'affichage
+                    updateUserDisplay();
+                }
+            } catch (error) {
+                console.error('Erreur chargement données élève:', error);
+            }
+        }
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             initializeUI();
@@ -675,7 +1353,7 @@
             }
             
             // Charger les données de l'élève actuel
-            loadEleveData();
+            // loadEleveData(); // Maintenant appelée dans initializeUI
         }
 
         // Génère le HTML du menu déroulant
@@ -773,7 +1451,7 @@
             if (currentChild.photo) {
                 avatarEl.innerHTML = `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
             } else {
-                avatarEl.textContent = prenom[0].toUpperCase();
+                avatarEl.innerHTML = '<i class="material-icons" style="font-size: 24px;">person</i>';
             }
 
             // Dashboard Header Infos
@@ -781,7 +1459,15 @@
             document.getElementById('eleveClass').textContent = currentChild.classe || 'Classe non assignée';
             document.getElementById('eleveAvatar').innerHTML = currentChild.photo ? 
                 `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
-                (prenom[0].toUpperCase());
+                '<i class="material-icons" style="font-size: 48px;">person</i>';
+
+            // Profil Avatar (si on est dans l'onglet profil)
+            const profileAvatarEl = document.getElementById('profileAvatar');
+            if (profileAvatarEl) {
+                profileAvatarEl.innerHTML = currentChild.photo ? 
+                    `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
+                    '<i class="material-icons" style="font-size: 48px;">person</i>';
+            }
 
             // Mettre à jour la coche "active" dans le menu déroulant
             renderFamilyList();
@@ -789,6 +1475,7 @@
 
         function initializeUI() {
             updateUserDisplay();
+            loadCurrentChildData(); // Charger les données actuelles depuis le serveur
 
             // Navigation
             document.querySelectorAll('.sidebar-nav-item').forEach(item => {
@@ -803,8 +1490,16 @@
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
+            // Charger les données de l'élève après que tout soit initialisé
+            setTimeout(() => {
+                loadEleveData();
+            }, 100);
+
             // Theme toggle
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // Formulaire profil
+            document.getElementById('profileForm').addEventListener('submit', saveProfile);
         }
 
         function switchTab(tabName) {
@@ -825,6 +1520,7 @@
             // Mettre à jour le titre
             const titles = {
                 accueil: 'Mon espace',
+                profil: 'Mon profil',
                 actualites: 'Actualités',
                 absences: 'Mes absences',
                 appreciations: 'Mes appréciations',
@@ -832,6 +1528,11 @@
                 messages: 'Messages'
             };
             document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
+
+            // Charger les données spécifiques à l'onglet
+            if (tabName === 'profil') {
+                loadProfile();
+            }
 
             // Fermer la sidebar sur mobile
             if (window.innerWidth < 900) {
@@ -852,11 +1553,24 @@
 
         async function loadEleveData() {
             const eleveId = currentChild.id;
-            
+
             // Charger les infos de l'élève
-            document.getElementById('eleveName').textContent = `${currentChild.prenom || ''} ${currentChild.nom || ''}`;
-            document.getElementById('eleveClass').textContent = currentChild.classe || 'Classe non assignée';
-            document.getElementById('eleveAvatar').innerHTML = currentChild.prenom ? currentChild.prenom[0].toUpperCase() : '<span class="material-icons" style="font-size: 48px;">person</span>';
+            const eleveNameEl = document.getElementById('eleveName');
+            if (eleveNameEl) {
+                eleveNameEl.textContent = `${currentChild.prenom || ''} ${currentChild.nom || ''}`;
+            }
+
+            const eleveClassEl = document.getElementById('eleveClass');
+            if (eleveClassEl) {
+                eleveClassEl.textContent = currentChild.classe || 'Classe non assignée';
+            }
+
+            const eleveAvatarEl = document.getElementById('eleveAvatar');
+            if (eleveAvatarEl) {
+                eleveAvatarEl.innerHTML = currentChild.photo ?
+                    `<img src="${currentChild.photo}" alt="${currentChild.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` :
+                    (currentChild.prenom ? currentChild.prenom[0].toUpperCase() : '<span class="material-icons" style="font-size: 48px;">person</span>');
+            }
 
             // Charger les actualités
             try {
@@ -868,32 +1582,64 @@
                     // Afficher les 3 dernières sur l'accueil
                     if (actualites.length > 0) {
                         const recent = actualites.slice(0, 3);
-                        document.getElementById('recentActualites').innerHTML = recent.map(a => `
-                            <div class="appreciation-card" style="cursor: pointer;" onclick="showActualiteDetails('${a.id}')">
-                                <div class="appreciation-header">
-                                    <span class="appreciation-subject">${a.titre}</span>
-                                    <span class="appreciation-date">${new Date(a.date).toLocaleDateString('fr-FR')}</span>
+                        const recentActualitesEl = document.getElementById('recentActualites');
+                        if (recentActualitesEl) {
+                            recentActualitesEl.innerHTML = recent.map(a => `
+                                <div class="actualite-card" onclick="showActualiteDetails('${a.id}')">
+                                    <div class="actualite-header">
+                                        <div class="actualite-icon">
+                                            <span class="material-icons">campaign</span>
+                                        </div>
+                                        <div class="actualite-meta">
+                                            <h4 class="actualite-title">${a.titre}</h4>
+                                            <span class="actualite-date">${new Date(a.date).toLocaleDateString('fr-FR', {
+                                                weekday: 'long',
+                                                day: 'numeric',
+                                                month: 'short'
+                                            })}</span>
+                                        </div>
+                                    </div>
+                                    <p class="actualite-preview">${a.description.length > 120 ? a.description.substring(0, 120) + '...' : a.description}</p>
+                                    <div class="actualite-footer">
+                                        <span class="actualite-author">Par ${a.auteurNom || 'École'}</span>
+                                        <span class="actualite-read-more">Lire la suite →</span>
+                                    </div>
                                 </div>
-                                <p class="appreciation-text" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                    ${a.description}
-                                </p>
-                            </div>
-                        `).join('');
-                        
-                        // Afficher toutes les actualités dans le tableau
-                        document.getElementById('actualitesList').innerHTML = actualites.map(a => `
-                            <tr>
-                                <td>${new Date(a.date).toLocaleDateString('fr-FR')}</td>
-                                <td><strong>${a.titre}</strong></td>
-                                <td>${a.auteurNom || '-'}</td>
-                                <td>
-                                    <button class="md-btn md-btn-text" onclick="showActualiteDetails('${a.id}')">
-                                        <span class="material-icons">visibility</span>
-                                        Voir
-                                    </button>
-                                </td>
-                            </tr>
-                        `).join('');
+                            `).join('');
+                        }
+
+                        // Afficher toutes les actualités dans une grille de cartes
+                        const actualitesListEl = document.getElementById('actualitesList');
+                        if (actualitesListEl) {
+                            actualitesListEl.innerHTML = actualites.map(a => `
+                                <div class="actualite-card-full" onclick="showActualiteDetails('${a.id}')">
+                                    <div class="actualite-card-header">
+                                        <div class="actualite-icon-large">
+                                            <span class="material-icons">campaign</span>
+                                        </div>
+                                        <div class="actualite-content">
+                                            <h3 class="actualite-title-full">${a.titre}</h3>
+                                            <div class="actualite-meta-full">
+                                                <span class="actualite-date-full">${new Date(a.date).toLocaleDateString('fr-FR', {
+                                                    weekday: 'long',
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric'
+                                                })}</span>
+                                                <span class="actualite-author-full">Par ${a.auteurNom || 'École'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="actualite-description">${a.description}</p>
+                                    <div class="actualite-actions">
+                                        <button class="md-btn md-btn-text" onclick="event.stopPropagation(); showActualiteDetails('${a.id}')">
+                                            <span class="material-icons">visibility</span>
+                                            Lire l'article complet
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
                     }
                 }
             } catch (error) {
@@ -912,21 +1658,26 @@
                 
                 if (response.ok) {
                     const absences = await response.json();
-                    document.getElementById('eleveAbsences').textContent = `${absences.length} absence(s)`;
-                    document.getElementById('totalAbsences').textContent = absences.length;
-                    
-                    if (absences.length > 0) {
-                        document.getElementById('absencesList').innerHTML = absences.map(a => `
-                            <div class="absence-card">
-                                <span class="material-icons">event_busy</span>
-                                <div>
-                                    <strong>${new Date(a.date).toLocaleDateString('fr-FR')}</strong>
-                                    <p>${a.type || 'Absence'} - ${a.motif || 'Non spécifié'}</p>
+                    const totalAbsencesEl = document.getElementById('totalAbsences');
+                    if (totalAbsencesEl) {
+                        totalAbsencesEl.textContent = absences.length;
+                    }
+
+                    const absencesListEl = document.getElementById('absencesList');
+                    if (absencesListEl) {
+                        if (absences.length > 0) {
+                            absencesListEl.innerHTML = absences.map(a => `
+                                <div class="absence-card">
+                                    <span class="material-icons">event_busy</span>
+                                    <div>
+                                        <strong>${new Date(a.date).toLocaleDateString('fr-FR')}</strong>
+                                        <p>${a.type || 'Absence'} - ${a.motif || 'Non spécifié'}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('');
-                    } else {
-                        document.getElementById('absencesList').innerHTML = '<p class="text-on-surface-variant">Aucune absence enregistrée</p>';
+                            `).join('');
+                        } else {
+                            absencesListEl.innerHTML = '<p class="text-on-surface-variant">Aucune absence enregistrée</p>';
+                        }
                     }
                 }
             } catch (error) {
@@ -945,35 +1696,49 @@
                 
                 if (response.ok) {
                     const appreciations = await response.json();
-                    document.getElementById('eleveAppreciations').textContent = `${appreciations.length} appréciation(s)`;
-                    document.getElementById('totalAppreciations').textContent = appreciations.length;
-                    
+                    const totalAppreciationsEl = document.getElementById('totalAppreciations');
+                    if (totalAppreciationsEl) {
+                        totalAppreciationsEl.textContent = appreciations.length;
+                    }
+
                     if (appreciations.length > 0) {
                         const recent = appreciations.slice(0, 3);
-                        document.getElementById('recentAppreciations').innerHTML = recent.map(a => `
-                            <div class="appreciation-card">
-                                <div class="appreciation-header">
-                                    <span class="appreciation-subject">${a.matiere || 'Général'}</span>
-                                    <span class="appreciation-date">${a.periode || ''}</span>
+                        const recentAppreciationsEl = document.getElementById('recentAppreciations');
+                        if (recentAppreciationsEl) {
+                            recentAppreciationsEl.innerHTML = recent.map(a => `
+                                <div class="appreciation-card">
+                                    <div class="appreciation-header">
+                                        <span class="appreciation-subject">${a.matiere || 'Général'}</span>
+                                        <span class="appreciation-date">${a.periode || ''}</span>
+                                    </div>
+                                    <p class="appreciation-text">${a.commentaire || ''}</p>
+                                    ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
                                 </div>
-                                <p class="appreciation-text">${a.commentaire || ''}</p>
-                                ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
-                            </div>
-                        `).join('');
+                            `).join('');
+                        }
 
-                        document.getElementById('appreciationsList').innerHTML = appreciations.map(a => `
-                            <div class="appreciation-card">
-                                <div class="appreciation-header">
-                                    <span class="appreciation-subject">${a.matiere || 'Général'}</span>
-                                    <span class="appreciation-date">${a.periode || ''}</span>
+                        const appreciationsListEl = document.getElementById('appreciationsList');
+                        if (appreciationsListEl) {
+                            appreciationsListEl.innerHTML = appreciations.map(a => `
+                                <div class="appreciation-card">
+                                    <div class="appreciation-header">
+                                        <span class="appreciation-subject">${a.matiere || 'Général'}</span>
+                                        <span class="appreciation-date">${a.periode || ''}</span>
+                                    </div>
+                                    <p class="appreciation-text">${a.commentaire || ''}</p>
+                                    ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
                                 </div>
-                                <p class="appreciation-text">${a.commentaire || ''}</p>
-                                ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
-                            </div>
-                        `).join('');
+                            `).join('');
+                        }
                     } else {
-                        document.getElementById('recentAppreciations').innerHTML = '<p class="text-on-surface-variant">Aucune appréciation récente</p>';
-                        document.getElementById('appreciationsList').innerHTML = '<p class="text-on-surface-variant">Aucune appréciation</p>';
+                        const recentAppreciationsEl = document.getElementById('recentAppreciations');
+                        if (recentAppreciationsEl) {
+                            recentAppreciationsEl.innerHTML = '<p class="text-on-surface-variant">Aucune appréciation récente</p>';
+                        }
+                        const appreciationsListEl = document.getElementById('appreciationsList');
+                        if (appreciationsListEl) {
+                            appreciationsListEl.innerHTML = '<p class="text-on-surface-variant">Aucune appréciation</p>';
+                        }
                     }
                 }
             } catch (error) {
@@ -984,58 +1749,384 @@
             await loadMessages();
         }
 
+        // Variables globales pour la messagerie
+        let allMessages = { received: [], sent: [] };
+        let currentMessageView = 'received';
+        let selectedDestinatairesMessage = [];
+
         async function loadMessages() {
             try {
+                const container = document.getElementById('messagesContainer');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
+                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
+                        <p>Chargement des messages...</p>
+                    </div>
+                `;
+
                 const response = await fetch(`${API_URL}/messagerie`, {
-                    headers: { 
+                    headers: {
                         'Authorization': `Bearer ${token}`,
                         'x-user-id': currentChild.id,
                         'x-user-role': 'eleve'
                     }
                 });
-                
-                if (response.ok) {
-                    const messages = await response.json();
-                    
-                    // Compter les messages non lus destinés à cet élève
-                    const unread = messages.filter(m => !m.lu && m.destinataireId === currentChild.id);
-                    document.getElementById('unreadMessages').textContent = unread.length;
-                    
-                    if (unread.length > 0) {
-                        document.getElementById('messageBadge').textContent = unread.length;
-                        document.getElementById('messageBadge').style.display = 'flex';
-                    } else {
-                        document.getElementById('messageBadge').style.display = 'none';
-                    }
+                const messages = await response.json();
 
-                    if (messages.length > 0) {
-                        // Trier par date décroissante
-                        messages.sort((a, b) => new Date(b.date) - new Date(a.date));
-                        
-                        document.getElementById('messagesList').innerHTML = messages.map(m => {
-                            const isReceived = m.destinataireId === currentChild.id;
-                            const otherName = isReceived ? m.expediteurNom : m.destinataireNom;
-                            const initial = otherName ? otherName[0].toUpperCase() : 'U';
-                            
-                            return `
-                                <div class="message-card ${!m.lu && isReceived ? 'unread' : ''}" onclick="showMessage('${m.id}', ${isReceived})">
-                                    <div class="message-sender-avatar">${initial}</div>
-                                    <div class="message-content">
-                                        <p class="message-sender">
-                                            ${isReceived ? 'De: ' : 'À: '}${otherName || 'Inconnu'}
-                                        </p>
-                                        <p class="message-preview">${m.contenu}</p>
-                                    </div>
-                                    <span class="message-time">${new Date(m.date).toLocaleDateString('fr-FR')}</span>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        document.getElementById('messagesList').innerHTML = '<p class="text-on-surface-variant">Aucun message</p>';
-                    }
+                if (!response.ok) {
+                    showSnackbar(messages.error || 'Erreur chargement messages');
+                    return;
                 }
+
+                // Séparer reçus et envoyés
+                allMessages.received = messages.filter(m => m.destinataireId === currentChild.id);
+                allMessages.sent = messages.filter(m => m.expediteurId === currentChild.id);
+
+                // Mettre à jour les compteurs
+                const receivedCountEl = document.getElementById('received-count');
+                if (receivedCountEl) {
+                    receivedCountEl.textContent = allMessages.received.length;
+                }
+                const sentCountEl = document.getElementById('sent-count');
+                if (sentCountEl) {
+                    sentCountEl.textContent = allMessages.sent.length;
+                }
+
+                // Mettre à jour le badge de messages non lus
+                updateMessageBadge();
+
+                // Afficher la vue actuelle
+                switchMessageView(currentMessageView);
+
             } catch (error) {
                 console.error('Erreur chargement messages:', error);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="error-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-error);">
+                            <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">error</span>
+                            <p>Erreur lors du chargement des messages</p>
+                            <button class="md-btn md-btn-filled" onclick="loadMessages()">Réessayer</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function switchMessageView(view) {
+            currentMessageView = view;
+
+            // Mettre à jour les boutons actifs
+            const btnReceived = document.getElementById('btn-received');
+            if (btnReceived) {
+                btnReceived.classList.toggle('active', view === 'received');
+            }
+            const btnSent = document.getElementById('btn-sent');
+            if (btnSent) {
+                btnSent.classList.toggle('active', view === 'sent');
+            }
+
+            // Afficher les messages
+            displayMessages(view);
+        }
+
+        function displayMessages(view) {
+            const messages = allMessages[view] || [];
+            const container = document.getElementById('messagesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!container || !emptyState) return;
+
+            if (messages.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            const messageCards = messages.map(m => createMessageCard(m, view)).join('');
+            container.innerHTML = messageCards;
+        }
+
+        function createMessageCard(message, view) {
+            const isReceived = view === 'received';
+            const otherName = isReceived ? message.expediteurNom : message.destinataireNom;
+            const otherInitial = otherName ? otherName[0].toUpperCase() : 'U';
+            const date = new Date(message.date).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            return `
+                <div class="message-card ${!message.lu && isReceived ? 'unread' : ''}" onclick="openMessage('${message.id}')">
+                    <div class="message-avatar">${otherInitial}</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">${isReceived ? 'De: ' : 'À: '}${otherName || 'Inconnu'}</span>
+                            <span class="message-date">${date}</span>
+                        </div>
+                        <p class="message-preview">${message.contenu.length > 100 ? message.contenu.substring(0, 100) + '...' : message.contenu}</p>
+                    </div>
+                    ${!message.lu && isReceived ? '<div class="message-unread-dot"></div>' : ''}
+                </div>
+            `;
+        }
+
+        function filterMessages() {
+            const searchInput = document.getElementById('messageSearch');
+            if (!searchInput) return;
+
+            const searchTerm = searchInput.value.toLowerCase();
+            const messages = allMessages[currentMessageView] || [];
+
+            if (!searchTerm) {
+                displayMessages(currentMessageView);
+                return;
+            }
+
+            const filteredMessages = messages.filter(m => {
+                const otherName = currentMessageView === 'received' ? m.expediteurNom : m.destinataireNom;
+                return (otherName || '').toLowerCase().includes(searchTerm) ||
+                       m.contenu.toLowerCase().includes(searchTerm);
+            });
+
+            const container = document.getElementById('messagesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!container || !emptyState) return;
+
+            if (filteredMessages.length === 0) {
+                container.innerHTML = '<p class="text-on-surface-variant">Aucun message trouvé</p>';
+                emptyState.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            const messageCards = filteredMessages.map(m => createMessageCard(m, currentMessageView)).join('');
+            container.innerHTML = messageCards;
+        }
+
+        async function openMessage(id) {
+            const message = [...allMessages.received, ...allMessages.sent].find(m => m.id === id);
+            if (!message) return;
+
+            const isReceived = message.destinataireId === currentChild.id;
+
+            // Marquer comme lu si c'est un message reçu non lu
+            if (isReceived && !message.lu) {
+                try {
+                    await fetch(`${API_URL}/messagerie/${id}/lu`, {
+                        method: 'PUT',
+                        headers: {
+                            'x-user-id': currentChild.id,
+                            'x-user-role': 'eleve'
+                        }
+                    });
+                    message.lu = true;
+                    updateMessageBadge();
+                    displayMessages(currentMessageView);
+                } catch (error) {
+                    console.error('Erreur marquage lu:', error);
+                }
+            }
+
+            const otherName = isReceived ? message.expediteurNom : message.destinataireNom;
+            const date = new Date(message.date).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            showDialog(`Message ${isReceived ? 'reçu' : 'envoyé'}`, `
+                <div class="message-detail">
+                    <div class="message-detail-header">
+                        <div class="message-detail-meta">
+                            <span class="message-detail-label">${isReceived ? 'De:' : 'À:'}</span>
+                            <span class="message-detail-value">${otherName || 'Inconnu'}</span>
+                        </div>
+                        <div class="message-detail-meta">
+                            <span class="message-detail-label">Date:</span>
+                            <span class="message-detail-value">${date}</span>
+                        </div>
+                    </div>
+                    <div class="message-detail-content">
+                        ${message.contenu.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `);
+        }
+
+        function updateMessageBadge() {
+            const unreadCount = allMessages.received.filter(m => !m.lu).length;
+            const badge = document.getElementById('messageBadge');
+
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        async function showComposeMessage(destinataireId = '', destinataireNom = '') {
+            selectedDestinatairesMessage = [];
+
+            try {
+                const response = await fetch(`${API_URL}/messagerie/destinataires`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'x-user-id': currentChild.id,
+                        'x-user-role': 'eleve'
+                    }
+                });
+                const destinataires = await response.json();
+
+                if (!response.ok) {
+                    showSnackbar(destinataires.error || 'Erreur chargement destinataires');
+                    return;
+                }
+
+                // Pré-sélectionner le destinataire si fourni
+                if (destinataireId) {
+                    selectedDestinatairesMessage = [{ id: destinataireId, nom: destinataireNom }];
+                }
+
+                showDialog('Nouveau message', `
+                    <div class="compose-message">
+                        <div class="destinataires-section">
+                            <label class="destinataires-label">Destinataires:</label>
+                            <div class="destinataires-input">
+                                <div class="selected-destinataires" id="selectedDestinataires">
+                                    ${selectedDestinatairesMessage.map(d => `
+                                        <span class="destinataire-chip">
+                                            ${d.nom}
+                                            <button type="button" onclick="removeDestinataire('${d.id}')">
+                                                <span class="material-icons">close</span>
+                                            </button>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                                <div class="destinataires-dropdown">
+                                    <input type="text" id="destinataireSearch" placeholder="Rechercher un destinataire..." oninput="filterDestinataires()">
+                                    <div class="destinataires-list" id="destinatairesList">
+                                        ${destinataires.map(d => `
+                                            <div class="destinataire-option" onclick="addDestinataire('${d.id}', '${d.nom.replace(/'/g, "\\'")}')">
+                                                <span class="destinataire-name">${d.nom}</span>
+                                                <span class="destinataire-role">${d.role}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-content-section">
+                            <textarea id="messageContent" placeholder="Écrivez votre message..." rows="8"></textarea>
+                        </div>
+                    </div>
+                `);
+
+                document.getElementById('dialogActions').innerHTML = `
+                    <button class="md-btn md-btn-text" onclick="closeDialog()">Annuler</button>
+                    <button class="md-btn md-btn-filled" onclick="sendMessage()">Envoyer</button>
+                `;
+
+            } catch (error) {
+                console.error('Erreur chargement destinataires:', error);
+                showSnackbar('Erreur lors du chargement des destinataires');
+            }
+        }
+
+        function filterDestinataires() {
+            const searchInput = document.getElementById('destinataireSearch');
+            if (!searchInput) return;
+
+            const searchTerm = searchInput.value.toLowerCase();
+            const options = document.querySelectorAll('.destinataire-option');
+
+            options.forEach(option => {
+                const nameEl = option.querySelector('.destinataire-name');
+                const roleEl = option.querySelector('.destinataire-role');
+                if (!nameEl || !roleEl) return;
+
+                const name = nameEl.textContent.toLowerCase();
+                const role = roleEl.textContent.toLowerCase();
+                const isVisible = name.includes(searchTerm) || role.includes(searchTerm);
+                option.style.display = isVisible ? 'flex' : 'none';
+            });
+        }
+
+        function addDestinataire(id, nom) {
+            if (selectedDestinatairesMessage.some(d => d.id === id)) return;
+
+            selectedDestinatairesMessage.push({ id, nom });
+            updateSelectedDestinataires();
+        }
+
+        function removeDestinataire(id) {
+            selectedDestinatairesMessage = selectedDestinatairesMessage.filter(d => d.id !== id);
+            updateSelectedDestinataires();
+        }
+
+        function updateSelectedDestinataires() {
+            const container = document.getElementById('selectedDestinataires');
+            if (!container) return;
+
+            container.innerHTML = selectedDestinatairesMessage.map(d => `
+                <span class="destinataire-chip">
+                    ${d.nom}
+                    <button type="button" onclick="removeDestinataire('${d.id}')">
+                        <span class="material-icons">close</span>
+                    </button>
+                </span>
+            `).join('');
+        }
+
+        async function sendMessage() {
+            const contentEl = document.getElementById('messageContent');
+            if (!contentEl) return;
+
+            const contenu = contentEl.value.trim();
+
+            if (selectedDestinatairesMessage.length === 0 || !contenu) {
+                showSnackbar('Veuillez sélectionner au moins un destinataire et saisir un message');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/messagerie`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'x-user-id': currentChild.id,
+                        'x-user-role': 'eleve'
+                    },
+                    body: JSON.stringify({
+                        expediteurId: currentChild.id,
+                        destinataires: selectedDestinatairesMessage.map(d => d.id),
+                        contenu
+                    })
+                });
+
+                if (response.ok) {
+                    showSnackbar('Message envoyé avec succès !');
+                    closeDialog();
+                    loadMessages();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erreur envoi message');
+                }
+            } catch (error) {
+                console.error('Erreur envoi message:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'envoi du message');
             }
         }
 
@@ -1072,102 +2163,11 @@
         }
 
         async function showMessage(id, isReceived) {
-            // Marquer comme lu si c'est un message reçu
-            if (isReceived) {
-                try {
-                    await fetch(`${API_URL}/messagerie/${id}/lu`, {
-                        method: 'PUT',
-                        headers: { 
-                            'x-user-id': currentChild.id,
-                            'x-user-role': 'eleve'
-                        }
-                    });
-                    // Recharger les messages
-                    loadMessages();
-                } catch (error) {
-                    console.error('Erreur marquage lu:', error);
-                }
-            }
-            showSnackbar('Message ouvert');
+            // Cette fonction est maintenant remplacée par openMessage
+            await openMessage(id);
         }
 
-        async function showComposeMessage() {
-            // Charger les destinataires possibles
-            try {
-                const response = await fetch(`${API_URL}/messagerie/destinataires`, {
-                    headers: { 
-                        'x-user-id': currentChild.id,
-                        'x-user-role': 'eleve'
-                    }
-                });
-                
-                if (response.ok) {
-                    const destinataires = await response.json();
-                    
-                    showDialog('Nouveau message', `
-                        <form id="messageForm">
-                            <div class="md-text-field mb-md">
-                                <div class="md-text-field-container">
-                                    <select id="messageDestinataire" class="md-text-field-input" required style="padding: 16px 12px;">
-                                        <option value="">Sélectionner un destinataire</option>
-                                        ${destinataires.map(d => `<option value="${d.id}">${d.nom} (${d.role})</option>`).join('')}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="md-text-field mb-md">
-                                <div class="md-text-field-container" style="height: 150px;">
-                                    <textarea id="messageContent" class="md-text-field-input" placeholder="Votre message..." required style="height: 100%; resize: none; padding: 16px 12px;"></textarea>
-                                </div>
-                            </div>
-                        </form>
-                    `);
-                    document.getElementById('dialogActions').innerHTML = `
-                        <button class="md-btn md-btn-text" onclick="closeDialog()">Annuler</button>
-                        <button class="md-btn md-btn-filled" onclick="sendMessage()">Envoyer</button>
-                    `;
-                }
-            } catch (error) {
-                console.error('Erreur chargement destinataires:', error);
-                showSnackbar('Erreur lors du chargement des destinataires');
-            }
-        }
-
-        async function sendMessage() {
-            const destinataireId = document.getElementById('messageDestinataire').value;
-            const contenu = document.getElementById('messageContent').value.trim();
-            
-            if (!destinataireId || !contenu) {
-                showSnackbar('Veuillez remplir tous les champs');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/messagerie`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'x-user-id': currentChild.id,
-                        'x-user-role': 'eleve'
-                    },
-                    body: JSON.stringify({
-                        expediteurId: currentChild.id,
-                        destinataireId,
-                        contenu
-                    })
-                });
-                
-                if (response.ok) {
-                    showSnackbar('Message envoyé !');
-                    closeDialog();
-                    loadMessages();
-                } else {
-                    throw new Error('Erreur envoi');
-                }
-            } catch (error) {
-                console.error('Erreur envoi message:', error);
-                showSnackbar('Erreur lors de l\'envoi du message');
-            }
-        }
+        // Les fonctions showComposeMessage et sendMessage ont été remplacées par les nouvelles versions ci-dessus
 
         function showSnackbar(message) {
             const snackbar = document.getElementById('snackbar');
@@ -1189,6 +2189,110 @@
 
         function closeDialog() {
             document.getElementById('dialogOverlay').classList.remove('show');
+        }
+
+        // Gestion du profil
+        async function loadProfile() {
+            if (!currentChild || !currentChild.id) {
+                showSnackbar('Erreur: utilisateur non défini');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/eleves/profil`, {
+                    headers: {
+                        'x-user-id': currentChild.id,
+                        'x-user-role': 'eleve'
+                    }
+                });
+                
+                if (response.ok) {
+                    const profile = await response.json();
+                    
+                    // Mettre à jour l'affichage du profil
+                    document.getElementById('profileName').textContent = `${profile.prenom || ''} ${profile.nom || ''}`;
+                    document.getElementById('profileClass').textContent = currentChild.classe || 'Classe non assignée';
+                    document.getElementById('profileEmailDisplay').textContent = profile.email || 'Non défini';
+                    document.getElementById('profilePhoneDisplay').textContent = profile.parentTel || 'Non défini';
+                    
+                    // Mettre à jour l'avatar
+                    const avatarEl = document.getElementById('profileAvatar');
+                    if (profile.photo) {
+                        avatarEl.innerHTML = `<img src="${profile.photo}" alt="${profile.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                    } else {
+                        avatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                    }
+                    
+                    // Mettre à jour les champs du formulaire
+                    document.getElementById('profileEmail').value = profile.email || '';
+                    document.getElementById('profilePhone').value = profile.parentTel || '';
+                } else {
+                    const error = await response.json();
+                    showSnackbar('Erreur lors du chargement du profil: ' + (error.message || 'Erreur inconnue'));
+                }
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement du profil');
+            }
+        }
+
+        async function saveProfile(event) {
+            event.preventDefault();
+            
+            const formData = new FormData();
+            const email = document.getElementById('profileEmail').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            const photo = document.getElementById('profilePhoto').files[0];
+            
+            if (email) formData.append('email', email);
+            if (phone) formData.append('parentTel', phone);
+            if (photo) formData.append('photo', photo);
+            
+            if (!email && !phone && !photo) {
+                showSnackbar('Veuillez modifier au moins un champ');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/eleves/profil`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-user-id': currentChild.id,
+                        'x-user-role': 'eleve'
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showSnackbar('Profil mis à jour avec succès !');
+                    
+                    // Mettre à jour currentChild avec les nouvelles données
+                    if (result.eleve) {
+                        currentChild.email = result.eleve.email;
+                        currentChild.photo = result.eleve.photo;
+                        currentChild.parentTel = result.eleve.parentTel;
+                    }
+                    
+                    // Rafraîchir tous les avatars et informations affichées
+                    updateUserDisplay();
+                    
+                    // Recharger les données du profil avec les nouvelles valeurs
+                    loadProfile();
+                } else {
+                    const error = await response.json();
+                    showSnackbar(error.error || 'Erreur lors de la mise à jour');
+                }
+            } catch (error) {
+                console.error('Erreur sauvegarde profil:', error);
+                showSnackbar('Erreur lors de la mise à jour du profil');
+            }
+        }
+
+        function resetProfileForm() {
+            // Recharger les données du profil pour annuler les modifications
+            loadProfile();
+            // Réinitialiser le champ fichier
+            document.getElementById('profilePhoto').value = '';
         }
 
         function logout() {

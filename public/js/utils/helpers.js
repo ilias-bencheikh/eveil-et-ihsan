@@ -2,6 +2,31 @@
  * Utilitaires généraux
  */
 
+// Récupérer le rôle de l'utilisateur actuel
+function getCurrentUserRole() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    
+    try {
+        const user = JSON.parse(userStr);
+        return user.role || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Vérifier si l'utilisateur a un rôle spécifique
+function hasRole(role) {
+    const userRole = getCurrentUserRole();
+    return userRole === role;
+}
+
+// Vérifier si l'utilisateur peut modifier/supprimer (pas professeur)
+function canModifyData() {
+    const userRole = getCurrentUserRole();
+    return userRole && userRole !== 'professeur';
+}
+
 // Formater une date
 function formatDate(dateString, format = 'short') {
     if (!dateString) return '';

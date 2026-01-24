@@ -25,12 +25,18 @@ router.get('/', (req, res) => {
 // Créer une classe
 router.post('/', checkPermission('create'), (req, res) => {
     const { nom, niveau, professeurId } = req.body;
+    console.log('Requête POST /classes reçue:', { nom, niveau, professeurId });
+    
     const id = generateId();
 
     db.run('INSERT INTO classes VALUES (?, ?, ?, ?)',
         [id, nom, niveau, professeurId],
         function(err) {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) {
+                console.error('Erreur lors de l\'insertion en base:', err);
+                return res.status(500).json({ error: err.message });
+            }
+            console.log('Classe créée avec succès:', { id, nom, niveau, professeurId });
             res.status(201).json({ id, nom, niveau, professeurId });
         }
     );

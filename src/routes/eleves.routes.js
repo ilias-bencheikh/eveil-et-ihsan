@@ -1,8 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
-const { checkPermission } = require('../middleware/auth');
+const { checkPermission, requireAuth } = require('../middleware/auth');
 const { generateToken, generateId } = require('../utils/helpers');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configuration multer pour l'upload de photos
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../../public/uploads'));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Seules les images sont autorisées'));
+        }
+    }
+});
 
 // Obtenir tous les élèves
 router.get('/', (req, res) => {
@@ -24,6 +50,103 @@ router.get('/', (req, res) => {
             res.json(rows);
         });
     }
+});
+
+// ================== PROFIL ÉLÈVE ==================
+
+// Obtenir le profil de l'élève connecté
+router.get('/profil', requireAuth, (req, res) => {
+    if (req.userRole !== 'eleve') {
+        return res.status(403).json({ message: 'Accès réservé aux élèves' });
+    }
+
+    db.get('SELECT id, nom, prenom, email, photo, parentTel FROM eleves WHERE id = ?', [String(req.userId)], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ message: 'Élève non trouvé' });
+        res.json(row);
+    });
+});
+
+// Mettre à jour le profil de l'élève connecté
+router.put('/profil', requireAuth, upload.single('photo'), (req, res) => {
+    if (req.userRole !== 'eleve') {
+        return res.status(403).json({ message: 'Accès réservé aux élèves' });
+    }
+
+    const { email, parentTel } = req.body;
+    const photo = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // Validation basique
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: 'Email invalide' });
+    }
+
+    if (parentTel && !/^[0-9+\-\s()]{10,}$/.test(parentTel)) {
+        return res.status(400).json({ error: 'Numéro de téléphone invalide' });
+    }
+
+    // Si une nouvelle photo est uploadée, supprimer l'ancienne
+    if (photo) {
+        // Récupérer l'ancienne photo
+        db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+            if (err) {
+                console.error('Erreur récupération ancienne photo:', err);
+            } else if (row && row.photo) {
+                // Supprimer l'ancienne image du système de fichiers
+                const oldPhotoPath = path.join(__dirname, '../../public', row.photo);
+                fs.access(oldPhotoPath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        // Le fichier existe, on peut le supprimer
+                        fs.unlink(oldPhotoPath, (err) => {
+                            if (err) {
+                                console.error('Erreur suppression ancienne photo:', err);
+                            } else {
+                                console.log('Ancienne photo supprimée:', oldPhotoPath);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Construire la requête de mise à jour
+    let updateFields = [];
+    let updateValues = [];
+
+    if (email !== undefined) {
+        updateFields.push('email = ?');
+        updateValues.push(email);
+    }
+
+    if (parentTel !== undefined) {
+        updateFields.push('parentTel = ?');
+        updateValues.push(parentTel);
+    }
+
+    if (photo) {
+        updateFields.push('photo = ?');
+        updateValues.push(photo);
+    }
+
+    if (updateFields.length === 0) {
+        return res.status(400).json({ error: 'Aucun champ à mettre à jour' });
+    }
+
+    updateValues.push(req.userId);
+
+    const query = `UPDATE eleves SET ${updateFields.join(', ')} WHERE id = ?`;
+
+    db.run(query, updateValues, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
+        
+        // Récupérer les données mises à jour
+        db.get('SELECT id, nom, prenom, email, photo, parentTel FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'Profil mis à jour avec succès', eleve: row });
+        });
+    });
 });
 
 // Obtenir un élève par ID

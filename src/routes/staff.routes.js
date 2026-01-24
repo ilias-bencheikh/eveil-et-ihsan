@@ -73,10 +73,19 @@ router.put('/:id', requireAdmin, (req, res) => {
 
 // Supprimer un membre du staff
 router.delete('/:id', requireAdmin, (req, res) => {
+    const userRole = req.headers['x-user-role'];
+    const userId = req.headers['x-user-id'];
+
+    // Vérifier si l'utilisateur essaie de se supprimer lui-même
+    if (userId === req.params.id) {
+        return res.status(400).json({ error: 'Vous ne pouvez pas vous supprimer vous-même' });
+    }
+
+    // Procéder à la suppression
     db.run('DELETE FROM staff WHERE id = ?', [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ message: 'Membre non trouvé' });
-        res.json({ message: 'Membre supprimé' });
+        if (this.changes === 0) return res.status(404).json({ error: 'Membre non trouvé' });
+        res.json({ message: 'Membre supprimé avec succès' });
     });
 });
 

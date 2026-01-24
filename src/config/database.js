@@ -135,6 +135,24 @@ function initDatabase() {
             // Ajouter la colonne cible si elle n'existe pas (migration)
             db.run(`ALTER TABLE actualites ADD COLUMN cible TEXT DEFAULT 'tous'`, () => {});
 
+            // Insérer le compte admin s'il n'existe pas
+            db.get('SELECT id FROM staff WHERE id = ?', ['admin1'], (err, row) => {
+                if (err) {
+                    console.error('Erreur vérification admin:', err);
+                    return;
+                }
+                if (!row) {
+                    db.run('INSERT INTO staff (id, nom, prenom, email, role, password, activated) VALUES (?, ?, ?, ?, ?, ?, 1)',
+                        ['admin1', 'Admin', '', 'admin@ecole.fr', 'admin', 'admin'], (err) => {
+                        if (err) {
+                            console.error('Erreur insertion admin:', err);
+                        } else {
+                            console.log('✅ Compte admin créé');
+                        }
+                    });
+                }
+            });
+
             console.log('✅ Tables créées avec succès');
             resolve();
         });

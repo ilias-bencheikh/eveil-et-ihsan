@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
-const { DEMO_ACCOUNTS, TOKEN_EXPIRY } = require('../config/constants');
+const { TOKEN_EXPIRY } = require('../config/constants');
 const { sendEmail } = require('../config/email');
 const { generateToken, dbGet, dbRun } = require('../utils/helpers');
 
@@ -9,13 +9,7 @@ const { generateToken, dbGet, dbRun } = require('../utils/helpers');
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    // 1. Vérifier les comptes de démonstration
-    let user = DEMO_ACCOUNTS.staff.find(u => u.email === email && u.password === password);
-    if (user) {
-        return res.json({ user, token: 'demo-token' });
-    }
-
-    // 2. Vérifier dans la table STAFF
+    // Vérifier dans la table STAFF
     db.get('SELECT * FROM staff WHERE email = ? AND password = ? AND activated = 1', 
         [email, password], 
         (err, row) => {
@@ -28,49 +22,51 @@ router.post('/login', (req, res) => {
                         email: row.email,
                         role: row.role,
                         nom: row.nom,
-                        prenom: row.prenom,
-                        matiere: row.matiere
+                        prenom: row.prenom
                     }, 
-                    token: 'demo-token' 
+                    token: generateToken() 
                 });
             }
 
-            // 3. Vérifier les PROFESSEURS
-            db.get('SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', 
+            // Vérifier dans la table ÉLÈVES
+            db.get('SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', 
                 [email, password], 
                 (err, row) => {
+                    if (err) return res.status(500).json({ error: err.message });
+                    
                     if (row) {
                         return res.json({ 
                             user: {
                                 id: row.id,
                                 email: row.email,
-                                role: 'professeur',
+                                role: 'eleve',
                                 nom: row.nom,
-                                prenom: row.prenom,
-                                matiere: row.matiere
+                                prenom: row.prenom
                             }, 
-                            token: 'demo-token' 
+                            token: generateToken() 
                         });
                     }
-                    
-                    // 4. Vérifier les ÉLÈVES
-                    db.get('SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', 
+
+                    // Vérifier dans la table PROFESSEURS
+                    db.get('SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', 
                         [email, password], 
                         (err, row) => {
+                            if (err) return res.status(500).json({ error: err.message });
+                            
                             if (row) {
                                 return res.json({ 
                                     user: {
                                         id: row.id,
                                         email: row.email,
-                                        role: 'eleve',
+                                        role: 'professeur',
                                         nom: row.nom,
                                         prenom: row.prenom
                                     }, 
-                                    token: 'demo-token' 
+                                    token: generateToken() 
                                 });
+                            } else {
+                                return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
                             }
-                            
-                            res.status(401).json({ message: 'Email ou mot de passe incorrect' });
                         }
                     );
                 }

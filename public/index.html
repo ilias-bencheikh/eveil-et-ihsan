@@ -27,6 +27,19 @@
             text-rendering: optimizeLegibility;
             font-feature-settings: 'liga';
         }
+
+        /* Styles pour la recherche de professeur */
+        .search-result-item:hover {
+            background-color: var(--md-sys-color-secondary-container) !important;
+        }
+
+        .selected-item {
+            position: relative;
+        }
+
+        .selected-item .material-icons {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -390,7 +403,43 @@
                             </div>
                         </div>
                         <div class="widget-card-content">
-                            <div id="messagesList"></div>
+                            <!-- Filtres et navigation -->
+                            <div class="messagerie-filters" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                                <div class="filter-tabs" style="display: flex; gap: 8px;">
+                                    <button class="md-btn md-btn-tonal active" id="btn-received" onclick="switchMessageView('received')">
+                                        <span class="material-icons">inbox</span> Reçus (<span id="received-count">0</span>)
+                                    </button>
+                                    <button class="md-btn md-btn-tonal" id="btn-sent" onclick="switchMessageView('sent')">
+                                        <span class="material-icons">send</span> Envoyés (<span id="sent-count">0</span>)
+                                    </button>
+                                </div>
+                                <div class="search-container" style="flex: 1; min-width: 200px;">
+                                    <div class="md-text-field" style="margin: 0;">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="messageSearch" class="md-text-field-input" placeholder="Rechercher dans les messages..." oninput="filterMessages()">
+                                            <label class="md-text-field-label">Recherche</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Liste des messages -->
+                            <div id="messagesContainer" class="messages-container">
+                                <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
+                                    <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
+                                    <p>Chargement des messages...</p>
+                                </div>
+                            </div>
+
+                            <!-- État vide -->
+                            <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
+                                <span class="material-icons" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; display: block;">mail</span>
+                                <h4 style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Aucun message</h4>
+                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">Vous n'avez pas encore de messages dans cette boîte.</p>
+                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()">
+                                    <span class="material-icons">edit</span> Écrire un message
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -545,12 +594,43 @@
             window.location.href = 'login.html';
         }
 
+        // Charger les utilitaires
+        // Simuler l'inclusion de helpers.js
+        
+        // Récupérer le rôle de l'utilisateur actuel
+        function getCurrentUserRole() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) return null;
+            
+            try {
+                const user = JSON.parse(userStr);
+                return user.role || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Vérifier si l'utilisateur a un rôle spécifique
+        function hasRole(role) {
+            const userRole = getCurrentUserRole();
+            return userRole === role;
+        }
+
+        // Vérifier si l'utilisateur peut modifier/supprimer (pas professeur)
+        function canModifyData() {
+            const userRole = getCurrentUserRole();
+            return userRole && userRole !== 'professeur';
+        }
+        
+
         // Variables globales
         let allEleves = [];
         let allClasses = [];
         let allProfesseurs = [];
         let allStaff = [];
         let appelEleves = [];
+        let selectedDestinataires = [];
+        let allStaffMembers = []; // Tous les membres du staff (professeurs inclus)
 
         // ==================== INITIALISATION ====================
         document.addEventListener('DOMContentLoaded', () => {
@@ -568,6 +648,9 @@
                 document.getElementById('adminSection').style.display = 'block';
             }
 
+            // Appliquer les restrictions selon le rôle
+            applyRoleRestrictions();
+
             document.querySelectorAll('.sidebar-nav-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -577,6 +660,9 @@
 
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+
+            // Charger les messages pour mettre à jour le badge non lus
+            loadMessages();
         }
 
         function getRoleName(role) {
@@ -591,6 +677,25 @@
                 'X-User-Role': user.role,
                 'X-User-Id': user.id
             };
+        }
+
+        // Masquer les éléments selon le rôle
+        function applyRoleRestrictions() {
+            if (user.role === 'professeur') {
+                // Masquer les boutons d'ajout d'élèves et de classes dans les actions rapides
+                const addEleveBtn = document.querySelector('.quick-action-btn[onclick*="showAddEleveForm"]');
+                const addClasseBtn = document.querySelector('.quick-action-btn[onclick*="showAddClasseForm"]');
+                if (addEleveBtn) addEleveBtn.style.display = 'none';
+                if (addClasseBtn) addClasseBtn.style.display = 'none';
+
+                // Masquer le bouton "Nouvelle classe" dans la section classes
+                const addClasseInClassesTab = document.querySelector('#classes .md-btn[onclick*="showAddClasseForm"]');
+                if (addClasseInClassesTab) addClasseInClassesTab.style.display = 'none';
+
+                // Masquer le bouton "Ajouter un membre" dans la section bureau
+                const addStaffBtn = document.querySelector('#bureau .md-btn[onclick*="showAddStaffForm"]');
+                if (addStaffBtn) addStaffBtn.style.display = 'none';
+            }
         }
 
         // ==================== NAVIGATION ====================
@@ -621,16 +726,24 @@
         // ==================== CHARGEMENT DES DONNÉES ====================
         async function loadDashboardData() {
             try {
-                const [eleves, classes, professeurs, absences] = await Promise.all([
+                const [eleves, classes, professeurs, staff, absences] = await Promise.all([
                     fetch(`${API_URL}/eleves`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
                     fetch(`${API_URL}/classes`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
                     fetch(`${API_URL}/professeurs`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/staff`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
                     fetch(`${API_URL}/absences`, { headers: getHeaders() }).then(r => r.json()).catch(() => [])
                 ]);
 
                 allEleves = Array.isArray(eleves) ? eleves : [];
                 allClasses = Array.isArray(classes) ? classes : [];
                 allProfesseurs = Array.isArray(professeurs) ? professeurs : [];
+                allStaff = Array.isArray(staff) ? staff : [];
+
+                // Combiner professeurs et staff pour la recherche
+                allStaffMembers = [
+                    ...allProfesseurs.map(p => ({ ...p, type: 'professeur', displayName: `${p.prenom} ${p.nom} (${p.matiere || 'Professeur'})` })),
+                    ...allStaff.filter(s => s.role === 'professeur').map(s => ({ ...s, type: 'staff', displayName: `${s.prenom} ${s.nom} (${s.matiere || 'Professeur'})` }))
+                ];
 
                 document.getElementById('totalEleves').textContent = allEleves.length;
                 document.getElementById('totalClasses').textContent = allClasses.length;
@@ -661,15 +774,23 @@
         // Fonction pour recharger toutes les données
         async function loadAllData() {
             try {
-                const [eleves, classes, professeurs] = await Promise.all([
+                const [eleves, classes, professeurs, staff] = await Promise.all([
                     fetch(`${API_URL}/eleves`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
                     fetch(`${API_URL}/classes`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
-                    fetch(`${API_URL}/professeurs`, { headers: getHeaders() }).then(r => r.json()).catch(() => [])
+                    fetch(`${API_URL}/professeurs`, { headers: getHeaders() }).then(r => r.json()).catch(() => []),
+                    fetch(`${API_URL}/staff`, { headers: getHeaders() }).then(r => r.json()).catch(() => [])
                 ]);
                 
                 allEleves = Array.isArray(eleves) ? eleves : [];
                 allClasses = Array.isArray(classes) ? classes : [];
                 allProfesseurs = Array.isArray(professeurs) ? professeurs : [];
+                allStaff = Array.isArray(staff) ? staff : [];
+
+                // Combiner professeurs et staff pour la recherche
+                allStaffMembers = [
+                    ...allProfesseurs.map(p => ({ ...p, type: 'professeur', displayName: `${p.prenom} ${p.nom} (${p.matiere || 'Professeur'})` })),
+                    ...allStaff.filter(s => s.role === 'professeur').map(s => ({ ...s, type: 'staff', displayName: `${s.prenom} ${s.nom} (${s.matiere || 'Professeur'})` }))
+                ];
             } catch (error) {
                 console.error('Erreur loadAllData:', error);
             }
@@ -691,7 +812,7 @@
                 <div class="md-card md-card-elevated" style="padding: 16px;">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                         <div class="md-avatar" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
-                            ${(e.prenom || 'E')[0].toUpperCase()}
+                            ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (e.prenom || 'E')[0].toUpperCase()}
                         </div>
                         <div style="flex: 1;">
                             <h4 style="font-weight: 500;">${e.prenom} ${e.nom}</h4>
@@ -701,8 +822,8 @@
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         ${!e.activated && e.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${e.id}', '${e.email}', 'eleve')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
-                        <button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')"><span class="material-icons">edit</span></button>
-                        <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteEleve('${e.id}')"><span class="material-icons">delete</span></button>
+                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')"><span class="material-icons">edit</span></button>` : ''}
+                        ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteEleve('${e.id}')"><span class="material-icons">delete</span></button>` : ''}
                     </div>
                 </div>
             `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève enregistré</p>';
@@ -893,10 +1014,18 @@
         // ==================== CLASSES ====================
         async function loadClasses() {
             try {
+                // S'assurer que les données des professeurs sont chargées
+                if (allStaffMembers.length === 0) {
+                    await loadAllData();
+                }
+
                 const response = await fetch(`${API_URL}/classes`, { headers: getHeaders() });
                 allClasses = await response.json();
                 
-                document.getElementById('classesGrid').innerHTML = allClasses.length ? allClasses.map(c => `
+                document.getElementById('classesGrid').innerHTML = allClasses.length ? allClasses.map(c => {
+                    const professeur = allStaffMembers.find(p => p.id === c.professeurId);
+                    const professeurName = professeur ? professeur.displayName : 'Non assigné';
+                    return `
                     <div class="md-card md-card-elevated" style="padding: 16px;">
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                             <div class="stat-widget-icon secondary" style="width: 48px; height: 48px;">
@@ -905,81 +1034,35 @@
                             <div style="flex: 1;">
                                 <h4 style="font-weight: 500;">${c.nom}</h4>
                                 <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${c.niveau || 'Niveau non défini'}</p>
+                                <p style="font-size: 12px; color: var(--md-sys-color-primary); margin-top: 4px;">
+                                    <span class="material-icons" style="font-size: 14px; vertical-align: middle;">person</span>
+                                    ${professeurName}
+                                </p>
                             </div>
                         </div>
                         <p style="margin-bottom: 12px; font-size: 14px;">${allEleves.filter(e => e.classe === c.nom).length} élève(s)</p>
                         <div style="display: flex; gap: 8px;">
                             <button class="md-btn md-btn-tonal" onclick="viewClasse('${c.id}')"><span class="material-icons">visibility</span></button>
-                            <button class="md-btn md-btn-tonal" onclick="editClasse('${c.id}')"><span class="material-icons">edit</span></button>
-                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>
+                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editClasse('${c.id}')"><span class="material-icons">edit</span></button>` : ''}
+                            ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>` : ''}
                         </div>
                     </div>
-                `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune classe enregistrée</p>';
+                    `;
+                }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune classe enregistrée</p>';
             } catch (error) {
                 showSnackbar('Erreur lors du chargement des classes');
             }
         }
 
         function showAddClasseForm() {
-            showDialog('Nouvelle classe', `
-                <form id="classeForm" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="text" id="classeNom" class="md-text-field-input" placeholder=" " required>
-                            <label class="md-text-field-label">Nom de la classe *</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="classeNiveau" class="md-text-field-input" required>
-                                <option value="">-- Sélectionner un niveau --</option>
-                                <option value="Maternelle">Maternelle</option>
-                                <option value="CP">CP</option>
-                                <option value="CE1">CE1</option>
-                                <option value="CE2">CE2</option>
-                                <option value="CM1">CM1</option>
-                                <option value="CM2">CM2</option>
-                                <option value="6ème">6ème</option>
-                                <option value="5ème">5ème</option>
-                                <option value="4ème">4ème</option>
-                                <option value="3ème">3ème</option>
-                            </select>
-                            <label class="md-text-field-label">Niveau *</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="classeProfesseur" class="md-text-field-input">
-                                <option value="">-- Professeur principal --</option>
-                                ${allProfesseurs.map(p => `<option value="${p.id}">${p.prenom} ${p.nom}</option>`).join('')}
-                            </select>
-                            <label class="md-text-field-label">Professeur principal</label>
-                        </div>
-                    </div>
-                </form>
-            `, async () => {
-                const data = {
-                    nom: document.getElementById('classeNom').value,
-                    niveau: document.getElementById('classeNiveau').value,
-                    professeurId: document.getElementById('classeProfesseur').value
-                };
-                try {
-                    const response = await fetch(`${API_URL}/classes`, {
-                        method: 'POST',
-                        headers: getHeaders(),
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) {
-                        showSnackbar('Classe créée avec succès');
-                        loadClasses();
-                        loadDashboardData();
-                    } else {
-                        showSnackbar('Erreur lors de la création');
-                    }
-                } catch (error) {
-                    showSnackbar('Erreur de connexion');
-                }
-            });
+            // S'assurer que les données des professeurs sont chargées
+            if (allStaffMembers.length === 0) {
+                loadAllData().then(() => {
+                    showClasseForm();
+                });
+            } else {
+                showClasseForm();
+            }
         }
 
         function viewClasse(id) {
@@ -993,7 +1076,12 @@
                 <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--md-sys-color-outline-variant);">
                 <h4 style="margin-bottom: 12px;">Liste des élèves :</h4>
                 ${elevesClasse.length ? `<ul style="list-style: none; padding: 0;">
-                    ${elevesClasse.map(e => `<li style="padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant);">${e.prenom} ${e.nom}</li>`).join('')}
+                    ${elevesClasse.map(e => `<li style="padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); display: flex; align-items: center; gap: 8px;">
+                        <div class="md-avatar" style="width: 24px; height: 24px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 12px;">
+                            ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (e.prenom || 'E')[0].toUpperCase()}
+                        </div>
+                        ${e.prenom} ${e.nom}
+                    </li>`).join('')}
                 </ul>` : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève dans cette classe</p>'}
             `, () => {});
         }
@@ -1002,57 +1090,11 @@
             const classe = allClasses.find(c => c.id === id);
             if (!classe) return;
 
-            showDialog('Modifier la classe', `
-                <form id="classeForm" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="text" id="classeNom" class="md-text-field-input" value="${classe.nom}" required>
-                            <label class="md-text-field-label">Nom de la classe *</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="classeNiveau" class="md-text-field-input" required>
-                                <option value="">-- Sélectionner un niveau --</option>
-                                ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n => 
-                                    `<option value="${n}" ${n === classe.niveau ? 'selected' : ''}>${n}</option>`
-                                ).join('')}
-                            </select>
-                            <label class="md-text-field-label">Niveau *</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="classeProfesseur" class="md-text-field-input">
-                                <option value="">-- Professeur principal --</option>
-                                ${allProfesseurs.map(p => `<option value="${p.id}" ${p.id === classe.professeurId ? 'selected' : ''}>${p.prenom} ${p.nom}</option>`).join('')}
-                            </select>
-                            <label class="md-text-field-label">Professeur principal</label>
-                        </div>
-                    </div>
-                </form>
-            `, async () => {
-                const data = {
-                    nom: document.getElementById('classeNom').value,
-                    niveau: document.getElementById('classeNiveau').value,
-                    professeurId: document.getElementById('classeProfesseur').value
-                };
-                try {
-                    const response = await fetch(`${API_URL}/classes/${id}`, {
-                        method: 'PUT',
-                        headers: getHeaders(),
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) {
-                        showSnackbar('Classe modifiée avec succès');
-                        loadClasses();
-                    } else {
-                        showSnackbar('Erreur lors de la modification');
-                    }
-                } catch (error) {
-                    showSnackbar('Erreur de connexion');
-                }
-            });
+            // S'assurer que les données des professeurs sont chargées
+            if (allStaffMembers.length === 0) {
+                await loadAllData();
+            }
+            showClasseForm(classe);
         }
 
         async function deleteClasse(id) {
@@ -1074,6 +1116,161 @@
                 }
             });
         }
+
+        function showClasseForm(classe = null) {
+            // S'assurer que les données des professeurs sont chargées
+            if (allStaffMembers.length === 0) {
+                loadAllData().then(() => {
+                    showClasseFormInternal(classe);
+                });
+                return;
+            }
+            showClasseFormInternal(classe);
+        }
+
+        function showClasseFormInternal(classe = null) {
+            const isEdit = classe !== null;
+            const title = isEdit ? 'Modifier la classe' : 'Nouvelle classe';
+
+            console.log('showClasseFormInternal appelée, allStaffMembers:', allStaffMembers);
+
+            // Trouver le professeur actuel si en mode édition
+            let selectedProfesseur = null;
+            if (isEdit && classe.professeurId) {
+                selectedProfesseur = allStaffMembers.find(p => p.id === classe.professeurId);
+                console.log('Professeur trouvé pour édition:', selectedProfesseur);
+            }
+
+            showDialog(title, `
+                <form id="classeForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" id="classeNom" class="md-text-field-input" placeholder=" " value="${isEdit ? classe.nom : ''}" required>
+                            <label class="md-text-field-label">Nom de la classe *</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="classeNiveau" class="md-text-field-input" required>
+                                <option value="">-- Sélectionner un niveau --</option>
+                                ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
+                                    `<option value="${n}" ${isEdit && n === classe.niveau ? 'selected' : ''}>${n}</option>`
+                                ).join('')}
+                            </select>
+                            <label class="md-text-field-label">Niveau *</label>
+                        </div>
+                    </div>
+
+                    <!-- Sélecteur de professeur simple -->
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <select id="selectedProfesseurId" class="md-text-field-input" ${isEdit ? '' : ''}>
+                                <option value="">-- Sélectionner un professeur --</option>
+                                ${allStaffMembers.map(p => `<option value="${p.id}" ${isEdit && classe.professeurId === p.id ? 'selected' : ''}>${p.displayName}</option>`).join('')}
+                            </select>
+                            <label class="md-text-field-label">Professeur</label>
+                        </div>
+                    </div>
+                </form>
+            `, async () => {
+                const data = {
+                    nom: document.getElementById('classeNom').value,
+                    niveau: document.getElementById('classeNiveau').value,
+                    professeurId: document.getElementById('selectedProfesseurId').value || null
+                };
+
+                console.log('Données envoyées:', data);
+
+                // Validation côté client
+                if (!data.nom.trim()) {
+                    showSnackbar('Le nom de la classe est requis');
+                    return;
+                }
+                if (!data.niveau) {
+                    showSnackbar('Le niveau de la classe est requis');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/classes${isEdit ? '/' + classe.id : ''}`, {
+                        method: isEdit ? 'PUT' : 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) {
+                        showSnackbar(`Classe ${isEdit ? 'modifiée' : 'créée'} avec succès`);
+                        loadClasses();
+                        loadDashboardData();
+                    } else {
+                        const errorData = await response.json();
+                        console.error('Erreur serveur:', errorData);
+                        showSnackbar(`Erreur lors de la ${isEdit ? 'modification' : 'création'}: ${errorData.error || 'Erreur inconnue'}`);
+                    }
+                } catch (error) {
+                    console.error('Erreur de connexion:', error);
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        function selectProfesseur(id, displayName) {
+            console.log('=== FONCTION selectProfesseur appelée ===');
+            console.log('Paramètres reçus:', { id, displayName });
+
+            const selectedIdInput = document.getElementById('selectedProfesseurId');
+            const selectedDiv = document.getElementById('selectedProfesseur');
+            const selectedNameSpan = document.getElementById('selectedProfesseurName');
+            const searchInput = document.getElementById('professeurSearch');
+            const resultsDiv = document.getElementById('professeurResults');
+
+            console.log('Éléments DOM trouvés:', {
+                selectedIdInput: !!selectedIdInput,
+                selectedDiv: !!selectedDiv,
+                selectedNameSpan: !!selectedNameSpan,
+                searchInput: !!searchInput,
+                resultsDiv: !!resultsDiv
+            });
+
+            if (!selectedIdInput || !selectedDiv || !selectedNameSpan) {
+                console.error('Éléments DOM non trouvés pour la sélection du professeur');
+                return;
+            }
+
+            selectedIdInput.value = id;
+            console.log('Valeur définie dans le champ hidden:', selectedIdInput.value);
+            selectedNameSpan.textContent = displayName;
+            selectedDiv.style.display = 'block';
+
+            if (searchInput) searchInput.value = '';
+            if (resultsDiv) resultsDiv.style.display = 'none';
+
+            console.log('Professeur sélectionné avec succès:', id, displayName);
+        }
+
+        function clearSelectedProfesseur() {
+            document.getElementById('selectedProfesseurId').value = '';
+            document.getElementById('selectedProfesseur').style.display = 'none';
+            document.getElementById('professeurSearch').value = '';
+        }
+
+        // Rendre les fonctions globales pour l'accès depuis le HTML inline
+        window.selectProfesseur = selectProfesseur;
+        window.clearSelectedProfesseur = clearSelectedProfesseur;
+        window.testSelect = function(id, name) {
+            console.log('testSelect appelé avec:', id, name);
+            console.log('Champ hidden existe:', !!document.getElementById('selectedProfesseurId'));
+            selectProfesseur(id, name);
+        };
+
+        window.testWithRealId = function() {
+            if (allStaffMembers.length > 0) {
+                const prof = allStaffMembers[0];
+                console.log('Test avec un vrai professeur:', prof);
+                selectProfesseur(prof.id, prof.displayName);
+            } else {
+                console.error('Aucun professeur disponible pour le test');
+            }
+        };
 
         // ==================== APPEL ====================
         async function loadClassesForSelect() {
@@ -1107,7 +1304,12 @@
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     ${appelEleves.map(e => `
                         <div class="md-card md-card-outlined" style="padding: 12px; display: flex; align-items: center; justify-content: space-between;">
-                            <span>${e.prenom} ${e.nom}</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="md-avatar" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 14px;">
+                                    ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (e.prenom || 'E')[0].toUpperCase()}
+                                </div>
+                                <span>${e.prenom} ${e.nom}</span>
+                            </div>
                             <div style="display: flex; gap: 8px;">
                                 <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
                                     <input type="radio" name="appel_${e.id}" value="present" checked> Présent
@@ -1173,7 +1375,14 @@
                                 ${absences.map(a => {
                                     const eleve = allEleves.find(e => e.id === a.eleveId);
                                     return `<tr>
-                                        <td>${eleve ? `${eleve.prenom} ${eleve.nom}` : 'Inconnu'}</td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <div class="md-avatar" style="width: 24px; height: 24px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 12px;">
+                                                    ${eleve && eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve ? (eleve.prenom || 'E')[0].toUpperCase() : '?')}
+                                                </div>
+                                                ${eleve ? `${eleve.prenom} ${eleve.nom}` : 'Inconnu'}
+                                            </div>
+                                        </td>
                                         <td>${new Date(a.date).toLocaleDateString('fr-FR')}</td>
                                         <td><span class="md-chip md-chip-${a.type === 'absent' ? 'error' : 'warning'}">${a.type}</span></td>
                                         <td>${a.motif || '-'}</td>
@@ -1321,120 +1530,420 @@
         }
 
         // ==================== MESSAGERIE ====================
+        let currentMessageView = 'received';
+        let allMessages = { received: [], sent: [] };
+        let selectedDestinatairesMessage = [];
+
         async function loadMessages() {
             try {
-                const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
-                const messages = await response.json();
-                
-                const received = messages.filter(m => m.destinataireId === user.id);
-                const sent = messages.filter(m => m.expediteurId === user.id);
-
-                document.getElementById('messagesList').innerHTML = `
-                    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-                        <button class="md-btn md-btn-tonal active" onclick="showReceivedMessages()">Reçus (${received.length})</button>
-                        <button class="md-btn md-btn-tonal" onclick="showSentMessages()">Envoyés (${sent.length})</button>
-                    </div>
-                    <div id="messagesContent">
-                        ${received.length ? received.map(m => `
-                            <div class="md-card md-card-outlined" style="padding: 16px; margin-bottom: 12px; ${!m.lu ? 'border-left: 4px solid var(--md-sys-color-primary);' : ''}">
-                                <div style="display: flex; justify-content: space-between; align-items: start;">
-                                    <div>
-                                        <h4 style="font-weight: 500;">De : ${m.expediteurNom || 'Inconnu'}</h4>
-                                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${new Date(m.date).toLocaleString('fr-FR')}</p>
-                                    </div>
-                                    ${!m.lu ? '<span class="md-badge">Nouveau</span>' : ''}
-                                </div>
-                                <p style="margin-top: 12px;">${m.contenu}</p>
-                                <div style="margin-top: 12px;">
-                                    <button class="md-btn md-btn-text" onclick="replyToMessage('${m.expediteurId}', '${m.expediteurNom}')">
-                                        <span class="material-icons">reply</span> Répondre
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun message reçu</p>'}
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = `
+                    <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
+                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
+                        <p>Chargement des messages...</p>
                     </div>
                 `;
 
-                window.allMessages = { received, sent };
+                const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
+                const messages = await response.json();
+
+                if (!response.ok) {
+                    showSnackbar(messages.error || 'Erreur chargement messages');
+                    return;
+                }
+
+                // Séparer reçus et envoyés
+                allMessages.received = messages.filter(m => m.destinataireId === user.id);
+                allMessages.sent = messages.filter(m => m.expediteurId === user.id);
+
+                // Mettre à jour les compteurs
+                document.getElementById('received-count').textContent = allMessages.received.length;
+                document.getElementById('sent-count').textContent = allMessages.sent.length;
+
+                // Mettre à jour le badge de messages non lus
+                updateMessageBadge();
+
+                // Afficher la vue actuelle
+                switchMessageView(currentMessageView);
+
             } catch (error) {
-                showSnackbar('Erreur lors du chargement des messages');
+                console.error('Erreur chargement messages:', error);
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="error-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-error);">
+                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">error</span>
+                        <p>Erreur lors du chargement des messages</p>
+                        <button class="md-btn md-btn-filled" onclick="loadMessages()">Réessayer</button>
+                    </div>
+                `;
             }
         }
 
-        function showReceivedMessages() {
-            const received = window.allMessages?.received || [];
-            document.getElementById('messagesContent').innerHTML = received.length ? received.map(m => `
-                <div class="md-card md-card-outlined" style="padding: 16px; margin-bottom: 12px;">
-                    <div style="display: flex; justify-content: space-between;"><div>
-                        <h4 style="font-weight: 500;">De : ${m.expediteurNom}</h4>
-                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${new Date(m.date).toLocaleString('fr-FR')}</p>
-                    </div></div>
-                    <p style="margin-top: 12px;">${m.contenu}</p>
-                </div>
-            `).join('') : '<p>Aucun message reçu</p>';
+        function switchMessageView(view) {
+            currentMessageView = view;
+
+            // Mettre à jour les boutons actifs
+            document.getElementById('btn-received').classList.toggle('active', view === 'received');
+            document.getElementById('btn-sent').classList.toggle('active', view === 'sent');
+
+            // Afficher les messages
+            displayMessages(view);
         }
 
-        function showSentMessages() {
-            const sent = window.allMessages?.sent || [];
-            document.getElementById('messagesContent').innerHTML = sent.length ? sent.map(m => `
-                <div class="md-card md-card-outlined" style="padding: 16px; margin-bottom: 12px;">
-                    <div><h4 style="font-weight: 500;">À : ${m.destinataireNom}</h4>
-                    <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${new Date(m.date).toLocaleString('fr-FR')}</p></div>
-                    <p style="margin-top: 12px;">${m.contenu}</p>
+        function displayMessages(view) {
+            const messages = allMessages[view] || [];
+            const container = document.getElementById('messagesContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (messages.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            const messageCards = messages.map(m => createMessageCard(m, view)).join('');
+            container.innerHTML = `
+                <div class="messages-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    ${messageCards}
                 </div>
-            `).join('') : '<p>Aucun message envoyé</p>';
+            `;
+
+            // Appliquer le filtre de recherche si présent
+            filterMessages();
+        }
+
+        function createMessageCard(message, view) {
+            const isReceived = view === 'received';
+            const isUnread = isReceived && !message.lu;
+            const contactName = isReceived ? message.expediteurNom : message.destinataireNom;
+            const contactLabel = isReceived ? 'De' : 'À';
+            const formattedDate = new Date(message.date).toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return `
+                <div class="message-card md-card md-card-outlined ${isUnread ? 'unread' : ''}"
+                     style="padding: 16px; cursor: pointer; transition: all 0.2s; ${isUnread ? 'border-left: 4px solid var(--md-sys-color-primary); background: var(--md-sys-color-primary-container);' : ''}"
+                     onclick="openMessage('${message.id}')">
+                    <div class="message-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                        <div class="contact-info" style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-on-surface-variant);">
+                                    ${isReceived ? 'inbox' : 'send'}
+                                </span>
+                                <span style="font-weight: 500; color: var(--md-sys-color-on-surface);">
+                                    ${contactLabel} : ${contactName || 'Système'}
+                                </span>
+                                ${isUnread ? '<span class="md-badge" style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">Nouveau</span>' : ''}
+                            </div>
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 2px;">
+                                ${formattedDate}
+                            </div>
+                        </div>
+                        <div class="message-actions" style="display: flex; gap: 4px;">
+                            <button class="md-btn md-btn-text" style="padding: 8px;" onclick="event.stopPropagation(); replyToMessage('${isReceived ? message.expediteurId : ''}', '${contactName}')" title="Répondre">
+                                <span class="material-icons">reply</span>
+                            </button>
+                            <button class="md-btn md-btn-text" style="padding: 8px; color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteMessage('${message.id}')" title="Supprimer">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="message-content" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.4;">
+                        ${message.contenu.length > 150 ? message.contenu.substring(0, 150) + '...' : message.contenu}
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterMessages() {
+            const searchTerm = document.getElementById('messageSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.message-card');
+
+            cards.forEach(card => {
+                const content = card.querySelector('.message-content').textContent.toLowerCase();
+                const contact = card.querySelector('.contact-info span').textContent.toLowerCase();
+                const visible = !searchTerm || content.includes(searchTerm) || contact.includes(searchTerm);
+                card.style.display = visible ? 'block' : 'none';
+            });
+        }
+
+        async function openMessage(messageId) {
+            const message = [...allMessages.received, ...allMessages.sent].find(m => m.id === messageId);
+            if (!message) return;
+
+            // Marquer comme lu si c'est un message reçu non lu
+            if (message.destinataireId === user.id && !message.lu) {
+                try {
+                    await fetch(`${API_URL}/messagerie/${messageId}/lu`, {
+                        method: 'PUT',
+                        headers: getHeaders()
+                    });
+                    message.lu = true;
+                    // Mettre à jour le badge
+                    updateMessageBadge();
+                    // Mettre à jour l'affichage
+                    loadMessages();
+                } catch (error) {
+                    console.error('Erreur marquage lu:', error);
+                }
+            }
+
+            // Afficher le message complet
+            const isReceived = message.destinataireId === user.id;
+            const contactName = isReceived ? message.expediteurNom : message.destinataireNom;
+            const formattedDate = new Date(message.date).toLocaleString('fr-FR', {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            showDialog(`Message ${isReceived ? 'reçu' : 'envoyé'}`, `
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="message-details" style="background: var(--md-sys-color-surface-variant); padding: 16px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span class="material-icons">${isReceived ? 'inbox' : 'send'}</span>
+                            <span style="font-weight: 500;">${isReceived ? 'De' : 'À'} : ${contactName || 'Système'}</span>
+                        </div>
+                        <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">
+                            ${formattedDate}
+                        </div>
+                    </div>
+                    <div class="message-full-content" style="background: var(--md-sys-color-surface); padding: 16px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline); min-height: 100px; white-space: pre-wrap;">
+                        ${message.contenu}
+                    </div>
+                </div>
+            `, () => {}, false, [
+                { text: 'Répondre', action: () => replyToMessage(isReceived ? message.expediteurId : '', contactName), primary: true },
+                { text: 'Fermer', action: () => {} }
+            ]);
+        }
+
+        async function deleteMessage(messageId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/messagerie/${messageId}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+
+                if (response.ok) {
+                    showSnackbar('Message supprimé');
+                    loadMessages();
+                } else {
+                    showSnackbar('Erreur lors de la suppression');
+                }
+            } catch (error) {
+                showSnackbar('Erreur lors de la suppression');
+            }
+        }
+
+        function updateMessageBadge() {
+            const unreadCount = allMessages.received.filter(m => !m.lu).length;
+            const badge = document.getElementById('messageBadge');
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         async function showComposeMessage(destinataireId = '', destinataireNom = '') {
+            selectedDestinatairesMessage = [];
+
             try {
                 const response = await fetch(`${API_URL}/messagerie/destinataires`, { headers: getHeaders() });
                 const destinataires = await response.json();
 
+                if (!response.ok) {
+                    showSnackbar(destinataires.error || 'Erreur chargement destinataires');
+                    return;
+                }
+
+                // Pré-sélectionner le destinataire si fourni
+                if (destinataireId) {
+                    const dest = destinataires.find(d => d.id === destinataireId);
+                    if (dest) selectedDestinatairesMessage = [dest];
+                }
+
                 showDialog('Nouveau message', `
-                    <form style="display: flex; flex-direction: column; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <select id="messageDestinataire" class="md-text-field-input" required>
-                                    <option value="">-- Sélectionner un destinataire --</option>
-                                    ${destinataires.map(d => `<option value="${d.id}" ${d.id === destinataireId ? 'selected' : ''}>${d.nom} (${d.role})</option>`).join('')}
-                                </select>
-                                <label class="md-text-field-label">Destinataire *</label>
+                    <form id="composeForm" style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Sélection des destinataires -->
+                        <div class="destinataires-section">
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="text" id="destinataireSearch" class="md-text-field-input" placeholder="Rechercher destinataires..." oninput="filterDestinataires()">
+                                    <label class="md-text-field-label">Destinataires *</label>
+                                </div>
+                            </div>
+
+                            <!-- Destinataires sélectionnés -->
+                            <div id="selectedDestinataires" class="selected-chips" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; padding: 8px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; background: var(--md-sys-color-surface);">
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 14px;">${selectedDestinatairesMessage.length ? '' : 'Aucun destinataire sélectionné'}</span>
+                            </div>
+
+                            <!-- Liste des destinataires disponibles -->
+                            <div id="destinatairesList" class="destinataires-list" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; margin-top: 12px;">
+                                ${destinataires.map(d => `
+                                    <div class="destinataire-option" data-id="${d.id}" data-type="${d.type || 'user'}" data-nom="${d.nom}" data-role="${d.role}"
+                                         style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--md-sys-color-outline); display: flex; align-items: center; gap: 12px; transition: background 0.2s;"
+                                         onclick="toggleDestinataire('${d.id}', '${d.nom.replace(/'/g, "\\'")}', '${d.role}', '${d.type || 'user'}')">
+                                        <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-on-surface-variant);">
+                                            ${d.type === 'class' ? 'groups' : 'person'}
+                                        </span>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${d.nom}</div>
+                                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${d.role}</div>
+                                        </div>
+                                        <span class="selection-indicator material-icons" style="font-size: 20px; color: var(--md-sys-color-primary); opacity: 0;">check_circle</span>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
+
+                        <!-- Contenu du message -->
                         <div class="md-text-field">
                             <div class="md-text-field-container">
-                                <textarea id="messageContenu" class="md-text-field-input" rows="5" placeholder=" " required></textarea>
+                                <textarea id="messageContenu" class="md-text-field-input" rows="6" placeholder="Écrivez votre message ici..." required></textarea>
                                 <label class="md-text-field-label">Message *</label>
                             </div>
                         </div>
                     </form>
                 `, async () => {
+                    const form = document.getElementById('composeForm');
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+
+                    if (selectedDestinatairesMessage.length === 0) {
+                        showSnackbar('Veuillez sélectionner au moins un destinataire');
+                        return;
+                    }
+
+                    const contenu = document.getElementById('messageContenu').value.trim();
+                    if (!contenu) {
+                        showSnackbar('Le message ne peut pas être vide');
+                        return;
+                    }
+
                     const data = {
                         expediteurId: user.id,
-                        destinataireId: document.getElementById('messageDestinataire').value,
-                        contenu: document.getElementById('messageContenu').value
+                        destinataires: selectedDestinatairesMessage,
+                        contenu: contenu
                     };
+
                     try {
                         const response = await fetch(`${API_URL}/messagerie`, {
                             method: 'POST',
                             headers: getHeaders(),
                             body: JSON.stringify(data)
                         });
+
                         if (response.ok) {
-                            showSnackbar('Message envoyé');
+                            const result = await response.json();
+                            showSnackbar(`${result.length} message(s) envoyé(s) avec succès`);
                             loadMessages();
+                        } else {
+                            const error = await response.json();
+                            showSnackbar(error.error || 'Erreur lors de l\'envoi du message');
                         }
                     } catch (error) {
-                        showSnackbar('Erreur lors de l\'envoi');
+                        console.error('Erreur envoi message:', error);
+                        showSnackbar('Erreur lors de l\'envoi du message');
                     }
                 });
+
+                // Mettre à jour l'affichage initial
+                updateSelectedDestinataires();
+
             } catch (error) {
+                console.error('Erreur chargement destinataires:', error);
                 showSnackbar('Erreur lors du chargement des destinataires');
             }
         }
 
         function replyToMessage(destinataireId, destinataireNom) {
-            showComposeMessage(destinataireId, destinataireNom);
+            if (destinataireId) {
+                showComposeMessage(destinataireId, destinataireNom);
+            } else {
+                showSnackbar('Impossible de répondre à ce message');
+            }
+        }
+
+        function toggleDestinataire(id, nom, role, type) {
+            const index = selectedDestinatairesMessage.findIndex(d => d.id === id);
+            if (index > -1) {
+                selectedDestinatairesMessage.splice(index, 1);
+            } else {
+                selectedDestinatairesMessage.push({ id, nom, role, type });
+            }
+            updateSelectedDestinataires();
+            updateDestinatairesList();
+        }
+
+        function updateSelectedDestinataires() {
+            const container = document.getElementById('selectedDestinataires');
+            if (!container) return;
+
+            if (selectedDestinatairesMessage.length === 0) {
+                container.innerHTML = '<span style="color: var(--md-sys-color-on-surface-variant); font-size: 14px;">Aucun destinataire sélectionné</span>';
+                return;
+            }
+
+            container.innerHTML = selectedDestinatairesMessage.map(d => `
+                <span class="md-chip md-chip-assist selected-chip" style="display: inline-flex; align-items: center; gap: 6px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">
+                    <span class="material-icons" style="font-size: 16px;">${d.type === 'class' ? 'groups' : 'person'}</span>
+                    ${d.nom} (${d.role})
+                    <button type="button" onclick="removeDestinataire('${d.id}')" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; color: inherit;">
+                        <span class="material-icons" style="font-size: 16px;">close</span>
+                    </button>
+                </span>
+            `).join('');
+        }
+
+        function removeDestinataire(id) {
+            selectedDestinatairesMessage = selectedDestinatairesMessage.filter(d => d.id !== id);
+            updateSelectedDestinataires();
+            updateDestinatairesList();
+        }
+
+        function updateDestinatairesList() {
+            const options = document.querySelectorAll('.destinataire-option');
+            options.forEach(option => {
+                const id = option.dataset.id;
+                const isSelected = selectedDestinatairesMessage.some(d => d.id === id);
+                const indicator = option.querySelector('.selection-indicator');
+
+                option.style.background = isSelected ? 'var(--md-sys-color-primary-container)' : 'transparent';
+                option.style.borderLeft = isSelected ? '4px solid var(--md-sys-color-primary)' : '4px solid transparent';
+                if (indicator) {
+                    indicator.style.opacity = isSelected ? '1' : '0';
+                }
+            });
+        }
+
+        function filterDestinataires() {
+            const search = document.getElementById('destinataireSearch').value.toLowerCase();
+            const options = document.querySelectorAll('.destinataire-option');
+
+            options.forEach(option => {
+                const nom = option.dataset.nom.toLowerCase();
+                const role = option.dataset.role.toLowerCase();
+                const visible = !search || nom.includes(search) || role.includes(search);
+                option.style.display = visible ? 'flex' : 'none';
+            });
         }
 
         // ==================== BUREAU (STAFF) ====================
@@ -1459,7 +1968,7 @@
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                             ${!s.activated && s.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${s.id}', '${s.email}', 'staff')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
                             <button class="md-btn md-btn-tonal" onclick="editStaff('${s.id}')"><span class="material-icons">edit</span></button>
-                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')"><span class="material-icons">delete</span></button>
+                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')" title="Supprimer"><span class="material-icons">delete</span></button>
                         </div>
                     </div>
                 `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun membre du bureau</p>';
@@ -1624,18 +2133,21 @@
         }
 
         async function deleteStaff(id) {
-            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer ce membre ?</p>', async () => {
+            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer ce membre du personnel ?<br>Cette action est irréversible.</p>', async () => {
                 try {
                     const response = await fetch(`${API_URL}/staff/${id}`, {
                         method: 'DELETE',
                         headers: getHeaders()
                     });
                     if (response.ok) {
-                        showSnackbar('Membre supprimé');
+                        showSnackbar('Membre supprimé avec succès');
                         loadStaff();
+                    } else {
+                        const error = await response.json();
+                        showSnackbar(error.error || 'Erreur lors de la suppression');
                     }
                 } catch (error) {
-                    showSnackbar('Erreur');
+                    showSnackbar('Erreur de connexion');
                 }
             });
         }
@@ -1722,9 +2234,9 @@
                         ${e.parentNom ? `<p style="font-size: 14px;"><strong>Parent:</strong> ${e.parentPrenom || ''} ${e.parentNom}</p>` : ''}
                         <p style="font-size: 14px;">Email : ${e.email || 'Non renseigné'}</p>
                         <div style="margin-top: 12px; display: flex; gap: 8px;">
-                            <button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')">
+                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')">
                                 <span class="material-icons">edit</span> Modifier
-                            </button>
+                            </button>` : ''}
                             <button class="md-btn md-btn-filled" onclick="sendActivationEmail('${e.id}', '${e.email}', 'eleve')">
                                 <span class="material-icons">send</span> Envoyer activation
                             </button>

@@ -23,31 +23,75 @@
 .text-on-surface { color: var(--md-sys-color-on-surface); }
 .text-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
 
-/* ===== UTILITAIRES DE SPACING ===== */
+/* ===== MESSAGERIE ===== */
 
-.p-0 { padding: 0; }
-.p-xs { padding: var(--spacing-xs); }
-.p-sm { padding: var(--spacing-sm); }
-.p-md { padding: var(--spacing-md); }
-.p-lg { padding: var(--spacing-lg); }
-.p-xl { padding: var(--spacing-xl); }
+.message-card {
+    transition: all 0.2s ease;
+}
 
-.px-xs { padding-left: var(--spacing-xs); padding-right: var(--spacing-xs); }
-.px-sm { padding-left: var(--spacing-sm); padding-right: var(--spacing-sm); }
-.px-md { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
-.px-lg { padding-left: var(--spacing-lg); padding-right: var(--spacing-lg); }
-.px-xl { padding-left: var(--spacing-xl); padding-right: var(--spacing-xl); }
+.message-card:hover {
+    box-shadow: var(--md-sys-elevation-2);
+    transform: translateY(-1px);
+}
 
-.py-xs { padding-top: var(--spacing-xs); padding-bottom: var(--spacing-xs); }
-.py-sm { padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
-.py-md { padding-top: var(--spacing-md); padding-bottom: var(--spacing-md); }
-.py-lg { padding-top: var(--spacing-lg); padding-bottom: var(--spacing-lg); }
-.py-xl { padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl); }
+.message-card.unread {
+    animation: pulse 2s infinite;
+}
 
-.m-0 { margin: 0; }
-.m-xs { margin: var(--spacing-xs); }
-.m-sm { margin: var(--spacing-sm); }
-.m-md { margin: var(--spacing-md); }
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+.selected-chip {
+    animation: chipSelect 0.3s ease;
+}
+
+@keyframes chipSelect {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.destinataires-list {
+    background: var(--md-sys-color-surface);
+}
+
+.destinataire-option:hover {
+    background: var(--md-sys-color-surface-variant) !important;
+}
+
+.messages-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+    .messagerie-filters {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .filter-tabs {
+        justify-content: center;
+    }
+
+    .search-container {
+        min-width: auto;
+    }
+
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+
+    .message-actions {
+        align-self: flex-end;
+    }
+}
 .m-lg { margin: var(--spacing-lg); }
 .m-xl { margin: var(--spacing-xl); }
 
