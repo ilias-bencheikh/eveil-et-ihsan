@@ -11,16 +11,21 @@ router.get('/destinataires', (req, res) => {
     if (userRole === 'eleve') {
         // Élèves peuvent envoyer à leurs professeurs et au secrétariat
         Promise.all([
+            // Récupérer les professeurs depuis la table `professeurs` et également depuis `staff` (role = 'professeur')
             new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, prenom FROM professeurs', (err, profs) => {
+                db.all(`
+                    SELECT id, nom, prenom FROM professeurs
+                    UNION
+                    SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur'
+                `, (err, profs) => {
                     if (err) reject(err);
                     else resolve(profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })));
                 });
             }),
             new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, email, role FROM staff WHERE role = ?', ['secretariat'], (err, staffs) => {
+                db.all('SELECT id, nom, prenom, role FROM staff WHERE lower(role) = ?', ['secretariat'], (err, staffs) => {
                     if (err) reject(err);
-                    else resolve(staffs.map(s => ({ id: s.id, nom: s.nom, role: 'Secrétariat', type: 'user' })));
+                    else resolve(staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: 'Secrétariat', type: 'user' })));
                 });
             })
         ]).then(([profs, staffs]) => {

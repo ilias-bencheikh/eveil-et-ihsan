@@ -48,6 +48,12 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN parentNom TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN parentPrenom TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN parentTel TEXT`, () => {});
+            // Colonnes pour les frais d'inscription
+            db.run(`ALTER TABLE eleves ADD COLUMN fraisInscription REAL DEFAULT 0`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN nbPaiements INTEGER DEFAULT 1`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN fraisValide INTEGER DEFAULT 0`, () => {});
+            // Nombre de paiements déjà validés
+            db.run(`ALTER TABLE eleves ADD COLUMN paiementsEffectues INTEGER DEFAULT 0`, () => {});
 
             // Table professeurs
             db.run(`CREATE TABLE IF NOT EXISTS professeurs (

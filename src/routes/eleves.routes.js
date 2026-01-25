@@ -210,16 +210,20 @@ router.post('/inscription', async (req, res) => {
         // Générer un ID de famille unique si plusieurs enfants
         const familleLienId = enFamille ? `FAM_${Date.now()}` : null;
         const nombreFamille = enfants.length;
+        // Si en famille, utiliser un token d'activation commun pour activer tous les membres via un seul lien
+        const familleActivationToken = enFamille ? generateToken() : null;
         
         const createdEleves = [];
         
         for (const enfant of enfants) {
             const id = generateId();
-            const activationToken = generateToken();
+            const activationToken = enFamille ? familleActivationToken : generateToken();
             
             await new Promise((resolve, reject) => {
-                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                const frais = parseFloat(enfant.fraisInscription || 0) || 0;
+                const nbPaiements = parseInt(enfant.nbPaiements || 1, 10) || 1;
+                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         id, 
                         enfant.nom, 
@@ -238,7 +242,11 @@ router.post('/inscription', async (req, res) => {
                         null,
                         parentNom || null,
                         parentPrenom || null,
-                        parentTel || null
+                        parentTel || null,
+                        frais,
+                        nbPaiements,
+                        0,
+                        0
                     ],
                     function(err) {
                         if (err) reject(err);
@@ -271,13 +279,15 @@ router.post('/inscription', async (req, res) => {
 
 // Créer un élève
 router.post('/', checkPermission('create'), (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo } = req.body;
+    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements } = req.body;
     const id = req.body.id || generateId();
     const activationToken = generateToken();
 
-    db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null],
+    const frais = parseFloat(fraisInscription || 0) || 0;
+    const nb = parseInt(nbPaiements || 1, 10) || 1;
+    db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0],
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
             const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
@@ -288,6 +298,64 @@ router.post('/', checkPermission('create'), (req, res) => {
             });
         }
     );
+});
+
+// Endpoint pour valider les frais d'un élève (admin/secretariat/directeur)
+router.post('/:id/validate-frais', checkPermission('update'), (req, res) => {
+    const count = parseInt(req.body.count || '1', 10) || 1;
+    db.get('SELECT paiementsEffectues, nbPaiements FROM eleves WHERE id = ?', [req.params.id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ message: 'Élève non trouvé' });
+
+        const current = parseInt(row.paiementsEffectues || 0, 10);
+        const max = parseInt(row.nbPaiements || 1, 10);
+        const newCount = Math.min(current + count, max);
+        const fraisValide = newCount >= max ? 1 : 0;
+
+        db.run('UPDATE eleves SET paiementsEffectues = ?, fraisValide = ? WHERE id = ?', [newCount, fraisValide, req.params.id], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'Paiements mis à jour', paiementsEffectues: newCount, fraisValide });
+        });
+    });
+});
+
+// Endpoint pour valider les frais d'une famille entière
+router.post('/validate-frais-famille', checkPermission('update'), (req, res) => {
+    const { familleId, eleveIds, count } = req.body;
+    if (!familleId) return res.status(400).json({ error: 'familleId requis' });
+    if (!Array.isArray(eleveIds) || eleveIds.length === 0) {
+        return res.status(400).json({ error: 'eleveIds requis (liste des élèves à mettre à jour)' });
+    }
+
+    const toUpdate = eleveIds.slice();
+    const results = [];
+    const cnt = parseInt(count || '1', 10) || 1;
+
+    (async () => {
+        for (const id of toUpdate) {
+            // Vérifier que l'élève appartient bien à la famille
+            const row = await new Promise((resolve, reject) => {
+                db.get('SELECT id, paiementsEffectues, nbPaiements, familleLienId FROM eleves WHERE id = ?', [id], (err, r) => err ? reject(err) : resolve(r));
+            });
+            if (!row) continue;
+            if (row.familleLienId !== familleId) continue;
+
+            const current = parseInt(row.paiementsEffectues || 0, 10);
+            const max = parseInt(row.nbPaiements || 1, 10);
+            const newCount = Math.min(current + cnt, max);
+            const fraisValide = newCount >= max ? 1 : 0;
+
+            await new Promise((resolve, reject) => {
+                db.run('UPDATE eleves SET paiementsEffectues = ?, fraisValide = ? WHERE id = ?', [newCount, fraisValide, id], function(err) {
+                    if (err) return reject(err);
+                    results.push({ id, paiementsEffectues: newCount, fraisValide });
+                    resolve();
+                });
+            });
+        }
+
+        res.json({ message: 'Mise à jour des paiements effectuée', results });
+    })().catch(err => res.status(500).json({ error: err.message }));
 });
 
 // Mettre à jour un élève
@@ -321,16 +389,31 @@ router.post('/activate', (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!row) return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
         
-        db.run('UPDATE eleves SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
-            [password, row.id],
-            function(err) {
-                if (err) return res.status(500).json({ error: err.message });
-                res.json({ 
-                    message: 'Compte activé avec succès! Vous pouvez maintenant vous connecter.',
-                    email: row.email
-                });
-            }
-        );
+        // Si l'élève fait partie d'une famille, activer tous les membres de la même famille
+        if (row.enFamille && row.familleLienId) {
+            db.run('UPDATE eleves SET password = ?, activated = 1, activationToken = NULL WHERE familleLienId = ?',
+                [password, row.familleLienId],
+                function(err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.json({ 
+                        message: 'Comptes de la famille activés avec succès! Vous pouvez maintenant vous connecter.',
+                        email: row.email,
+                        updated: this.changes
+                    });
+                }
+            );
+        } else {
+            db.run('UPDATE eleves SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
+                [password, row.id],
+                function(err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.json({ 
+                        message: 'Compte activé avec succès! Vous pouvez maintenant vous connecter.',
+                        email: row.email
+                    });
+                }
+            );
+        }
     });
 });
 

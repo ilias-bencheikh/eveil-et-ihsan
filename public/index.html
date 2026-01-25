@@ -555,6 +555,22 @@
                             <div id="inscriptionsList" class="md-grid md-grid-auto"></div>
                         </div>
                     </div>
+                    <!-- ========== FRAIS D'INSCRIPTION (visible aux admins/directeur/secretariat) ========= -->
+                    <div class="widget-card" id="fraisInscriptionCard" style="display: none; margin-top: 16px;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Frais d'inscription</h3>
+                            <div class="widget-card-actions">
+                                <button class="md-btn md-btn-outlined" onclick="loadFraisInscriptions()">
+                                    <span class="material-icons">refresh</span> Rafraîchir
+                                </button>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="fraisList" class="md-grid md-grid-auto">
+                                <p style="color: var(--md-sys-color-on-surface-variant);">Chargement des frais...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -2209,11 +2225,9 @@
                             `).join('')}
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            ${membres.map(m => `
-                                <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${m.id}', '${m.email}', 'eleve')">
-                                    <span class="material-icons">send</span> Activer ${m.prenom}
-                                </button>
-                            `).join('')}
+                            <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${membres[0].id}', '${parentEmail}', 'eleve')">
+                                <span class="material-icons">send</span> Envoyer l'email d'activation
+                            </button>
                         </div>
                     </div>
                 `;
@@ -2246,6 +2260,16 @@
             });
             
             document.getElementById('inscriptionsList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun dossier d\'inscription en attente</p>';
+
+            // Afficher la section frais d'inscription uniquement pour les rôles autorisés
+            if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
+                const fraisCard = document.getElementById('fraisInscriptionCard');
+                if (fraisCard) fraisCard.style.display = 'block';
+                loadFraisInscriptions();
+            } else {
+                const fraisCard = document.getElementById('fraisInscriptionCard');
+                if (fraisCard) fraisCard.style.display = 'none';
+            }
         }
 
         function showInscriptionForm() {
@@ -2341,6 +2365,19 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="0">
+                                <label class="md-text-field-label">Frais d'inscription (€)</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <select class="md-text-field-input enfant-nbPaiements" data-index="${index}" style="padding: 12px;">
+                                    ${[1,2,3,4,6,8,10,12].map(n => `<option value="${n}">${n} fois</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2394,7 +2431,9 @@
                     return;
                 }
                 
-                enfants.push({ nom, prenom, dateNaissance, classe });
+                const fraisInscription = parseFloat(field.querySelector('.enfant-frais')?.value || 0) || 0;
+                const nbPaiements = parseInt(field.querySelector('.enfant-nbPaiements')?.value || '1', 10) || 1;
+                enfants.push({ nom, prenom, dateNaissance, classe, fraisInscription, nbPaiements });
             }
             
             try {
@@ -2433,6 +2472,156 @@
 
         function showNewInscriptionForm() {
             showInscriptionForm();
+        }
+
+        // ==================== FRAIS D'INSCRIPTION ====================
+        async function loadFraisInscriptions() {
+            try {
+                // Récupérer les élèves avec frais d'inscription non validés
+                const frais = allEleves.filter(e => e.fraisInscription && !e.fraisValide);
+
+                // Grouper par famille si applicable
+                const familles = {};
+                const seuls = [];
+
+                frais.forEach(e => {
+                    if (e.enFamille && e.familleLienId) {
+                        if (!familles[e.familleLienId]) familles[e.familleLienId] = [];
+                        familles[e.familleLienId].push(e);
+                    } else {
+                        seuls.push(e);
+                    }
+                });
+
+                let html = '';
+
+                // Familles
+                Object.keys(familles).forEach(fid => {
+                    const membres = familles[fid];
+                    const total = membres.reduce((s, m) => s + (parseFloat(m.fraisInscription) || 0), 0);
+                    const parentNom = membres[0].parentNom || '';
+                    const parentPrenom = membres[0].parentPrenom || '';
+
+                    html += `
+                        <div class="md-card md-card-elevated" style="padding:16px; border-left:4px solid var(--md-sys-color-primary);">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div class="md-avatar" style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container);">
+                                        <span class="material-icons">groups</span>
+                                    </div>
+                                    <div>
+                                        <h4 style="margin:0;">Famille ${parentPrenom} ${parentNom}</h4>
+                                        <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-weight:600;">Total: ${total.toFixed(2)} €</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--md-sys-color-surface-container); padding:12px; border-radius:8px;">
+                                ${membres.map(m => `
+                                    <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span class="md-avatar" style="width:32px; height:32px;">${(m.prenom||'E')[0]}</span>
+                                            <div>${m.prenom} ${m.nom}</div>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div style="font-size:14px; font-weight:500;">${(parseFloat(m.fraisInscription)||0).toFixed(2)} €</div>
+                                            <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${m.nbPaiements ? m.nbPaiements + ' fois' : '1 fois'} • ${m.paiementsEffectues ? m.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
+                                            <button class="md-btn md-btn-outlined" style="margin-top:6px;" onclick="validateFraisEleve('${m.id}')">Valider</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Individuels
+                seuls.forEach(e => {
+                    const montant = parseFloat(e.fraisInscription) || 0;
+                    html += `
+                        <div class="md-card md-card-elevated" style="padding:16px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div class="md-avatar">${(e.prenom||'E')[0].toUpperCase()}</div>
+                                    <div>
+                                        <h4 style="margin:0;">${e.prenom} ${e.nom}</h4>
+                                        <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-weight:600;">${montant.toFixed(2)} €</div>
+                                    <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.nbPaiements ? e.nbPaiements + ' fois' : '1 fois'} • ${e.paiementsEffectues ? e.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
+                                    <button class="md-btn md-btn-filled" style="margin-top:8px;" onclick="validateFraisEleve('${e.id}')">Valider</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('fraisList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun frais d\'inscription en attente</p>';
+            } catch (error) {
+                console.error('Erreur loadFraisInscriptions:', error);
+                document.getElementById('fraisList').innerHTML = '<p style="color: var(--md-sys-color-error);">Erreur lors du chargement des frais</p>';
+            }
+        }
+
+        async function validateFraisEleve(eleveId) {
+            const defaultCount = 1;
+            let countStr = prompt('Nombre de mensualités à valider (par défaut 1):', String(defaultCount));
+            if (countStr === null) return; // annuler
+            const count = parseInt(countStr, 10) || defaultCount;
+            try {
+                const headers = Object.assign({}, getHeaders());
+                headers['Content-Type'] = 'application/json';
+                const response = await fetch(`${API_URL}/eleves/${eleveId}/validate-frais`, { method: 'POST', headers, body: JSON.stringify({ count }) });
+                if (response.ok) {
+                    const data = await response.json();
+                    showSnackbar(`✅ Paiements mis à jour (${data.paiementsEffectues} validé(s))`);
+                } else {
+                    // fallback : marquer localement (incrémenter paiementsEffectues)
+                    const el = allEleves.find(e => e.id === eleveId);
+                    if (el) {
+                        el.paiementsEffectues = (parseInt(el.paiementsEffectues || 0, 10) + count);
+                        if (el.paiementsEffectues >= (el.nbPaiements || 1)) el.fraisValide = 1;
+                    }
+                    showSnackbar('✅ Paiements mis à jour (local)');
+                }
+            } catch (error) {
+                console.warn('API validate failed, fallback local', error);
+                const el = allEleves.find(e => e.id === eleveId);
+                if (el) {
+                    el.paiementsEffectues = (parseInt(el.paiementsEffectues || 0, 10) + count);
+                    if (el.paiementsEffectues >= (el.nbPaiements || 1)) el.fraisValide = 1;
+                }
+                showSnackbar('✅ Paiements mis à jour (local)');
+            }
+            // Rafraîchir l'affichage
+            await loadAllData();
+            loadInscriptions();
+            loadFraisInscriptions();
+        }
+
+        async function validateFraisFamille(familleId) {
+            if (!confirm('Valider le paiement des frais pour cette famille et tous ses enfants ?')) return;
+            try {
+                const response = await fetch(`${API_URL}/eleves/validate-frais-famille`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ familleId }) });
+                if (response.ok) {
+                    showSnackbar('✅ Frais de la famille validés');
+                } else {
+                    // fallback local
+                    allEleves.forEach(e => { if (e.familleLienId === familleId) e.fraisValide = true; });
+                    showSnackbar('✅ Frais marqués comme validés (local)');
+                }
+            } catch (error) {
+                console.warn('API validate famille failed, fallback local', error);
+                allEleves.forEach(e => { if (e.familleLienId === familleId) e.fraisValide = true; });
+                showSnackbar('✅ Frais marqués comme validés (local)');
+            }
+            await loadAllData();
+            loadInscriptions();
+            loadFraisInscriptions();
         }
 
         // ==================== ACTUALITÉS ====================

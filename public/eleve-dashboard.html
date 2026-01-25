@@ -887,6 +887,10 @@
                         <span class="material-icons">grade</span>
                         <span>Mes notes</span>
                     </a>
+                    <a href="#frais" class="sidebar-nav-item" data-tab="frais">
+                        <span class="material-icons">payments</span>
+                        <span>Frais d'inscription</span>
+                    </a>
                 </div>
 
                 <div class="sidebar-nav-section">
@@ -898,6 +902,14 @@
                         <span class="nav-badge" id="messageBadge" style="display: none;">0</span>
                     </a>
                 </div>
+
+                <div class="sidebar-nav-section admin-only" style="display:none;">
+                    <span class="sidebar-nav-section-title">Administration</span>
+                    <a href="#frais-admin" class="sidebar-nav-item" data-tab="frais-admin">
+                        <span class="material-icons">manage_accounts</span>
+                        <span>Gestion des frais</span>
+                    </a>
+                </div>
             </nav>
 
             <!-- Footer -->
@@ -906,6 +918,7 @@
                     <span class="material-icons">logout</span>
                     <span>Déconnexion</span>
                 </button>
+
             </div>
         </aside>
 
@@ -1234,10 +1247,74 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Frais Tab (onglet dédié) -->
+                <div id="frais" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Frais d'inscription - Détails</h3>
+                        </div>
+                        <div class="widget-card-content" id="fraisSectionContainer">
+                            <div class="loading-state" style="text-align: center; padding: 24px; color: var(--md-sys-color-on-surface-variant);">
+                                <span class="material-icons" style="font-size: 36px; margin-bottom: 8px; display: block;">payments</span>
+                                <p>Chargement des informations de frais...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Frais Admin Tab -->
+                <div id="frais-admin" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Administration — Gestion des frais</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <div style="display:flex; flex-direction:column; gap:12px;">
+                                <div>
+                                    <label class="form-label">Cible</label>
+                                    <div style="display:flex; gap:12px; align-items:center;">
+                                        <label><input type="radio" name="adminFraisTarget" value="eleve" checked onchange="adminFraisTargetChanged()"> Élève</label>
+                                        <label><input type="radio" name="adminFraisTarget" value="famille" onchange="adminFraisTargetChanged()"> Famille</label>
+                                    </div>
+                                </div>
+
+                                <div id="adminFraisEleveSelect">
+                                    <label class="form-label">Sélectionner un élève</label>
+                                    <select id="adminEleveList" class="form-input" onchange="adminLoadSelectedFrais()">
+                                        <option value="">Chargement...</option>
+                                    </select>
+                                </div>
+
+                                <div id="adminFraisFamille" style="display:none;">
+                                    <label class="form-label">Email parent / Identifiant famille</label>
+                                    <input id="adminFamilleEmail" class="form-input" placeholder="parent@exemple.com" />
+                                    <button class="md-btn md-btn-text" onclick="adminLoadSelectedFrais()">Charger la famille</button>
+                                </div>
+
+                                <div style="display:flex; gap:12px;">
+                                    <div style="flex:1;">
+                                        <label class="form-label">Montant total (€)</label>
+                                        <input id="adminInitTotal" type="number" class="form-input" placeholder="Ex: 300" />
+                                    </div>
+                                    <div style="width:150px;">
+                                        <label class="form-label">Réduction (%)</label>
+                                        <input id="adminInitReduction" type="number" class="form-input" placeholder="0" />
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; gap:8px;">
+                                    <button class="md-btn md-btn-primary" onclick="adminInitFrais()">Initialiser les frais</button>
+                                    <button class="md-btn md-btn-text" onclick="adminLoadSelectedFrais()">Charger les frais</button>
+                                </div>
+
+                                <div id="adminFraisResult" style="margin-top:12px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
-
     <!-- Dialog Container -->
     <div class="md-dialog-overlay" id="dialogOverlay">
         <div class="md-dialog" id="dialogBox">
@@ -1270,8 +1347,9 @@
             window.location.href = 'login.html';
         }
 
-        // Redirection si pas un élève
-        if (user.role !== 'eleve') {
+        // Redirection si pas un rôle autorisé (élève, secrétaire, directeur, admin)
+        const allowedRoles = ['eleve', 'secretaire', 'directeur', 'admin'];
+        if (!allowedRoles.includes(user.role)) {
             window.location.href = 'index.html';
         }
 
@@ -1486,6 +1564,12 @@
                 });
             });
 
+            // Montrer les éléments admin seulement pour les rôles autorisés
+            const adminRoles = ['secretaire', 'directeur', 'admin'];
+            if (adminRoles.includes(user.role)) {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            }
+
             // Toggle sidebar mobile
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
@@ -1525,13 +1609,22 @@
                 absences: 'Mes absences',
                 appreciations: 'Mes appréciations',
                 notes: 'Mes notes',
-                messages: 'Messages'
+                messages: 'Messages',
+                frais: "Frais d'inscription",
+                'frais-admin': 'Gestion des frais'
             };
             document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
 
             // Charger les données spécifiques à l'onglet
             if (tabName === 'profil') {
                 loadProfile();
+            }
+            if (tabName === 'frais-admin') {
+                // Préparer l'interface admin
+                adminFraisTargetChanged().catch(e => console.warn('adminFrais init error', e));
+            }
+            if (tabName === 'frais') {
+                loadFraisData();
             }
 
             // Fermer la sidebar sur mobile
@@ -1747,12 +1840,19 @@
 
             // Charger les messages
             await loadMessages();
+            // Charger les informations de frais d'inscription (élève ou famille)
+            try {
+                await loadFraisData();
+            } catch (e) {
+                console.warn('Erreur chargement frais:', e);
+            }
         }
 
         // Variables globales pour la messagerie
         let allMessages = { received: [], sent: [] };
         let currentMessageView = 'received';
         let selectedDestinatairesMessage = [];
+        let availableDestinataires = [];
 
         async function loadMessages() {
             try {
@@ -1989,14 +2089,18 @@
                 });
                 const destinataires = await response.json();
 
+                // Sauvegarder la liste complète disponible (id, role, type)
+                availableDestinataires = destinataires;
+
                 if (!response.ok) {
                     showSnackbar(destinataires.error || 'Erreur chargement destinataires');
                     return;
                 }
 
-                // Pré-sélectionner le destinataire si fourni
+                // Pré-sélectionner le destinataire si fourni (rechercher l'objet complet)
                 if (destinataireId) {
-                    selectedDestinatairesMessage = [{ id: destinataireId, nom: destinataireNom }];
+                    const found = availableDestinataires.find(d => d.id === destinataireId);
+                    selectedDestinatairesMessage = [found || { id: destinataireId, nom: destinataireNom, type: 'user' }];
                 }
 
                 showDialog('Nouveau message', `
@@ -2066,7 +2170,15 @@
         function addDestinataire(id, nom) {
             if (selectedDestinatairesMessage.some(d => d.id === id)) return;
 
-            selectedDestinatairesMessage.push({ id, nom });
+            // Chercher l'objet complet (contient role et type) dans la liste disponible
+            const found = availableDestinataires.find(d => d.id === id);
+            if (found) {
+                selectedDestinatairesMessage.push(found);
+            } else {
+                // Cas fallback : ajouter un objet minimal
+                selectedDestinatairesMessage.push({ id, nom, type: 'user' });
+            }
+
             updateSelectedDestinataires();
         }
 
@@ -2111,7 +2223,7 @@
                     },
                     body: JSON.stringify({
                         expediteurId: currentChild.id,
-                        destinataires: selectedDestinatairesMessage.map(d => d.id),
+                        destinataires: selectedDestinatairesMessage.map(d => ({ id: d.id, type: d.type, role: d.role })),
                         contenu
                     })
                 });
@@ -2190,6 +2302,310 @@
         function closeDialog() {
             document.getElementById('dialogOverlay').classList.remove('show');
         }
+
+        /* ---------- FRAIS D'INSCRIPTION (UI + API) ---------- */
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount || 0);
+        }
+
+        async function loadFraisData() {
+            const eleveId = currentChild && currentChild.id;
+            const container = document.getElementById('fraisContainer');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="loading-state" style="text-align: center; padding: 24px; color: var(--md-sys-color-on-surface-variant);">
+                    <span class="material-icons" style="font-size: 36px; margin-bottom: 8px; display: block;">payments</span>
+                    <p>Chargement des informations de frais...</p>
+                </div>
+            `;
+
+            try {
+                // Si on a plusieurs enfants, proposer l'agrégation famille pour les admins et secrétaires
+                let feesData = null;
+
+                if (familyMembers && familyMembers.length > 1 && (user.role === 'secretaire' || user.role === 'directeur' || user.role === 'admin')) {
+                    // Appel API famille (agrégé)
+                    const resp = await fetch(`${API_URL}/frais/famille/${encodeURIComponent(user.email)}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resp.ok) feesData = await resp.json();
+                }
+
+                if (!feesData && eleveId) {
+                    const resp = await fetch(`${API_URL}/frais/eleve/${eleveId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resp.ok) feesData = await resp.json();
+                }
+
+                if (!feesData) {
+                    container.innerHTML = '<p class="text-on-surface-variant">Aucune information de frais disponible.</p>';
+                    return;
+                }
+
+                // Render into the accueil widget and into the dedicated tab (si présent)
+                renderFraisSection(feesData, 'fraisContainer');
+                renderFraisSection(feesData, 'fraisSectionContainer');
+            } catch (error) {
+                console.error('Erreur fetch frais:', error);
+                container.innerHTML = '<p class="text-on-surface-variant">Erreur lors du chargement des frais.</p>';
+            }
+        }
+
+        function renderFraisSection(data, containerId = 'fraisContainer') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Structure attendue: { total, paid, remaining, reduction, payments: [ { id, montant, date, valide, eleveId } ] }
+            const total = data.total || 0;
+            const paid = data.paid || 0;
+            const remaining = Math.max(0, total - paid);
+            const reduction = data.reduction || 0;
+            const payments = data.payments || [];
+
+            const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
+
+            const isAdminView = (user.role === 'secretaire' || user.role === 'directeur' || user.role === 'admin');
+
+            container.innerHTML = `
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:220px;">
+                        <div style="font-weight:600; margin-bottom:8px;">Montant total</div>
+                        <div style="font-size:1.25rem; margin-bottom:8px;">${formatCurrency(total)}</div>
+                        ${reduction ? `<div class="form-help">Réduction famille: ${reduction}% appliquée</div>` : ''}
+                    </div>
+                    <div style="flex:1; min-width:220px;">
+                        <div style="font-weight:600; margin-bottom:8px;">Payé</div>
+                        <div style="font-size:1.25rem; color:var(--md-sys-color-primary); margin-bottom:8px;">${formatCurrency(paid)}</div>
+                        <div style="font-weight:600; margin-bottom:8px;">Reste à payer</div>
+                        <div style="font-size:1.1rem; color:var(--md-sys-color-error);">${formatCurrency(remaining)}</div>
+                    </div>
+                    <div style="flex-basis:100%;">
+                        <div style="height:12px; background:var(--md-sys-color-surface-container); border-radius:8px; overflow:hidden; margin:12px 0;">
+                            <div style="width:${progress}%; height:100%; background:linear-gradient(90deg,var(--md-sys-color-primary),var(--md-sys-color-secondary));"></div>
+                        </div>
+                        <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant);">Progression: ${progress}%</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <strong>Historique des paiements</strong>
+                        ${isAdminView ? '<button class="md-btn md-btn-primary" onclick="openAddPaymentDialog()">Enregistrer paiement</button>' : ''}
+                    </div>
+                    <div>
+                        ${payments.length === 0 ? '<p class="text-on-surface-variant">Aucun paiement enregistré.</p>' : payments.map(p => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:8px; background:var(--md-sys-color-surface-container); margin-bottom:8px;">
+                                <div>
+                                    <div style="font-weight:600;">${formatCurrency(p.montant)}</div>
+                                    <div style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant);">${new Date(p.date).toLocaleDateString('fr-FR')}</div>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    ${p.valide ? '<span style="color:var(--md-sys-color-primary); font-weight:600;">Validé</span>' : (isAdminView ? `<button class="md-btn md-btn-text" onclick="validatePayment('${p.id}')">Valider</button>` : '<span style="color:var(--md-sys-color-error);">Non validé</span>')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openAddPaymentDialog() {
+            showDialog('Enregistrer un paiement', `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <label class="form-label">Montant</label>
+                    <input type="number" id="newPaymentAmount" class="form-input" placeholder="Montant en €" />
+                    <label class="form-label">Date</label>
+                    <input type="date" id="newPaymentDate" class="form-input" />
+                </div>
+            `);
+
+            document.getElementById('dialogActions').innerHTML = `
+                <button class="md-btn md-btn-text" onclick="closeDialog()">Annuler</button>
+                <button class="md-btn md-btn-primary" onclick="recordPayment()">Enregistrer</button>
+            `;
+        }
+
+        async function recordPayment() {
+            const amountEl = document.getElementById('newPaymentAmount');
+            const dateEl = document.getElementById('newPaymentDate');
+            const montant = parseFloat(amountEl && amountEl.value);
+            const date = dateEl && dateEl.value;
+
+            if (!montant || montant <= 0) {
+                showSnackbar('Montant invalide');
+                return;
+            }
+
+            const payload = {
+                eleveId: currentChild.id,
+                montant,
+                date: date || new Date().toISOString()
+            };
+
+            try {
+                const resp = await fetch(`${API_URL}/frais/paiement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+
+                if (resp.ok) {
+                    showSnackbar('Paiement enregistré');
+                    closeDialog();
+                    await loadFraisData();
+                } else {
+                    const err = await resp.json();
+                    throw new Error(err.error || 'Erreur enregistrement paiement');
+                }
+            } catch (error) {
+                console.error('Erreur recordPayment:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'enregistrement');
+            }
+        }
+
+        async function validatePayment(paymentId) {
+            if (!confirm('Valider ce paiement ?')) return;
+            try {
+                const resp = await fetch(`${API_URL}/frais/${paymentId}/valider`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (resp.ok) {
+                    showSnackbar('Paiement validé');
+                    await loadFraisData();
+                } else {
+                    const err = await resp.json();
+                    throw new Error(err.error || 'Erreur validation');
+                }
+            } catch (error) {
+                console.error('Erreur validatePayment:', error);
+                showSnackbar(error.message || 'Erreur lors de la validation');
+            }
+        }
+
+        /* ---------- ADMIN: gestion des frais (initialisation / chargement famille/élève) ---------- */
+
+        async function adminFraisTargetChanged() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            document.getElementById('adminFraisEleveSelect').style.display = target === 'eleve' ? 'block' : 'none';
+            document.getElementById('adminFraisFamille').style.display = target === 'famille' ? 'block' : 'none';
+            if (target === 'eleve') {
+                await loadAdminEleves();
+            }
+        }
+
+        async function loadAdminEleves() {
+            const select = document.getElementById('adminEleveList');
+            if (!select) return;
+            select.innerHTML = '<option value="">Chargement...</option>';
+
+            try {
+                const resp = await fetch(`${API_URL}/eleves`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!resp.ok) throw new Error('Erreur chargement élèves');
+                const eleves = await resp.json();
+                select.innerHTML = '<option value="">-- Sélectionner --</option>' + eleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom} (${e.classe || '—'})</option>`).join('');
+            } catch (error) {
+                console.error('loadAdminEleves:', error);
+                select.innerHTML = '<option value="">Erreur chargement</option>';
+            }
+        }
+
+        async function adminLoadSelectedFrais() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            const resultEl = document.getElementById('adminFraisResult');
+            resultEl.innerHTML = '<p class="text-on-surface-variant">Chargement...</p>';
+
+            try {
+                let data = null;
+                if (target === 'eleve') {
+                    const eleveId = document.getElementById('adminEleveList').value;
+                    if (!eleveId) { resultEl.innerHTML = '<p class="text-on-surface-variant">Veuillez sélectionner un élève.</p>'; return; }
+                    const resp = await fetch(`${API_URL}/frais/eleve/${eleveId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!resp.ok) throw await resp.json();
+                    data = await resp.json();
+                } else {
+                    const email = document.getElementById('adminFamilleEmail').value.trim();
+                    if (!email) { resultEl.innerHTML = '<p class="text-on-surface-variant">Veuillez saisir un email de parent.</p>'; return; }
+                    const resp = await fetch(`${API_URL}/frais/famille/${encodeURIComponent(email)}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!resp.ok) throw await resp.json();
+                    data = await resp.json();
+                }
+
+                // Afficher les infos et paiements
+                resultEl.innerHTML = '';
+                const total = data.total || 0;
+                const paid = data.paid || 0;
+                const remaining = Math.max(0, total - paid);
+                const reduction = data.reduction || 0;
+                const payments = data.payments || [];
+
+                resultEl.innerHTML = `
+                    <div>
+                        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                            <div>Montant total: <strong>${formatCurrency(total)}</strong></div>
+                            <div>Payé: <strong>${formatCurrency(paid)}</strong></div>
+                            <div>Reste: <strong>${formatCurrency(remaining)}</strong></div>
+                            ${reduction ? `<div>Réduction: <strong>${reduction}%</strong></div>` : ''}
+                        </div>
+                        <div style="margin-top:12px;"><strong>Historique des paiements</strong></div>
+                        <div style="margin-top:8px;">${payments.length === 0 ? '<p class="text-on-surface-variant">Aucun paiement</p>' : payments.map(p => `
+                            <div style="display:flex; justify-content:space-between; padding:8px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:8px;">
+                                <div>${formatCurrency(p.montant)} — ${new Date(p.date).toLocaleDateString('fr-FR')}</div>
+                                <div>${p.valide ? '<span style="color:var(--md-sys-color-primary)">Validé</span>' : `<button class="md-btn md-btn-text" onclick="validatePayment('${p.id}')">Valider</button>`}</div>
+                            </div>
+                        `).join('')}</div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('adminLoadSelectedFrais error:', error);
+                resultEl.innerHTML = `<p class="text-on-surface-variant">Erreur chargement: ${error && error.error ? error.error : 'Erreur'}</p>`;
+            }
+        }
+
+        async function adminInitFrais() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            const total = parseFloat(document.getElementById('adminInitTotal').value);
+            const reduction = parseFloat(document.getElementById('adminInitReduction').value) || 0;
+
+            if (!total || total <= 0) { showSnackbar('Montant total invalide'); return; }
+
+            const payload = { total, reduction, type: target };
+            if (target === 'eleve') {
+                const eleveId = document.getElementById('adminEleveList').value;
+                if (!eleveId) { showSnackbar('Sélectionnez un élève'); return; }
+                payload.eleveId = eleveId;
+            } else {
+                const email = document.getElementById('adminFamilleEmail').value.trim();
+                if (!email) { showSnackbar('Saisissez un email de parent'); return; }
+                payload.familyEmail = email;
+            }
+
+            try {
+                const resp = await fetch(`${API_URL}/frais/init`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+
+                if (resp.ok) {
+                    showSnackbar('Frais initialisés');
+                    adminLoadSelectedFrais();
+                    await loadFraisData();
+                } else {
+                    const err = await resp.json();
+                    throw new Error(err.error || 'Erreur initialisation');
+                }
+            } catch (error) {
+                console.error('adminInitFrais error:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'initialisation');
+            }
+        }
+
 
         // Gestion du profil
         async function loadProfile() {
