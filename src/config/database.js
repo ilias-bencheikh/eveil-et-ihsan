@@ -97,6 +97,7 @@ function initDatabase() {
                 note REAL,
                 commentaire TEXT,
                 createdByRole TEXT,
+                dateCreated TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (eleveId) REFERENCES eleves(id),
                 FOREIGN KEY (professeurId) REFERENCES professeurs(id)
             )`);
@@ -140,6 +141,16 @@ function initDatabase() {
 
             // Ajouter la colonne cible si elle n'existe pas (migration)
             db.run(`ALTER TABLE actualites ADD COLUMN cible TEXT DEFAULT 'tous'`, () => {});
+
+            // Table tokens (pour la réinitialisation de mot de passe)
+            db.run(`CREATE TABLE IF NOT EXISTS tokens (
+                id TEXT PRIMARY KEY,
+                token TEXT NOT NULL,
+                userId TEXT NOT NULL,
+                role TEXT NOT NULL,
+                expires INTEGER NOT NULL,
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
 
             // Insérer le compte admin s'il n'existe pas
             db.get('SELECT id FROM staff WHERE id = ?', ['admin1'], (err, row) => {

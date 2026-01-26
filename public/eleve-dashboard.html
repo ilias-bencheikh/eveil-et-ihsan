@@ -58,9 +58,179 @@
             margin-bottom: var(--spacing-xs);
         }
 
-        .eleve-class {
-            font: var(--md-sys-typescale-title-medium);
-            opacity: 0.9;
+        .family-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .family-member-card {
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: var(--spacing-xl);
+            color: white;
+            text-align: center;
+            box-shadow: var(--md-sys-elevation-3);
+            transition: transform 0.2s ease;
+        }
+
+        .family-member-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--md-sys-elevation-4);
+        }
+
+        .child-section {
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: var(--md-sys-shape-corner-medium);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .child-name {
+            font: var(--md-sys-typescale-headline-small);
+            color: var(--md-sys-color-primary);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--md-sys-color-primary-container);
+        }
+
+        .child-absences, .child-appreciations, .child-frais {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .student-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+        }
+
+        .student-photo-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md);
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: var(--md-sys-shape-corner-medium);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .student-photo-field label {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            font-size: 0.9rem;
+        }
+
+        .student-photo-field input[type="file"] {
+            padding: var(--spacing-xs);
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-small);
+            background: var(--md-sys-color-surface);
+        }
+
+        .current-photo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .current-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            object-fit: cover;
+            border: 2px solid var(--md-sys-color-outline-variant);
+        }
+
+        .delete-photo-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--md-sys-elevation-2);
+            transition: all 0.2s ease;
+        }
+
+        .delete-photo-btn:hover {
+            background: var(--md-sys-color-error-container);
+            transform: scale(1.1);
+        }
+
+        .delete-photo-btn .material-icons {
+            font-size: 16px;
+        }
+
+        /* Styles pour les widgets cliquables */
+        .stat-widget.clickable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stat-widget.clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--md-sys-elevation-3);
+        }
+
+        .stat-widget.clickable:active {
+            transform: translateY(0);
+            box-shadow: var(--md-sys-elevation-1);
+        }
+
+        .note-card {
+            padding: var(--spacing-md);
+            background: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-medium);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .note-subject {
+            font: var(--md-sys-typescale-title-small);
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+        }
+
+        .note-date {
+            font: var(--md-sys-typescale-body-small);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .note-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-value {
+            font: var(--md-sys-typescale-headline-small);
+            color: var(--md-sys-color-primary);
+            font-weight: 600;
+        }
+
+        .note-appreciation {
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface-variant);
+            margin: var(--spacing-xs) 0 0 0;
+            font-style: italic;
         }
 
         .info-grid {
@@ -537,6 +707,36 @@
             margin: 0 0 var(--spacing-sm) 0;
         }
 
+        /* Child badges for actualités */
+        .child-badges-inline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 4px 0 8px 0;
+        }
+
+        .child-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 8px;
+            background: var(--md-sys-color-primary);
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            white-space: nowrap;
+        }
+
+        .actualite-icon {
+            position: relative;
+        }
+
+        .actualite-icon-large {
+            position: relative;
+        }
+
         .empty-state p {
             font: var(--md-sys-typescale-body-large);
             margin: 0;
@@ -662,6 +862,26 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+        }
+
+        .child-selection-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .child-select {
+            padding: 12px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font: var(--md-sys-typescale-body-large);
+        }
+
+        .child-select:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
         }
 
         .destinataires-section {
@@ -834,17 +1054,7 @@
                 <div class="sidebar-user-avatar" id="userAvatar">E</div>
                 
                 <div class="sidebar-user-info" style="width: 100%; text-align: center;">
-                    <div class="family-selector-wrapper" id="familySelectorWrapper">
-                        
-                        <div class="current-user-display">
-                            <h3 class="current-user-name" id="userName">Chargement...</h3>
-                            <span class="material-icons dropdown-arrow" id="switchIcon" style="display: none;">expand_more</span>
-                        </div>
-
-                        <div class="family-dropdown-menu" id="familyDropdownList">
-                            </div>
-                    </div>
-                    
+                    <h3 class="current-user-name" id="userName">Chargement...</h3>
                     <span id="userClass" style="display: block; font-size: 0.85rem; opacity: 0.7; margin-top: 4px;">Classe</span>
                 </div>
             </div>
@@ -881,11 +1091,6 @@
                     <a href="#appreciations" class="sidebar-nav-item" data-tab="appreciations">
                         <span class="material-icons">star</span>
                         <span>Appréciations</span>
-                    </a>
-                    
-                    <a href="#notes" class="sidebar-nav-item" data-tab="notes">
-                        <span class="material-icons">grade</span>
-                        <span>Mes notes</span>
                     </a>
                     <a href="#frais" class="sidebar-nav-item" data-tab="frais">
                         <span class="material-icons">payments</span>
@@ -949,19 +1154,14 @@
             <div class="dashboard-content">
                 <!-- Accueil Tab -->
                 <div id="accueil" class="tab-content active">
-                    <!-- Profil Card -->
-                    <div class="eleve-profile-card">
-                        <div class="eleve-avatar" id="eleveAvatar">
-                            <span class="material-icons" style="font-size: 48px;">person</span>
-                        </div>
-                        <h2 class="eleve-name" id="eleveName">Prénom Nom</h2>
-                        <p class="eleve-class" id="eleveClass">Classe</p>
-                        
+                    <!-- Famille Cards -->
+                    <div id="familyCards" class="family-cards-grid">
+                        <!-- Les cartes des enfants seront générées dynamiquement -->
                     </div>
 
                     <!-- Quick Stats -->
                     <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                        <div class="stat-widget">
+                        <div class="stat-widget clickable" onclick="switchTab('messages')">
                             <div class="stat-widget-icon secondary">
                                 <span class="material-icons">mail</span>
                             </div>
@@ -971,7 +1171,7 @@
                             </div>
                         </div>
                         
-                        <div class="stat-widget">
+                        <div class="stat-widget clickable" onclick="switchTab('absences')">
                             <div class="stat-widget-icon primary">
                                 <span class="material-icons">event_busy</span>
                             </div>
@@ -981,7 +1181,7 @@
                             </div>
                         </div>
                         
-                        <div class="stat-widget">
+                        <div class="stat-widget clickable" onclick="switchTab('appreciations')">
                             <div class="stat-widget-icon tertiary">
                                 <span class="material-icons">star</span>
                             </div>
@@ -1014,6 +1214,7 @@
                                 <p class="text-on-surface-variant">Aucune appréciation récente</p>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -1066,14 +1267,16 @@
                                     </div>
 
                                     <div class="form-field">
-                                        <label for="profilePhoto" class="form-label">
+                                        <label class="form-label">
                                             <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">photo_camera</span>
-                                            Photo de profil
+                                            Photos de profil des élèves
                                         </label>
-                                        <input type="file" id="profilePhoto" name="photo" class="form-input" accept="image/*">
+                                        <div id="studentPhotosContainer" class="student-photos-grid">
+                                            <!-- Les champs pour chaque élève seront ajoutés ici dynamiquement -->
+                                        </div>
                                         <div class="form-help">
                                             <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
-                                            Formats acceptés: JPG, PNG, GIF. Taille max: 5MB
+                                            Formats acceptés: JPG, PNG, GIF. Taille max: 5MB par image
                                         </div>
                                     </div>
                                 </div>
@@ -1084,6 +1287,56 @@
                                         Enregistrer les modifications
                                     </button>
                                     <button type="button" class="md-btn md-btn-text" onclick="resetProfileForm()">
+                                        <span class="material-icons">refresh</span>
+                                        Annuler
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Password Change Section -->
+                    <div class="widget-card" style="margin-top: var(--spacing-lg);">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Modifier mon mot de passe</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <form id="passwordForm">
+                                <div class="form-grid">
+                                    <div class="form-field">
+                                        <label for="currentPassword" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">lock</span>
+                                            Mot de passe actuel
+                                        </label>
+                                        <input type="password" id="currentPassword" name="currentPassword" class="form-input" placeholder="Votre mot de passe actuel" required>
+                                        <div class="form-help">Pour des raisons de sécurité, saisissez votre mot de passe actuel</div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="newPassword" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">lock_outline</span>
+                                            Nouveau mot de passe
+                                        </label>
+                                        <input type="password" id="newPassword" name="newPassword" class="form-input" placeholder="Votre nouveau mot de passe" required minlength="8">
+                                        <div class="form-help">Minimum 8 caractères, incluant lettres et chiffres</div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="confirmPassword" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">lock_outline</span>
+                                            Confirmer le nouveau mot de passe
+                                        </label>
+                                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Confirmez votre nouveau mot de passe" required minlength="8">
+                                        <div class="form-help">Retapez votre nouveau mot de passe pour confirmation</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions" style="margin-top: var(--spacing-lg);">
+                                    <button type="submit" class="md-btn md-btn-primary">
+                                        <span class="material-icons">security</span>
+                                        Changer le mot de passe
+                                    </button>
+                                    <button type="button" class="md-btn md-btn-text" onclick="resetPasswordForm()">
                                         <span class="material-icons">refresh</span>
                                         Annuler
                                     </button>
@@ -1163,10 +1416,10 @@
                 <div id="absences" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Mes absences</h3>
+                            <h3 class="widget-card-title">Absences de la famille</h3>
                         </div>
-                        <div class="widget-card-content" id="absencesList">
-                            <p class="text-on-surface-variant">Aucune absence enregistrée</p>
+                        <div class="widget-card-content" id="absencesSection">
+                            <p class="text-on-surface-variant">Chargement des absences...</p>
                         </div>
                     </div>
                 </div>
@@ -1175,22 +1428,22 @@
                 <div id="appreciations" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Mes appréciations</h3>
+                            <h3 class="widget-card-title">Appréciations de la famille</h3>
                         </div>
-                        <div class="widget-card-content" id="appreciationsList">
-                            <p class="text-on-surface-variant">Aucune appréciation</p>
+                        <div class="widget-card-content" id="appreciationsSection">
+                            <p class="text-on-surface-variant">Chargement des appréciations...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Notes Tab -->
-                <div id="notes" class="tab-content">
+                <!-- Frais Tab -->
+                <div id="frais" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Mes notes</h3>
+                            <h3 class="widget-card-title">Frais d'inscription de la famille</h3>
                         </div>
-                        <div class="widget-card-content" id="notesList">
-                            <p class="text-on-surface-variant">Aucune note disponible</p>
+                        <div class="widget-card-content" id="fraisSection">
+                            <p class="text-on-surface-variant">Chargement des frais...</p>
                         </div>
                     </div>
                 </div>
@@ -1353,9 +1606,15 @@
             window.location.href = 'index.html';
         }
 
-        // Stocker les membres de la famille
+        // --- GESTION DES DONNÉES DE FAMILLE ---
+
         let familyMembers = [];
         let currentChild = user;
+        let parentInfo = null;
+        let allMessages = { received: [], sent: [] };
+        let currentMessageView = 'received';
+        let selectedDestinatairesMessage = [];
+        let availableDestinataires = [];
 
         // Charger les données actuelles de l'élève depuis le serveur
         async function loadCurrentChildData() {
@@ -1375,6 +1634,15 @@
                         photo: eleveData.photo,
                         parentTel: eleveData.parentTel
                     };
+
+                    // Récupérer les informations du parent
+                    if (eleveData.parentNom && eleveData.parentPrenom) {
+                        parentInfo = {
+                            nom: eleveData.parentNom,
+                            prenom: eleveData.parentPrenom,
+                            telephone: eleveData.parentTel
+                        };
+                    }
                     
                     // Mettre à jour l'affichage
                     updateUserDisplay();
@@ -1384,171 +1652,135 @@
             }
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
             initializeUI();
-            loadFamilyMembers();
-        });
+            loadFamilyData();
 
-        // --- GESTION DU SÉLECTEUR DE FAMILLE (Custom Dropdown) ---
-
-        async function loadFamilyMembers() {
+        async function loadFamilyData() {
             try {
                 // Charger les membres de la famille par email
                 const response = await fetch(`${API_URL}/eleves/famille-by-email/${encodeURIComponent(user.email)}`);
-                
+
                 if (response.ok) {
                     familyMembers = await response.json();
-                    
-                    const wrapper = document.getElementById('familySelectorWrapper');
-                    const icon = document.getElementById('switchIcon');
-                    
-                    if (familyMembers.length > 1) {
-                        // Activer le mode famille (plusieurs enfants)
-                        icon.style.display = 'block';
-                        wrapper.classList.add('has-multiple');
-                        wrapper.title = "Cliquez pour changer d'enfant";
-                        
-                        // Ajouter l'événement de clic pour ouvrir/fermer
-                        wrapper.onclick = (e) => {
-                            e.stopPropagation(); // Empêche la fermeture immédiate
-                            toggleFamilyMenu();
-                        };
+
+                    // Définir l'enfant actuel (le premier ou celui connecté)
+                    if (familyMembers.length > 0) {
+                        // Chercher l'utilisateur actuel dans la famille
+                        currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
                     } else {
-                        // Mode enfant unique
-                        icon.style.display = 'none';
-                        wrapper.classList.remove('has-multiple');
-                        wrapper.onclick = null;
-                        wrapper.style.cursor = 'default';
-                        wrapper.title = "";
+                        // Fallback si pas de données famille
+                        currentChild = user;
                     }
-                    
-                    // Générer la liste HTML une première fois
-                    renderFamilyList();
+
+                    updateUserDisplay();
                 }
             } catch (error) {
                 console.error('Erreur chargement famille:', error);
+                // Fallback
+                currentChild = user;
+                updateUserDisplay();
             }
-            
-            // Charger les données de l'élève actuel
-            // loadEleveData(); // Maintenant appelée dans initializeUI
-        }
 
-        // Génère le HTML du menu déroulant
-        function renderFamilyList() {
-            const list = document.getElementById('familyDropdownList');
-            if (!list) return;
-
-            list.innerHTML = familyMembers.map(member => {
-                const initial = member.prenom ? member.prenom[0].toUpperCase() : 'E';
-                const isActive = member.id === currentChild.id ? 'active' : '';
-                
-                return `
-                    <div class="family-dropdown-item ${isActive}" onclick="selectChild('${member.id}')">
-                        <div class="item-avatar">${initial}</div>
-                        <div class="item-info">
-                            <span class="item-name">${member.prenom}</span>
-                            <span class="item-class">${member.classe || 'Sans classe'}</span>
-                        </div>
-                        ${isActive ? '<span class="material-icons check-icon">check_circle</span>' : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Ouvre ou ferme le menu
-        function toggleFamilyMenu() {
-            const wrapper = document.getElementById('familySelectorWrapper');
-            if (wrapper.classList.contains('active')) {
-                closeFamilyMenu();
-            } else {
-                wrapper.classList.add('active');
-                // Écouter les clics ailleurs pour fermer le menu
-                setTimeout(() => document.addEventListener('click', closeFamilyMenuOutside), 0);
-            }
-        }
-
-        // Ferme le menu
-        function closeFamilyMenu() {
-            const wrapper = document.getElementById('familySelectorWrapper');
-            if (wrapper) wrapper.classList.remove('active');
-            document.removeEventListener('click', closeFamilyMenuOutside);
-        }
-
-        // Ferme le menu si on clique en dehors
-        function closeFamilyMenuOutside(event) {
-            const wrapper = document.getElementById('familySelectorWrapper');
-            if (wrapper && !wrapper.contains(event.target)) {
-                closeFamilyMenu();
-            }
-        }
-
-        // Action quand on clique sur un enfant dans la liste
-        function selectChild(id) {
-            // Empêcher la propagation pour ne pas rouvrir le menu instantanément
-            if (window.event) window.event.stopPropagation();
-
-            const selectedChild = familyMembers.find(m => m.id === id);
-            
-            if (selectedChild) {
-                // Si c'est le même enfant, on ferme juste le menu
-                if (selectedChild.id === currentChild.id) {
-                    closeFamilyMenu();
-                    return;
-                }
-
-                // Mettre à jour l'utilisateur courant
-                currentChild = {
-                    ...user, // Garde le token
-                    id: selectedChild.id,
-                    nom: selectedChild.nom,
-                    prenom: selectedChild.prenom,
-                    classe: selectedChild.classe,
-                    photo: selectedChild.photo
-                };
-                
-                closeFamilyMenu();
-                updateUserDisplay(); // Met à jour l'affichage et la coche dans la liste
-                loadEleveData(); // Recharge toutes les données
-                
-                showSnackbar(`Profil actif : ${selectedChild.prenom}`);
-            }
+            // Charger les données de tous les enfants
+            loadEleveData();
         }
 
         // Mettre à jour l'affichage global
         function updateUserDisplay() {
-            const prenom = currentChild.prenom || 'Élève';
-            const nom = currentChild.nom || '';
+            // Utiliser les informations du parent si elles existent, sinon celles de l'utilisateur connecté
+            const displayInfo = parentInfo || user;
+            const prenom = displayInfo.prenom || 'Utilisateur';
+            const nom = displayInfo.nom || '';
             
             // Sidebar textes
-            document.getElementById('userName').textContent = `${prenom} ${nom}`;
-            document.getElementById('userClass').textContent = currentChild.classe || 'Non assigné';
+            document.getElementById('userName').textContent = `${prenom} ${nom}`.trim();
+            document.getElementById('userClass').textContent = parentInfo ? 'Parent' : (currentChild.classe || 'Non assigné');
             
             // Sidebar Avatar
             const avatarEl = document.getElementById('userAvatar');
-            if (currentChild.photo) {
-                avatarEl.innerHTML = `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-            } else {
+            // Pour le parent, utiliser une icône par défaut, pour l'élève utiliser sa photo
+            if (parentInfo) {
+                // Parent : icône par défaut
                 avatarEl.innerHTML = '<i class="material-icons" style="font-size: 24px;">person</i>';
+            } else {
+                // Élève : sa propre photo ou icône par défaut
+                const avatarSource = currentChild.photo;
+                if (avatarSource) {
+                    avatarEl.innerHTML = `<img src="${avatarSource}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    avatarEl.innerHTML = '<i class="material-icons" style="font-size: 24px;">person</i>';
+                }
             }
 
-            // Dashboard Header Infos
-            document.getElementById('eleveName').textContent = `${prenom} ${nom}`;
-            document.getElementById('eleveClass').textContent = currentChild.classe || 'Classe non assignée';
-            document.getElementById('eleveAvatar').innerHTML = currentChild.photo ? 
-                `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
-                '<i class="material-icons" style="font-size: 48px;">person</i>';
-
-            // Profil Avatar (si on est dans l'onglet profil)
+            // Profil
+            const profileNameEl = document.getElementById('profileName');
+            const profileClassEl = document.getElementById('profileClass');
+            const profileEmailDisplayEl = document.getElementById('profileEmailDisplay');
+            const profilePhoneDisplayEl = document.getElementById('profilePhoneDisplay');
             const profileAvatarEl = document.getElementById('profileAvatar');
+
+            if (profileNameEl) profileNameEl.textContent = `${prenom} ${nom}`.trim();
+            if (profileClassEl) profileClassEl.textContent = parentInfo ? 'Parent d\'élève' : (currentChild.classe || 'Classe non assignée');
+            if (profileEmailDisplayEl) profileEmailDisplayEl.textContent = user.email || 'Non défini';
+            if (profilePhoneDisplayEl) profilePhoneDisplayEl.textContent = displayInfo.telephone || currentChild.parentTel || 'Non défini';
+
             if (profileAvatarEl) {
-                profileAvatarEl.innerHTML = currentChild.photo ? 
-                    `<img src="${currentChild.photo}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
-                    '<i class="material-icons" style="font-size: 48px;">person</i>';
+                // Pour le parent, utiliser une icône par défaut, pour l'élève utiliser sa photo
+                if (parentInfo) {
+                    // Parent : icône par défaut
+                    profileAvatarEl.innerHTML = '<i class="material-icons" style="font-size: 48px;">person</i>';
+                } else {
+                    // Élève : sa propre photo ou icône par défaut
+                    const profileAvatarSource = currentChild.photo;
+                    profileAvatarEl.innerHTML = profileAvatarSource ? 
+                        `<img src="${profileAvatarSource}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
+                        '<i class="material-icons" style="font-size: 48px;">person</i>';
+                }
             }
 
-            // Mettre à jour la coche "active" dans le menu déroulant
-            renderFamilyList();
+            // Afficher les cartes de la famille
+            renderFamilyCards();
+        }
+
+        // Afficher les cartes de tous les membres de la famille
+        function renderFamilyCards() {
+            const familyCardsContainer = document.getElementById('familyCards');
+            familyCardsContainer.innerHTML = '';
+
+            if (!familyMembers || familyMembers.length === 0) {
+                // Fallback si pas de données famille
+                const card = document.createElement('div');
+                card.className = 'family-member-card';
+                card.innerHTML = `
+                    <div class="eleve-avatar">
+                        <span class="material-icons" style="font-size: 48px;">person</span>
+                    </div>
+                    <h2 class="eleve-name">${currentChild.prenom || 'Élève'} ${currentChild.nom || ''}</h2>
+                    <p class="eleve-class">${currentChild.classe || 'Classe non assignée'}</p>
+                `;
+                familyCardsContainer.appendChild(card);
+                return;
+            }
+
+            // Créer une carte pour chaque membre de la famille
+            familyMembers.forEach(member => {
+                const card = document.createElement('div');
+                card.className = 'family-member-card';
+                
+                const avatarHtml = member.photo ? 
+                    `<img src="${member.photo}" alt="${member.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
+                    '<span class="material-icons" style="font-size: 48px;">person</span>';
+                
+                card.innerHTML = `
+                    <div class="eleve-avatar">
+                        ${avatarHtml}
+                    </div>
+                    <h2 class="eleve-name">${member.prenom || 'Élève'} ${member.nom || ''}</h2>
+                    <p class="eleve-class">${member.classe || 'Classe non assignée'}</p>
+                `;
+                
+                familyCardsContainer.appendChild(card);
+            });
         }
 
         function initializeUI() {
@@ -1574,16 +1806,13 @@
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
-            // Charger les données de l'élève après que tout soit initialisé
-            setTimeout(() => {
-                loadEleveData();
-            }, 100);
-
             // Theme toggle
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
             // Formulaire profil
             document.getElementById('profileForm').addEventListener('submit', saveProfile);
+            
+            // Le sélecteur d'élève est toujours visible pour la photo de profil
         }
 
         function switchTab(tabName) {
@@ -1608,7 +1837,6 @@
                 actualites: 'Actualités',
                 absences: 'Mes absences',
                 appreciations: 'Mes appréciations',
-                notes: 'Mes notes',
                 messages: 'Messages',
                 frais: "Frais d'inscription",
                 'frais-admin': 'Gestion des frais'
@@ -1645,39 +1873,326 @@
         }
 
         async function loadEleveData() {
-            const eleveId = currentChild.id;
+            console.log('loadEleveData called for all family members');
 
-            // Charger les infos de l'élève
-            const eleveNameEl = document.getElementById('eleveName');
-            if (eleveNameEl) {
-                eleveNameEl.textContent = `${currentChild.prenom || ''} ${currentChild.nom || ''}`;
+            // Réinitialiser les compteurs
+            totalAbsencesCount = 0;
+            totalAppreciationsCount = 0;
+            totalUnreadMessages = 0;
+
+            // Vider les sections existantes
+            const absencesSection = document.getElementById('absencesSection');
+            const appreciationsSection = document.getElementById('appreciationsSection');
+            const fraisSection = document.getElementById('fraisSection');
+
+            if (absencesSection) {
+                absencesSection.innerHTML = '<h3 class="section-title">Absences</h3>';
+            }
+            if (appreciationsSection) {
+                appreciationsSection.innerHTML = '<h3 class="section-title">Appréciations</h3>';
+            }
+            if (fraisSection) {
+                fraisSection.innerHTML = '<h3 class="section-title">Frais d\'inscription</h3>';
             }
 
-            const eleveClassEl = document.getElementById('eleveClass');
-            if (eleveClassEl) {
-                eleveClassEl.textContent = currentChild.classe || 'Classe non assignée';
+            // Charger les données pour chaque enfant
+            for (const child of familyMembers) {
+                console.log(`Loading data for child: ${child.prenom} ${child.nom}`);
+
+                // Créer une section pour cet enfant
+                await loadChildData(child);
             }
 
-            const eleveAvatarEl = document.getElementById('eleveAvatar');
-            if (eleveAvatarEl) {
-                eleveAvatarEl.innerHTML = currentChild.photo ?
-                    `<img src="${currentChild.photo}" alt="${currentChild.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` :
-                    (currentChild.prenom ? currentChild.prenom[0].toUpperCase() : '<span class="material-icons" style="font-size: 48px;">person</span>');
-            }
+            // Mettre à jour les statistiques globales
+            updateGlobalStats();
 
-            // Charger les actualités
+            // Charger les actualités (communes à tous)
+            await loadActualites();
+
+            // Charger les messages (pour l'enfant connecté)
+            await loadMessages();
+
+            // Charger les dernières appréciations
+            await loadRecentAppreciations();
+        }
+
+        async function loadChildData(child) {
+            const childId = child.id;
+            const childName = `${child.prenom || ''} ${child.nom || ''}`.trim();
+
+            // Section Absences pour cet enfant
+            await loadChildAbsences(child);
+
+            // Section Appréciations pour cet enfant
+            await loadChildAppreciations(child);
+
+            // Section Frais pour cet enfant
+            await loadChildFrais(child);
+        }
+
+        async function loadChildAbsences(child) {
             try {
-                const response = await fetch(`${API_URL}/actualites`);
-                
+                const response = await fetch(`${API_URL}/absences/eleve/${child.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'x-user-id': child.id,
+                        'x-user-role': 'eleve'
+                    }
+                });
+
                 if (response.ok) {
-                    const actualites = await response.json();
-                    
-                    // Afficher les 3 dernières sur l'accueil
-                    if (actualites.length > 0) {
-                        const recent = actualites.slice(0, 3);
-                        const recentActualitesEl = document.getElementById('recentActualites');
-                        if (recentActualitesEl) {
-                            recentActualitesEl.innerHTML = recent.map(a => `
+                    const absences = await response.json();
+
+                    // Incrémenter le compteur global
+                    totalAbsencesCount += absences.length;
+
+                    const absencesSection = document.getElementById('absencesSection');
+                    if (absencesSection) {
+                        // Créer une sous-section pour cet enfant
+                        const childAbsencesDiv = document.createElement('div');
+                        childAbsencesDiv.className = 'child-section';
+                        childAbsencesDiv.innerHTML = `
+                            <h4 class="child-name">${child.prenom} ${child.nom}</h4>
+                            <div class="child-absences" id="absences-${child.id}">
+                                ${absences.length > 0 ?
+                                    absences.map(a => `
+                                        <div class="absence-card">
+                                            <span class="material-icons">event_busy</span>
+                                            <div>
+                                                <strong>${new Date(a.date).toLocaleDateString('fr-FR')}</strong>
+                                                <p>${a.type || 'Absence'} - ${a.motif || 'Non spécifié'}</p>
+                                            </div>
+                                        </div>
+                                    `).join('') :
+                                    '<p class="text-on-surface-variant">Aucune absence enregistrée</p>'
+                                }
+                            </div>
+                        `;
+                        absencesSection.appendChild(childAbsencesDiv);
+                    }
+                }
+            } catch (error) {
+                console.error(`Erreur chargement absences pour ${child.prenom}:`, error);
+            }
+        }
+
+        async function loadChildAppreciations(child) {
+            try {
+                const response = await fetch(`${API_URL}/appreciations/eleve/${child.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'x-user-id': child.id,
+                        'x-user-role': 'eleve'
+                    }
+                });
+
+                if (response.ok) {
+                    const appreciations = await response.json();
+
+                    // Incrémenter le compteur global
+                    totalAppreciationsCount += appreciations.length;
+
+                    const appreciationsSection = document.getElementById('appreciationsSection');
+                    if (appreciationsSection) {
+                        // Créer une sous-section pour cet enfant
+                        const childAppreciationsDiv = document.createElement('div');
+                        childAppreciationsDiv.className = 'child-section';
+                        childAppreciationsDiv.innerHTML = `
+                            <h4 class="child-name">${child.prenom} ${child.nom}</h4>
+                            <div class="child-appreciations" id="appreciations-${child.id}">
+                                ${appreciations.length > 0 ?
+                                    appreciations.map(a => `
+                                        <div class="appreciation-card">
+                                            <div class="appreciation-header">
+                                                <span class="appreciation-subject">${a.matiere || 'Général'}</span>
+                                                <span class="appreciation-date">${a.periode || ''}</span>
+                                            </div>
+                                            <p class="appreciation-text">${a.commentaire || ''}</p>
+                                            ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
+                                        </div>
+                                    `).join('') :
+                                    '<p class="text-on-surface-variant">Aucune appréciation</p>'
+                                }
+                            </div>
+                        `;
+                        appreciationsSection.appendChild(childAppreciationsDiv);
+                    }
+                }
+            } catch (error) {
+                console.error(`Erreur chargement appréciations pour ${child.prenom}:`, error);
+            }
+        }
+
+        async function loadChildFrais(child) {
+            try {
+                const response = await fetch(`${API_URL}/eleves/frais/${child.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'x-user-id': child.id,
+                        'x-user-role': 'eleve'
+                    }
+                });
+
+                if (response.ok) {
+                    const fraisData = await response.json();
+
+                    const fraisSection = document.getElementById('fraisSection');
+                    if (fraisSection && fraisData) {
+                        // Créer une sous-section pour cet enfant
+                        const childFraisDiv = document.createElement('div');
+                        childFraisDiv.className = 'child-section';
+                        
+                        const eleve = fraisData.eleve;
+                        const total = eleve.fraisInscription || 0;
+                        const paid = (eleve.paiementsEffectues || 0) * fraisData.fraisParPaiement;
+                        const remaining = Math.max(0, fraisData.resteAPayer || 0);
+                        const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
+
+                        childFraisDiv.innerHTML = `
+                            <h4 class="child-name">${child.prenom} ${child.nom}</h4>
+                            <div class="child-frais" id="frais-${child.id}">
+                                <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom: 16px;">
+                                    <div style="flex:1; min-width:150px;">
+                                        <div style="font-weight:600; margin-bottom:8px;">Montant total</div>
+                                        <div style="font-size:1.1rem;">${formatCurrency(total)}</div>
+                                    </div>
+                                    <div style="flex:1; min-width:150px;">
+                                        <div style="font-weight:600; margin-bottom:8px;">Payé</div>
+                                        <div style="font-size:1.1rem; color:var(--md-sys-color-primary);">${formatCurrency(paid)}</div>
+                                    </div>
+                                    <div style="flex:1; min-width:150px;">
+                                        <div style="font-weight:600; margin-bottom:8px;">Reste à payer</div>
+                                        <div style="font-size:1.1rem; color:${remaining > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">${formatCurrency(remaining)}</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="height:8px; background:var(--md-sys-color-surface-container); border-radius:4px; overflow:hidden; margin:8px 0;">
+                                    <div style="width:${progress}%; height:100%; background:linear-gradient(90deg,var(--md-sys-color-primary),var(--md-sys-color-secondary));"></div>
+                                </div>
+                                <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant); margin-bottom: 12px;">Progression: ${progress}%</div>
+                                
+                                <div style="padding:12px; background:var(--md-sys-color-surface-container); border-radius:8px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span class="material-icons" style="color:${eleve.fraisValide ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-error)'};">${eleve.fraisValide ? 'check_circle' : 'error'}</span>
+                                        <span style="font-weight:600;">${eleve.fraisValide ? 'Frais validés' : 'Frais non validés'}</span>
+                                    </div>
+                                    <div style="margin-top:8px; font-size:0.9rem; color:var(--md-sys-color-on-surface-variant);">
+                                        ${eleve.paiementsEffectues || 0} paiement(s) effectué(s) sur ${eleve.nbPaiements || 1} prévu(s)
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        fraisSection.appendChild(childFraisDiv);
+                    }
+                }
+            } catch (error) {
+                console.error(`Erreur chargement frais pour ${child.prenom}:`, error);
+            }
+        }
+
+        // Mettre à jour les statistiques globales
+        function updateGlobalStats() {
+            // Mettre à jour le nombre total d'absences
+            const totalAbsencesEl = document.getElementById('totalAbsences');
+            if (totalAbsencesEl) {
+                totalAbsencesEl.textContent = totalAbsencesCount;
+            }
+
+            // Mettre à jour le nombre total d'appréciations
+            const totalAppreciationsEl = document.getElementById('totalAppreciations');
+            if (totalAppreciationsEl) {
+                totalAppreciationsEl.textContent = totalAppreciationsCount;
+            }
+
+            // Mettre à jour le nombre de messages non lus
+            const unreadMessagesEl = document.getElementById('unreadMessages');
+            if (unreadMessagesEl) {
+                unreadMessagesEl.textContent = totalUnreadMessages;
+            }
+
+            // Mettre à jour le nombre de membres de la famille
+            const familyMembersCountEl = document.getElementById('familyMembersCount');
+            if (familyMembersCountEl) {
+                familyMembersCountEl.textContent = familyMembers ? familyMembers.length : 0;
+            }
+        }
+
+        async function loadActualites() {
+            try {
+                // Récupérer les actualités pour tous les membres de la famille
+                let allActualites = [];
+                const actualitesMap = new Map(); // Pour dédupliquer par ID
+
+                if (familyMembers && familyMembers.length > 0) {
+                    for (const child of familyMembers) {
+                        try {
+                            const response = await fetch(`${API_URL}/actualites`, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'x-user-role': user.role || 'eleve',
+                                    'x-user-classe': child.classe || ''
+                                }
+                            });
+
+                            if (response.ok) {
+                                const actualites = await response.json();
+
+                                // Ajouter les actualités avec l'enfant associé
+                                actualites.forEach(actu => {
+                                    if (!actualitesMap.has(actu.id)) {
+                                        actualitesMap.set(actu.id, {
+                                            ...actu,
+                                            applicableChildren: [child]
+                                        });
+                                    } else {
+                                        // Ajouter l'enfant à la liste des enfants applicables
+                                        const existing = actualitesMap.get(actu.id);
+                                        if (!existing.applicableChildren.some(c => c.id === child.id)) {
+                                            existing.applicableChildren.push(child);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (childError) {
+                            console.error(`Erreur chargement actualités pour ${child.prenom}:`, childError);
+                        }
+                    }
+                } else {
+                    // Fallback pour un seul enfant
+                    const response = await fetch(`${API_URL}/actualites`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'x-user-role': user.role || 'eleve',
+                            'x-user-classe': currentChild.classe || ''
+                        }
+                    });
+
+                    if (response.ok) {
+                        const actualites = await response.json();
+                        actualites.forEach(actu => {
+                            actualitesMap.set(actu.id, {
+                                ...actu,
+                                applicableChildren: [currentChild]
+                            });
+                        });
+                    }
+                }
+
+                // Convertir la map en tableau
+                allActualites = Array.from(actualitesMap.values());
+
+                // Trier par date décroissante
+                allActualites.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Afficher les 3 dernières sur l'accueil
+                if (allActualites.length > 0) {
+                    const recent = allActualites.slice(0, 3);
+                    const recentActualitesEl = document.getElementById('recentActualites');
+                    if (recentActualitesEl) {
+                        recentActualitesEl.innerHTML = recent.map(a => {
+                            const childBadges = a.applicableChildren.length < familyMembers.length ?
+                                a.applicableChildren.map(child => `<span class="child-badge">${child.prenom}</span>`).join('') : '';
+                            return `
                                 <div class="actualite-card" onclick="showActualiteDetails('${a.id}')">
                                     <div class="actualite-header">
                                         <div class="actualite-icon">
@@ -1685,6 +2200,7 @@
                                         </div>
                                         <div class="actualite-meta">
                                             <h4 class="actualite-title">${a.titre}</h4>
+                                            ${childBadges ? `<div class="child-badges-inline">${childBadges}</div>` : ''}
                                             <span class="actualite-date">${new Date(a.date).toLocaleDateString('fr-FR', {
                                                 weekday: 'long',
                                                 day: 'numeric',
@@ -1698,13 +2214,17 @@
                                         <span class="actualite-read-more">Lire la suite →</span>
                                     </div>
                                 </div>
-                            `).join('');
-                        }
+                            `;
+                        }).join('');
+                    }
 
-                        // Afficher toutes les actualités dans une grille de cartes
-                        const actualitesListEl = document.getElementById('actualitesList');
-                        if (actualitesListEl) {
-                            actualitesListEl.innerHTML = actualites.map(a => `
+                    // Afficher toutes les actualités dans une grille de cartes
+                    const actualitesListEl = document.getElementById('actualitesList');
+                    if (actualitesListEl) {
+                        actualitesListEl.innerHTML = allActualites.map(a => {
+                            const childBadges = a.applicableChildren.length < familyMembers.length ?
+                                a.applicableChildren.map(child => `<span class="child-badge">${child.prenom}</span>`).join('') : '';
+                            return `
                                 <div class="actualite-card-full" onclick="showActualiteDetails('${a.id}')">
                                     <div class="actualite-card-header">
                                         <div class="actualite-icon-large">
@@ -1712,6 +2232,7 @@
                                         </div>
                                         <div class="actualite-content">
                                             <h3 class="actualite-title-full">${a.titre}</h3>
+                                              ${childBadges ? `<div class="child-badges-inline">${childBadges}</div>` : ''}
                                             <div class="actualite-meta-full">
                                                 <span class="actualite-date-full">${new Date(a.date).toLocaleDateString('fr-FR', {
                                                     weekday: 'long',
@@ -1731,128 +2252,19 @@
                                         </button>
                                     </div>
                                 </div>
-                            `).join('');
-                        }
+                            `;}).join('');
                     }
                 }
-            } catch (error) {
+            }
+            catch (error) {
                 console.error('Erreur chargement actualités:', error);
-            }
-
-            // Charger les absences
-            try {
-                const response = await fetch(`${API_URL}/absences/eleve/${eleveId}`, {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'x-user-id': eleveId,
-                        'x-user-role': 'eleve'
-                    }
-                });
-                
-                if (response.ok) {
-                    const absences = await response.json();
-                    const totalAbsencesEl = document.getElementById('totalAbsences');
-                    if (totalAbsencesEl) {
-                        totalAbsencesEl.textContent = absences.length;
-                    }
-
-                    const absencesListEl = document.getElementById('absencesList');
-                    if (absencesListEl) {
-                        if (absences.length > 0) {
-                            absencesListEl.innerHTML = absences.map(a => `
-                                <div class="absence-card">
-                                    <span class="material-icons">event_busy</span>
-                                    <div>
-                                        <strong>${new Date(a.date).toLocaleDateString('fr-FR')}</strong>
-                                        <p>${a.type || 'Absence'} - ${a.motif || 'Non spécifié'}</p>
-                                    </div>
-                                </div>
-                            `).join('');
-                        } else {
-                            absencesListEl.innerHTML = '<p class="text-on-surface-variant">Aucune absence enregistrée</p>';
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur chargement absences:', error);
-            }
-
-            // Charger les appréciations
-            try {
-                const response = await fetch(`${API_URL}/appreciations/eleve/${eleveId}`, {
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'x-user-id': eleveId,
-                        'x-user-role': 'eleve'
-                    }
-                });
-                
-                if (response.ok) {
-                    const appreciations = await response.json();
-                    const totalAppreciationsEl = document.getElementById('totalAppreciations');
-                    if (totalAppreciationsEl) {
-                        totalAppreciationsEl.textContent = appreciations.length;
-                    }
-
-                    if (appreciations.length > 0) {
-                        const recent = appreciations.slice(0, 3);
-                        const recentAppreciationsEl = document.getElementById('recentAppreciations');
-                        if (recentAppreciationsEl) {
-                            recentAppreciationsEl.innerHTML = recent.map(a => `
-                                <div class="appreciation-card">
-                                    <div class="appreciation-header">
-                                        <span class="appreciation-subject">${a.matiere || 'Général'}</span>
-                                        <span class="appreciation-date">${a.periode || ''}</span>
-                                    </div>
-                                    <p class="appreciation-text">${a.commentaire || ''}</p>
-                                    ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
-                                </div>
-                            `).join('');
-                        }
-
-                        const appreciationsListEl = document.getElementById('appreciationsList');
-                        if (appreciationsListEl) {
-                            appreciationsListEl.innerHTML = appreciations.map(a => `
-                                <div class="appreciation-card">
-                                    <div class="appreciation-header">
-                                        <span class="appreciation-subject">${a.matiere || 'Général'}</span>
-                                        <span class="appreciation-date">${a.periode || ''}</span>
-                                    </div>
-                                    <p class="appreciation-text">${a.commentaire || ''}</p>
-                                    ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
-                                </div>
-                            `).join('');
-                        }
-                    } else {
-                        const recentAppreciationsEl = document.getElementById('recentAppreciations');
-                        if (recentAppreciationsEl) {
-                            recentAppreciationsEl.innerHTML = '<p class="text-on-surface-variant">Aucune appréciation récente</p>';
-                        }
-                        const appreciationsListEl = document.getElementById('appreciationsList');
-                        if (appreciationsListEl) {
-                            appreciationsListEl.innerHTML = '<p class="text-on-surface-variant">Aucune appréciation</p>';
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur chargement appréciations:', error);
-            }
-
-            // Charger les messages
-            await loadMessages();
-            // Charger les informations de frais d'inscription (élève ou famille)
-            try {
-                await loadFraisData();
-            } catch (e) {
-                console.warn('Erreur chargement frais:', e);
             }
         }
 
-        // Variables globales pour la messagerie
-        let allMessages = { received: [], sent: [] };
-        let currentMessageView = 'received';
-        let selectedDestinatairesMessage = [];
-        let availableDestinataires = [];
+        // Variables globales pour les statistiques
+        let totalAbsencesCount = 0;
+        let totalAppreciationsCount = 0;
+        let totalUnreadMessages = 0;
 
         async function loadMessages() {
             try {
@@ -1866,23 +2278,59 @@
                     </div>
                 `;
 
-                const response = await fetch(`${API_URL}/messagerie`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'x-user-id': currentChild.id,
-                        'x-user-role': 'eleve'
-                    }
-                });
-                const messages = await response.json();
+                // Charger les messages de tous les enfants de la famille
+                let allReceivedMessages = [];
+                let allSentMessages = [];
 
-                if (!response.ok) {
-                    showSnackbar(messages.error || 'Erreur chargement messages');
-                    return;
+                if (familyMembers && familyMembers.length > 0) {
+                    for (const child of familyMembers) {
+                        try {
+                            const response = await fetch(`${API_URL}/messagerie`, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'x-user-id': child.id,
+                                    'x-user-role': 'eleve'
+                                }
+                            });
+
+                            if (response.ok) {
+                                const messages = await response.json();
+                                
+                                // Ajouter l'enfant à chaque message pour l'identification
+                                const received = messages.filter(m => m.destinataireId === child.id).map(m => ({ ...m, child: child }));
+                                const sent = messages.filter(m => m.expediteurId === child.id).map(m => ({ ...m, child: child }));
+                                
+                                allReceivedMessages = allReceivedMessages.concat(received);
+                                allSentMessages = allSentMessages.concat(sent);
+                            }
+                        } catch (childError) {
+                            console.error(`Erreur chargement messages pour ${child.prenom}:`, childError);
+                        }
+                    }
+                } else {
+                    // Fallback pour un seul enfant
+                    const response = await fetch(`${API_URL}/messagerie`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'x-user-id': currentChild.id,
+                            'x-user-role': 'eleve'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const messages = await response.json();
+                        allReceivedMessages = messages.filter(m => m.destinataireId === currentChild.id).map(m => ({ ...m, child: currentChild }));
+                        allSentMessages = messages.filter(m => m.expediteurId === currentChild.id).map(m => ({ ...m, child: currentChild }));
+                    }
                 }
 
-                // Séparer reçus et envoyés
-                allMessages.received = messages.filter(m => m.destinataireId === currentChild.id);
-                allMessages.sent = messages.filter(m => m.expediteurId === currentChild.id);
+                // Trier par date (plus récent en premier)
+                allReceivedMessages.sort((a, b) => new Date(b.date) - new Date(a.date));
+                allSentMessages.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Stocker globalement
+                allMessages.received = allReceivedMessages;
+                allMessages.sent = allSentMessages;
 
                 // Mettre à jour les compteurs
                 const receivedCountEl = document.getElementById('received-count');
@@ -1960,6 +2408,9 @@
                 year: 'numeric'
             });
 
+            // Badge pour l'enfant concerné
+            const childBadge = message.child ? `<div class="child-badges-inline"><span class="child-badge">${message.child.prenom}</span></div>` : '';
+
             return `
                 <div class="message-card ${!message.lu && isReceived ? 'unread' : ''}" onclick="openMessage('${message.id}')">
                     <div class="message-avatar">${otherInitial}</div>
@@ -1968,6 +2419,7 @@
                             <span class="message-sender">${isReceived ? 'De: ' : 'À: '}${otherName || 'Inconnu'}</span>
                             <span class="message-date">${date}</span>
                         </div>
+                        ${childBadge}
                         <p class="message-preview">${message.contenu.length > 100 ? message.contenu.substring(0, 100) + '...' : message.contenu}</p>
                     </div>
                     ${!message.lu && isReceived ? '<div class="message-unread-dot"></div>' : ''}
@@ -2013,7 +2465,7 @@
             const message = [...allMessages.received, ...allMessages.sent].find(m => m.id === id);
             if (!message) return;
 
-            const isReceived = message.destinataireId === currentChild.id;
+            const isReceived = message.destinataireId === message.child.id;
 
             // Marquer comme lu si c'est un message reçu non lu
             if (isReceived && !message.lu) {
@@ -2021,7 +2473,7 @@
                     await fetch(`${API_URL}/messagerie/${id}/lu`, {
                         method: 'PUT',
                         headers: {
-                            'x-user-id': currentChild.id,
+                            'x-user-id': message.child.id,
                             'x-user-role': 'eleve'
                         }
                     });
@@ -2043,7 +2495,10 @@
                 minute: '2-digit'
             });
 
-            showDialog(`Message ${isReceived ? 'reçu' : 'envoyé'}`, `
+            // Afficher pour quel enfant est le message
+            const childInfo = message.child ? ` pour ${message.child.prenom} ${message.child.nom}` : '';
+
+            showDialog(`Message ${isReceived ? 'reçu' : 'envoyé'}${childInfo}`, `
                 <div class="message-detail">
                     <div class="message-detail-header">
                         <div class="message-detail-meta">
@@ -2054,6 +2509,12 @@
                             <span class="message-detail-label">Date:</span>
                             <span class="message-detail-value">${date}</span>
                         </div>
+                        ${message.child ? `
+                        <div class="message-detail-meta">
+                            <span class="message-detail-label">Concernant:</span>
+                            <span class="message-detail-value">${message.child.prenom} ${message.child.nom}</span>
+                        </div>
+                        ` : ''}
                     </div>
                     <div class="message-detail-content">
                         ${message.contenu.replace(/\n/g, '<br>')}
@@ -2064,8 +2525,12 @@
 
         function updateMessageBadge() {
             const unreadCount = allMessages.received.filter(m => !m.lu).length;
+            
+            // Mettre à jour la variable globale
+            totalUnreadMessages = unreadCount;
+            
+            // Mettre à jour le badge dans la sidebar
             const badge = document.getElementById('messageBadge');
-
             if (badge) {
                 if (unreadCount > 0) {
                     badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
@@ -2073,6 +2538,12 @@
                 } else {
                     badge.style.display = 'none';
                 }
+            }
+            
+            // Mettre à jour le widget sur l'accueil
+            const unreadMessagesEl = document.getElementById('unreadMessages');
+            if (unreadMessagesEl) {
+                unreadMessagesEl.textContent = unreadCount;
             }
         }
 
@@ -2105,6 +2576,12 @@
 
                 showDialog('Nouveau message', `
                     <div class="compose-message">
+                        <div class="child-selection-section">
+                            <label class="destinataires-label">Envoyer en tant que:</label>
+                            <select id="selectedChildForMessage" class="child-select">
+                                ${familyMembers.map(child => `<option value="${child.id}">${child.prenom} ${child.nom}</option>`).join('')}
+                            </select>
+                        </div>
                         <div class="destinataires-section">
                             <label class="destinataires-label">Destinataires:</label>
                             <div class="destinataires-input">
@@ -2141,6 +2618,39 @@
                     <button class="md-btn md-btn-text" onclick="closeDialog()">Annuler</button>
                     <button class="md-btn md-btn-filled" onclick="sendMessage()">Envoyer</button>
                 `;
+
+                // Ajouter un event listener pour recharger les destinataires quand l'enfant change
+                const childSelect = document.getElementById('selectedChildForMessage');
+                if (childSelect) {
+                    childSelect.addEventListener('change', async () => {
+                        const selectedChildId = childSelect.value;
+                        try {
+                            const response = await fetch(`${API_URL}/messagerie/destinataires`, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'x-user-id': selectedChildId,
+                                    'x-user-role': 'eleve'
+                                }
+                            });
+                            const newDestinataires = await response.json();
+                            if (response.ok) {
+                                availableDestinataires = newDestinataires;
+                                // Vider les destinataires sélectionnés
+                                selectedDestinatairesMessage = [];
+                                document.getElementById('selectedDestinataires').innerHTML = '';
+                                // Mettre à jour la liste des destinataires disponibles
+                                document.getElementById('destinatairesList').innerHTML = newDestinataires.map(d => `
+                                    <div class="destinataire-option" onclick="addDestinataire('${d.id}', '${d.nom.replace(/'/g, "\\'")}')">
+                                        <span class="destinataire-name">${d.nom}</span>
+                                        <span class="destinataire-role">${d.role}</span>
+                                    </div>
+                                `).join('');
+                            }
+                        } catch (error) {
+                            console.error('Erreur rechargement destinataires:', error);
+                        }
+                    });
+                }
 
             } catch (error) {
                 console.error('Erreur chargement destinataires:', error);
@@ -2203,12 +2713,14 @@
 
         async function sendMessage() {
             const contentEl = document.getElementById('messageContent');
-            if (!contentEl) return;
+            const childSelectEl = document.getElementById('selectedChildForMessage');
+            if (!contentEl || !childSelectEl) return;
 
             const contenu = contentEl.value.trim();
+            const selectedChildId = childSelectEl.value;
 
-            if (selectedDestinatairesMessage.length === 0 || !contenu) {
-                showSnackbar('Veuillez sélectionner au moins un destinataire et saisir un message');
+            if (selectedDestinatairesMessage.length === 0 || !contenu || !selectedChildId) {
+                showSnackbar('Veuillez sélectionner un enfant, au moins un destinataire et saisir un message');
                 return;
             }
 
@@ -2218,11 +2730,11 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
-                        'x-user-id': currentChild.id,
+                        'x-user-id': selectedChildId,
                         'x-user-role': 'eleve'
                     },
                     body: JSON.stringify({
-                        expediteurId: currentChild.id,
+                        expediteurId: selectedChildId,
                         destinataires: selectedDestinatairesMessage.map(d => ({ id: d.id, type: d.type, role: d.role })),
                         contenu
                     })
@@ -2310,8 +2822,8 @@
         }
 
         async function loadFraisData() {
-            const eleveId = currentChild && currentChild.id;
-            const container = document.getElementById('fraisContainer');
+            console.log('loadFraisData called');
+            const container = document.getElementById('fraisSectionContainer');
             if (!container) return;
 
             container.innerHTML = `
@@ -2322,22 +2834,31 @@
             `;
 
             try {
-                // Si on a plusieurs enfants, proposer l'agrégation famille pour les admins et secrétaires
                 let feesData = null;
+                let eleveId = user.id; // Pour les élèves, toujours utiliser leur propre ID
 
-                if (familyMembers && familyMembers.length > 1 && (user.role === 'secretaire' || user.role === 'directeur' || user.role === 'admin')) {
-                    // Appel API famille (agrégé)
-                    const resp = await fetch(`${API_URL}/frais/famille/${encodeURIComponent(user.email)}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (resp.ok) feesData = await resp.json();
+                // Pour les admins, permettre de voir les frais de l'enfant sélectionné
+                if (user.role === 'secretaire' || user.role === 'directeur' || user.role === 'admin') {
+                    eleveId = currentChild && currentChild.id;
                 }
 
-                if (!feesData && eleveId) {
-                    const resp = await fetch(`${API_URL}/frais/eleve/${eleveId}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                if (eleveId) {
+                    console.log('Chargement frais pour élève:', eleveId);
+                    const resp = await fetch(`${API_URL}/eleves/frais/${eleveId}`, {
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'x-user-role': user.role,
+                            'x-user-id': user.id
+                        }
                     });
-                    if (resp.ok) feesData = await resp.json();
+                    console.log('Réponse frais status:', resp.status);
+                    if (resp.ok) {
+                        feesData = await resp.json();
+                        console.log('Données frais reçues:', feesData);
+                    } else {
+                        const errorText = await resp.text();
+                        console.error('Erreur frais:', resp.status, errorText);
+                    }
                 }
 
                 if (!feesData) {
@@ -2345,12 +2866,14 @@
                     return;
                 }
 
-                // Render into the accueil widget and into the dedicated tab (si présent)
-                renderFraisSection(feesData, 'fraisContainer');
+                // Render into the dedicated tab (si présent)
                 renderFraisSection(feesData, 'fraisSectionContainer');
             } catch (error) {
                 console.error('Erreur fetch frais:', error);
-                container.innerHTML = '<p class="text-on-surface-variant">Erreur lors du chargement des frais.</p>';
+                console.error('Error details:', error.message, error.stack);
+                if (container) {
+                    container.innerHTML = '<p class="text-on-surface-variant">Erreur lors du chargement des frais.</p>';
+                }
             }
         }
 
@@ -2358,13 +2881,11 @@
             const container = document.getElementById(containerId);
             if (!container) return;
 
-            // Structure attendue: { total, paid, remaining, reduction, payments: [ { id, montant, date, valide, eleveId } ] }
-            const total = data.total || 0;
-            const paid = data.paid || 0;
-            const remaining = Math.max(0, total - paid);
-            const reduction = data.reduction || 0;
-            const payments = data.payments || [];
-
+            // Structure de l'API: { eleve: { fraisInscription, nbPaiements, fraisValide, paiementsEffectues }, fraisParPaiement, resteAPayer }
+            const eleve = data.eleve;
+            const total = eleve.fraisInscription || 0;
+            const paid = (eleve.paiementsEffectues || 0) * data.fraisParPaiement;
+            const remaining = Math.max(0, data.resteAPayer || 0);
             const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
 
             const isAdminView = (user.role === 'secretaire' || user.role === 'directeur' || user.role === 'admin');
@@ -2374,13 +2895,12 @@
                     <div style="flex:1; min-width:220px;">
                         <div style="font-weight:600; margin-bottom:8px;">Montant total</div>
                         <div style="font-size:1.25rem; margin-bottom:8px;">${formatCurrency(total)}</div>
-                        ${reduction ? `<div class="form-help">Réduction famille: ${reduction}% appliquée</div>` : ''}
                     </div>
                     <div style="flex:1; min-width:220px;">
                         <div style="font-weight:600; margin-bottom:8px;">Payé</div>
                         <div style="font-size:1.25rem; color:var(--md-sys-color-primary); margin-bottom:8px;">${formatCurrency(paid)}</div>
                         <div style="font-weight:600; margin-bottom:8px;">Reste à payer</div>
-                        <div style="font-size:1.1rem; color:var(--md-sys-color-error);">${formatCurrency(remaining)}</div>
+                        <div style="font-size:1.1rem; color:${remaining > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">${formatCurrency(remaining)}</div>
                     </div>
                     <div style="flex-basis:100%;">
                         <div style="height:12px; background:var(--md-sys-color-surface-container); border-radius:8px; overflow:hidden; margin:12px 0;">
@@ -2392,21 +2912,16 @@
 
                 <div style="margin-top:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong>Historique des paiements</strong>
-                        ${isAdminView ? '<button class="md-btn md-btn-primary" onclick="openAddPaymentDialog()">Enregistrer paiement</button>' : ''}
+                        <strong>Statut des frais</strong>
                     </div>
-                    <div>
-                        ${payments.length === 0 ? '<p class="text-on-surface-variant">Aucun paiement enregistré.</p>' : payments.map(p => `
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:8px; background:var(--md-sys-color-surface-container); margin-bottom:8px;">
-                                <div>
-                                    <div style="font-weight:600;">${formatCurrency(p.montant)}</div>
-                                    <div style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant);">${new Date(p.date).toLocaleDateString('fr-FR')}</div>
-                                </div>
-                                <div style="display:flex; gap:8px; align-items:center;">
-                                    ${p.valide ? '<span style="color:var(--md-sys-color-primary); font-weight:600;">Validé</span>' : (isAdminView ? `<button class="md-btn md-btn-text" onclick="validatePayment('${p.id}')">Valider</button>` : '<span style="color:var(--md-sys-color-error);">Non validé</span>')}
-                                </div>
-                            </div>
-                        `).join('')}
+                    <div style="padding:12px; background:var(--md-sys-color-surface-container); border-radius:8px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="material-icons" style="color:${eleve.fraisValide ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-error)'};">${eleve.fraisValide ? 'check_circle' : 'error'}</span>
+                            <span style="font-weight:600;">${eleve.fraisValide ? 'Frais validés' : 'Frais non validés'}</span>
+                        </div>
+                        <div style="margin-top:8px; font-size:0.9rem; color:var(--md-sys-color-on-surface-variant);">
+                            ${eleve.paiementsEffectues || 0} paiement(s) effectué(s) sur ${eleve.nbPaiements || 1} prévu(s)
+                        </div>
                     </div>
                 </div>
             `;
@@ -2609,106 +3124,439 @@
 
         // Gestion du profil
         async function loadProfile() {
-            if (!currentChild || !currentChild.id) {
-                showSnackbar('Erreur: utilisateur non défini');
+            if (!parentInfo) {
+                showSnackbar('Informations du parent non disponibles');
+                return;
+            }
+            
+            // Vérifier si les données de famille sont chargées
+            if (!familyMembers || familyMembers.length === 0) {
+                showSnackbar('Chargement des données familiales en cours...');
+                // Attendre un peu et réessayer
+                setTimeout(() => loadProfile(), 1000);
                 return;
             }
             
             try {
-                const response = await fetch(`${API_URL}/eleves/profil`, {
-                    headers: {
-                        'x-user-id': currentChild.id,
-                        'x-user-role': 'eleve'
-                    }
-                });
+                // Afficher les informations du parent
+                document.getElementById('profileName').textContent = `${parentInfo.prenom || ''} ${parentInfo.nom || ''}`;
+                document.getElementById('profileClass').textContent = 'Parent';
                 
-                if (response.ok) {
-                    const profile = await response.json();
-                    
-                    // Mettre à jour l'affichage du profil
-                    document.getElementById('profileName').textContent = `${profile.prenom || ''} ${profile.nom || ''}`;
-                    document.getElementById('profileClass').textContent = currentChild.classe || 'Classe non assignée';
-                    document.getElementById('profileEmailDisplay').textContent = profile.email || 'Non défini';
-                    document.getElementById('profilePhoneDisplay').textContent = profile.parentTel || 'Non défini';
-                    
-                    // Mettre à jour l'avatar
-                    const avatarEl = document.getElementById('profileAvatar');
-                    if (profile.photo) {
-                        avatarEl.innerHTML = `<img src="${profile.photo}" alt="${profile.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-                    } else {
-                        avatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
-                    }
-                    
-                    // Mettre à jour les champs du formulaire
-                    document.getElementById('profileEmail').value = profile.email || '';
-                    document.getElementById('profilePhone').value = profile.parentTel || '';
+                // Utiliser l'email de l'utilisateur connecté (user) comme email du parent
+                const parentEmail = user && user.email ? user.email : 'Non défini';
+                const parentPhone = parentInfo.telephone || 'Non défini';
+                
+                document.getElementById('profileEmailDisplay').textContent = parentEmail;
+                document.getElementById('profilePhoneDisplay').textContent = parentPhone;
+                
+                // Mettre à jour l'avatar du parent
+                const avatarEl = document.getElementById('profileAvatar');
+                if (parentInfo.photo) {
+                    avatarEl.innerHTML = `<img src="${parentInfo.photo}" alt="${parentInfo.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
                 } else {
-                    const error = await response.json();
-                    showSnackbar('Erreur lors du chargement du profil: ' + (error.message || 'Erreur inconnue'));
+                    avatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
                 }
+                
+                // Mettre à jour les champs du formulaire
+                document.getElementById('profileEmail').value = user && user.email ? user.email : '';
+                document.getElementById('profilePhone').value = parentInfo.telephone || '';
+                
+                // Peupler la liste des élèves pour la sélection d'image
+                populateStudentSelector();
+                
+                // Générer les champs de photo pour chaque élève
+                generateStudentPhotoFields();
             } catch (error) {
                 showSnackbar('Erreur lors du chargement du profil');
             }
         }
 
+        function populateStudentSelector() {
+            const selector = document.getElementById('studentPhotoSelector');
+            if (!selector) return;
+            
+            selector.innerHTML = '<option value="">-- Sélectionner un élève --</option>';
+            
+            if (familyMembers && familyMembers.length > 0) {
+                familyMembers.forEach(child => {
+                    const option = document.createElement('option');
+                    option.value = child.id;
+                    option.textContent = `${child.prenom} ${child.nom}`;
+                    selector.appendChild(option);
+                });
+            }
+        }
+
+        function generateStudentPhotoFields() {
+            const container = document.getElementById('studentPhotosContainer');
+            if (!container || !familyMembers || familyMembers.length === 0) return;
+            
+            container.innerHTML = '';
+            
+            familyMembers.forEach(child => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'student-photo-field';
+                
+                let photoHtml = '';
+                if (child.photo) {
+                    photoHtml = `
+                        <div class="current-photo-container">
+                            <img src="${child.photo}" alt="Photo actuelle de ${child.prenom}" class="current-photo">
+                            <button type="button" class="delete-photo-btn" data-student-id="${child.id}" title="Supprimer la photo">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                fieldDiv.innerHTML = `
+                    <label for="photo-${child.id}">${child.prenom} ${child.nom}</label>
+                    ${photoHtml}
+                    <input type="file" id="photo-${child.id}" name="photo-${child.id}" accept="image/*" data-student-id="${child.id}">
+                    <input type="hidden" id="delete-photo-${child.id}" name="delete-photo-${child.id}" value="false">
+                `;
+                container.appendChild(fieldDiv);
+            });
+            
+            // Ajouter les event listeners pour les boutons de suppression
+            document.querySelectorAll('.delete-photo-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-student-id');
+                    // Marquer la photo pour suppression
+                    document.getElementById(`delete-photo-${studentId}`).value = 'true';
+                    // Masquer l'image actuelle
+                    this.closest('.current-photo-container').style.display = 'none';
+                    showSnackbar('Photo marquée pour suppression. Cliquez sur "Enregistrer" pour confirmer.');
+                });
+            });
+        }
+
         async function saveProfile(event) {
             event.preventDefault();
             
-            const formData = new FormData();
             const email = document.getElementById('profileEmail').value.trim();
             const phone = document.getElementById('profilePhone').value.trim();
-            const photo = document.getElementById('profilePhoto').files[0];
             
-            if (email) formData.append('email', email);
-            if (phone) formData.append('parentTel', phone);
-            if (photo) formData.append('photo', photo);
+            // Collecter toutes les photos uploadées et les suppressions
+            const photoUploads = [];
+            const photoDeletions = [];
+            familyMembers.forEach(child => {
+                const photoInput = document.getElementById(`photo-${child.id}`);
+                const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                
+                if (photoInput && photoInput.files && photoInput.files.length > 0) {
+                    photoUploads.push({
+                        studentId: child.id,
+                        file: photoInput.files[0],
+                        studentName: `${child.prenom} ${child.nom}`
+                    });
+                }
+                
+                if (deleteInput && deleteInput.value === 'true') {
+                    photoDeletions.push({
+                        studentId: child.id,
+                        studentName: `${child.prenom} ${child.nom}`
+                    });
+                }
+            });
             
-            if (!email && !phone && !photo) {
-                showSnackbar('Veuillez modifier au moins un champ');
+            if (!email && !phone && photoUploads.length === 0 && photoDeletions.length === 0) {
+                showSnackbar('Veuillez modifier au moins un champ ou uploader/supprimer au moins une photo');
                 return;
             }
             
             try {
-                const response = await fetch(`${API_URL}/eleves/profil`, {
-                    method: 'PUT',
-                    headers: {
-                        'x-user-id': currentChild.id,
-                        'x-user-role': 'eleve'
-                    },
-                    body: formData
-                });
+                let hasErrors = false;
+                const errorMessages = [];
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    showSnackbar('Profil mis à jour avec succès !');
+                // Traiter les uploads de photos pour chaque élève
+                for (const upload of photoUploads) {
+                    try {
+                        const studentFormData = new FormData();
+                        studentFormData.append('photo', upload.file);
+                        
+                        const studentResponse = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': upload.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: studentFormData
+                        });
+                        
+                        if (!studentResponse.ok) {
+                            const error = await studentResponse.json();
+                            errorMessages.push(`Erreur pour ${upload.studentName}: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            // Mettre à jour l'avatar de l'élève dans la liste des membres de la famille
+                            const updatedStudent = familyMembers.find(child => child.id === upload.studentId);
+                            if (updatedStudent) {
+                                const result = await studentResponse.json();
+                                if (result.eleve && result.eleve.photo) {
+                                    updatedStudent.photo = result.eleve.photo;
+                                }
+                            }
+                        }
+                    } catch (childError) {
+                        errorMessages.push(`Erreur pour ${upload.studentName}: ${childError.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Traiter les suppressions de photos
+                for (const deletion of photoDeletions) {
+                    try {
+                        const deleteFormData = new FormData();
+                        deleteFormData.append('deletePhoto', 'true');
+                        
+                        const deleteResponse = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': deletion.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: deleteFormData
+                        });
+                        
+                        if (!deleteResponse.ok) {
+                            const error = await deleteResponse.json();
+                            errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            // Mettre à jour les données locales
+                            const updatedStudent = familyMembers.find(child => child.id === deletion.studentId);
+                            if (updatedStudent) {
+                                updatedStudent.photo = null;
+                            }
+                        }
+                    } catch (deleteError) {
+                        errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${deleteError.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Mise à jour du profil parent (email et téléphone seulement)
+                // L'email et le téléphone du parent sont stockés au niveau des enfants
+                if (email || phone) {
+                    let updateSuccess = true;
+                    const updateErrors = [];
                     
-                    // Mettre à jour currentChild avec les nouvelles données
-                    if (result.eleve) {
-                        currentChild.email = result.eleve.email;
-                        currentChild.photo = result.eleve.photo;
-                        currentChild.parentTel = result.eleve.parentTel;
+                    // Mettre à jour l'email et/ou téléphone pour chaque enfant de la famille
+                    for (const child of familyMembers) {
+                        try {
+                            const childFormData = new FormData();
+                            if (email) childFormData.append('email', email);
+                            if (phone) childFormData.append('parentTel', phone);
+                            
+                            const response = await fetch(`${API_URL}/eleves/profil`, {
+                                method: 'PUT',
+                                headers: {
+                                    'x-user-id': child.id,
+                                    'x-user-role': 'eleve'
+                                },
+                                body: childFormData
+                            });
+                            
+                            if (!response.ok) {
+                                const error = await response.json();
+                                updateErrors.push(`Erreur pour ${child.prenom} ${child.nom}: ${error.error || 'Erreur inconnue'}`);
+                                updateSuccess = false;
+                            } else {
+                                // Mettre à jour les données locales
+                                if (email) child.email = email;
+                                if (phone) child.parentTel = phone;
+                            }
+                        } catch (childError) {
+                            updateErrors.push(`Erreur pour ${child.prenom} ${child.nom}: ${childError.message}`);
+                            updateSuccess = false;
+                        }
                     }
                     
-                    // Rafraîchir tous les avatars et informations affichées
-                    updateUserDisplay();
-                    
-                    // Recharger les données du profil avec les nouvelles valeurs
-                    loadProfile();
+                // Afficher le résultat
+                if (hasErrors) {
+                    showSnackbar('Erreurs lors de la mise à jour: ' + errorMessages.join('; '));
                 } else {
-                    const error = await response.json();
-                    showSnackbar(error.error || 'Erreur lors de la mise à jour');
-                }
+                    const successMessage = [];
+                    if (photoUploads.length > 0) successMessage.push(`${photoUploads.length} photo(s) mise(s) à jour`);
+                    if (photoDeletions.length > 0) successMessage.push(`${photoDeletions.length} photo(s) supprimée(s)`);
+                    if (email || phone) successMessage.push('Informations du parent mises à jour');
+                    showSnackbar(successMessage.join(' et ') + ' avec succès !');
+                    
+                    // Rafraîchir l'affichage des cartes de famille
+                    renderFamilyCards();
+                    
+                    // Réinitialiser les champs de fichier et les marqueurs de suppression
+                    familyMembers.forEach(child => {
+                        const photoInput = document.getElementById(`photo-${child.id}`);
+                        const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                        if (photoInput) photoInput.value = '';
+                        if (deleteInput) deleteInput.value = 'false';
+                    });
+                    
+                    // Régénérer les champs de photo pour refléter les changements
+                    generateStudentPhotoFields();
+                }}
             } catch (error) {
                 console.error('Erreur sauvegarde profil:', error);
-                showSnackbar('Erreur lors de la mise à jour du profil');
+                showSnackbar(error.message || 'Erreur lors de la mise à jour du profil');
             }
         }
 
         function resetProfileForm() {
             // Recharger les données du profil pour annuler les modifications
             loadProfile();
-            // Réinitialiser le champ fichier
-            document.getElementById('profilePhoto').value = '';
+            // Réinitialiser tous les champs de fichier des élèves et les marqueurs de suppression
+            familyMembers.forEach(child => {
+                const photoInput = document.getElementById(`photo-${child.id}`);
+                const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                if (photoInput) photoInput.value = '';
+                if (deleteInput) deleteInput.value = 'false';
+            });
+        }
+
+        // Gestion du changement de mot de passe
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation côté client
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showSnackbar('Veuillez remplir tous les champs');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showSnackbar('Le nouveau mot de passe doit contenir au moins 8 caractères');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showSnackbar('Les mots de passe ne correspondent pas');
+                return;
+            }
+            
+            if (currentPassword === newPassword) {
+                showSnackbar('Le nouveau mot de passe doit être différent de l\'ancien');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/change-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-id': user.id,
+                        'x-user-role': user.role
+                    },
+                    body: JSON.stringify({
+                        currentPassword: currentPassword,
+                        newPassword: newPassword
+                    })
+                });
+                
+                if (response.ok) {
+                    showSnackbar('Mot de passe changé avec succès !');
+                    resetPasswordForm();
+                } else {
+                    const error = await response.json();
+                    if (response.status === 401) {
+                        showSnackbar('Mot de passe actuel incorrect');
+                    } else {
+                        showSnackbar(error.error || 'Erreur lors du changement de mot de passe');
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur changePassword:', error);
+                showSnackbar('Erreur réseau lors du changement de mot de passe');
+            }
+        }
+
+        function resetPasswordForm() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        // Initialisation des événements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Événement pour le formulaire de profil
+            const profileForm = document.getElementById('profileForm');
+            if (profileForm) {
+                profileForm.addEventListener('submit', saveProfile);
+            }
+
+            // Événement pour le formulaire de mot de passe
+            const passwordForm = document.getElementById('passwordForm');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', changePassword);
+            }
+        });
+
+        async function loadRecentAppreciations() {
+            try {
+                const recentAppreciationsEl = document.getElementById('recentAppreciations');
+                if (!recentAppreciationsEl) return;
+
+                let allAppreciations = [];
+
+                // Récupérer les appréciations pour chaque enfant
+                for (const child of familyMembers) {
+                    try {
+                        const response = await fetch(`${API_URL}/appreciations/eleve/${child.id}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'x-user-id': child.id,
+                                'x-user-role': 'eleve'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const appreciations = await response.json();
+                            // Ajouter le nom de l'enfant à chaque appréciation
+                            appreciations.forEach(app => {
+                                app.childName = `${child.prenom} ${child.nom}`;
+                            });
+                            allAppreciations = allAppreciations.concat(appreciations);
+                        }
+                    } catch (error) {
+                        console.error(`Erreur chargement appréciations pour ${child.prenom}:`, error);
+                    }
+                }
+
+                // Trier par date décroissante (les plus récentes en premier)
+                allAppreciations.sort((a, b) => new Date(b.dateCreated || b.createdAt || b.date) - new Date(a.dateCreated || a.createdAt || a.date));
+
+                // Prendre les 5 plus récentes
+                const recentOnes = allAppreciations.slice(0, 5);
+
+                if (recentOnes.length > 0) {
+                    recentAppreciationsEl.innerHTML = recentOnes.map(a => `
+                        <div class="appreciation-card">
+                            <div class="appreciation-header">
+                                <span class="appreciation-subject">${a.matiere || 'Général'}</span>
+                                <span class="appreciation-date">${a.periode || ''}</span>
+                            </div>
+                            <div class="child-badges-inline">
+                                <span class="child-badge">${a.childName.split(' ')[0]}</span>
+                            </div>
+                            <p class="appreciation-text">${a.commentaire || ''}</p>
+                            ${a.note ? `<p style="color: var(--md-sys-color-primary); font-weight: 500;">Note: ${a.note}/20</p>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    recentAppreciationsEl.innerHTML = '<p class="text-on-surface-variant">Aucune appréciation récente</p>';
+                }
+            } catch (error) {
+                console.error('Erreur chargement appréciations récentes:', error);
+                const recentAppreciationsEl = document.getElementById('recentAppreciations');
+                if (recentAppreciationsEl) {
+                    recentAppreciationsEl.innerHTML = '<p class="text-on-surface-variant">Erreur de chargement</p>';
+                }
+            }
         }
 
         function logout() {

@@ -895,3 +895,48 @@
 .md-card-outlined {
     border: 1px solid var(--md-sys-color-outline-variant);
 }
+
+/* ===== FAMILY DASHBOARD SECTIONS ===== */
+
+.child-section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background-color: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-large);
+    border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.child-section:first-child {
+    margin-top: var(--spacing-lg);
+}
+
+.child-name {
+    color: var(--md-sys-color-primary);
+    font-size: var(--md-sys-typescale-title-medium-font-size);
+    font-weight: var(--md-sys-typescale-title-medium-font-weight);
+    margin: 0 0 var(--spacing-md) 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--md-sys-color-primary);
+}
+
+.child-absences,
+.child-appreciations {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.child-absences .absence-card,
+.child-appreciations .appreciation-card {
+    padding: var(--spacing-md);
+    background-color: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    border: 1px solid var(--md-sys-color-outline);
+    transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.child-absences .absence-card:hover,
+.child-appreciations .appreciation-card:hover {
+    background-color: var(--md-sys-color-surface-container-highest);
+    box-shadow: var(--md-sys-elevation-1);
+}

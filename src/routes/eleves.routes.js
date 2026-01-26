@@ -30,6 +30,22 @@ const upload = multer({
     }
 });
 
+// Middleware pour gérer les uploads avec ou sans fichier
+const uploadMiddleware = (req, res, next) => {
+    // Utiliser multer seulement si c'est une requête multipart/form-data
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+        upload.single('photo')(req, res, (err) => {
+            if (err) {
+                console.error('Erreur multer:', err);
+                return res.status(400).json({ error: 'Erreur lors du traitement du fichier' });
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+};
+
 // Obtenir tous les élèves
 router.get('/', (req, res) => {
     const userRole = req.headers['x-user-role'];
@@ -60,7 +76,7 @@ router.get('/profil', requireAuth, (req, res) => {
         return res.status(403).json({ message: 'Accès réservé aux élèves' });
     }
 
-    db.get('SELECT id, nom, prenom, email, photo, parentTel FROM eleves WHERE id = ?', [String(req.userId)], (err, row) => {
+    db.get('SELECT id, nom, prenom, email, photo, parentTel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues FROM eleves WHERE id = ?', [String(req.userId)], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!row) return res.status(404).json({ message: 'Élève non trouvé' });
         res.json(row);
@@ -68,15 +84,19 @@ router.get('/profil', requireAuth, (req, res) => {
 });
 
 // Mettre à jour le profil de l'élève connecté
-router.put('/profil', requireAuth, upload.single('photo'), (req, res) => {
-    if (req.userRole !== 'eleve') {
-        return res.status(403).json({ message: 'Accès réservé aux élèves' });
-    }
+router.put('/profil', requireAuth, uploadMiddleware, (req, res) => {
+    try {
+        if (req.userRole !== 'eleve') {
+            return res.status(403).json({ message: 'Accès réservé aux élèves' });
+        }
 
-    const { email, parentTel } = req.body;
-    const photo = req.file ? `/uploads/${req.file.filename}` : null;
+        console.log('PUT /profil - req.body:', req.body);
+        console.log('PUT /profil - req.file:', req.file);
 
-    // Validation basique
+        const { email, parentTel, deletePhoto } = req.body;
+        // deletePhoto peut être un array ou une string selon comment c'est envoyé
+        const deletePhotoValue = Array.isArray(deletePhoto) ? deletePhoto[0] : deletePhoto;
+        const photo = req.file ? `/uploads/${req.file.filename}` : null;
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return res.status(400).json({ error: 'Email invalide' });
     }
@@ -85,8 +105,33 @@ router.put('/profil', requireAuth, upload.single('photo'), (req, res) => {
         return res.status(400).json({ error: 'Numéro de téléphone invalide' });
     }
 
-    // Si une nouvelle photo est uploadée, supprimer l'ancienne
-    if (photo) {
+    // Gestion de la suppression de photo
+    if (deletePhotoValue === 'true') {
+        // Récupérer l'ancienne photo pour la supprimer du système de fichiers
+        db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+            if (err) {
+                console.error('Erreur récupération photo pour suppression:', err);
+            } else if (row && row.photo) {
+                // Supprimer l'image du système de fichiers
+                const photoPath = path.join(__dirname, '../../public', row.photo);
+                fs.access(photoPath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        // Le fichier existe, on peut le supprimer
+                        fs.unlink(photoPath, (err) => {
+                            if (err) {
+                                console.error('Erreur suppression photo:', err);
+                            } else {
+                                console.log('Photo supprimée:', photoPath);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Si une nouvelle photo est uploadée, supprimer l'ancienne (sauf si on est en train de supprimer)
+    if (photo && deletePhotoValue !== 'true') {
         // Récupérer l'ancienne photo
         db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
             if (err) {
@@ -114,12 +159,12 @@ router.put('/profil', requireAuth, upload.single('photo'), (req, res) => {
     let updateFields = [];
     let updateValues = [];
 
-    if (email !== undefined) {
+    if (email !== undefined && email !== '') {
         updateFields.push('email = ?');
         updateValues.push(email);
     }
 
-    if (parentTel !== undefined) {
+    if (parentTel !== undefined && parentTel !== '') {
         updateFields.push('parentTel = ?');
         updateValues.push(parentTel);
     }
@@ -127,7 +172,17 @@ router.put('/profil', requireAuth, upload.single('photo'), (req, res) => {
     if (photo) {
         updateFields.push('photo = ?');
         updateValues.push(photo);
+    } else if (deletePhotoValue === 'true') {
+        updateFields.push('photo = NULL');
     }
+
+    // Si aucun champ n'est spécifié mais qu'on veut supprimer la photo, permettre la mise à jour
+    if (updateFields.length === 0 && deletePhotoValue === 'true') {
+        updateFields.push('photo = NULL');
+    }
+
+    console.log('PUT /profil - updateFields:', updateFields);
+    console.log('PUT /profil - updateValues:', updateValues);
 
     if (updateFields.length === 0) {
         return res.status(400).json({ error: 'Aucun champ à mettre à jour' });
@@ -147,6 +202,10 @@ router.put('/profil', requireAuth, upload.single('photo'), (req, res) => {
             res.json({ message: 'Profil mis à jour avec succès', eleve: row });
         });
     });
+    } catch (error) {
+        console.error('Erreur dans PUT /profil:', error);
+        res.status(500).json({ error: 'Erreur serveur interne' });
+    }
 });
 
 // Obtenir un élève par ID
@@ -427,6 +486,76 @@ router.get('/check-token/:token', (req, res) => {
             res.json(row);
         }
     );
+});
+
+// ================== FRAIS D'INSCRIPTION ==================
+
+// Obtenir les frais d'un élève
+router.get('/frais/:id', requireAuth, (req, res) => {
+    const eleveId = req.params.id;
+    console.log('Requête frais pour élève:', eleveId, 'par utilisateur:', req.userId, 'rôle:', req.userRole);
+    
+    // Vérifier les permissions : l'élève peut voir ses propres frais, les admins peuvent voir tous
+    if (req.userRole === 'eleve' && req.userId !== eleveId) {
+        console.log('Accès refusé: élève essaie de voir les frais d\'un autre élève');
+        return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+    
+    db.get('SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues FROM eleves WHERE id = ?', [eleveId], (err, row) => {
+        if (err) {
+            console.error('Erreur DB frais:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        if (!row) {
+            console.log('Élève non trouvé:', eleveId);
+            return res.status(404).json({ message: 'Élève non trouvé' });
+        }
+        
+        console.log('Données frais trouvées:', row);
+        const fraisParPaiement = row.fraisInscription / row.nbPaiements;
+        const resteAPayer = row.fraisInscription - (row.paiementsEffectues * fraisParPaiement);
+        
+        const result = {
+            eleve: row,
+            fraisParPaiement: fraisParPaiement,
+            resteAPayer: resteAPayer
+        };
+        
+        console.log('Réponse frais:', result);
+        res.json(result);
+    });
+});
+
+// Obtenir les frais d'une famille
+router.get('/frais/famille/:email', requireAuth, (req, res) => {
+    const email = req.params.email;
+    
+    // Vérifier les permissions : seuls les admins/secrétaires/directeurs peuvent voir les frais famille
+    if (!['admin', 'secretaire', 'directeur'].includes(req.userRole)) {
+        return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+    
+    db.all(`
+        SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues 
+        FROM eleves 
+        WHERE email = ? OR familleLienId IN (
+            SELECT familleLienId FROM eleves WHERE email = ? AND familleLienId IS NOT NULL
+        )
+    `, [email, email], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        const totalFrais = rows.reduce((sum, eleve) => sum + (eleve.fraisInscription || 0), 0);
+        const totalPaiements = rows.reduce((sum, eleve) => sum + (eleve.paiementsEffectues || 0), 0);
+        const fraisParPaiement = rows.length > 0 ? totalFrais / rows[0].nbPaiements : 0;
+        
+        res.json({
+            membres: rows,
+            totalFrais: totalFrais,
+            totalPaiementsEffectues: totalPaiements,
+            fraisParPaiement: fraisParPaiement,
+            resteAPayer: totalFrais - (totalPaiements * fraisParPaiement)
+        });
+    });
 });
 
 module.exports = router;

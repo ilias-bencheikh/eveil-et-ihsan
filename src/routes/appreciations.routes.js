@@ -39,12 +39,13 @@ router.get('/eleve/:eleveId', (req, res) => {
 router.post('/', (req, res) => {
     const { eleveId, professeurId, matiere, periode, note, commentaire, createdByRole } = req.body;
     const id = generateId();
+    const dateCreated = new Date().toISOString();
 
-    db.run('INSERT INTO appreciations VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [id, eleveId, professeurId, matiere, periode, note || null, commentaire, createdByRole || null],
+    db.run('INSERT INTO appreciations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [id, eleveId, professeurId, matiere, periode, note || null, commentaire, createdByRole || null, dateCreated],
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ id, eleveId, professeurId, matiere, periode, note, commentaire, createdByRole });
+            res.status(201).json({ id, eleveId, professeurId, matiere, periode, note, commentaire, createdByRole, dateCreated });
         }
     );
 });

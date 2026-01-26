@@ -4,6 +4,7 @@ const { db } = require('../config/database');
 const { TOKEN_EXPIRY } = require('../config/constants');
 const { sendEmail } = require('../config/email');
 const { generateToken, dbGet, dbRun } = require('../utils/helpers');
+const { requireAuth } = require('../middleware/auth');
 
 // Login
 router.post('/login', (req, res) => {
@@ -200,6 +201,49 @@ router.post('/reset-password', async (req, res) => {
         console.error('Erreur:', error);
         res.status(500).json({ error: 'Erreur serveur' });
     }
+});
+
+// Changer le mot de passe (utilisateur connecté)
+router.put('/change-password', requireAuth, (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Mot de passe actuel et nouveau mot de passe requis' });
+    }
+    
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'Le nouveau mot de passe doit contenir au moins 8 caractères' });
+    }
+    
+    const userId = req.userId;
+    const userRole = req.userRole;
+    
+    // Déterminer la table selon le rôle
+    let tableName;
+    if (userRole === 'eleve') tableName = 'eleves';
+    else if (userRole === 'professeur') tableName = 'professeurs';
+    else if (userRole === 'staff') tableName = 'staff';
+    else return res.status(400).json({ error: 'Rôle utilisateur invalide' });
+    
+    // Vérifier l'ancien mot de passe
+    db.get(`SELECT * FROM ${tableName} WHERE id = ? AND password = ?`, 
+        [userId, currentPassword], 
+        (err, userRow) => {
+            if (err) return res.status(500).json({ error: err.message });
+            if (!userRow) return res.status(400).json({ error: 'Mot de passe actuel incorrect' });
+            
+            // Mettre à jour avec le nouveau mot de passe
+            db.run(`UPDATE ${tableName} SET password = ? WHERE id = ?`, 
+                [newPassword, userId], 
+                function(err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    if (this.changes === 0) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+                    
+                    res.json({ success: true, message: 'Mot de passe changé avec succès' });
+                }
+            );
+        }
+    );
 });
 
 module.exports = router;
