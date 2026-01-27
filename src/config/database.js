@@ -98,9 +98,16 @@ function initDatabase() {
                 commentaire TEXT,
                 createdByRole TEXT,
                 dateCreated TEXT DEFAULT CURRENT_TIMESTAMP,
+                batchId TEXT,
+                classe TEXT,
                 FOREIGN KEY (eleveId) REFERENCES eleves(id),
                 FOREIGN KEY (professeurId) REFERENCES professeurs(id)
             )`);
+
+            // Migrations pour ajouter les colonnes manquantes
+            db.run(`ALTER TABLE appreciations ADD COLUMN dateCreated TEXT DEFAULT CURRENT_TIMESTAMP`, () => {});
+            db.run(`ALTER TABLE appreciations ADD COLUMN batchId TEXT`, () => {});
+            db.run(`ALTER TABLE appreciations ADD COLUMN classe TEXT`, () => {});
 
             // Table messages
             db.run(`CREATE TABLE IF NOT EXISTS messages (

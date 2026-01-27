@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="all">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" media="all">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    
+    <!-- Services JavaScript -->
+    <script src="js/services/api.service.js"></script>
+    
     <style>
         /* S'assurer que les icônes s'affichent correctement */
         .material-icons {
@@ -293,19 +297,153 @@
 
                 <!-- ========== APPRÉCIATIONS TAB ========== -->
                 <div id="appreciations" class="tab-content">
-                    <div class="widget-card">
+                    <!-- Section principale: Sélection de classe et actions -->
+                    <div class="widget-card" style="margin-bottom: 16px;">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Appréciations</h3>
-                            <div class="widget-card-actions">
-                                <button class="md-btn md-btn-filled" onclick="showAddAppreciationForm()">
-                                    <span class="material-icons">add</span> Nouvelle appréciation
+                            <h3 class="widget-card-title">Gestion des appréciations par classe</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <!-- Sélecteur de classe amélioré -->
+                            <div style="margin-bottom: 24px;">
+                                <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="color: var(--md-sys-color-primary);">class</span>
+                                    Sélectionnez une classe
+                                </h4>
+
+                                <!-- Barre de recherche -->
+                                <div style="margin-bottom: 16px;">
+                                    <div class="topbar-search" style="width: 100%;">
+                                        <span class="material-icons">search</span>
+                                        <input type="text" id="classSearchInput" placeholder="Rechercher une classe..." oninput="filterClasses()">
+                                        <button type="button" id="clearSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearClassSearch()">
+                                            <span class="material-icons">clear</span>
+                                        </button>
+                                    </div>
+                                    <div id="searchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                        <span id="filteredCount">0</span> classe(s) trouvée(s)
+                                    </div>
+                                </div>
+
+                                <!-- Grille des classes -->
+                                <div id="classesGridSelector" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                                    <!-- Les classes seront ajoutées dynamiquement ici -->
+                                </div>
+
+                                <!-- Sélecteur alternatif (fallback) -->
+                                <div style="margin-top: 16px; display: none;" id="fallbackSelector">
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <select id="appreciationClasseSelect" class="md-text-field-input" onchange="onClasseSelectChange()">
+                                                <option value="">-- Sélectionner une classe --</option>
+                                            </select>
+                                            <label class="md-text-field-label">Classe (mode alternatif)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions disponibles quand une classe est sélectionnée -->
+                            <div id="classActions" style="display: none; padding: 20px; background: var(--md-sys-color-surface-container); border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-on-primary-container);">school</span>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0; color: var(--md-sys-color-on-surface);">Classe sélectionnée</h4>
+                                            <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant);" id="selectedClassInfo">-</p>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                        <button class="md-btn md-btn-filled" onclick="showAddAppreciationByClasseForm()" id="btnNouvelleAppreciation">
+                                            <span class="material-icons">add</span>
+                                            <span>Nouvelle saisie</span>
+                                        </button>
+                                        <button class="md-btn md-btn-tonal" onclick="showHistoriqueAppreciations()" id="btnHistorique">
+                                            <span class="material-icons">history</span>
+                                            <span>Historique</span>
+                                        </button>
+                                        <button class="md-btn md-btn-outlined" onclick="deselectClasse()">
+                                            <span class="material-icons">clear</span>
+                                            <span>Changer de classe</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section formulaire de saisie des appréciations -->
+                    <div class="widget-card" id="appreciationFormCard" style="display: none;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title" id="appreciationFormTitle">Nouvelle saisie d'appréciations</h3>
+                            <button class="md-btn md-btn-text" onclick="hideAppreciationForm()">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+                        <div class="widget-card-content">
+                            <input type="hidden" id="editBatchId" value="">
+                            
+                            <!-- Informations du lot -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="matiereAppreciation" class="md-text-field-input" required placeholder=" ">
+                                        <label class="md-text-field-label">Matière *</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <select id="periodeAppreciation" class="md-text-field-input">
+                                            <option value="">-- Période --</option>
+                                            <option value="Trimestre 1">Trimestre 1</option>
+                                            <option value="Trimestre 2">Trimestre 2</option>
+                                            <option value="Trimestre 3">Trimestre 3</option>
+                                        </select>
+                                        <label class="md-text-field-label">Période</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Info classe sélectionnée -->
+                            <div style="background: var(--md-sys-color-primary-container); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <span class="material-icons" style="color: var(--md-sys-color-on-primary-container);">class</span>
+                                <span style="color: var(--md-sys-color-on-primary-container); font-weight: 500;">Classe: <span id="selectedClasseLabel">-</span></span>
+                            </div>
+                            
+                            <!-- Liste des élèves avec notes/appréciations -->
+                            <div id="elevesAppreciationsContainer" style="max-height: 500px; overflow-y: auto;">
+                                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Chargement des élèves...</p>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div style="display: flex; gap: 16px; margin-top: 24px; justify-content: flex-end;">
+                                <button class="md-btn md-btn-outlined" onclick="hideAppreciationForm()">
+                                    <span class="material-icons">close</span> Annuler
+                                </button>
+                                <button class="md-btn md-btn-filled" onclick="saveAllAppreciations()">
+                                    <span class="material-icons">save</span> Enregistrer tout
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Section Historique des appréciations -->
+                    <div class="widget-card" id="historiqueCard" style="display: none;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Historique des appréciations</h3>
+                            <button class="md-btn md-btn-text" onclick="hideHistorique()">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
                         <div class="widget-card-content">
-                            <div id="appreciationsList"></div>
+                            <div id="historiqueList">
+                                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour voir l'historique</p>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- ========== ACTUALITÉS TAB ========== -->
@@ -566,6 +704,19 @@
                             </div>
                         </div>
                         <div class="widget-card-content">
+                            <!-- Barre de recherche -->
+                            <div style="margin-bottom: 16px;">
+                                <div class="topbar-search" style="width: 100%;">
+                                    <span class="material-icons">search</span>
+                                    <input type="text" id="fraisSearchInput" placeholder="Rechercher par nom, prénom ou famille..." oninput="filterFraisInscriptions()">
+                                    <button type="button" id="clearFraisSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearFraisSearch()">
+                                        <span class="material-icons">clear</span>
+                                    </button>
+                                </div>
+                                <div id="fraisSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                    <span id="filteredFraisCount">0</span> dossier(s) trouvé(s)
+                                </div>
+                            </div>
                             <div id="fraisList" class="md-grid md-grid-auto">
                                 <p style="color: var(--md-sys-color-on-surface-variant);">Chargement des frais...</p>
                             </div>
@@ -602,7 +753,6 @@
 
     <script>
         // ==================== CONFIGURATION ====================
-        const API_URL = `http://${window.location.hostname}:3000/api`;
         const user = JSON.parse(localStorage.getItem('user'));
         const token = localStorage.getItem('token');
         
@@ -771,7 +921,20 @@
             } catch (error) {
                 console.error('Erreur chargement:', error);
             }
+
+            // Remplir les selects de classes après chargement
+            fillClasseSelects();
         }
+
+        function fillClasseSelects() {
+            // Select pour les appréciations
+            const appreciationClasseSelect = document.getElementById('appreciationClasseSelect');
+            if (appreciationClasseSelect) {
+                appreciationClasseSelect.innerHTML = '<option value="">-- Sélectionner une classe --</option>' +
+                    allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('');
+            }
+        }
+
 
         async function loadTabData(tabName) {
             switch(tabName) {
@@ -779,7 +942,7 @@
                 case 'classes': await loadClasses(); break;
                 case 'appel': await loadClassesForSelect(); break;
                 case 'absences': await loadAbsences(); break;
-                case 'appreciations': await loadAppreciations(); break;
+                case 'appreciations': await initAppreciationsTab(); break;
                 case 'actualites': await loadActualites(); break;
                 case 'messagerie': await loadMessages(); break;
                 case 'bureau': await loadStaff(); break;
@@ -1434,112 +1597,554 @@
             }
         }
 
-        // ==================== APPRÉCIATIONS ====================
-        async function loadAppreciations() {
-            try {
-                const response = await fetch(`${API_URL}/appreciations`, { headers: getHeaders() });
-                const appreciations = await response.json();
-                
-                document.getElementById('appreciationsList').innerHTML = appreciations.length ? `
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        ${appreciations.map(a => {
-                            const eleve = allEleves.find(e => e.id === a.eleveId);
-                            return `<div class="md-card md-card-outlined" style="padding: 16px;">
-                                <div style="display: flex; justify-content: space-between; align-items: start;">
-                                    <div>
-                                        <h4 style="font-weight: 500;">${eleve ? `${eleve.prenom} ${eleve.nom}` : 'Inconnu'}</h4>
-                                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${a.matiere || 'Général'} - ${a.periode || ''}</p>
-                                    </div>
-                                    ${a.note ? `<span style="font-size: 24px; font-weight: 500; color: var(--md-sys-color-primary);">${a.note}/20</span>` : ''}
-                                </div>
-                                <p style="margin-top: 12px;">${a.commentaire || ''}</p>
-                                <div style="margin-top: 12px; display: flex; gap: 8px;">
-                                    <button class="md-icon-btn" onclick="deleteAppreciation('${a.id}')"><span class="material-icons">delete</span></button>
-                                </div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                ` : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune appréciation enregistrée</p>';
-            } catch (error) {
-                showSnackbar('Erreur lors du chargement');
+        // ==================== APPRÉCIATIONS - NOUVEAU SYSTÈME ====================
+        let currentSelectedClasse = '';
+        let availableClasses = [];
+
+        // Initialiser l'onglet appréciations
+        async function initAppreciationsTab() {
+            await loadAvailableClasses();
+            const classeSelect = document.getElementById('appreciationClasseSelect');
+            if (classeSelect && classeSelect.value) {
+                currentSelectedClasse = classeSelect.value;
+                showAppreciationButtons();
+                await loadAppreciationsRecap();
             }
         }
 
-        function showAddAppreciationForm() {
-            showDialog('Nouvelle appréciation', `
-                <form style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="appreciationEleve" class="md-text-field-input" required>
-                                <option value="">-- Sélectionner un élève --</option>
-                                ${allEleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom}</option>`).join('')}
-                            </select>
-                            <label class="md-text-field-label">Élève *</label>
-                        </div>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="appreciationMatiere" class="md-text-field-input" placeholder=" ">
-                                <label class="md-text-field-label">Matière</label>
-                            </div>
-                        </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="number" id="appreciationNote" class="md-text-field-input" placeholder=" " min="0" max="20" step="0.5">
-                                <label class="md-text-field-label">Note /20</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="appreciationPeriode" class="md-text-field-input">
-                                <option value="">-- Période --</option>
-                                <option value="Trimestre 1">Trimestre 1</option>
-                                <option value="Trimestre 2">Trimestre 2</option>
-                                <option value="Trimestre 3">Trimestre 3</option>
-                            </select>
-                            <label class="md-text-field-label">Période</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <textarea id="appreciationCommentaire" class="md-text-field-input" rows="3" placeholder=" "></textarea>
-                            <label class="md-text-field-label">Commentaire</label>
-                        </div>
-                    </div>
-                </form>
-            `, async () => {
-                const data = {
-                    eleveId: document.getElementById('appreciationEleve').value,
-                    professeurId: user.id,
-                    matiere: document.getElementById('appreciationMatiere').value,
-                    periode: document.getElementById('appreciationPeriode').value,
-                    note: document.getElementById('appreciationNote').value || null,
-                    commentaire: document.getElementById('appreciationCommentaire').value,
-                    createdByRole: user.role
-                };
-                try {
-                    const response = await fetch(`${API_URL}/appreciations`, {
-                        method: 'POST',
-                        headers: getHeaders(),
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) {
-                        showSnackbar('Appréciation ajoutée');
-                        loadAppreciations();
-                    }
-                } catch (error) {
-                    showSnackbar('Erreur');
+        // Charger les classes disponibles
+        async function loadAvailableClasses() {
+            try {
+                const response = await fetch(`${API_URL}/appreciations/classes`, { headers: getHeaders() });
+                const classes = await response.json();
+
+                if (Array.isArray(classes)) {
+                    availableClasses = classes;
+                    renderClassesGrid();
+                    fillFallbackSelect();
                 }
+            } catch (error) {
+                console.error('Erreur chargement classes:', error);
+                showSnackbar('Erreur lors du chargement des classes');
+            }
+        }
+
+        // Rendre la grille des classes
+        function renderClassesGrid(classesToShow = availableClasses) {
+            const grid = document.getElementById('classesGridSelector');
+            const searchTerm = document.getElementById('classSearchInput')?.value.toLowerCase() || '';
+
+            if (classesToShow.length === 0) {
+                grid.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px; grid-column: 1 / -1;">Aucune classe disponible</p>';
+                return;
+            }
+
+            // Filtrer les classes si un terme de recherche est présent
+            const filteredClasses = searchTerm ?
+                classesToShow.filter(classe => classe.nom.toLowerCase().includes(searchTerm)) :
+                classesToShow;
+
+            if (filteredClasses.length === 0 && searchTerm) {
+                grid.innerHTML = `
+                    <div class="no-classes-found" style="grid-column: 1 / -1;">
+                        <span class="material-icons">search_off</span>
+                        <p>Aucune classe trouvée pour "${searchTerm}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredClasses.map(classe => {
+                const isSelected = classe.nom === currentSelectedClasse;
+                const studentCount = classe.nombreEleves || 0;
+
+                return `
+                    <div class="class-card ${isSelected ? 'selected' : ''}"
+                         onclick="selectClasse('${classe.nom}')"
+                         data-classe="${classe.nom}">
+                        <div class="class-card-icon">
+                            <span class="material-icons">school</span>
+                        </div>
+                        <div class="class-card-name">${classe.nom}</div>
+                        <div class="class-card-count">
+                            <span class="material-icons">people</span>
+                            ${studentCount} élève${studentCount > 1 ? 's' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Ajouter la classe 'filtered' si on filtre
+            grid.classList.toggle('filtered', searchTerm.length > 0);
+        }
+
+        // Filtrer les classes en fonction de la recherche
+        function filterClasses() {
+            const searchInput = document.getElementById('classSearchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const resultsInfo = document.getElementById('searchResultsInfo');
+            const filteredCount = document.getElementById('filteredCount');
+
+            const searchTerm = searchInput.value.toLowerCase();
+
+            // Afficher/masquer le bouton d'effacement
+            if (searchTerm.length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+                resultsInfo.style.display = 'none';
+            }
+
+            renderClassesGrid();
+
+            // Mettre à jour les informations de résultats
+            if (searchTerm.length > 0) {
+                const filteredClasses = availableClasses.filter(classe =>
+                    classe.nom.toLowerCase().includes(searchTerm)
+                );
+                filteredCount.textContent = filteredClasses.length;
+                resultsInfo.style.display = filteredClasses.length !== availableClasses.length ? 'block' : 'none';
+            }
+        }
+
+        // Effacer la recherche
+        function clearClassSearch() {
+            document.getElementById('classSearchInput').value = '';
+            filterClasses();
+        }
+
+        // Remplir le sélecteur alternatif
+        function fillFallbackSelect() {
+            const select = document.getElementById('appreciationClasseSelect');
+            select.innerHTML = '<option value="">-- Sélectionner une classe --</option>';
+
+            availableClasses.forEach(classe => {
+                const option = document.createElement('option');
+                option.value = classe.nom;
+                option.textContent = `${classe.nom} (${classe.nombreEleves || 0} élèves)`;
+                if (classe.nom === currentSelectedClasse) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
             });
         }
 
+        // Sélectionner une classe
+        function selectClasse(nomClasse) {
+            currentSelectedClasse = nomClasse;
+
+            // Mettre à jour l'affichage des cartes
+            document.querySelectorAll('.class-card').forEach(card => {
+                const isSelected = card.dataset.classe === nomClasse;
+                card.classList.toggle('selected', isSelected);
+            });
+
+            // Mettre à jour le sélecteur alternatif
+            const select = document.getElementById('appreciationClasseSelect');
+            if (select) select.value = nomClasse;
+
+            // Afficher les actions
+            showAppreciationButtons();
+
+            // Charger les données
+            loadAppreciationsRecap();
+        }
+
+        // Désélectionner la classe
+        function deselectClasse() {
+            currentSelectedClasse = '';
+
+            // Mettre à jour l'affichage
+            document.querySelectorAll('.class-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            const select = document.getElementById('appreciationClasseSelect');
+            if (select) select.value = '';
+
+            // Masquer les actions
+            document.getElementById('classActions').style.display = 'none';
+            document.getElementById('appreciationFormCard').style.display = 'none';
+            document.getElementById('historiqueCard').style.display = 'none';
+
+            // Vider le récapitulatif
+            document.getElementById('appreciationsList').innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour afficher les appréciations</p>';
+        }
+
+        // Afficher les boutons d'action quand une classe est sélectionnée
+        function showAppreciationButtons() {
+            const actionsDiv = document.getElementById('classActions');
+            const selectedClassInfo = document.getElementById('selectedClassInfo');
+
+            if (!currentSelectedClasse) {
+                actionsDiv.style.display = 'none';
+                return;
+            }
+
+            actionsDiv.style.display = 'block';
+
+            // Trouver les infos de la classe sélectionnée
+            const selectedClass = availableClasses.find(c => c.nom === currentSelectedClasse);
+            if (selectedClass) {
+                selectedClassInfo.textContent = `${selectedClass.nombreEleves || 0} élève${(selectedClass.nombreEleves || 0) > 1 ? 's' : ''}`;
+            }
+        }
+
+        // Quand on change de classe via le sélecteur alternatif
+        function onClasseSelectChange() {
+            const select = document.getElementById('appreciationClasseSelect');
+            if (select.value) {
+                selectClasse(select.value);
+            } else {
+                deselectClasse();
+            }
+        }
+        
+        // Charger le récapitulatif des appréciations
+        async function loadAppreciationsRecap() {
+            if (!currentSelectedClasse) return;
+
+            try {
+                // Récupérer toutes les appréciations et filtrer par classe
+                const allAppreciations = await API.Appreciations.getAll();
+                const appreciations = allAppreciations.filter(a => a.classe === currentSelectedClasse);
+
+                if (!Array.isArray(appreciations) || appreciations.length === 0) {
+                    document.getElementById('appreciationsList').innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Aucune appréciation pour cette classe</p>';
+                    return;
+                // Grouper par élève
+                const byEleve = {};
+                appreciations.forEach(a => {
+                    if (!byEleve[a.eleveId]) {
+                        byEleve[a.eleveId] = {
+                            nom: a.eleveNom,
+                            prenom: a.elevePrenom,
+                            appreciations: []
+                        };
+                    }
+                    byEleve[a.eleveId].appreciations.push(a);
+                });
+
+                document.getElementById('appreciationsList').innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+                        ${Object.entries(byEleve).map(([eleveId, data]) => `
+                            <div class="md-card md-card-outlined" style="padding: 16px;">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center; color: var(--md-sys-color-on-primary-container); font-weight: 500;">
+                                        ${(data.prenom || 'E')[0].toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <h4 style="font-weight: 500;">${data.prenom} ${data.nom}</h4>
+                                        <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${data.appreciations.length} appréciation(s)</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    ${data.appreciations.slice(0, 3).map(a => `
+                                        <div style="padding: 8px; background: var(--md-sys-color-surface-container); border-radius: 8px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span style="font-size: 12px; color: var(--md-sys-color-primary);">${a.matiere || 'Général'}</span>
+                                                ${a.note !== null ? `<span style="font-weight: 600; color: var(--md-sys-color-primary);">${a.note}/20</span>` : ''}
+                                            </div>
+                                            ${a.commentaire ? `<p style="font-size: 12px; margin-top: 4px; color: var(--md-sys-color-on-surface-variant);">${a.commentaire.substring(0, 50)}${a.commentaire.length > 50 ? '...' : ''}</p>` : ''}
+                                        </div>
+                                    `).join('')}
+                                    ${data.appreciations.length > 3 ? `<p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-align: center;">+ ${data.appreciations.length - 3} autres</p>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                }
+            } catch (error) {
+                console.error('Erreur chargement appréciations:', error);
+                document.getElementById('appreciationsList').innerHTML = '<p style="color: var(--md-sys-color-error); text-align: center; padding: 20px;">Erreur lors du chargement</p>';
+            }
+        }
+        
+        // Afficher le formulaire de nouvelle saisie
+        async function showAddAppreciationByClasseForm() {
+            if (!currentSelectedClasse) {
+                showSnackbar('Veuillez d\'abord sélectionner une classe');
+                return;
+            }
+
+            document.getElementById('appreciationFormCard').style.display = 'block';
+            document.getElementById('historiqueCard').style.display = 'none';
+            document.getElementById('appreciationFormTitle').textContent = 'Nouvelle saisie d\'appréciations';
+            document.getElementById('selectedClasseLabel').textContent = currentSelectedClasse;
+            document.getElementById('editBatchId').value = '';
+            document.getElementById('matiereAppreciation').value = '';
+            document.getElementById('periodeAppreciation').value = '';
+
+            // Charger les élèves de la classe
+            await loadElevesForAppreciationForm();
+        }
+        
+        // Masquer le formulaire
+        function hideAppreciationForm() {
+            document.getElementById('appreciationFormCard').style.display = 'none';
+        }
+        
+        // Charger les élèves dans le formulaire
+        async function loadElevesForAppreciationForm(existingAppreciations = null) {
+            const container = document.getElementById('elevesAppreciationsContainer');
+
+            if (!currentSelectedClasse) {
+                container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Aucune classe sélectionnée</p>';
+                return;
+            }
+
+            container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;"><span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Chargement...</p>';
+
+            try {
+                const eleves = await API.Appreciations.getElevesByClasse(currentSelectedClasse);
+
+                if (!eleves || eleves.length === 0) {
+                    container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Aucun élève dans cette classe</p>';
+                    return;
+                }
+
+                // Créer un mapping des appréciations existantes par eleveId
+                const appreciationsMap = {};
+                if (existingAppreciations && Array.isArray(existingAppreciations)) {
+                    existingAppreciations.forEach(a => {
+                        appreciationsMap[a.eleveId] = a;
+                    });
+                }
+
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- En-tête -->
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 3fr; gap: 12px; padding: 12px 16px; background: var(--md-sys-color-surface-container); border-radius: 8px; font-weight: 500;">
+                            <span>Élève</span>
+                            <span>Note /20</span>
+                            <span>Appréciation</span>
+                        </div>
+
+                        ${eleves.map(eleve => {
+                            const existing = appreciationsMap[eleve.id];
+                            return `
+                                <div class="eleve-appreciation-row" data-eleve-id="${eleve.id}" data-appreciation-id="${existing?.id || ''}" style="display: grid; grid-template-columns: 2fr 1fr 3fr; gap: 12px; padding: 12px 16px; background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 8px; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--md-sys-color-on-primary-container);">
+                                            ${(eleve.prenom || 'E')[0].toUpperCase()}
+                                        </div>
+                                        <span style="font-weight: 500;">${eleve.prenom} ${eleve.nom}</span>
+                                    </div>
+                                    <div>
+                                        <input type="number" class="md-text-field-input note-input" style="width: 100%; padding: 8px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;" placeholder="--" min="0" max="20" step="0.5" value="${existing?.note ?? ''}">
+                                    </div>
+                                    <div>
+                                        <input type="text" class="md-text-field-input commentaire-input" style="width: 100%; padding: 8px; border: 1px solid var(--md-sys-color-outline); border-radius: 4px;" placeholder="Commentaire..." value="${existing?.commentaire || ''}">
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erreur chargement élèves:', error);
+                container.innerHTML = '<p style="color: var(--md-sys-color-error); text-align: center; padding: 20px;">Erreur lors du chargement des élèves</p>';
+            }
+        }
+        
+        // Enregistrer toutes les appréciations
+        async function saveAllAppreciations() {
+            const matiere = document.getElementById('matiereAppreciation').value.trim();
+            const periode = document.getElementById('periodeAppreciation').value;
+            const editBatchId = document.getElementById('editBatchId').value;
+            
+            if (!matiere) {
+                showSnackbar('Veuillez saisir une matière');
+                return;
+            }
+            
+            const rows = document.querySelectorAll('.eleve-appreciation-row');
+            const appreciationsData = [];
+            
+            rows.forEach(row => {
+                const eleveId = row.dataset.eleveId;
+                const appreciationId = row.dataset.appreciationId;
+                const note = row.querySelector('.note-input').value;
+                const commentaire = row.querySelector('.commentaire-input').value.trim();
+                
+                // Inclure même si vide pour les mises à jour de lot
+                if (note || commentaire || appreciationId) {
+                    appreciationsData.push({
+                        id: appreciationId || null,
+                        eleveId,
+                        professeurId: user.id,
+                        matiere,
+                        periode: periode || null,
+                        note: note ? parseFloat(note) : null,
+                        commentaire: commentaire || null,
+                        createdByRole: user.role,
+                        classe: currentSelectedClasse
+                    });
+                }
+            });
+            
+            if (appreciationsData.length === 0) {
+                showSnackbar('Aucune appréciation à sauvegarder');
+                return;
+            }
+            
+            try {
+                let result;
+                if (editBatchId) {
+                    // Mise à jour d'un lot existant
+                    result = await API.Appreciations.updateBatch(editBatchId, appreciationsData);
+                } else {
+                    // Création d'un nouveau lot
+                    result = await API.Appreciations.createBulk(appreciationsData);
+                }
+
+                showSnackbar(`${appreciationsData.length} appréciation(s) enregistrée(s) avec succès`);
+                hideAppreciationForm();
+                loadAppreciationsRecap();
+            } catch (error) {
+                console.error('Erreur sauvegarde:', error);
+                showSnackbar('Erreur lors de la sauvegarde des appréciations');
+            }
+        }
+        
+        // ==================== HISTORIQUE DES APPRÉCIATIONS ====================
+        
+        async function showHistoriqueAppreciations() {
+            if (!currentSelectedClasse) {
+                showSnackbar('Veuillez d\'abord sélectionner une classe');
+                return;
+            }
+            
+            document.getElementById('historiqueCard').style.display = 'block';
+            document.getElementById('appreciationFormCard').style.display = 'none';
+            
+            await loadHistorique();
+        }
+        
+        function hideHistorique() {
+            document.getElementById('historiqueCard').style.display = 'none';
+        }
+        
+        async function loadHistorique() {
+            const container = document.getElementById('historiqueList');
+            container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;"><span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Chargement...</p>';
+
+            try {
+                const historique = await API.Appreciations.getHistoriqueByClasse(currentSelectedClasse);
+
+                if (!Array.isArray(historique) || historique.length === 0) {
+                    container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Aucun historique pour cette classe</p>';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        ${historique.map(batch => {
+                            const date = new Date(batch.dateCreated).toLocaleDateString('fr-FR', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            const moyenne = batch.moyenneNotes ? batch.moyenneNotes.toFixed(2) : '-';
+                            
+                            return `
+                                <div class="md-card md-card-outlined" style="padding: 16px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                                <span class="material-icons" style="color: var(--md-sys-color-primary);">assignment</span>
+                                                <h4 style="font-weight: 600;">${batch.matiere || 'Sans matière'}</h4>
+                                                ${batch.periode ? `<span style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); padding: 2px 8px; border-radius: 12px; font-size: 12px;">${batch.periode}</span>` : ''}
+                                            </div>
+                                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
+                                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">calendar_today</span> ${date}
+                                            </p>
+                                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">
+                                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">people</span> ${batch.nbAppreciations} élève(s) noté(s)
+                                            </p>
+                                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">
+                                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">trending_up</span> Moyenne: <strong>${moyenne}</strong>/20
+                                            </p>
+                                        </div>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button class="md-btn md-btn-tonal" onclick="editBatch('${batch.batchId}')" title="Modifier">
+                                                <span class="material-icons">edit</span>
+                                            </button>
+                                            <button class="md-btn md-btn-tonal" style="color: var(--md-sys-color-error);" onclick="deleteBatch('${batch.batchId}')" title="Supprimer">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erreur chargement historique:', error);
+                container.innerHTML = '<p style="color: var(--md-sys-color-error); text-align: center; padding: 20px;">Erreur lors du chargement de l\'historique</p>';
+            }
+        }
+        
+        // Modifier un lot d'appréciations
+        async function editBatch(batchId) {
+            try {
+                // Pour l'instant, on utilise l'ancien endpoint car le service API n'a pas cette méthode
+                const response = await fetch(`${API_URL}/appreciations/batch/${batchId}`, { headers: getHeaders() });
+                const appreciations = await response.json();
+
+                if (!appreciations || appreciations.length === 0) {
+                    showSnackbar('Lot introuvable');
+                    return;
+                }
+
+                // Afficher le formulaire
+                document.getElementById('appreciationFormCard').style.display = 'block';
+                document.getElementById('historiqueCard').style.display = 'none';
+                document.getElementById('appreciationFormTitle').textContent = 'Modifier les appréciations';
+                document.getElementById('selectedClasseLabel').textContent = currentSelectedClasse;
+                document.getElementById('editBatchId').value = batchId;
+
+                // Pré-remplir matière et période depuis la première appréciation
+                document.getElementById('matiereAppreciation').value = appreciations[0].matiere || '';
+                document.getElementById('periodeAppreciation').value = appreciations[0].periode || '';
+
+                // Charger les élèves avec les appréciations existantes
+                await loadElevesForAppreciationForm(appreciations);
+
+            } catch (error) {
+                console.error('Erreur chargement lot:', error);
+                showSnackbar('Erreur lors du chargement du lot');
+            }
+        }
+        
+        // Supprimer un lot complet
+        async function deleteBatch(batchId) {
+            showDialog('Confirmer la suppression', `
+                <p>Êtes-vous sûr de vouloir supprimer ce lot d'appréciations ?</p>
+                <p style="color: var(--md-sys-color-error); margin-top: 8px;"><strong>Cette action est irréversible.</strong></p>
+            `, async () => {
+                try {
+                    await API.Appreciations.deleteBatch(batchId);
+                    showSnackbar('Lot d\'appréciations supprimé');
+                    await loadHistorique();
+                    await loadAppreciationsRecap();
+                } catch (error) {
+                    console.error('Erreur suppression:', error);
+                    showSnackbar('Erreur lors de la suppression');
+                }
+            }, 'Supprimer');
+        }
+        
+        // Fonction legacy pour la suppression individuelle
         async function deleteAppreciation(id) {
             try {
                 await fetch(`${API_URL}/appreciations/${id}`, { method: 'DELETE', headers: getHeaders() });
                 showSnackbar('Appréciation supprimée');
-                loadAppreciations();
+                loadAppreciationsRecap();
             } catch (error) {
                 showSnackbar('Erreur');
             }
@@ -1559,6 +2164,7 @@
                         <p>Chargement des messages...</p>
                     </div>
                 `;
+
 
                 const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
                 const messages = await response.json();
@@ -2474,6 +3080,9 @@
             showInscriptionForm();
         }
 
+        // Variable globale pour stocker les données des frais
+        let allFraisData = { familles: {}, seuls: [] };
+
         // ==================== FRAIS D'INSCRIPTION ====================
         async function loadFraisInscriptions() {
             try {
@@ -2493,78 +3102,146 @@
                     }
                 });
 
-                let html = '';
+                // Stocker les données pour le filtrage
+                allFraisData = { familles, seuls };
 
-                // Familles
-                Object.keys(familles).forEach(fid => {
-                    const membres = familles[fid];
-                    const total = membres.reduce((s, m) => s + (parseFloat(m.fraisInscription) || 0), 0);
-                    const parentNom = membres[0].parentNom || '';
-                    const parentPrenom = membres[0].parentPrenom || '';
-
-                    html += `
-                        <div class="md-card md-card-elevated" style="padding:16px; border-left:4px solid var(--md-sys-color-primary);">
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div class="md-avatar" style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container);">
-                                        <span class="material-icons">groups</span>
-                                    </div>
-                                    <div>
-                                        <h4 style="margin:0;">Famille ${parentPrenom} ${parentNom}</h4>
-                                        <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
-                                    </div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <div style="font-weight:600;">Total: ${total.toFixed(2)} €</div>
-                                </div>
-                            </div>
-                            <div style="background:var(--md-sys-color-surface-container); padding:12px; border-radius:8px;">
-                                ${membres.map(m => `
-                                    <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--md-sys-color-outline-variant);">
-                                        <div style="display:flex; align-items:center; gap:8px;">
-                                            <span class="md-avatar" style="width:32px; height:32px;">${(m.prenom||'E')[0]}</span>
-                                            <div>${m.prenom} ${m.nom}</div>
-                                        </div>
-                                        <div style="text-align:right;">
-                                            <div style="font-size:14px; font-weight:500;">${(parseFloat(m.fraisInscription)||0).toFixed(2)} €</div>
-                                            <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${m.nbPaiements ? m.nbPaiements + ' fois' : '1 fois'} • ${m.paiementsEffectues ? m.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
-                                            <button class="md-btn md-btn-outlined" style="margin-top:6px;" onclick="validateFraisEleve('${m.id}')">Valider</button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                // Individuels
-                seuls.forEach(e => {
-                    const montant = parseFloat(e.fraisInscription) || 0;
-                    html += `
-                        <div class="md-card md-card-elevated" style="padding:16px;">
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div class="md-avatar">${(e.prenom||'E')[0].toUpperCase()}</div>
-                                    <div>
-                                        <h4 style="margin:0;">${e.prenom} ${e.nom}</h4>
-                                        <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
-                                    </div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <div style="font-weight:600;">${montant.toFixed(2)} €</div>
-                                    <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.nbPaiements ? e.nbPaiements + ' fois' : '1 fois'} • ${e.paiementsEffectues ? e.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
-                                    <button class="md-btn md-btn-filled" style="margin-top:8px;" onclick="validateFraisEleve('${e.id}')">Valider</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                document.getElementById('fraisList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun frais d\'inscription en attente</p>';
+                // Afficher tous les résultats
+                renderFraisInscriptions(allFraisData.familles, allFraisData.seuls);
             } catch (error) {
                 console.error('Erreur loadFraisInscriptions:', error);
                 document.getElementById('fraisList').innerHTML = '<p style="color: var(--md-sys-color-error);">Erreur lors du chargement des frais</p>';
             }
+        }
+
+        // Fonction pour rendre les frais d'inscription
+        function renderFraisInscriptions(familles, seuls) {
+            let html = '';
+
+            // Familles
+            Object.keys(familles).forEach(fid => {
+                const membres = familles[fid];
+                const total = membres.reduce((s, m) => s + (parseFloat(m.fraisInscription) || 0), 0);
+                const parentNom = membres[0].parentNom || '';
+                const parentPrenom = membres[0].parentPrenom || '';
+
+                html += `
+                    <div class="md-card md-card-elevated" style="padding:16px; border-left:4px solid var(--md-sys-color-primary);">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div class="md-avatar" style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container);">
+                                    <span class="material-icons">groups</span>
+                                </div>
+                                <div>
+                                    <h4 style="margin:0;">Famille ${parentPrenom} ${parentNom}</h4>
+                                    <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:600;">Total: ${total.toFixed(2)} €</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--md-sys-color-surface-container); padding:12px; border-radius:8px;">
+                            ${membres.map(m => `
+                                <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span class="md-avatar" style="width:32px; height:32px;">${(m.prenom||'E')[0]}</span>
+                                        <div>${m.prenom} ${m.nom}</div>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <div style="font-size:14px; font-weight:500;">${(parseFloat(m.fraisInscription)||0).toFixed(2)} €</div>
+                                        <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${m.nbPaiements ? m.nbPaiements + ' fois' : '1 fois'} • ${m.paiementsEffectues ? m.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
+                                        <button class="md-btn md-btn-outlined" style="margin-top:6px;" onclick="validateFraisEleve('${m.id}')">Valider</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Individuels
+            seuls.forEach(e => {
+                const montant = parseFloat(e.fraisInscription) || 0;
+                html += `
+                    <div class="md-card md-card-elevated" style="padding:16px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div class="md-avatar">${(e.prenom||'E')[0].toUpperCase()}</div>
+                                <div>
+                                    <h4 style="margin:0;">${e.prenom} ${e.nom}</h4>
+                                    <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:600;">${montant.toFixed(2)} €</div>
+                                <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.nbPaiements ? e.nbPaiements + ' fois' : '1 fois'} • ${e.paiementsEffectues ? e.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
+                                <button class="md-btn md-btn-filled" style="margin-top:8px;" onclick="validateFraisEleve('${e.id}')">Valider</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('fraisList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun frais d\'inscription en attente</p>';
+        }
+
+        // Fonction de filtrage des frais d'inscription
+        function filterFraisInscriptions() {
+            const searchInput = document.getElementById('fraisSearchInput');
+            const clearBtn = document.getElementById('clearFraisSearchBtn');
+            const resultsInfo = document.getElementById('fraisSearchResultsInfo');
+            const filteredCount = document.getElementById('filteredFraisCount');
+
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            // Afficher/masquer le bouton d'effacement
+            if (searchTerm.length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+                resultsInfo.style.display = 'none';
+                // Réafficher tous les résultats
+                renderFraisInscriptions(allFraisData.familles, allFraisData.seuls);
+                return;
+            }
+
+            // Filtrer les familles
+            const filteredFamilles = {};
+            Object.keys(allFraisData.familles).forEach(fid => {
+                const membres = allFraisData.familles[fid];
+                const parentNom = membres[0].parentNom || '';
+                const parentPrenom = membres[0].parentPrenom || '';
+
+                // Vérifier si la famille correspond à la recherche
+                const familleMatch = `${parentPrenom} ${parentNom}`.toLowerCase().includes(searchTerm) ||
+                                   membres.some(m => `${m.prenom} ${m.nom}`.toLowerCase().includes(searchTerm));
+
+                if (familleMatch) {
+                    filteredFamilles[fid] = membres;
+                }
+            });
+
+            // Filtrer les élèves individuels
+            const filteredSeuls = allFraisData.seuls.filter(e =>
+                `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm) ||
+                (e.parentNom && e.parentPrenom && `${e.parentPrenom} ${e.parentNom}`.toLowerCase().includes(searchTerm))
+            );
+
+            // Calculer le nombre total de dossiers trouvés
+            const totalFound = Object.keys(filteredFamilles).length + filteredSeuls.length;
+
+            // Afficher les résultats filtrés
+            renderFraisInscriptions(filteredFamilles, filteredSeuls);
+
+            // Mettre à jour les informations de résultats
+            filteredCount.textContent = totalFound;
+            resultsInfo.style.display = totalFound !== (Object.keys(allFraisData.familles).length + allFraisData.seuls.length) ? 'block' : 'none';
+        }
+
+        // Fonction pour effacer la recherche des frais
+        function clearFraisSearch() {
+            document.getElementById('fraisSearchInput').value = '';
+            filterFraisInscriptions();
         }
 
         async function validateFraisEleve(eleveId) {

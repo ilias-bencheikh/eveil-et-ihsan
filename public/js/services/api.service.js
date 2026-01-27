@@ -249,6 +249,39 @@ const AppreciationsService = {
         return apiRequest(`/appreciations/${id}`, {
             method: 'DELETE'
         });
+    },
+    
+    // Nouvelles méthodes pour la gestion par classe
+    async getClasses() {
+        return apiRequest('/appreciations/classes');
+    },
+    
+    async getElevesByClasse(nomClasse) {
+        return apiRequest(`/appreciations/eleves/classe/${encodeURIComponent(nomClasse)}`);
+    },
+    
+    async createBulk(appreciations) {
+        return apiRequest('/appreciations/bulk', {
+            method: 'POST',
+            body: JSON.stringify({ appreciations })
+        });
+    },
+    
+    async getHistoriqueByClasse(nomClasse) {
+        return apiRequest(`/appreciations/historique/classe/${encodeURIComponent(nomClasse)}`);
+    },
+    
+    async updateBatch(batchId, appreciations) {
+        return apiRequest(`/appreciations/batch/${batchId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ appreciations })
+        });
+    },
+    
+    async deleteBatch(batchId) {
+        return apiRequest(`/appreciations/batch/${batchId}`, {
+            method: 'DELETE'
+        });
     }
 };
 

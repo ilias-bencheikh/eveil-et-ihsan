@@ -68,6 +68,30 @@ router.get('/', (req, res) => {
     }
 });
 
+// Obtenir les élèves d'une classe spécifique
+router.get('/classe/:nomClasse', (req, res) => {
+    const { nomClasse } = req.params;
+    const userRole = req.headers['x-user-role'];
+    const userId = req.headers['x-user-id'];
+
+    let query = 'SELECT * FROM eleves WHERE classe = ?';
+    let params = [nomClasse];
+
+    if (userRole === 'professeur') {
+        query = `
+            SELECT e.* FROM eleves e
+            INNER JOIN classes c ON e.classe = c.nom
+            WHERE e.classe = ? AND c.professeurId = ?
+        `;
+        params = [nomClasse, userId];
+    }
+
+    db.all(query, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
 // ================== PROFIL ÉLÈVE ==================
 
 // Obtenir le profil de l'élève connecté
