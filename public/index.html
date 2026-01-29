@@ -44,6 +44,69 @@
         .selected-item .material-icons {
             font-size: 18px;
         }
+
+        /* Styles pour l'appel */
+        .appel-eleve-card:hover {
+            box-shadow: var(--md-sys-elevation-2);
+            transform: translateY(-2px);
+        }
+
+        .appel-avatar {
+            transition: transform 0.2s ease;
+        }
+
+        .appel-eleve-card:hover .appel-avatar {
+            transform: scale(1.1);
+        }
+
+        .appel-status-label {
+            border: 1px solid transparent;
+        }
+
+        .appel-status-label.selected-present {
+            background: var(--md-sys-color-success-container) !important;
+            color: var(--md-sys-color-on-success-container) !important;
+            border-color: var(--md-sys-color-success) !important;
+            box-shadow: 0 2px 4px rgba(20, 107, 58, 0.2);
+        }
+
+        .appel-status-label.selected-absent {
+            background: var(--md-sys-color-error-container) !important;
+            color: var(--md-sys-color-on-error-container) !important;
+            border-color: var(--md-sys-color-error) !important;
+            box-shadow: 0 2px 4px rgba(186, 26, 26, 0.2);
+        }
+
+        .appel-status-label.selected-retard {
+            background: var(--md-sys-color-warning-container) !important;
+            color: var(--md-sys-color-on-warning-container) !important;
+            border-color: var(--md-sys-color-warning) !important;
+            box-shadow: 0 2px 4px rgba(124, 88, 0, 0.2);
+        }
+
+        .appel-status-label:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .appel-save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--md-sys-elevation-3) !important;
+        }
+
+        .appel-save-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Styles pour l'historique des appels */
+        .appel-historique-card:hover {
+            box-shadow: var(--md-sys-elevation-3);
+            transform: translateY(-2px);
+        }
+
+        .appel-historique-card .md-btn-text:hover {
+            background: var(--md-sys-color-surface-variant);
+        }
     </style>
 </head>
 <body>
@@ -268,29 +331,158 @@
 
                 <!-- ========== APPEL TAB ========== -->
                 <div id="appel" class="tab-content">
-                    <div class="widget-card">
-                        <div class="widget-card-header"><h3 class="widget-card-title">Faire l'appel</h3></div>
-                        <div class="widget-card-content">
-                            <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
-                                <select id="appelClasse" class="md-select" onchange="loadElevesForAppel()">
-                                    <option value="">-- Sélectionner une classe --</option>
-                                </select>
-                                <input type="date" id="appelDate" class="md-select" value="">
+                    <!-- Section principale: Sélection de classe et actions -->
+                    <div class="widget-card" style="margin-bottom: 16px;">
+                        <div class="widget-card-header">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 28px;">fact_check</span>
+                                <div>
+                                    <h3 class="widget-card-title">Gestion des appels</h3>
+                                    <p style="margin: 0; font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Marquez la présence de vos élèves</p>
+                                </div>
                             </div>
-                            <div id="appelList"></div>
-                            <button id="btnSaveAppel" class="md-btn md-btn-filled" style="display: none; margin-top: 16px;" onclick="saveAppel()">
-                                <span class="material-icons">save</span> Enregistrer l'appel
-                            </button>
+                        </div>
+                        <div class="widget-card-content">
+                            <!-- Sélecteur de classe amélioré -->
+                            <div style="margin-bottom: 24px;">
+                                <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="color: var(--md-sys-color-primary);">class</span>
+                                    Sélectionnez une classe
+                                </h4>
+
+                                <!-- Barre de recherche -->
+                                <div style="margin-bottom: 16px;">
+                                    <div class="topbar-search" style="width: 100%;">
+                                        <span class="material-icons">search</span>
+                                        <input type="text" id="appelClassSearchInput" placeholder="Rechercher une classe..." oninput="filterAppelClasses()">
+                                        <button type="button" id="clearAppelSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearAppelClassSearch()">
+                                            <span class="material-icons">clear</span>
+                                        </button>
+                                    </div>
+                                    <div id="appelSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                        <span id="appelFilteredCount">0</span> classe(s) trouvée(s)
+                                    </div>
+                                </div>
+
+                                <!-- Grille des classes -->
+                                <div id="appelClassesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                                    <!-- Les classes seront ajoutées dynamiquement ici -->
+                                </div>
+                            </div>
+
+                            <!-- Actions disponibles quand une classe est sélectionnée -->
+                            <div id="appelClassActions" style="display: none; padding: 20px; background: var(--md-sys-color-surface-container); border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-on-primary-container);">school</span>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0; color: var(--md-sys-color-on-surface);">Classe sélectionnée</h4>
+                                            <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant);" id="appelSelectedClassInfo">-</p>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                        <button class="md-btn md-btn-filled" onclick="showNewAppelForm()" id="btnNouvelAppel">
+                                            <span class="material-icons">add</span>
+                                            <span>Nouvel appel</span>
+                                        </button>
+                                        <button class="md-btn md-btn-outlined" onclick="deselectAppelClasse()">
+                                            <span class="material-icons">clear</span>
+                                            <span>Changer de classe</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- ========== ABSENCES TAB ========== -->
                 <div id="absences" class="tab-content">
-                    <div class="widget-card">
-                        <div class="widget-card-header"><h3 class="widget-card-title">Suivi des absences</h3></div>
+                    <!-- Historique des appels -->
+                    <div class="widget-card" style="margin-top: 16px;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Historique des appels</h3>
+                        </div>
                         <div class="widget-card-content">
-                            <div id="absencesList"></div>
+                            <!-- Sélecteur de classe -->
+                            <div style="margin-bottom: 24px;">
+                                <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="color: var(--md-sys-color-primary);">class</span>
+                                    Sélectionnez une classe
+                                </h4>
+
+                                <!-- Barre de recherche -->
+                                <div style="margin-bottom: 16px;">
+                                    <div class="topbar-search" style="width: 100%;">
+                                        <span class="material-icons">search</span>
+                                        <input type="text" id="absencesClassSearchInput" placeholder="Rechercher une classe..." oninput="filterAbsencesClasses()">
+                                        <button type="button" id="clearAbsencesSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearAbsencesClassSearch()">
+                                            <span class="material-icons">clear</span>
+                                        </button>
+                                    </div>
+                                    <div id="absencesSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                        <span id="absencesFilteredCount">0</span> classe(s) trouvée(s)
+                                    </div>
+                                </div>
+
+                                <!-- Grille des classes -->
+                                <div id="absencesClassesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                                    <!-- Les classes seront ajoutées dynamiquement ici -->
+                                </div>
+                            </div>
+
+                            <!-- Historique -->
+                            <div id="absencesHistoriqueCard">
+                                <div id="absencesHistoriqueList">
+                                    <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour voir l'historique</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section formulaire de modification de l'appel -->
+                    <div class="widget-card" id="appelFormCard" style="display: none; margin-top: 16px;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title" id="appelFormTitle">Modifier l'appel</h3>
+                            <button class="md-btn md-btn-text" onclick="hideAppelForm()">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+                        <div class="widget-card-content">
+                            <input type="hidden" id="editAppelBatchId" value="">
+                            
+                            <!-- Informations de l'appel -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="date" id="appelDateInput" class="md-text-field-input" required placeholder=" " value="">
+                                        <label class="md-text-field-label">Date de l'appel *</label>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 16px; background: var(--md-sys-color-primary-container); border-radius: 8px;">
+                                    <span class="material-icons" style="color: var(--md-sys-color-on-primary-container); margin-right: 8px;">class</span>
+                                    <span style="color: var(--md-sys-color-on-primary-container); font-weight: 500;">Classe: <span id="appelClasseLabel">-</span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Liste des élèves avec statuts -->
+                            <div id="elevesAppelContainer" style="max-height: 500px; overflow-y: auto;">
+                                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Chargement des élèves...</p>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div style="display: flex; gap: 16px; margin-top: 24px; justify-content: flex-end;">
+                                <button class="md-btn md-btn-outlined" onclick="hideAppelForm()">
+                                    <span class="material-icons">close</span> Annuler
+                                </button>
+                                <button class="md-btn md-btn-filled" id="appelSaveBtn" onclick="saveAppelData()">
+                                    <span class="material-icons">save</span> Enregistrer l'appel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -794,7 +986,6 @@
         let allClasses = [];
         let allProfesseurs = [];
         let allStaff = [];
-        let appelEleves = [];
         let selectedDestinataires = [];
         let allStaffMembers = []; // Tous les membres du staff (professeurs inclus)
 
@@ -802,7 +993,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeUI();
             loadDashboardData();
-            document.getElementById('appelDate').value = new Date().toISOString().split('T')[0];
+            // Initialiser la date seulement si l'élément existe
+            const appelDateInput = document.getElementById('appelDateInput');
+            if (appelDateInput) {
+                appelDateInput.value = new Date().toISOString().split('T')[0];
+            }
         });
 
         function initializeUI() {
@@ -940,8 +1135,8 @@
             switch(tabName) {
                 case 'eleves': await loadEleves(); break;
                 case 'classes': await loadClasses(); break;
-                case 'appel': await loadClassesForSelect(); break;
-                case 'absences': await loadAbsences(); break;
+                case 'appel': await initAppelTab(); break;
+                case 'absences': await loadAvailableAbsencesClasses(); break;
                 case 'appreciations': await initAppreciationsTab(); break;
                 case 'actualites': await loadActualites(); break;
                 case 'messagerie': await loadMessages(); break;
@@ -1456,8 +1651,11 @@
             try {
                 const response = await fetch(`${API_URL}/classes`, { headers: getHeaders() });
                 const classes = await response.json();
-                document.getElementById('appelClasse').innerHTML = '<option value="">-- Sélectionner une classe --</option>' +
+                const options = '<option value="">-- Sélectionner une classe --</option>' +
                     classes.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('');
+                
+                document.getElementById('appelClasse').innerHTML = options;
+                document.getElementById('historiqueClasse').innerHTML = options;
             } catch (error) {
                 showSnackbar('Erreur lors du chargement');
             }
@@ -1480,24 +1678,33 @@
             }
 
             document.getElementById('appelList').innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${appelEleves.map(e => `
-                        <div class="md-card md-card-outlined" style="padding: 12px; display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div class="md-avatar" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 14px;">
+                        <div class="appel-eleve-card md-card md-card-outlined" style="padding: 16px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; border-radius: 12px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div class="md-avatar appel-avatar" style="width: 40px; height: 40px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 16px; font-weight: 500; border: 2px solid var(--md-sys-color-primary);">
                                     ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (e.prenom || 'E')[0].toUpperCase()}
                                 </div>
-                                <span>${e.prenom} ${e.nom}</span>
+                                <div>
+                                    <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${e.prenom} ${e.nom}</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Classe ${e.classe}</div>
+                                </div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                    <input type="radio" name="appel_${e.id}" value="present" checked> Présent
+                            <div class="appel-status-options" style="display: flex; gap: 12px;">
+                                <label class="appel-status-label present-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; background: var(--md-sys-color-success-container); color: var(--md-sys-color-on-success-container);">
+                                    <input type="radio" name="appel_${e.id}" value="present" checked style="display: none;">
+                                    <span class="material-icons" style="font-size: 18px;">check_circle</span>
+                                    <span>Présent</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                    <input type="radio" name="appel_${e.id}" value="absent"> Absent
+                                <label class="appel-status-label absent-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant);">
+                                    <input type="radio" name="appel_${e.id}" value="absent" style="display: none;">
+                                    <span class="material-icons" style="font-size: 18px;">cancel</span>
+                                    <span>Absent</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                    <input type="radio" name="appel_${e.id}" value="retard"> Retard
+                                <label class="appel-status-label retard-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant);">
+                                    <input type="radio" name="appel_${e.id}" value="retard" style="display: none;">
+                                    <span class="material-icons" style="font-size: 18px;">schedule</span>
+                                    <span>Retard</span>
                                 </label>
                             </div>
                         </div>
@@ -1505,10 +1712,40 @@
                 </div>
             `;
             document.getElementById('btnSaveAppel').style.display = 'block';
+            
+            // Reset le bouton à "Enregistrer" pour un nouvel appel
+            document.getElementById('btnSaveAppel').innerHTML = '<span class="material-icons" style="margin-right: 8px;">save</span> Enregistrer l\'appel';
+            document.getElementById('btnSaveAppel').onclick = saveAppel;
+            delete document.getElementById('btnSaveAppel').dataset.batchId;
+            
+            // Ajouter les event listeners pour les changements de statut
+            appelEleves.forEach(e => {
+                const labels = document.querySelectorAll(`input[name="appel_${e.id}"]`);
+                labels.forEach(input => {
+                    input.addEventListener('change', function() {
+                        updateAppelStatusLabels(e.id);
+                    });
+                });
+            });
+            
+            // Initialiser les labels
+            appelEleves.forEach(e => updateAppelStatusLabels(e.id));
+        }
+
+        function updateAppelStatusLabels(eleveId) {
+            const selectedValue = document.querySelector(`input[name="appel_${eleveId}"]:checked`).value;
+            const labels = document.querySelectorAll(`input[name="appel_${eleveId}"]`).forEach(input => {
+                const label = input.parentElement;
+                label.classList.remove('selected-present', 'selected-absent', 'selected-retard');
+                if (input.checked) {
+                    label.classList.add(`selected-${input.value}`);
+                }
+            });
         }
 
         async function saveAppel() {
             const date = document.getElementById('appelDate').value;
+            const classe = document.getElementById('appelClasse').value;
             const absences = [];
 
             for (const eleve of appelEleves) {
@@ -1516,7 +1753,6 @@
                 if (status !== 'present') {
                     absences.push({
                         eleveId: eleve.id,
-                        date: date,
                         type: status,
                         motif: ''
                     });
@@ -1524,62 +1760,624 @@
             }
 
             try {
-                for (const absence of absences) {
-                    await fetch(`${API_URL}/absences`, {
-                        method: 'POST',
-                        headers: getHeaders(),
-                        body: JSON.stringify(absence)
-                    });
+                const response = await fetch(`${API_URL}/absences/appel`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        absences,
+                        classe,
+                        date,
+                        professeurId: user?.id
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showSnackbar(`Appel enregistré : ${absences.length} absence(s)`);
+                    loadDashboardData();
+                } else {
+                    throw new Error('Erreur lors de l\'enregistrement');
                 }
-                showSnackbar(`Appel enregistré : ${absences.length} absence(s)`);
-                loadDashboardData();
             } catch (error) {
                 showSnackbar('Erreur lors de l\'enregistrement');
             }
         }
 
-        // ==================== ABSENCES ====================
-        async function loadAbsences() {
+        // ==================== APPEL - NOUVEAU SYSTÈME ====================
+        let currentSelectedAppelClasse = '';
+        let availableAppelClasses = [];
+        let appelEleves = [];
+
+        // ==================== ABSENCES - HISTORIQUE ====================
+        let currentSelectedAbsencesClasse = '';
+        let availableAbsencesClasses = [];
+
+        // Initialiser l'onglet appel
+        async function initAppelTab() {
+            await loadAvailableAppelClasses();
+        }
+
+        // Charger les classes disponibles pour appel
+        async function loadAvailableAppelClasses() {
             try {
-                const response = await fetch(`${API_URL}/absences`, { headers: getHeaders() });
-                const absences = await response.json();
-                
-                document.getElementById('absencesList').innerHTML = absences.length ? `
-                    <div class="md-table-container">
-                        <table class="md-table">
-                            <thead>
-                                <tr><th>Élève</th><th>Date</th><th>Type</th><th>Motif</th><th>Actions</th></tr>
-                            </thead>
-                            <tbody>
-                                ${absences.map(a => {
-                                    const eleve = allEleves.find(e => e.id === a.eleveId);
-                                    return `<tr>
-                                        <td>
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <div class="md-avatar" style="width: 24px; height: 24px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 12px;">
-                                                    ${eleve && eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve ? (eleve.prenom || 'E')[0].toUpperCase() : '?')}
-                                                </div>
-                                                ${eleve ? `${eleve.prenom} ${eleve.nom}` : 'Inconnu'}
-                                            </div>
-                                        </td>
-                                        <td>${new Date(a.date).toLocaleDateString('fr-FR')}</td>
-                                        <td><span class="md-chip md-chip-${a.type === 'absent' ? 'error' : 'warning'}">${a.type}</span></td>
-                                        <td>${a.motif || '-'}</td>
-                                        <td>
-                                            <button class="md-icon-btn" onclick="deleteAbsence('${a.id}')">
-                                                <span class="material-icons">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>`;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                ` : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune absence enregistrée</p>';
+                const response = await fetch(`${API_URL}/appreciations/classes`, { headers: getHeaders() });
+                const classes = await response.json();
+
+                if (Array.isArray(classes)) {
+                    availableAppelClasses = classes;
+                    renderAppelClassesGrid();
+                    fillAppelFallbackSelect();
+                }
             } catch (error) {
-                showSnackbar('Erreur lors du chargement des absences');
+                console.error('Erreur chargement classes appel:', error);
+                showSnackbar('Erreur lors du chargement des classes');
             }
         }
+
+        // Rendre la grille des classes pour appel
+        function renderAppelClassesGrid(classesToShow = availableAppelClasses) {
+            const grid = document.getElementById('appelClassesGrid');
+            const searchTerm = document.getElementById('appelClassSearchInput')?.value.toLowerCase() || '';
+
+            if (!grid) return; // Sécurité si l'élément n'existe pas
+
+            if (classesToShow.length === 0) {
+                grid.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px; grid-column: 1 / -1;">Aucune classe disponible</p>';
+                return;
+            }
+
+            // Filtrer les classes si un terme de recherche est présent
+            const filteredClasses = searchTerm ?
+                classesToShow.filter(classe => classe.nom.toLowerCase().includes(searchTerm)) :
+                classesToShow;
+
+            if (filteredClasses.length === 0 && searchTerm) {
+                grid.innerHTML = `
+                    <div class="no-classes-found" style="grid-column: 1 / -1;">
+                        <span class="material-icons">search_off</span>
+                        <p>Aucune classe trouvée pour "${searchTerm}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredClasses.map(classe => {
+                const isSelected = classe.nom === currentSelectedAppelClasse;
+                const studentCount = classe.nombreEleves || 0;
+
+                return `
+                    <div class="class-card ${isSelected ? 'selected' : ''}"
+                         onclick="selectAppelClasse('${classe.nom}')"
+                         data-classe="${classe.nom}"
+                         style="padding: 16px; border: 2px solid ${isSelected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}; border-radius: 12px; background: ${isSelected ? 'var(--md-sys-color-primary-container)' : 'var(--md-sys-color-surface)'}; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <div class="class-card-icon" style="width: 48px; height: 48px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center;">
+                            <span class="material-icons" style="color: var(--md-sys-color-on-primary-container); font-size: 24px;">school</span>
+                        </div>
+                        <div class="class-card-name" style="font-weight: 500; color: var(--md-sys-color-on-surface); text-align: center;">${classe.nom}</div>
+                        <div class="class-card-count" style="display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--md-sys-color-on-surface-variant);">
+                            <span class="material-icons" style="font-size: 16px;">people</span>
+                            ${studentCount} élève${studentCount > 1 ? 's' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Ajouter la classe 'filtered' si on filtre
+            grid.classList.toggle('filtered', searchTerm.length > 0);
+        }
+
+        // Filtrer les classes pour appel
+        function filterAppelClasses() {
+            const searchInput = document.getElementById('appelClassSearchInput');
+            const clearBtn = document.getElementById('clearAppelSearchBtn');
+            const resultsInfo = document.getElementById('appelSearchResultsInfo');
+            const filteredCount = document.getElementById('appelFilteredCount');
+
+            const searchTerm = searchInput.value.toLowerCase();
+
+            // Afficher/masquer le bouton d'effacement
+            if (searchTerm.length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+                resultsInfo.style.display = 'none';
+            }
+
+            renderAppelClassesGrid();
+
+            // Mettre à jour les informations de résultats
+            if (searchTerm.length > 0) {
+                const filteredClasses = availableAppelClasses.filter(classe =>
+                    classe.nom.toLowerCase().includes(searchTerm)
+                );
+                filteredCount.textContent = filteredClasses.length;
+                resultsInfo.style.display = filteredClasses.length !== availableAppelClasses.length ? 'block' : 'none';
+            }
+        }
+
+        // Effacer la recherche pour appel
+        function clearAppelClassSearch() {
+            document.getElementById('appelClassSearchInput').value = '';
+            filterAppelClasses();
+        }
+        function clearAppelClassSearch() {
+            // Pas de champ de recherche dans cette version
+        }
+
+        // Remplir le sélecteur alternatif pour appel
+        function fillAppelFallbackSelect() {
+            const select = document.getElementById('appelClasseSelect');
+            if (!select) return; // Sécurité si l'élément n'existe pas
+
+            select.innerHTML = '<option value="">-- Sélectionner une classe --</option>';
+
+            availableAppelClasses.forEach(classe => {
+                const option = document.createElement('option');
+                option.value = classe.nom;
+                option.textContent = `${classe.nom} (${classe.nombreEleves || 0} élèves)`;
+                if (classe.nom === currentSelectedAppelClasse) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        // Sélectionner une classe pour appel
+        function selectAppelClasse(nomClasse) {
+            currentSelectedAppelClasse = nomClasse;
+
+            // Mettre à jour l'affichage des cartes
+            const cards = document.querySelectorAll('#appelClassesGrid .class-card');
+            cards.forEach(card => {
+                const isSelected = card.dataset.classe === nomClasse;
+                card.classList.toggle('selected', isSelected);
+                // Mettre à jour le style de bordure
+                card.style.borderColor = isSelected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)';
+                card.style.background = isSelected ? 'var(--md-sys-color-primary-container)' : 'var(--md-sys-color-surface)';
+            });
+
+            // Mettre à jour le sélecteur alternatif s'il existe
+            const select = document.getElementById('appelClasseSelect');
+            if (select) select.value = nomClasse;
+
+            // Mettre à jour les informations de la classe sélectionnée
+            const selectedClassInfo = document.getElementById('appelSelectedClassInfo');
+            if (selectedClassInfo) {
+                const classe = availableAppelClasses.find(c => c.nom === nomClasse);
+                if (classe) {
+                    selectedClassInfo.textContent = `${classe.nom} - ${classe.nombreEleves || 0} élève(s)`;
+                }
+            }
+
+            // Afficher les actions
+            showAppelButtons();
+        }
+
+        // Désélectionner la classe pour appel
+        function deselectAppelClasse() {
+            currentSelectedAppelClasse = '';
+
+            // Mettre à jour l'affichage
+            const cards = document.querySelectorAll('#appelClassesGrid .class-card');
+            cards.forEach(card => {
+                card.classList.remove('selected');
+                card.style.borderColor = 'var(--md-sys-color-outline-variant)';
+                card.style.background = 'var(--md-sys-color-surface)';
+            });
+
+            const select = document.getElementById('appelClasseSelect');
+            if (select) select.value = '';
+
+            // Masquer les actions
+            const actionsDiv = document.getElementById('appelClassActions');
+            if (actionsDiv) actionsDiv.style.display = 'none';
+
+            const formCard = document.getElementById('appelFormCard');
+            if (formCard) formCard.style.display = 'none';
+
+            // Vider le récapitulatif
+            const appelList = document.getElementById('appelList');
+            if (appelList) {
+                appelList.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour afficher les appels</p>';
+            }
+        }
+
+        // Afficher les boutons d'action quand une classe est sélectionnée pour appel
+        function showAppelButtons() {
+            const actionsDiv = document.getElementById('appelClassActions');
+            if (currentSelectedAppelClasse) {
+                actionsDiv.style.display = 'flex';
+            } else {
+                actionsDiv.style.display = 'none';
+            }
+        }
+
+        // Afficher le formulaire de nouvel appel
+        function showNewAppelForm() {
+            document.getElementById('appelFormCard').style.display = 'block';
+
+            // Réinitialiser le formulaire
+            const appelDateInput = document.getElementById('appelDateInput');
+            if (appelDateInput) {
+                appelDateInput.value = new Date().toISOString().split('T')[0];
+            }
+            const appelClasseLabel = document.getElementById('appelClasseLabel');
+            if (appelClasseLabel) {
+                appelClasseLabel.textContent = currentSelectedAppelClasse;
+            }
+
+            // Réinitialiser pour création
+            document.getElementById('editAppelBatchId').value = '';
+            document.getElementById('appelFormTitle').textContent = 'Nouvel appel';
+            document.getElementById('appelSaveBtn').innerHTML = '<span class="material-icons">save</span> Enregistrer l\'appel';
+
+            // Les élèves seront chargés par editAppel() si nécessaire
+        }
+
+        // Masquer le formulaire d'appel
+        function hideAppelForm() {
+            document.getElementById('appelFormCard').style.display = 'none';
+        }
+
+
+
+        // Charger les élèves pour le formulaire d'appel
+        async function loadElevesForAppelForm() {
+            try {
+                const response = await fetch(`${API_URL}/appreciations/eleves/classe/${currentSelectedAppelClasse}`, { headers: getHeaders() });
+                appelEleves = await response.json();
+
+                const container = document.getElementById('elevesAppelContainer');
+                container.innerHTML = appelEleves.map(eleve => `
+                    <div class="appel-eleve-row" style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+                            <div class="md-avatar" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                                ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">${eleve.prenom} ${eleve.nom}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                <input type="radio" name="appel_${eleve.id}" value="present" checked style="margin: 0;">
+                                <span style="font-size: 14px;">Présent</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                <input type="radio" name="appel_${eleve.id}" value="absent" style="margin: 0;">
+                                <span style="font-size: 14px;">Absent</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                <input type="radio" name="appel_${eleve.id}" value="retard" style="margin: 0;">
+                                <span style="font-size: 14px;">Retard</span>
+                            </label>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des élèves');
+            }
+        }
+
+        // Sauvegarder les données d'appel
+        async function saveAppelData() {
+            const editBatchId = document.getElementById('editAppelBatchId').value;
+            if (editBatchId) {
+                return updateAppel(editBatchId);
+            }
+
+            const appelDateInput = document.getElementById('appelDateInput');
+            const date = appelDateInput ? appelDateInput.value : new Date().toISOString().split('T')[0];
+            const classe = currentSelectedAppelClasse;
+            const absences = [];
+
+            for (const eleve of appelEleves) {
+                const status = document.querySelector(`input[name="appel_${eleve.id}"]:checked`).value;
+                absences.push({
+                    eleveId: eleve.id,
+                    type: status,
+                    motif: '',
+                    professeurId: user?.id,
+                    classe,
+                    date
+                });
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/absences/appel`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ absences, classe, date, professeurId: user?.id })
+                });
+
+                if (response.ok) {
+                    showSnackbar('Appel enregistré avec succès');
+                    document.getElementById('appelFormCard').style.display = 'none';
+                    loadDashboardData();
+                } else {
+                    throw new Error('Erreur lors de l\'enregistrement');
+                }
+            } catch (error) {
+                showSnackbar('Erreur lors de l\'enregistrement');
+            }
+        }
+
+        // Afficher l'historique des appels
+
+
+        // Éditer un appel
+        async function editAppel(batchId) {
+            try {
+                const response = await fetch(`${API_URL}/absences/appel/${batchId}`, { headers: getHeaders() });
+                const absences = await response.json();
+
+                if (absences.length === 0) {
+                    showSnackbar('Appel introuvable');
+                    return;
+                }
+
+                // Passer au formulaire
+                showNewAppelForm();
+
+                // Marquer comme édition
+                document.getElementById('editAppelBatchId').value = batchId;
+                document.getElementById('appelFormTitle').textContent = 'Modifier l\'appel';
+                document.getElementById('appelSaveBtn').innerHTML = '<span class="material-icons">update</span> Modifier l\'appel';
+
+                // Remplir les données
+                const appel = absences[0];
+                const appelDateInput = document.getElementById('appelDateInput');
+                if (appelDateInput) {
+                    appelDateInput.value = appel.date;
+                }
+                const appelClasseLabel = document.getElementById('appelClasseLabel');
+                if (appelClasseLabel) {
+                    appelClasseLabel.textContent = appel.classe;
+                }
+
+                // Définir la classe sélectionnée pour le chargement des élèves
+                currentSelectedAppelClasse = appel.classe;
+
+                // Charger les élèves et marquer leurs statuts
+                await loadElevesForAppelForm();
+
+                // Attendre que les élèves soient chargés, puis marquer les statuts
+                setTimeout(() => {
+                    absences.forEach(absence => {
+                        const radio = document.querySelector(`input[name="appel_${absence.eleveId}"][value="${absence.type}"]`);
+                        if (radio) {
+                            radio.checked = true;
+                        }
+                    });
+                }, 500);
+
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement de l\'appel');
+            }
+        }
+
+        // Mettre à jour un appel
+        async function updateAppel(batchId) {
+            const appelDateInput = document.getElementById('appelDateInput');
+            const date = appelDateInput ? appelDateInput.value : new Date().toISOString().split('T')[0];
+            const classe = currentSelectedAppelClasse;
+            const absences = [];
+
+            for (const eleve of appelEleves) {
+                const status = document.querySelector(`input[name="appel_${eleve.id}"]:checked`).value;
+                absences.push({
+                    eleveId: eleve.id,
+                    type: status,
+                    motif: '',
+                    professeurId: user?.id,
+                    classe,
+                    date
+                });
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/absences/appel/${batchId}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ absences })
+                });
+
+                if (response.ok) {
+                    showSnackbar('Appel enregistré avec succès');
+                    document.getElementById('appelFormCard').style.display = 'none';
+                    loadDashboardData();
+                } else {
+                    throw new Error('Erreur lors de la modification');
+                }
+            } catch (error) {
+                showSnackbar('Erreur lors de la modification');
+            }
+        }
+
+        // Supprimer un appel
+        async function deleteAppel(batchId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/absences/appel/${batchId}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+
+                if (response.ok) {
+                    showSnackbar('Appel supprimé');
+                    loadDashboardData();
+                } else {
+                    throw new Error('Erreur lors de la suppression');
+                }
+            } catch (error) {
+                showSnackbar('Erreur lors de la suppression');
+            }
+        }
+
+        // Fonction utilitaire pour formater les dates
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('fr-FR');
+        }
+
+        // ==================== ABSENCES - HISTORIQUE ====================
+
+        // Charger les classes disponibles pour les absences
+        async function loadAvailableAbsencesClasses() {
+            try {
+                const response = await fetch(`${API_URL}/appreciations/classes`, { headers: getHeaders() });
+                const classes = await response.json();
+
+                if (Array.isArray(classes)) {
+                    availableAbsencesClasses = classes;
+                    renderAbsencesClassesGrid();
+                }
+            } catch (error) {
+                console.error('Erreur chargement classes absences:', error);
+            }
+        }
+
+        // Rendre la grille des classes pour absences
+        function renderAbsencesClassesGrid(classesToShow = availableAbsencesClasses) {
+            const grid = document.getElementById('absencesClassesGrid');
+            const searchTerm = document.getElementById('absencesClassSearchInput')?.value.toLowerCase() || '';
+
+            if (!grid) return;
+
+            if (classesToShow.length === 0) {
+                grid.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px; grid-column: 1 / -1;">Aucune classe disponible</p>';
+                return;
+            }
+
+            // Filtrer les classes si un terme de recherche est présent
+            const filteredClasses = searchTerm ?
+                classesToShow.filter(classe => classe.nom.toLowerCase().includes(searchTerm)) :
+                classesToShow;
+
+            if (filteredClasses.length === 0 && searchTerm) {
+                grid.innerHTML = `
+                    <div class="no-classes-found" style="grid-column: 1 / -1;">
+                        <span class="material-icons">search_off</span>
+                        <p>Aucune classe trouvée pour "${searchTerm}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredClasses.map(classe => {
+                const isSelected = classe.nom === currentSelectedAbsencesClasse;
+                const studentCount = classe.nombreEleves || 0;
+
+                return `
+                    <div class="class-card ${isSelected ? 'selected' : ''}"
+                         onclick="selectAbsencesClasse('${classe.nom}')"
+                         data-classe="${classe.nom}"
+                         style="padding: 16px; border: 2px solid ${isSelected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}; border-radius: 12px; background: ${isSelected ? 'var(--md-sys-color-primary-container)' : 'var(--md-sys-color-surface)'}; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <div class="class-card-icon" style="width: 48px; height: 48px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center;">
+                            <span class="material-icons" style="color: var(--md-sys-color-on-primary-container); font-size: 24px;">school</span>
+                        </div>
+                        <div class="class-card-name" style="font-weight: 500; color: var(--md-sys-color-on-surface); text-align: center;">${classe.nom}</div>
+                        <div class="class-card-count" style="display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--md-sys-color-on-surface-variant);">
+                            <span class="material-icons" style="font-size: 16px;">people</span>
+                            ${studentCount} élève${studentCount > 1 ? 's' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Ajouter la classe 'filtered' si on filtre
+            grid.classList.toggle('filtered', searchTerm.length > 0);
+        }
+
+        // Filtrer les classes pour absences
+        function filterAbsencesClasses() {
+            const searchInput = document.getElementById('absencesClassSearchInput');
+            const clearBtn = document.getElementById('clearAbsencesSearchBtn');
+            const resultsInfo = document.getElementById('absencesSearchResultsInfo');
+            const filteredCount = document.getElementById('absencesFilteredCount');
+
+            const searchTerm = searchInput.value.toLowerCase();
+
+            // Afficher/masquer le bouton d'effacement
+            if (searchTerm.length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+                resultsInfo.style.display = 'none';
+            }
+
+            renderAbsencesClassesGrid();
+
+            // Mettre à jour les informations de résultats
+            if (searchTerm.length > 0) {
+                const filteredClasses = availableAbsencesClasses.filter(classe =>
+                    classe.nom.toLowerCase().includes(searchTerm)
+                );
+                filteredCount.textContent = filteredClasses.length;
+                resultsInfo.style.display = filteredClasses.length !== availableAbsencesClasses.length ? 'block' : 'none';
+            }
+        }
+
+        // Effacer la recherche pour absences
+        function clearAbsencesClassSearch() {
+            document.getElementById('absencesClassSearchInput').value = '';
+            filterAbsencesClasses();
+        }
+
+        // Sélectionner une classe pour absences
+        function selectAbsencesClasse(nomClasse) {
+            currentSelectedAbsencesClasse = nomClasse;
+            renderAbsencesClassesGrid();
+            loadAbsencesHistorique();
+        }
+
+        // Charger l'historique des absences
+        async function loadAbsencesHistorique() {
+            try {
+                const response = await fetch(`${API_URL}/absences/appel/historique/${currentSelectedAbsencesClasse}`, { headers: getHeaders() });
+                const appels = await response.json();
+
+                const container = document.getElementById('absencesHistoriqueList');
+                if (appels.length === 0) {
+                    container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 24px;">Aucun appel enregistré pour cette classe</p>';
+                    return;
+                }
+
+                container.innerHTML = appels.map(appel => `
+                    <div class="appel-historique-card md-card md-card-outlined" style="padding: 20px; cursor: pointer; transition: all 0.3s ease;" onclick="editAppel('${appel.batchId}')">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 24px;">event_note</span>
+                                <div>
+                                    <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${formatDate(appel.date)}</div>
+                                    <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Classe ${appel.classe}</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 18px; font-weight: 500; color: var(--md-sys-color-on-surface);">${appel.nbAbsences} élève(s)</div>
+                                <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
+                                    ${appel.nbPresents || 0} présent(s), ${appel.nbRetards} retard(s), ${appel.nbAbsents} absent(s)
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-primary);" onclick="event.stopPropagation(); editAppel('${appel.batchId}')">
+                                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
+                                Modifier
+                            </button>
+                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteAppel('${appel.batchId}')">
+                                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement de l\'historique');
+            }
+        }
+
+
 
         async function deleteAbsence(id) {
             try {
@@ -1589,7 +2387,6 @@
                 });
                 if (response.ok) {
                     showSnackbar('Absence supprimée');
-                    loadAbsences();
                     loadDashboardData();
                 }
             } catch (error) {

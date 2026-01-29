@@ -84,8 +84,16 @@ function initDatabase() {
                 date TEXT NOT NULL,
                 type TEXT,
                 motif TEXT,
+                batchId TEXT,
+                professeurId TEXT,
+                classe TEXT,
                 FOREIGN KEY (eleveId) REFERENCES eleves(id)
             )`);
+
+            // Migration : ajouter les colonnes manquantes
+            db.run(`ALTER TABLE absences ADD COLUMN batchId TEXT`, () => {});
+            db.run(`ALTER TABLE absences ADD COLUMN professeurId TEXT`, () => {});
+            db.run(`ALTER TABLE absences ADD COLUMN classe TEXT`, () => {});
 
             // Table appréciations
             db.run(`CREATE TABLE IF NOT EXISTS appreciations (
