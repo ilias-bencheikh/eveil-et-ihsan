@@ -11,7 +11,9 @@
 .login-page {
     min-height: 100vh;
     display: flex;
-    background: linear-gradient(135deg, 
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg,
         var(--md-sys-color-primary-container) 0%,
         var(--md-sys-color-surface) 50%,
         var(--md-sys-color-tertiary-container) 100%);
@@ -161,9 +163,9 @@
     color: var(--md-sys-color-on-surface);
 }
 
-/* ===== PANNEAU DROIT (FORMULAIRE) ===== */
+/* ===== PANNEAU CENTRÉ (FORMULAIRE) ===== */
 
-.login-form-container {
+.login-form-container-centered {
     width: 100%;
     max-width: 480px;
     display: flex;
@@ -172,6 +174,7 @@
     padding: var(--spacing-xl);
     position: relative;
     z-index: 1;
+    margin: 0 auto;
 }
 
 .login-card {
@@ -186,6 +189,17 @@
 .login-card-header {
     text-align: center;
     margin-bottom: var(--spacing-xl);
+}
+
+.login-logo-small {
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    justify-content: center;
+}
+
+.login-logo-small img {
+    width: 60px;
+    height: 60px;
 }
 
 .login-card-header h2 {

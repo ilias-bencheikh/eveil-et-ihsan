@@ -100,10 +100,17 @@ router.get('/profil', requireAuth, (req, res) => {
         return res.status(403).json({ message: 'Accès réservé aux élèves' });
     }
 
-    db.get('SELECT id, nom, prenom, email, photo, parentTel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues FROM eleves WHERE id = ?', [String(req.userId)], (err, row) => {
+    db.get('SELECT id, nom, prenom, email, photo, parentTel, tel, status, fraisInscription, nbPaiements, fraisValide, paiementsEffectues FROM eleves WHERE id = ?', [String(req.userId)], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!row) return res.status(404).json({ message: 'Élève non trouvé' });
-        res.json(row);
+        
+        // Pour les majeurs, utiliser le téléphone de l'étudiant au lieu de celui du parent
+        const contactTel = row.status === 'majeur' ? row.tel : row.parentTel;
+        
+        res.json({
+            ...row,
+            contactTel // Retourner le bon numéro de téléphone selon le statut
+        });
     });
 });
 
@@ -121,111 +128,131 @@ router.put('/profil', requireAuth, uploadMiddleware, (req, res) => {
         // deletePhoto peut être un array ou une string selon comment c'est envoyé
         const deletePhotoValue = Array.isArray(deletePhoto) ? deletePhoto[0] : deletePhoto;
         const photo = req.file ? `/uploads/${req.file.filename}` : null;
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return res.status(400).json({ error: 'Email invalide' });
-    }
-
-    if (parentTel && !/^[0-9+\-\s()]{10,}$/.test(parentTel)) {
-        return res.status(400).json({ error: 'Numéro de téléphone invalide' });
-    }
-
-    // Gestion de la suppression de photo
-    if (deletePhotoValue === 'true') {
-        // Récupérer l'ancienne photo pour la supprimer du système de fichiers
-        db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
-            if (err) {
-                console.error('Erreur récupération photo pour suppression:', err);
-            } else if (row && row.photo) {
-                // Supprimer l'image du système de fichiers
-                const photoPath = path.join(__dirname, '../../public', row.photo);
-                fs.access(photoPath, fs.constants.F_OK, (err) => {
-                    if (!err) {
-                        // Le fichier existe, on peut le supprimer
-                        fs.unlink(photoPath, (err) => {
-                            if (err) {
-                                console.error('Erreur suppression photo:', err);
-                            } else {
-                                console.log('Photo supprimée:', photoPath);
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
-
-    // Si une nouvelle photo est uploadée, supprimer l'ancienne (sauf si on est en train de supprimer)
-    if (photo && deletePhotoValue !== 'true') {
-        // Récupérer l'ancienne photo
-        db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
-            if (err) {
-                console.error('Erreur récupération ancienne photo:', err);
-            } else if (row && row.photo) {
-                // Supprimer l'ancienne image du système de fichiers
-                const oldPhotoPath = path.join(__dirname, '../../public', row.photo);
-                fs.access(oldPhotoPath, fs.constants.F_OK, (err) => {
-                    if (!err) {
-                        // Le fichier existe, on peut le supprimer
-                        fs.unlink(oldPhotoPath, (err) => {
-                            if (err) {
-                                console.error('Erreur suppression ancienne photo:', err);
-                            } else {
-                                console.log('Ancienne photo supprimée:', oldPhotoPath);
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
-
-    // Construire la requête de mise à jour
-    let updateFields = [];
-    let updateValues = [];
-
-    if (email !== undefined && email !== '') {
-        updateFields.push('email = ?');
-        updateValues.push(email);
-    }
-
-    if (parentTel !== undefined && parentTel !== '') {
-        updateFields.push('parentTel = ?');
-        updateValues.push(parentTel);
-    }
-
-    if (photo) {
-        updateFields.push('photo = ?');
-        updateValues.push(photo);
-    } else if (deletePhotoValue === 'true') {
-        updateFields.push('photo = NULL');
-    }
-
-    // Si aucun champ n'est spécifié mais qu'on veut supprimer la photo, permettre la mise à jour
-    if (updateFields.length === 0 && deletePhotoValue === 'true') {
-        updateFields.push('photo = NULL');
-    }
-
-    console.log('PUT /profil - updateFields:', updateFields);
-    console.log('PUT /profil - updateValues:', updateValues);
-
-    if (updateFields.length === 0) {
-        return res.status(400).json({ error: 'Aucun champ à mettre à jour' });
-    }
-
-    updateValues.push(req.userId);
-
-    const query = `UPDATE eleves SET ${updateFields.join(', ')} WHERE id = ?`;
-
-    db.run(query, updateValues, function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
         
-        // Récupérer les données mises à jour
-        db.get('SELECT id, nom, prenom, email, photo, parentTel FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: 'Email invalide' });
+        }
+
+        if (parentTel && !/^[0-9+\-\s()]{10,}$/.test(parentTel)) {
+            return res.status(400).json({ error: 'Numéro de téléphone invalide' });
+        }
+
+        // D'abord récupérer le statut de l'élève pour savoir quel champ mettre à jour
+        db.get('SELECT status FROM eleves WHERE id = ?', [req.userId], (err, eleve) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Profil mis à jour avec succès', eleve: row });
+            if (!eleve) return res.status(404).json({ message: 'Élève non trouvé' });
+
+            const isMajeur = eleve.status === 'majeur';
+            const telField = isMajeur ? 'tel' : 'parentTel';
+
+            // Gestion de la suppression de photo
+            if (deletePhotoValue === 'true') {
+                // Récupérer l'ancienne photo pour la supprimer du système de fichiers
+                db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+                    if (err) {
+                        console.error('Erreur récupération photo pour suppression:', err);
+                    } else if (row && row.photo) {
+                        // Supprimer l'image du système de fichiers
+                        const photoPath = path.join(__dirname, '../../public', row.photo);
+                        fs.access(photoPath, fs.constants.F_OK, (err) => {
+                            if (!err) {
+                                // Le fichier existe, on peut le supprimer
+                                fs.unlink(photoPath, (err) => {
+                                    if (err) {
+                                        console.error('Erreur suppression photo:', err);
+                                    } else {
+                                        console.log('Photo supprimée:', photoPath);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Si une nouvelle photo est uploadée, supprimer l'ancienne (sauf si on est en train de supprimer)
+            if (photo && deletePhotoValue !== 'true') {
+                // Récupérer l'ancienne photo
+                db.get('SELECT photo FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+                    if (err) {
+                        console.error('Erreur récupération ancienne photo:', err);
+                    } else if (row && row.photo) {
+                        // Supprimer l'ancienne image du système de fichiers
+                        const oldPhotoPath = path.join(__dirname, '../../public', row.photo);
+                        fs.access(oldPhotoPath, fs.constants.F_OK, (err) => {
+                            if (!err) {
+                                // Le fichier existe, on peut le supprimer
+                                fs.unlink(oldPhotoPath, (err) => {
+                                    if (err) {
+                                        console.error('Erreur suppression ancienne photo:', err);
+                                    } else {
+                                        console.log('Ancienne photo supprimée:', oldPhotoPath);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Construire la requête de mise à jour
+            let updateFields = [];
+            let updateValues = [];
+
+            if (email !== undefined && email !== '') {
+                updateFields.push('email = ?');
+                updateValues.push(email);
+            }
+
+            if (parentTel !== undefined && parentTel !== '') {
+                updateFields.push(`${telField} = ?`);
+                updateValues.push(parentTel);
+            }
+
+            if (photo) {
+                updateFields.push('photo = ?');
+                updateValues.push(photo);
+            } else if (deletePhotoValue === 'true') {
+                updateFields.push('photo = NULL');
+            }
+
+            // Si aucun champ n'est spécifié mais qu'on veut supprimer la photo, permettre la mise à jour
+            if (updateFields.length === 0 && deletePhotoValue === 'true') {
+                updateFields.push('photo = NULL');
+            }
+
+            console.log('PUT /profil - updateFields:', updateFields);
+            console.log('PUT /profil - updateValues:', updateValues);
+
+            if (updateFields.length === 0) {
+                return res.status(400).json({ error: 'Aucun champ à mettre à jour' });
+            }
+
+            updateValues.push(req.userId);
+
+            const query = `UPDATE eleves SET ${updateFields.join(', ')} WHERE id = ?`;
+
+            db.run(query, updateValues, function(err) {
+                if (err) return res.status(500).json({ error: err.message });
+                if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
+                
+                // Récupérer les données mises à jour
+                db.get('SELECT id, nom, prenom, email, photo, parentTel, tel, status FROM eleves WHERE id = ?', [req.userId], (err, row) => {
+                    if (err) return res.status(500).json({ error: err.message });
+                    
+                    // Retourner le bon numéro de téléphone selon le statut
+                    const contactTel = row.status === 'majeur' ? row.tel : row.parentTel;
+                    
+                    res.json({ 
+                        message: 'Profil mis à jour avec succès', 
+                        eleve: {
+                            ...row,
+                            contactTel
+                        }
+                    });
+                });
+            });
         });
-    });
     } catch (error) {
         console.error('Erreur dans PUT /profil:', error);
         res.status(500).json({ error: 'Erreur serveur interne' });
@@ -285,11 +312,65 @@ router.get('/famille-by-email/:email', (req, res) => {
 router.post('/inscription', async (req, res) => {
     const { parentNom, parentPrenom, parentEmail, parentTel, enFamille, enfants } = req.body;
     
-    if (!parentEmail || !enfants || enfants.length === 0) {
-        return res.status(400).json({ error: 'Email parent et informations enfants requis' });
+    // Validation : soit un email parent (pour mineurs) soit au moins un enfant avec email (pour majeurs)
+    const hasParentEmail = parentEmail && parentEmail.trim();
+    const hasStudentEmails = enfants && enfants.some(enfant => enfant.email && enfant.email.trim());
+    
+    if ((!hasParentEmail && !hasStudentEmails) || !enfants || enfants.length === 0) {
+        return res.status(400).json({ error: 'Email (parent ou étudiant) et informations élèves requis' });
     }
     
     try {
+        // Vérifier les emails existants
+        if (hasParentEmail) {
+            // Pour les mineurs : vérifier que l'email parent n'est pas déjà utilisé par une autre famille
+            const existingParent = await new Promise((resolve, reject) => {
+                db.get(`SELECT id, enFamille, familleLienId FROM eleves WHERE email = ?`, [parentEmail], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
+            
+            if (existingParent) {
+                // Si c'est une inscription familiale et que l'email existe déjà dans la même famille, c'est OK
+                if (enFamille && existingParent.enFamille && existingParent.familleLienId) {
+                    // Vérifier si c'est la même famille en comparant les noms
+                    const familyMembers = await new Promise((resolve, reject) => {
+                        db.all(`SELECT parentNom, parentPrenom FROM eleves WHERE familleLienId = ?`, [existingParent.familleLienId], (err, rows) => {
+                            if (err) reject(err);
+                            else resolve(rows);
+                        });
+                    });
+                    
+                    const isSameFamily = familyMembers.some(member => 
+                        member.parentNom === parentNom && member.parentPrenom === parentPrenom
+                    );
+                    
+                    if (!isSameFamily) {
+                        return res.status(400).json({ error: 'Cet email est déjà utilisé par une autre famille' });
+                    }
+                } else if (!enFamille || !existingParent.enFamille) {
+                    return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+                }
+            }
+        }
+        
+        // Vérifier les emails des étudiants majeurs
+        for (const enfant of enfants) {
+            if (enfant.status === 'majeur' && enfant.email) {
+                const existingStudent = await new Promise((resolve, reject) => {
+                    db.get(`SELECT id FROM eleves WHERE email = ?`, [enfant.email], (err, row) => {
+                        if (err) reject(err);
+                        else resolve(row);
+                    });
+                });
+                
+                if (existingStudent) {
+                    return res.status(400).json({ error: `L'email ${enfant.email} est déjà utilisé` });
+                }
+            }
+        }
+        
         // Générer un ID de famille unique si plusieurs enfants
         const familleLienId = enFamille ? `FAM_${Date.now()}` : null;
         const nombreFamille = enfants.length;
@@ -302,18 +383,38 @@ router.post('/inscription', async (req, res) => {
             const id = generateId();
             const activationToken = enFamille ? familleActivationToken : generateToken();
             
+            // Déterminer l'email et téléphone à utiliser selon le statut
+            let emailToUse, telToUse, parentNomToUse, parentPrenomToUse, parentTelToUse;
+            
+            if (enfant.status === 'majeur') {
+                // Pour les majeurs : utiliser l'email et téléphone de l'étudiant
+                emailToUse = enfant.email;
+                telToUse = enfant.tel;
+                parentNomToUse = null; // Pas de parent pour les majeurs
+                parentPrenomToUse = null;
+                parentTelToUse = null;
+            } else {
+                // Pour les mineurs : utiliser l'email parent
+                emailToUse = parentEmail;
+                telToUse = null; // Le téléphone est stocké dans parentTel
+                parentNomToUse = parentNom || null;
+                parentPrenomToUse = parentPrenom || null;
+                parentTelToUse = parentTel || null;
+            }
+            
             await new Promise((resolve, reject) => {
                 const frais = parseFloat(enfant.fraisInscription || 0) || 0;
                 const nbPaiements = parseInt(enfant.nbPaiements || 1, 10) || 1;
-                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, tel, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+
                     [
                         id, 
                         enfant.nom, 
                         enfant.prenom, 
-                        enfant.dateNaissance, 
-                        enfant.classe, 
-                        parentEmail, // Tous les enfants partagent l'email parent
+                        enfant.dateNaissance || null, 
+                        enfant.classe || null, 
+                        emailToUse, 
                         null, 
                         activationToken, 
                         0, // Non activé - en attente de validation admin
@@ -323,13 +424,15 @@ router.post('/inscription', async (req, res) => {
                         nombreFamille, 
                         familleLienId,
                         null,
-                        parentNom || null,
-                        parentPrenom || null,
-                        parentTel || null,
+                        parentNomToUse,
+                        parentPrenomToUse,
+                        parentTelToUse,
                         frais,
                         nbPaiements,
                         0,
-                        0
+                        0,
+                        telToUse, // Téléphone de l'étudiant (pour majeurs)
+                        enfant.status || 'mineur'
                     ],
                     function(err) {
                         if (err) reject(err);
@@ -362,25 +465,65 @@ router.post('/inscription', async (req, res) => {
 
 // Créer un élève
 router.post('/', checkPermission('create'), (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements } = req.body;
-    const id = req.body.id || generateId();
-    const activationToken = generateToken();
-
-    const frais = parseFloat(fraisInscription || 0) || 0;
-    const nb = parseInt(nbPaiements || 1, 10) || 1;
-    db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0],
-        function(err) {
+    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, parentNom, parentPrenom, parentTel } = req.body;
+    
+    // Vérifier que l'email n'est pas déjà utilisé
+    if (email) {
+        db.get('SELECT id FROM eleves WHERE email = ?', [email], (err, eleveRow) => {
             if (err) return res.status(500).json({ error: err.message });
-            const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
-            res.status(201).json({ 
-                id, nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo,
-                activationLink,
-                message: 'Élève créé. Envoyez le lien d\'activation à l\'élève.'
+            if (eleveRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un élève' });
+            
+            db.get('SELECT id FROM professeurs WHERE email = ?', [email], (err, professeurRow) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (professeurRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
+                
+                db.get('SELECT id FROM staff WHERE email = ?', [email], (err, staffRow) => {
+                    if (err) return res.status(500).json({ error: err.message });
+                    if (staffRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du bureau' });
+                    
+                    // Procéder à la création
+                    const id = req.body.id || generateId();
+                    const activationToken = generateToken();
+
+                    const frais = parseFloat(fraisInscription || 0) || 0;
+                    const nb = parseInt(nbPaiements || 1, 10) || 1;
+                    db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, parentNom, parentPrenom, parentTel) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0, parentNom || null, parentPrenom || null, parentTel || null],
+                        function(err) {
+                            if (err) return res.status(500).json({ error: err.message });
+                            const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
+                            res.status(201).json({ 
+                                id, nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, parentNom, parentTel,
+                                activationLink,
+                                message: 'Élève créé. Envoyez le lien d\'activation à l\'élève.'
+                            });
+                        }
+                    );
+                });
             });
-        }
-    );
+        });
+    } else {
+        // Si pas d'email, procéder directement
+        const id = req.body.id || generateId();
+        const activationToken = generateToken();
+
+        const frais = parseFloat(fraisInscription || 0) || 0;
+        const nb = parseInt(nbPaiements || 1, 10) || 1;
+        db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, parentNom, parentPrenom, parentTel) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0, parentNom || null, parentPrenom || null, parentTel || null],
+            function(err) {
+                if (err) return res.status(500).json({ error: err.message });
+                const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
+                res.status(201).json({ 
+                    id, nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, parentNom, parentTel,
+                    activationLink,
+                    message: 'Élève créé. Envoyez le lien d\'activation à l\'élève.'
+                });
+            }
+        );
+    }
 });
 
 // Endpoint pour valider les frais d'un élève (admin/secretariat/directeur)
@@ -443,16 +586,45 @@ router.post('/validate-frais-famille', checkPermission('update'), (req, res) => 
 
 // Mettre à jour un élève
 router.put('/:id', checkPermission('update'), (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, photo } = req.body;
+    const { nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, tel } = req.body;
 
-    db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ? WHERE id = ?',
-        [nom, prenom, dateNaissance, classe, email || '', photo || null, req.params.id],
-        function(err) {
+    // Vérifier que l'email n'est pas déjà utilisé par quelqu'un d'autre
+    if (email) {
+        db.get('SELECT id FROM eleves WHERE email = ? AND id != ?', [email, req.params.id], (err, eleveRow) => {
             if (err) return res.status(500).json({ error: err.message });
-            if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
-            res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo });
-        }
-    );
+            if (eleveRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un autre élève' });
+            
+            db.get('SELECT id FROM professeurs WHERE email = ?', [email], (err, professeurRow) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (professeurRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
+                
+                db.get('SELECT id FROM staff WHERE email = ?', [email], (err, staffRow) => {
+                    if (err) return res.status(500).json({ error: err.message });
+                    if (staffRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du bureau' });
+                    
+                    // Procéder à la mise à jour
+                    db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, parentNom = ?, parentPrenom = ?, parentTel = ?, tel = ? WHERE id = ?',
+                        [nom, prenom, dateNaissance, classe, email || '', photo || null, parentNom || null, parentPrenom || null, parentTel || null, tel || null, req.params.id],
+                        function(err) {
+                            if (err) return res.status(500).json({ error: err.message });
+                            if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
+                            res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, tel });
+                        }
+                    );
+                });
+            });
+        });
+    } else {
+        // Si pas d'email, procéder directement
+        db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, parentNom = ?, parentPrenom = ?, parentTel = ?, tel = ? WHERE id = ?',
+            [nom, prenom, dateNaissance, classe, email || '', photo || null, parentNom || null, parentPrenom || null, parentTel || null, tel || null, req.params.id],
+            function(err) {
+                if (err) return res.status(500).json({ error: err.message });
+                if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
+                res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, tel });
+            }
+        );
+    }
 });
 
 // Supprimer un élève

@@ -8,7 +8,9 @@ router.get('/', (req, res) => {
     const userRole = req.headers['x-user-role'];
     const userClasse = req.headers['x-user-classe'];
     
-    db.all('SELECT * FROM actualites ORDER BY date DESC, createdAt DESC', [], (err, rows) => {
+    // Filtrer les actualités non expirées (dateFin NULL ou > date actuelle)
+    const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    db.all('SELECT * FROM actualites WHERE (dateFin IS NULL OR dateFin > ?) ORDER BY date DESC, createdAt DESC', [currentDate], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         
         // Filtrer les actualités selon le rôle et la classe
@@ -53,17 +55,17 @@ router.get('/:id', (req, res) => {
 
 // Créer une actualité (réservé au bureau/admin)
 router.post('/', (req, res) => {
-    const { titre, description, date, auteurId, auteurNom, cible } = req.body;
+    const { titre, description, date, auteurId, auteurNom, cible, dateFin } = req.body;
     const id = generateId();
     
     // cible peut être: 'tous', ['CP1', 'CP2'], ['professeurs'], ['eleves'], etc.
     const cibleStr = Array.isArray(cible) ? JSON.stringify(cible) : (cible || 'tous');
     
-    db.run('INSERT INTO actualites (id, titre, description, date, auteurId, auteurNom, cible) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [id, titre, description, date, auteurId || null, auteurNom || 'Système', cibleStr],
+    db.run('INSERT INTO actualites (id, titre, description, date, auteurId, auteurNom, cible, dateFin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [id, titre, description, date, auteurId || null, auteurNom || 'Système', cibleStr, dateFin || null],
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ id, titre, description, date, auteurId, auteurNom, cible: cibleStr });
+            res.status(201).json({ id, titre, description, date, auteurId, auteurNom, cible: cibleStr, dateFin });
         }
     );
 });
@@ -71,10 +73,10 @@ router.post('/', (req, res) => {
 // Modifier une actualité
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { titre, description, date } = req.body;
+    const { titre, description, date, dateFin } = req.body;
     
-    db.run('UPDATE actualites SET titre = ?, description = ?, date = ? WHERE id = ?',
-        [titre, description, date, id],
+    db.run('UPDATE actualites SET titre = ?, description = ?, date = ?, dateFin = ? WHERE id = ?',
+        [titre, description, date, dateFin || null, id],
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
             if (this.changes === 0) return res.status(404).json({ error: 'Actualité non trouvée' });

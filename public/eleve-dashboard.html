@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Espace Élève - Eveil & Ihsan</title>
+    
+    <!-- logo -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="all">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" media="all">
@@ -1043,7 +1048,10 @@
         <!-- Sidebar Navigation -->
         <aside class="dashboard-sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">E&I</div>
+                <div class="sidebar-logo">
+                    <img src="logo.png" alt="Eveil & Ihsan" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none;">E&I</div>
+                </div>
                 <div class="sidebar-brand">
                     <h1>Eveil & Ihsan</h1>
                     <span>Espace Élève</span>
@@ -1269,8 +1277,16 @@
                                     <div class="form-field">
                                         <label class="form-label">
                                             <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">photo_camera</span>
-                                            Photos de profil des élèves
+                                            Photo de profil
                                         </label>
+                                        <div id="currentPhotoContainer" class="current-photo-container" style="display: none;">
+                                            <img id="currentPhoto" src="" alt="Photo actuelle" class="current-photo">
+                                            <button type="button" id="deleteCurrentPhotoBtn" class="delete-photo-btn" title="Supprimer la photo">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </div>
+                                        <input type="file" id="photo-upload" name="photo" accept="image/*" style="display: none;">
+                                        <input type="hidden" id="delete-photo-current" name="delete-photo-current" value="false">
                                         <div id="studentPhotosContainer" class="student-photos-grid">
                                             <!-- Les champs pour chaque élève seront ajoutés ici dynamiquement -->
                                         </div>
@@ -1632,11 +1648,11 @@
                         classe: eleveData.classe,
                         email: eleveData.email,
                         photo: eleveData.photo,
-                        parentTel: eleveData.parentTel
+                        contactTel: eleveData.contactTel // Utiliser contactTel au lieu de parentTel
                     };
 
-                    // Récupérer les informations du parent
-                    if (eleveData.parentNom && eleveData.parentPrenom) {
+                    // Récupérer les informations du parent (uniquement pour les enfants, pas pour l'utilisateur connecté)
+                    if (eleveData.parentNom && eleveData.parentPrenom && currentChild.id !== user.id) {
                         parentInfo = {
                             nom: eleveData.parentNom,
                             prenom: eleveData.parentPrenom,
@@ -1652,8 +1668,16 @@
             }
         }
 
+        // Fonction d'initialisation principale
+        async function initializeDashboard() {
             initializeUI();
+            // Charger les informations complètes de l'utilisateur d'abord
+            await loadUserCompleteData();
             loadFamilyData();
+        }
+
+        // Lancer l'initialisation
+        initializeDashboard();
 
         async function loadFamilyData() {
             try {
@@ -1665,11 +1689,31 @@
 
                     // Définir l'enfant actuel (le premier ou celui connecté)
                     if (familyMembers.length > 0) {
-                        // Chercher l'utilisateur actuel dans la famille
-                        currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                        // Vérifier si c'est un élève majeur (pas de parent dans la famille)
+                        const isMajor = !familyMembers.some(m => m.id !== user.id);
+                        
+                        if (isMajor) {
+                            // Pour les élèves majeurs, utiliser directement l'objet user
+                            currentChild = user;
+                            // Mettre à jour user avec les données de familyMembers si elles existent
+                            const userInFamily = familyMembers.find(m => m.id === user.id);
+                            if (userInFamily) {
+                                Object.assign(user, userInFamily);
+                            }
+                        } else {
+                            // Pour les parents, utiliser l'enfant de la famille
+                            currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                        }
+                        
+                        // Charger les informations complètes si nécessaire
+                        if (isMajor) {
+                            await loadUserCompleteData();
+                        }
                     } else {
                         // Fallback si pas de données famille
                         currentChild = user;
+                        // Charger les informations complètes de l'utilisateur
+                        await loadUserCompleteData();
                     }
 
                     updateUserDisplay();
@@ -1678,11 +1722,36 @@
                 console.error('Erreur chargement famille:', error);
                 // Fallback
                 currentChild = user;
+                // Essayer de charger les informations complètes
+                await loadUserCompleteData();
                 updateUserDisplay();
             }
 
             // Charger les données de tous les enfants
             loadEleveData();
+        }
+
+        // Charger les informations complètes de l'utilisateur actuel
+        async function loadUserCompleteData() {
+            try {
+                const response = await fetch(`${API_URL}/eleves/${user.id}`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    // Mettre à jour l'objet user avec les données complètes
+                    user = {
+                        ...user,
+                        email: userData.email,
+                        tel: userData.tel,
+                        photo: userData.photo,
+                        nom: userData.nom,
+                        prenom: userData.prenom
+                    };
+                    // Mettre à jour le localStorage avec les données complètes
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+            } catch (error) {
+                console.error('Erreur chargement données utilisateur:', error);
+            }
         }
 
         // Mettre à jour l'affichage global
@@ -1722,7 +1791,7 @@
             if (profileNameEl) profileNameEl.textContent = `${prenom} ${nom}`.trim();
             if (profileClassEl) profileClassEl.textContent = parentInfo ? 'Parent d\'élève' : (currentChild.classe || 'Classe non assignée');
             if (profileEmailDisplayEl) profileEmailDisplayEl.textContent = user.email || 'Non défini';
-            if (profilePhoneDisplayEl) profilePhoneDisplayEl.textContent = displayInfo.telephone || currentChild.parentTel || 'Non défini';
+            if (profilePhoneDisplayEl) profilePhoneDisplayEl.textContent = displayInfo.telephone || currentChild.contactTel || 'Non défini';
 
             if (profileAvatarEl) {
                 // Pour le parent, utiliser une icône par défaut, pour l'élève utiliser sa photo
@@ -1813,6 +1882,526 @@
             document.getElementById('profileForm').addEventListener('submit', saveProfile);
             
             // Le sélecteur d'élève est toujours visible pour la photo de profil
+        }
+
+        // Fonction de synchronisation complète de l'affichage
+        function syncDisplay() {
+            // Mettre à jour la sidebar
+            updateUserDisplay();
+            
+            // Mettre à jour les informations du profil
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+            
+            if (isParentMode) {
+                // Mode parent : mettre à jour avec les informations du parent
+                const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                document.getElementById('profileName').textContent = `${currentChildInfo.prenom || ''} ${currentChildInfo.nom || ''}`.trim();
+                document.getElementById('profileClass').textContent = 'Parent';
+                document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
+                document.getElementById('profilePhoneDisplay').textContent = currentChildInfo.contactTel || currentChildInfo.parentTel || 'Non défini';
+                
+                // Avatar du profil
+                const profileAvatarEl = document.getElementById('profileAvatar');
+                if (currentChildInfo.photo) {
+                    profileAvatarEl.innerHTML = `<img src="${currentChildInfo.photo}" alt="${currentChildInfo.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                }
+            } else {
+                // Mode élève majeur : mettre à jour avec les informations de l'élève
+                document.getElementById('profileName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim();
+                document.getElementById('profileClass').textContent = user.classe || 'Classe non assignée';
+                document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
+                document.getElementById('profilePhoneDisplay').textContent = user.tel || 'Non défini';
+                
+                // Avatar du profil
+                const profileAvatarEl = document.getElementById('profileAvatar');
+                if (user.photo) {
+                    profileAvatarEl.innerHTML = `<img src="${user.photo}" alt="${user.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                }
+                
+                // Mettre à jour la photo actuelle dans le formulaire
+                const currentPhotoContainer = document.getElementById('currentPhotoContainer');
+                const currentPhotoImg = document.getElementById('currentPhoto');
+                if (user.photo) {
+                    currentPhotoImg.src = user.photo;
+                    currentPhotoContainer.style.display = 'block';
+                } else {
+                    currentPhotoContainer.style.display = 'none';
+                }
+            }
+        }
+
+        // Fonction de synchronisation complète de l'affichage
+        function syncDisplay() {
+            // Mettre à jour la sidebar
+            updateUserDisplay();
+            
+            // Mettre à jour les cartes de l'accueil
+            renderFamilyCards();
+            
+            // Mettre à jour les informations du profil
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+            
+            if (isParentMode) {
+                // Mode parent : mettre à jour avec les informations du parent
+                const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                document.getElementById('profileName').textContent = `${currentChildInfo.prenom || ''} ${currentChildInfo.nom || ''}`.trim();
+                document.getElementById('profileClass').textContent = 'Parent';
+                document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
+                document.getElementById('profilePhoneDisplay').textContent = currentChildInfo.contactTel || currentChildInfo.parentTel || 'Non défini';
+                
+                // Avatar du profil
+                const profileAvatarEl = document.getElementById('profileAvatar');
+                if (currentChildInfo.photo) {
+                    profileAvatarEl.innerHTML = `<img src="${currentChildInfo.photo}" alt="${currentChildInfo.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                }
+            } else {
+                // Mode élève majeur : mettre à jour avec les informations de l'élève
+                document.getElementById('profileName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim();
+                document.getElementById('profileClass').textContent = user.classe || 'Classe non assignée';
+                document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
+                document.getElementById('profilePhoneDisplay').textContent = user.tel || 'Non défini';
+                
+                // Avatar du profil
+                const profileAvatarEl = document.getElementById('profileAvatar');
+                if (user.photo) {
+                    profileAvatarEl.innerHTML = `<img src="${user.photo}" alt="${user.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                }
+                
+                // Mettre à jour la photo actuelle dans le formulaire
+                const currentPhotoContainer = document.getElementById('currentPhotoContainer');
+                const currentPhotoImg = document.getElementById('currentPhoto');
+                if (user.photo) {
+                    currentPhotoImg.src = user.photo;
+                    currentPhotoContainer.style.display = 'block';
+                } else {
+                    currentPhotoContainer.style.display = 'none';
+                }
+            }
+        }
+
+        // Gestion du profil
+        async function loadProfile() {
+            try {
+                // Déterminer le mode d'affichage
+                const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+
+                if (isParentMode) {
+                    // Mode parent : configurer l'affichage
+                    await loadParentProfile();
+                } else {
+                    // Mode élève majeur : configurer l'affichage
+                    await loadStudentProfile();
+                }
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+                showSnackbar('Erreur lors du chargement du profil');
+            }
+        }
+
+        // Charger le profil en mode parent
+        async function loadParentProfile() {
+            // Pré-remplir les champs du formulaire
+            const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+            document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profilePhone').value = currentChildInfo.contactTel || currentChildInfo.parentTel || '';
+
+            // Masquer les champs spécifiques aux élèves majeurs
+            document.getElementById('currentPhotoContainer').style.display = 'none';
+            document.getElementById('photo-upload').style.display = 'none';
+            document.getElementById('studentPhotosContainer').style.display = 'grid';
+
+            // Générer les champs de photo pour chaque élève
+            generateStudentPhotoFields();
+
+            // Synchroniser tous les affichages
+            syncDisplay();
+        }
+
+        // Charger le profil en mode élève majeur
+        async function loadStudentProfile() {
+            // S'assurer que les données de l'utilisateur sont à jour
+            await loadUserCompleteData();
+
+            // Pré-remplir les champs du formulaire
+            document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profilePhone').value = user.tel || '';
+
+            // Masquer les champs des enfants, afficher ceux de l'élève majeur
+            document.getElementById('studentPhotosContainer').style.display = 'none';
+            document.getElementById('photo-upload').style.display = 'block';
+
+            // Ajouter l'event listener pour la suppression de photo
+            const deleteBtn = document.getElementById('deleteCurrentPhotoBtn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    document.getElementById('delete-photo-current').value = 'true';
+                    const currentPhotoContainer = document.getElementById('currentPhotoContainer');
+                    if (currentPhotoContainer) currentPhotoContainer.style.display = 'none';
+                    showSnackbar('Photo marquée pour suppression. Cliquez sur "Enregistrer" pour confirmer.');
+                });
+            }
+
+            // Synchroniser tous les affichages
+            syncDisplay();
+        }
+
+        async function saveProfile(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('profileEmail').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            
+            // Déterminer le mode
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+            
+            if (isParentMode) {
+                await saveParentProfile(email, phone);
+            } else {
+                await saveStudentProfile(email, phone);
+            }
+        }
+
+        // Sauvegarder le profil en mode parent
+        async function saveParentProfile(email, phone) {
+            const photoUploads = [];
+            const photoDeletions = [];
+            
+            // Collecter les photos des enfants
+            familyMembers.forEach(child => {
+                const photoInput = document.getElementById(`photo-${child.id}`);
+                const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                
+                if (photoInput && photoInput.files && photoInput.files.length > 0) {
+                    photoUploads.push({
+                        studentId: child.id,
+                        file: photoInput.files[0],
+                        studentName: `${child.prenom} ${child.nom}`
+                    });
+                }
+                
+                if (deleteInput && deleteInput.value === 'true') {
+                    photoDeletions.push({
+                        studentId: child.id,
+                        studentName: `${child.prenom} ${child.nom}`
+                    });
+                }
+            });
+            
+            if (!email && !phone && photoUploads.length === 0 && photoDeletions.length === 0) {
+                showSnackbar('Veuillez modifier au moins un champ ou uploader/supprimer au moins une photo');
+                return;
+            }
+            
+            try {
+                let hasErrors = false;
+                const errorMessages = [];
+                
+                // Traiter les uploads de photos
+                for (const upload of photoUploads) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('photo', upload.file);
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': upload.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur pour ${upload.studentName}: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            const updatedStudent = familyMembers.find(child => child.id === upload.studentId);
+                            if (updatedStudent && result.eleve) {
+                                Object.assign(updatedStudent, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur pour ${upload.studentName}: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Traiter les suppressions de photos
+                for (const deletion of photoDeletions) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('deletePhoto', 'true');
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': deletion.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            const updatedStudent = familyMembers.find(child => child.id === deletion.studentId);
+                            if (updatedStudent && result.eleve) {
+                                Object.assign(updatedStudent, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Mettre à jour les informations de contact pour chaque enfant
+                if (email || phone) {
+                    for (const child of familyMembers) {
+                        try {
+                            const formData = new FormData();
+                            if (email) formData.append('email', email);
+                            if (phone) formData.append('parentTel', phone);
+                            
+                            const response = await fetch(`${API_URL}/eleves/profil`, {
+                                method: 'PUT',
+                                headers: {
+                                    'x-user-id': child.id,
+                                    'x-user-role': 'eleve'
+                                },
+                                body: formData
+                            });
+                            
+                            if (!response.ok) {
+                                const error = await response.json();
+                                errorMessages.push(`Erreur pour ${child.prenom} ${child.nom}: ${error.error || 'Erreur inconnue'}`);
+                                hasErrors = true;
+                            } else {
+                                const result = await response.json();
+                                if (result.eleve) {
+                                    if (email) child.email = email;
+                                    if (phone) child.contactTel = phone;
+                                }
+                            }
+                        } catch (error) {
+                            errorMessages.push(`Erreur pour ${child.prenom} ${child.nom}: ${error.message}`);
+                            hasErrors = true;
+                        }
+                    }
+                }
+                
+                // Résultat
+                if (hasErrors) {
+                    showSnackbar('Erreurs lors de la mise à jour: ' + errorMessages.join('; '));
+                } else {
+                    const successMessage = [];
+                    if (photoUploads.length > 0) successMessage.push(`${photoUploads.length} photo(s) mise(s) à jour`);
+                    if (photoDeletions.length > 0) successMessage.push(`${photoDeletions.length} photo(s) supprimée(s)`);
+                    if (email || phone) successMessage.push('Informations du parent mises à jour');
+                    showSnackbar(successMessage.join(' et ') + ' avec succès !');
+                    
+                    // Synchroniser tous les affichages
+                    syncDisplay();
+                    
+                    // Réinitialiser les champs
+                    familyMembers.forEach(child => {
+                        const photoInput = document.getElementById(`photo-${child.id}`);
+                        const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                        if (photoInput) photoInput.value = '';
+                        if (deleteInput) deleteInput.value = 'false';
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur sauvegarde profil parent:', error);
+                showSnackbar(error.message || 'Erreur lors de la mise à jour du profil');
+            }
+        }
+
+        // Sauvegarder le profil en mode élève majeur
+        async function saveStudentProfile(email, phone) {
+            const photoUploads = [];
+            const photoDeletions = [];
+            
+            // Collecter la photo de l'élève
+            const photoInput = document.getElementById('photo-upload');
+            const deleteInput = document.getElementById('delete-photo-current');
+            
+            if (photoInput && photoInput.files && photoInput.files.length > 0) {
+                photoUploads.push({
+                    studentId: user.id,
+                    file: photoInput.files[0],
+                    studentName: `${user.prenom} ${user.nom}`
+                });
+            }
+            
+            if (deleteInput && deleteInput.value === 'true') {
+                photoDeletions.push({
+                    studentId: user.id,
+                    studentName: `${user.prenom} ${user.nom}`
+                });
+            }
+            
+            if (!email && !phone && photoUploads.length === 0 && photoDeletions.length === 0) {
+                showSnackbar('Veuillez modifier au moins un champ ou uploader/supprimer au moins une photo');
+                return;
+            }
+            
+            try {
+                let hasErrors = false;
+                const errorMessages = [];
+                
+                // Traiter les uploads de photos
+                for (const upload of photoUploads) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('photo', upload.file);
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': upload.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur photo: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            if (result.eleve) {
+                                Object.assign(user, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur photo: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Traiter les suppressions de photos
+                for (const deletion of photoDeletions) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('deletePhoto', 'true');
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': deletion.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur suppression photo: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            if (result.eleve) {
+                                Object.assign(user, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur suppression photo: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Mettre à jour les informations de contact
+                if (email || phone) {
+                    try {
+                        const formData = new FormData();
+                        if (email) formData.append('email', email);
+                        if (phone) formData.append('tel', phone);
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': user.id,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur informations: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            if (result.eleve) {
+                                Object.assign(user, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur informations: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Résultat
+                if (hasErrors) {
+                    showSnackbar('Erreurs lors de la mise à jour: ' + errorMessages.join('; '));
+                } else {
+                    const successMessage = [];
+                    if (photoUploads.length > 0) successMessage.push('Photo mise à jour');
+                    if (photoDeletions.length > 0) successMessage.push('Photo supprimée');
+                    if (email || phone) successMessage.push('Informations mises à jour');
+                    showSnackbar(successMessage.join(' et ') + ' avec succès !');
+                    
+                    // Synchroniser tous les affichages
+                    syncDisplay();
+                    
+                    // Réinitialiser les champs
+                    const photoInputEl = document.getElementById('photo-upload');
+                    const deleteInputEl = document.getElementById('delete-photo-current');
+                    if (photoInputEl) photoInputEl.value = '';
+                    if (deleteInputEl) deleteInputEl.value = 'false';
+                }
+            } catch (error) {
+                console.error('Erreur sauvegarde profil élève:', error);
+                showSnackbar(error.message || 'Erreur lors de la mise à jour du profil');
+            }
+        }
+
+        function resetProfileForm() {
+            // Recharger les données du profil pour annuler les modifications
+            loadProfile();
+            
+            // Réinitialiser les champs selon le mode
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+            
+            if (isParentMode) {
+                familyMembers.forEach(child => {
+                    const photoInput = document.getElementById(`photo-${child.id}`);
+                    const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                    if (photoInput) photoInput.value = '';
+                    if (deleteInput) deleteInput.value = 'false';
+                });
+            } else {
+                const photoInput = document.getElementById('photo-upload');
+                const deleteInput = document.getElementById('delete-photo-current');
+                if (photoInput) photoInput.value = '';
+                if (deleteInput) deleteInput.value = 'false';
+            }
         }
 
         function switchTab(tabName) {
@@ -3122,53 +3711,101 @@
         }
 
 
-        // Gestion du profil
-        async function loadProfile() {
-            if (!parentInfo) {
-                showSnackbar('Informations du parent non disponibles');
-                return;
-            }
+        // Fonction de synchronisation complète de l'affichage
+        function syncDisplay() {
+            // Mettre à jour la sidebar
+            updateUserDisplay();
             
-            // Vérifier si les données de famille sont chargées
-            if (!familyMembers || familyMembers.length === 0) {
-                showSnackbar('Chargement des données familiales en cours...');
-                // Attendre un peu et réessayer
-                setTimeout(() => loadProfile(), 1000);
-                return;
-            }
+            // Mettre à jour les informations du profil
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
             
-            try {
-                // Afficher les informations du parent
-                document.getElementById('profileName').textContent = `${parentInfo.prenom || ''} ${parentInfo.nom || ''}`;
+            if (isParentMode) {
+                // Mode parent : mettre à jour avec les informations du parent
+                const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                document.getElementById('profileName').textContent = `${currentChildInfo.prenom || ''} ${currentChildInfo.nom || ''}`.trim();
                 document.getElementById('profileClass').textContent = 'Parent';
+                document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
+                document.getElementById('profilePhoneDisplay').textContent = currentChildInfo.contactTel || currentChildInfo.parentTel || 'Non défini';
                 
-                // Utiliser l'email de l'utilisateur connecté (user) comme email du parent
-                const parentEmail = user && user.email ? user.email : 'Non défini';
-                const parentPhone = parentInfo.telephone || 'Non défini';
-                
-                document.getElementById('profileEmailDisplay').textContent = parentEmail;
-                document.getElementById('profilePhoneDisplay').textContent = parentPhone;
-                
-                // Mettre à jour l'avatar du parent
-                const avatarEl = document.getElementById('profileAvatar');
-                if (parentInfo.photo) {
-                    avatarEl.innerHTML = `<img src="${parentInfo.photo}" alt="${parentInfo.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                // Avatar du profil
+                const profileAvatarEl = document.getElementById('profileAvatar');
+                if (currentChildInfo.photo) {
+                    profileAvatarEl.innerHTML = `<img src="${currentChildInfo.photo}" alt="${currentChildInfo.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
                 } else {
-                    avatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                    profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
+                }
+            } else {
+                // Mode élève majeur : mettre à jour avec les informations de l'élève
+                document.getElementById('profileName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim();
+                document.getElementById('profileClass').textContent = user.classe || 'Classe non assignée';
+                document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
+                document.getElementById('profilePhoneDisplay').textContent = user.tel || 'Non défini';
+                
+                // Avatar du profil
+                const profileAvatarEl = document.getElementById('profileAvatar');
+                if (user.photo) {
+                    profileAvatarEl.innerHTML = `<img src="${user.photo}" alt="${user.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                } else {
+                    profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
                 }
                 
-                // Mettre à jour les champs du formulaire
-                document.getElementById('profileEmail').value = user && user.email ? user.email : '';
-                document.getElementById('profilePhone').value = parentInfo.telephone || '';
-                
-                // Peupler la liste des élèves pour la sélection d'image
-                populateStudentSelector();
-                
-                // Générer les champs de photo pour chaque élève
-                generateStudentPhotoFields();
-            } catch (error) {
-                showSnackbar('Erreur lors du chargement du profil');
+                // Mettre à jour la photo actuelle dans le formulaire
+                const currentPhotoContainer = document.getElementById('currentPhotoContainer');
+                const currentPhotoImg = document.getElementById('currentPhoto');
+                if (user.photo) {
+                    currentPhotoImg.src = user.photo;
+                    currentPhotoContainer.style.display = 'block';
+                } else {
+                    currentPhotoContainer.style.display = 'none';
+                }
             }
+        }
+
+        // Charger le profil en mode parent
+        async function loadParentProfile() {
+            // Pré-remplir les champs du formulaire
+            const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+            document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profilePhone').value = currentChildInfo.contactTel || currentChildInfo.parentTel || '';
+
+            // Masquer les champs spécifiques aux élèves majeurs
+            document.getElementById('currentPhotoContainer').style.display = 'none';
+            document.getElementById('photo-upload').style.display = 'none';
+            document.getElementById('studentPhotosContainer').style.display = 'grid';
+
+            // Générer les champs de photo pour chaque élève
+            generateStudentPhotoFields();
+
+            // Synchroniser tous les affichages
+            syncDisplay();
+        }
+
+        // Charger le profil en mode élève majeur
+        async function loadStudentProfile() {
+            // S'assurer que les données de l'utilisateur sont à jour
+            await loadUserCompleteData();
+
+            // Pré-remplir les champs du formulaire
+            document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profilePhone').value = user.tel || '';
+
+            // Masquer les champs des enfants, afficher ceux de l'élève majeur
+            document.getElementById('studentPhotosContainer').style.display = 'none';
+            document.getElementById('photo-upload').style.display = 'block';
+
+            // Ajouter l'event listener pour la suppression de photo
+            const deleteBtn = document.getElementById('deleteCurrentPhotoBtn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    document.getElementById('delete-photo-current').value = 'true';
+                    const currentPhotoContainer = document.getElementById('currentPhotoContainer');
+                    if (currentPhotoContainer) currentPhotoContainer.style.display = 'none';
+                    showSnackbar('Photo marquée pour suppression. Cliquez sur "Enregistrer" pour confirmer.');
+                });
+            }
+
+            // Synchroniser tous les affichages
+            syncDisplay();
         }
 
         function populateStudentSelector() {
@@ -3237,9 +3874,22 @@
             const email = document.getElementById('profileEmail').value.trim();
             const phone = document.getElementById('profilePhone').value.trim();
             
-            // Collecter toutes les photos uploadées et les suppressions
+            // Déterminer le mode
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+            
+            if (isParentMode) {
+                await saveParentProfile(email, phone);
+            } else {
+                await saveStudentProfile(email, phone);
+            }
+        }
+
+        // Sauvegarder le profil en mode parent
+        async function saveParentProfile(email, phone) {
             const photoUploads = [];
             const photoDeletions = [];
+            
+            // Collecter les photos des enfants
             familyMembers.forEach(child => {
                 const photoInput = document.getElementById(`photo-${child.id}`);
                 const deleteInput = document.getElementById(`delete-photo-${child.id}`);
@@ -3269,37 +3919,34 @@
                 let hasErrors = false;
                 const errorMessages = [];
                 
-                // Traiter les uploads de photos pour chaque élève
+                // Traiter les uploads de photos
                 for (const upload of photoUploads) {
                     try {
-                        const studentFormData = new FormData();
-                        studentFormData.append('photo', upload.file);
+                        const formData = new FormData();
+                        formData.append('photo', upload.file);
                         
-                        const studentResponse = await fetch(`${API_URL}/eleves/profil`, {
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
                             method: 'PUT',
                             headers: {
                                 'x-user-id': upload.studentId,
                                 'x-user-role': 'eleve'
                             },
-                            body: studentFormData
+                            body: formData
                         });
                         
-                        if (!studentResponse.ok) {
-                            const error = await studentResponse.json();
+                        if (!response.ok) {
+                            const error = await response.json();
                             errorMessages.push(`Erreur pour ${upload.studentName}: ${error.error || 'Erreur inconnue'}`);
                             hasErrors = true;
                         } else {
-                            // Mettre à jour l'avatar de l'élève dans la liste des membres de la famille
+                            const result = await response.json();
                             const updatedStudent = familyMembers.find(child => child.id === upload.studentId);
-                            if (updatedStudent) {
-                                const result = await studentResponse.json();
-                                if (result.eleve && result.eleve.photo) {
-                                    updatedStudent.photo = result.eleve.photo;
-                                }
+                            if (updatedStudent && result.eleve) {
+                                Object.assign(updatedStudent, result.eleve);
                             }
                         }
-                    } catch (childError) {
-                        errorMessages.push(`Erreur pour ${upload.studentName}: ${childError.message}`);
+                    } catch (error) {
+                        errorMessages.push(`Erreur pour ${upload.studentName}: ${error.message}`);
                         hasErrors = true;
                     }
                 }
@@ -3307,47 +3954,42 @@
                 // Traiter les suppressions de photos
                 for (const deletion of photoDeletions) {
                     try {
-                        const deleteFormData = new FormData();
-                        deleteFormData.append('deletePhoto', 'true');
+                        const formData = new FormData();
+                        formData.append('deletePhoto', 'true');
                         
-                        const deleteResponse = await fetch(`${API_URL}/eleves/profil`, {
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
                             method: 'PUT',
                             headers: {
                                 'x-user-id': deletion.studentId,
                                 'x-user-role': 'eleve'
                             },
-                            body: deleteFormData
+                            body: formData
                         });
                         
-                        if (!deleteResponse.ok) {
-                            const error = await deleteResponse.json();
+                        if (!response.ok) {
+                            const error = await response.json();
                             errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${error.error || 'Erreur inconnue'}`);
                             hasErrors = true;
                         } else {
-                            // Mettre à jour les données locales
+                            const result = await response.json();
                             const updatedStudent = familyMembers.find(child => child.id === deletion.studentId);
-                            if (updatedStudent) {
-                                updatedStudent.photo = null;
+                            if (updatedStudent && result.eleve) {
+                                Object.assign(updatedStudent, result.eleve);
                             }
                         }
-                    } catch (deleteError) {
-                        errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${deleteError.message}`);
+                    } catch (error) {
+                        errorMessages.push(`Erreur suppression photo ${deletion.studentName}: ${error.message}`);
                         hasErrors = true;
                     }
                 }
                 
-                // Mise à jour du profil parent (email et téléphone seulement)
-                // L'email et le téléphone du parent sont stockés au niveau des enfants
+                // Mettre à jour les informations de contact pour chaque enfant
                 if (email || phone) {
-                    let updateSuccess = true;
-                    const updateErrors = [];
-                    
-                    // Mettre à jour l'email et/ou téléphone pour chaque enfant de la famille
                     for (const child of familyMembers) {
                         try {
-                            const childFormData = new FormData();
-                            if (email) childFormData.append('email', email);
-                            if (phone) childFormData.append('parentTel', phone);
+                            const formData = new FormData();
+                            if (email) formData.append('email', email);
+                            if (phone) formData.append('parentTel', phone);
                             
                             const response = await fetch(`${API_URL}/eleves/profil`, {
                                 method: 'PUT',
@@ -3355,25 +3997,28 @@
                                     'x-user-id': child.id,
                                     'x-user-role': 'eleve'
                                 },
-                                body: childFormData
+                                body: formData
                             });
                             
                             if (!response.ok) {
                                 const error = await response.json();
-                                updateErrors.push(`Erreur pour ${child.prenom} ${child.nom}: ${error.error || 'Erreur inconnue'}`);
-                                updateSuccess = false;
+                                errorMessages.push(`Erreur pour ${child.prenom} ${child.nom}: ${error.error || 'Erreur inconnue'}`);
+                                hasErrors = true;
                             } else {
-                                // Mettre à jour les données locales
-                                if (email) child.email = email;
-                                if (phone) child.parentTel = phone;
+                                const result = await response.json();
+                                if (result.eleve) {
+                                    if (email) child.email = email;
+                                    if (phone) child.contactTel = phone;
+                                }
                             }
-                        } catch (childError) {
-                            updateErrors.push(`Erreur pour ${child.prenom} ${child.nom}: ${childError.message}`);
-                            updateSuccess = false;
+                        } catch (error) {
+                            errorMessages.push(`Erreur pour ${child.prenom} ${child.nom}: ${error.message}`);
+                            hasErrors = true;
                         }
                     }
-                    
-                // Afficher le résultat
+                }
+                
+                // Résultat
                 if (hasErrors) {
                     showSnackbar('Erreurs lors de la mise à jour: ' + errorMessages.join('; '));
                 } else {
@@ -3383,22 +4028,171 @@
                     if (email || phone) successMessage.push('Informations du parent mises à jour');
                     showSnackbar(successMessage.join(' et ') + ' avec succès !');
                     
-                    // Rafraîchir l'affichage des cartes de famille
-                    renderFamilyCards();
+                    // Synchroniser tous les affichages
+                    syncDisplay();
                     
-                    // Réinitialiser les champs de fichier et les marqueurs de suppression
+                    // Réinitialiser les champs
                     familyMembers.forEach(child => {
                         const photoInput = document.getElementById(`photo-${child.id}`);
                         const deleteInput = document.getElementById(`delete-photo-${child.id}`);
                         if (photoInput) photoInput.value = '';
                         if (deleteInput) deleteInput.value = 'false';
                     });
-                    
-                    // Régénérer les champs de photo pour refléter les changements
-                    generateStudentPhotoFields();
-                }}
+                }
             } catch (error) {
-                console.error('Erreur sauvegarde profil:', error);
+                console.error('Erreur sauvegarde profil parent:', error);
+                showSnackbar(error.message || 'Erreur lors de la mise à jour du profil');
+            }
+        }
+
+        // Sauvegarder le profil en mode élève majeur
+        async function saveStudentProfile(email, phone) {
+            const photoUploads = [];
+            const photoDeletions = [];
+            
+            // Collecter la photo de l'élève
+            const photoInput = document.getElementById('photo-upload');
+            const deleteInput = document.getElementById('delete-photo-current');
+            
+            if (photoInput && photoInput.files && photoInput.files.length > 0) {
+                photoUploads.push({
+                    studentId: user.id,
+                    file: photoInput.files[0],
+                    studentName: `${user.prenom} ${user.nom}`
+                });
+            }
+            
+            if (deleteInput && deleteInput.value === 'true') {
+                photoDeletions.push({
+                    studentId: user.id,
+                    studentName: `${user.prenom} ${user.nom}`
+                });
+            }
+            
+            if (!email && !phone && photoUploads.length === 0 && photoDeletions.length === 0) {
+                showSnackbar('Veuillez modifier au moins un champ ou uploader/supprimer au moins une photo');
+                return;
+            }
+            
+            try {
+                let hasErrors = false;
+                const errorMessages = [];
+                
+                // Traiter les uploads de photos
+                for (const upload of photoUploads) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('photo', upload.file);
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': upload.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur photo: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            if (result.eleve) {
+                                Object.assign(user, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur photo: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Traiter les suppressions de photos
+                for (const deletion of photoDeletions) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('deletePhoto', 'true');
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': deletion.studentId,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur suppression photo: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            if (result.eleve) {
+                                Object.assign(user, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur suppression photo: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Mettre à jour les informations de contact
+                if (email || phone) {
+                    try {
+                        const formData = new FormData();
+                        if (email) formData.append('email', email);
+                        if (phone) formData.append('tel', phone);
+                        
+                        const response = await fetch(`${API_URL}/eleves/profil`, {
+                            method: 'PUT',
+                            headers: {
+                                'x-user-id': user.id,
+                                'x-user-role': 'eleve'
+                            },
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            errorMessages.push(`Erreur informations: ${error.error || 'Erreur inconnue'}`);
+                            hasErrors = true;
+                        } else {
+                            const result = await response.json();
+                            if (result.eleve) {
+                                Object.assign(user, result.eleve);
+                            }
+                        }
+                    } catch (error) {
+                        errorMessages.push(`Erreur informations: ${error.message}`);
+                        hasErrors = true;
+                    }
+                }
+                
+                // Résultat
+                if (hasErrors) {
+                    showSnackbar('Erreurs lors de la mise à jour: ' + errorMessages.join('; '));
+                } else {
+                    const successMessage = [];
+                    if (photoUploads.length > 0) successMessage.push('Photo mise à jour');
+                    if (photoDeletions.length > 0) successMessage.push('Photo supprimée');
+                    if (email || phone) successMessage.push('Informations mises à jour');
+                    showSnackbar(successMessage.join(' et ') + ' avec succès !');
+                    
+                    // Synchroniser tous les affichages
+                    syncDisplay();
+                    
+                    // Réinitialiser les champs
+                    const photoInputEl = document.getElementById('photo-upload');
+                    const deleteInputEl = document.getElementById('delete-photo-current');
+                    if (photoInputEl) photoInputEl.value = '';
+                    if (deleteInputEl) deleteInputEl.value = 'false';
+                }
+            } catch (error) {
+                console.error('Erreur sauvegarde profil élève:', error);
                 showSnackbar(error.message || 'Erreur lors de la mise à jour du profil');
             }
         }
@@ -3406,13 +4200,23 @@
         function resetProfileForm() {
             // Recharger les données du profil pour annuler les modifications
             loadProfile();
-            // Réinitialiser tous les champs de fichier des élèves et les marqueurs de suppression
-            familyMembers.forEach(child => {
-                const photoInput = document.getElementById(`photo-${child.id}`);
-                const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+            
+            // Réinitialiser les champs selon le mode
+            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
+            
+            if (isParentMode) {
+                familyMembers.forEach(child => {
+                    const photoInput = document.getElementById(`photo-${child.id}`);
+                    const deleteInput = document.getElementById(`delete-photo-${child.id}`);
+                    if (photoInput) photoInput.value = '';
+                    if (deleteInput) deleteInput.value = 'false';
+                });
+            } else {
+                const photoInput = document.getElementById('photo-upload');
+                const deleteInput = document.getElementById('delete-photo-current');
                 if (photoInput) photoInput.value = '';
                 if (deleteInput) deleteInput.value = 'false';
-            });
+            }
         }
 
         // Gestion du changement de mot de passe

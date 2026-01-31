@@ -96,7 +96,12 @@ router.post('/forgot-password', async (req, res) => {
         if (eleve) {
             await dbRun(db, 'UPDATE eleves SET resetToken = ?, resetExpires = ? WHERE id = ?', 
                 [resetToken, resetExpires, eleve.id]);
-            userName = `${eleve.prenom} ${eleve.nom}`;
+            // Utiliser le nom du parent si disponible
+            if (eleve.parentNom) {
+                userName = eleve.parentPrenom ? `${eleve.parentPrenom} ${eleve.parentNom}` : eleve.parentNom;
+            } else {
+                userName = `${eleve.prenom} ${eleve.nom}`;
+            }
             userFound = true;
         }
         

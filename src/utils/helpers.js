@@ -5,10 +5,11 @@ function generateToken(length = 32) {
     return crypto.randomBytes(length).toString('hex');
 }
 
-// Générer un ID unique basé sur timestamp
+// Générer un ID unique basé sur timestamp et aléatoire
 function generateId(prefix = '') {
     const timestamp = Date.now().toString();
-    return prefix ? `${prefix}_${timestamp}` : timestamp;
+    const random = Math.random().toString(36).substring(2, 8);
+    return prefix ? `${prefix}_${timestamp}_${random}` : `${timestamp}_${random}`;
 }
 
 // Obtenir l'adresse IP locale

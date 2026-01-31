@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eveil & Ihsan - Gestion Scolaire</title>
+    <title>Eveil et Ihsan</title>
+    
+    <!-- logo -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="all">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" media="all">
@@ -94,6 +99,101 @@
             box-shadow: var(--md-sys-elevation-3) !important;
         }
 
+        /* Styles pour le formulaire d'actualité */
+        .actualite-form-section {
+            margin: 24px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--md-sys-color-surface) 0%, var(--md-sys-color-surface-container-lowest) 100%);
+            border-radius: 12px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .actualite-form-section h4 {
+            margin: 0 0 16px 0;
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .actualite-form-section h4 .material-icons {
+            color: var(--md-sys-color-primary);
+        }
+
+        .actualite-dates-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .actualite-date-field .md-text-field-container {
+            position: relative;
+        }
+
+        .actualite-date-field .md-text-field-container::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--md-sys-color-surface);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .actualite-date-field .material-icons {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .actualite-date-field .md-text-field-input {
+            padding-left: 40px !important;
+        }
+
+        .actualite-info-text {
+            margin: 8px 0 0 0;
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .actualite-info-text .material-icons {
+            font-size: 14px;
+        }
+
+        /* Amélioration des checkboxes de ciblage */
+        .cible-checkbox {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cible-checkbox:hover {
+            border-color: var(--md-sys-color-primary) !important;
+            background-color: var(--md-sys-color-primary-container) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(30, 90, 168, 0.15);
+        }
+
+        .cible-checkbox input:checked + .material-icons {
+            color: var(--md-sys-color-primary) !important;
+        }
+
+        .cible-checkbox input:checked ~ span:last-child {
+            color: var(--md-sys-color-primary) !important;
+            font-weight: 500;
+        }
+
         .appel-save-btn:active {
             transform: translateY(0);
         }
@@ -107,6 +207,62 @@
         .appel-historique-card .md-btn-text:hover {
             background: var(--md-sys-color-surface-variant);
         }
+
+        /* Styles pour les cartes d'élèves cliquables */
+        #elevesGrid .md-card-elevated {
+            transition: all 0.3s ease;
+        }
+
+        #elevesGrid .md-card-elevated:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        #elevesGrid .eleve-card {
+            min-height: 120px;
+        }
+
+        /* Styles pour la modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--md-sys-color-surface);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .info-item {
+            padding: 12px;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -117,7 +273,10 @@
         <!-- Sidebar Navigation -->
         <aside class="dashboard-sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">E&I</div>
+                <div class="sidebar-logo">
+                    <img src="logo.png" alt="Eveil & Ihsan" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none;">E&I</div>
+                </div>
                 <div class="sidebar-brand">
                     <h1>Eveil & Ihsan</h1>
                     <span>Gestion Scolaire</span>
@@ -324,6 +483,19 @@
                             </div>
                         </div>
                         <div class="widget-card-content">
+                            <!-- Barre de recherche -->
+                            <div style="margin-bottom: 16px;">
+                                <div class="topbar-search" style="width: 100%;">
+                                    <span class="material-icons">search</span>
+                                    <input type="text" id="classesSearchInput" placeholder="Rechercher une classe..." oninput="filterClassesGrid()">
+                                    <button type="button" id="clearClassesSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearClassesSearch()">
+                                        <span class="material-icons">clear</span>
+                                    </button>
+                                </div>
+                                <div id="classesSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                    <span id="classesFilteredCount">0</span> classe(s) trouvée(s)
+                                </div>
+                            </div>
                             <div id="classesGrid" class="md-grid md-grid-auto"></div>
                         </div>
                     </div>
@@ -398,6 +570,46 @@
                         </div>
                     </div>
 
+                    <!-- Section formulaire pour créer un nouvel appel -->
+                    <div class="widget-card" id="newAppelFormCard" style="display: none; margin-top: 16px;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Nouvel appel</h3>
+                            <button class="md-btn md-btn-text" onclick="hideNewAppelForm()">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+                        <div class="widget-card-content">
+                            <!-- Informations de l'appel -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="date" id="newAppelDateInput" class="md-text-field-input" required placeholder=" " value="">
+                                        <label class="md-text-field-label">Date de l'appel *</label>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 16px; background: var(--md-sys-color-primary-container); border-radius: 8px;">
+                                    <span class="material-icons" style="color: var(--md-sys-color-on-primary-container); margin-right: 8px;">class</span>
+                                    <span style="color: var(--md-sys-color-on-primary-container); font-weight: 500;">Classe: <span id="newAppelClasseLabel">-</span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Liste des élèves avec statuts -->
+                            <div id="newElevesAppelContainer" style="max-height: 500px; overflow-y: auto;">
+                                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Chargement des élèves...</p>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div style="display: flex; gap: 16px; margin-top: 24px; justify-content: flex-end;">
+                                <button class="md-btn md-btn-outlined" onclick="hideNewAppelForm()">
+                                    <span class="material-icons">close</span> Annuler
+                                </button>
+                                <button class="md-btn md-btn-filled" id="newAppelSaveBtn" onclick="saveNewAppelData()">
+                                    <span class="material-icons">save</span> Enregistrer l'appel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- ========== ABSENCES TAB ========== -->
@@ -437,6 +649,20 @@
 
                             <!-- Historique -->
                             <div id="absencesHistoriqueCard">
+                                <!-- Recherche par date -->
+                                <div id="appelDateFilter" style="margin-bottom: 24px; display: none;">
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="date" id="appelSearchDate" class="md-text-field-input" placeholder=" " onchange="filterAppelsByDate()">
+                                            <label class="md-text-field-label">Rechercher par date</label>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 8px;">
+                                        <button class="md-btn md-btn-text" onclick="clearAppelDateFilter()">
+                                            <span class="material-icons">clear</span> Effacer le filtre
+                                        </button>
+                                    </div>
+                                </div>
                                 <div id="absencesHistoriqueList">
                                     <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour voir l'historique</p>
                                 </div>
@@ -485,6 +711,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- ========== APPRÉCIATIONS TAB ========== -->
@@ -663,18 +890,41 @@
                                         <label class="md-text-field-label">Description</label>
                                     </div>
                                 </div>
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="date" id="actualite_date" class="md-text-field-input" placeholder=" ">
-                                        <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date</label>
+
+                                <!-- Section Dates avec icônes et style amélioré -->
+                                <div class="actualite-form-section">
+                                    <h4>
+                                        <span class="material-icons">event</span>
+                                        Période de publication
+                                    </h4>
+                                    <div class="actualite-dates-grid">
+                                        <div class="md-text-field actualite-date-field">
+                                            <div class="md-text-field-container">
+                                                <span class="material-icons">today</span>
+                                                <input type="date" id="actualite_date" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Date de début</label>
+                                            </div>
+                                        </div>
+                                        <div class="md-text-field actualite-date-field">
+                                            <div class="md-text-field-container">
+                                                <span class="material-icons">event_busy</span>
+                                                <input type="date" id="actualite_dateFin" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Date de fin (optionnel)</label>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <p class="actualite-info-text">
+                                        <span class="material-icons">info</span>
+                                        L'actualité sera automatiquement supprimée après la date de fin
+                                    </p>
                                 </div>
                             </div>
                             
                             <!-- Section ciblage -->
-                            <div style="margin-top: 24px; padding: 20px; background: var(--md-sys-color-surface-container); border-radius: 12px;">
-                                <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-icons">groups</span> Destinataires
+                            <div class="actualite-form-section">
+                                <h4>
+                                    <span class="material-icons">groups</span>
+                                    Destinataires
                                 </h4>
                                 <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                                     <label class="cible-checkbox" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--md-sys-color-outline); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
@@ -817,7 +1067,7 @@
                             </div>
 
                             <!-- Info parent -->
-                            <div style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                            <div class="parent-info-section" style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
                                 <h4 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                                     <span class="material-icons">person</span> Informations du parent/tuteur
                                 </h4>
@@ -852,12 +1102,12 @@
                             <!-- Enfants -->
                             <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                                 <span class="material-icons">child_care</span>
-                                <span id="inscriptionEnfantsTitle">Informations de l'enfant</span>
+                                <span id="inscriptionEnfantsTitle">Informations de l'élève</span>
                             </h4>
                             <div id="inscriptionEnfantsContainer"></div>
                             
                             <button type="button" id="addEnfantBtn" class="md-btn md-btn-outlined" style="width: 100%; margin-top: 16px; display: none;" onclick="addEnfantField()">
-                                <span class="material-icons">add</span> Ajouter un autre enfant
+                                <span class="material-icons">add</span> Ajouter un autre élève
                             </button>
 
                             <div style="display: flex; gap: 16px; margin-top: 24px;">
@@ -998,11 +1248,36 @@
             if (appelDateInput) {
                 appelDateInput.value = new Date().toISOString().split('T')[0];
             }
+            
+            // Ajouter l'event listener pour synchroniser le nom des enfants avec le nom du parent
+            const parentNomInput = document.getElementById('insc_parentNom');
+            if (parentNomInput) {
+                parentNomInput.addEventListener('input', function() {
+                    const parentNom = this.value.trim();
+                    document.querySelectorAll('.enfant-nom').forEach(input => {
+                        input.value = parentNom;
+                    });
+                });
+            }
         });
 
         function initializeUI() {
-            document.getElementById('userName').textContent = user.prenom || user.nom || user.email.split('@')[0];
-            document.getElementById('userAvatar').textContent = (user.prenom || user.email)[0].toUpperCase();
+            // Afficher le nom complet (prénom + nom) pour les membres de bureau
+            let displayName = 'Utilisateur';
+            if (user.prenom && user.nom) {
+                displayName = `${user.prenom} ${user.nom}`;
+            } else if (user.prenom) {
+                displayName = user.prenom;
+            } else if (user.nom) {
+                displayName = user.nom;
+            } else if (user.nom_complet) {
+                displayName = user.nom_complet;
+            } else {
+                displayName = user.email.split('@')[0];
+            }
+            document.getElementById('userName').textContent = displayName;
+
+            document.getElementById('userAvatar').textContent = (user.prenom || user.nom || user.email)[0].toUpperCase();
             document.getElementById('userRole').innerHTML = `<span class="sidebar-user-badge">${getRoleName(user.role)}</span>`;
 
             if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
@@ -1183,7 +1458,7 @@
 
         function renderEleves(eleves) {
             document.getElementById('elevesGrid').innerHTML = eleves.length ? eleves.map(e => `
-                <div class="md-card md-card-elevated" style="padding: 16px;">
+                <div class="md-card md-card-elevated eleve-card" style="padding: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; min-height: 120px; display: flex; flex-direction: column;" onclick="showEleveDetails('${e.id}')">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                         <div class="md-avatar" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
                             ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (e.prenom || 'E')[0].toUpperCase()}
@@ -1194,10 +1469,13 @@
                             ${!e.activated ? '<span style="font-size: 11px; color: var(--md-sys-color-error);">⏳ Non activé</span>' : ''}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        ${!e.activated && e.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${e.id}', '${e.email}', 'eleve')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
-                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')"><span class="material-icons">edit</span></button>` : ''}
-                        ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteEleve('${e.id}')"><span class="material-icons">delete</span></button>` : ''}
+                    <div style="flex: 1; display: flex; align-items: flex-end; justify-content: space-between;">
+                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Cliquez pour voir les détails</div>
+                        <div style="display: flex; gap: 4px;">
+                            ${!e.activated && e.email ? `<button class="md-btn md-btn-tonal" onclick="event.stopPropagation(); sendActivationEmail('${e.id}', '${e.email}', 'eleve')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
+                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="event.stopPropagation(); editEleve('${e.id}')" title="Modifier"><span class="material-icons">edit</span></button>` : ''}
+                            ${canModifyData() ? `<button class="md-btn ${!e.activated ? 'md-btn-filled' : 'md-btn-text'}" style="color: ${!e.activated ? 'var(--md-sys-color-on-error)' : 'var(--md-sys-color-error)'}; background: ${!e.activated ? 'var(--md-sys-color-error)' : 'transparent'};" onclick="event.stopPropagation(); deleteEleve('${e.id}')" title="${!e.activated ? 'Supprimer le dossier d\'inscription' : 'Supprimer'}"><span class="material-icons">delete</span></button>` : ''}
+                        </div>
                     </div>
                 </div>
             `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève enregistré</p>';
@@ -1211,6 +1489,84 @@
                 (e.classe && e.classe.toLowerCase().includes(search))
             );
             renderEleves(filtered);
+        }
+
+        // Afficher les détails d'un élève
+        function showEleveDetails(eleveId) {
+            const eleve = allEleves.find(e => e.id === eleveId);
+            if (!eleve) return;
+
+            const content = document.getElementById('eleveDetailsContent');
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div class="md-avatar" style="width: 80px; height: 80px; margin: 0 auto 16px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 32px; font-weight: 500;">
+                        ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
+                    </div>
+                    <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-surface);">${eleve.prenom} ${eleve.nom}</h4>
+                    <p style="margin: 0; color: var(--md-sys-color-primary); font-weight: 500;">Classe ${eleve.classe || 'Non assigné'}</p>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">NOM</div>
+                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.nom || '-'}</div>
+                        </div>
+                        <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">PRÉNOM</div>
+                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.prenom || '-'}</div>
+                        </div>
+                    </div>
+
+                    ${eleve.status !== 'majeur' ? `
+                    <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">DATE DE NAISSANCE</div>
+                        <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.dateNaissance ? new Date(eleve.dateNaissance).toLocaleDateString('fr-FR') : '-'}</div>
+                    </div>
+                    ` : ''}
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        ${eleve.status === 'majeur' ? `
+                        <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">EMAIL DE L'ÉTUDIANT</div>
+                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.email || '-'}</div>
+                        </div>
+                        <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">TÉLÉPHONE DE L'ÉTUDIANT</div>
+                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.tel || '-'}</div>
+                        </div>
+                        ` : `
+                        <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">NOM DU PARENT</div>
+                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.parentNom || '-'}</div>
+                        </div>
+                        <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">PRÉNOM DU PARENT</div>
+                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.parentPrenom || '-'}</div>
+                        </div>
+                        `}
+                    </div>
+
+                    ${eleve.status !== 'majeur' ? `
+                    <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">TÉLÉPHONE DU PARENT</div>
+                        <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.parentTel || '-'}</div>
+                    </div>
+
+                    <div class="info-item" style="padding: 12px; background: var(--md-sys-color-surface-variant); border-radius: 8px;">
+                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 4px;">EMAIL DU PARENT</div>
+                        <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${eleve.email || '-'}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('eleveDetailsModal').style.display = 'flex';
+        }
+
+        // Fermer la modal des détails d'élève
+        function closeEleveDetailsModal() {
+            document.getElementById('eleveDetailsModal').style.display = 'none';
         }
 
         function showAddEleveForm() {
@@ -1245,6 +1601,26 @@
                             <label class="md-text-field-label">Classe</label>
                         </div>
                     </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="eleveNomParent" class="md-text-field-input" placeholder=" ">
+                                <label class="md-text-field-label">Nom du parent</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="elevePrenomParent" class="md-text-field-input" placeholder=" ">
+                                <label class="md-text-field-label">Prénom du parent</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="tel" id="eleveTelephoneParent" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Téléphone du parent</label>
+                        </div>
+                    </div>
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <input type="email" id="eleveEmail" class="md-text-field-input" placeholder=" ">
@@ -1261,6 +1637,9 @@
                 prenom: document.getElementById('elevePrenom').value,
                 dateNaissance: document.getElementById('eleveDateNaissance').value,
                 classe: document.getElementById('eleveClasse').value,
+                parentNom: document.getElementById('eleveNomParent').value,
+                parentPrenom: document.getElementById('elevePrenomParent').value,
+                parentTel: document.getElementById('eleveTelephoneParent').value,
                 email: document.getElementById('eleveEmail').value
             };
 
@@ -1301,7 +1680,9 @@
             const eleve = allEleves.find(e => e.id === id);
             if (!eleve) return;
 
-            showDialog('Modifier l\'élève', `
+            const isMajeur = eleve.status === 'majeur';
+
+            let formHTML = `
                 <form id="eleveForm" style="display: flex; flex-direction: column; gap: 16px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="md-text-field">
@@ -1316,13 +1697,10 @@
                                 <label class="md-text-field-label">Prénom *</label>
                             </div>
                         </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
-                            <label class="md-text-field-label">Date de naissance</label>
-                        </div>
-                    </div>
+                    </div>`;
+
+            // Champ classe toujours affiché pour tous les élèves
+            formHTML += `
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <select id="eleveClasse" class="md-text-field-input">
@@ -1331,22 +1709,87 @@
                             </select>
                             <label class="md-text-field-label">Classe</label>
                         </div>
+                    </div>`;
+
+            if (!isMajeur) {
+                formHTML += `
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
+                            <label class="md-text-field-label">Date de naissance</label>
+                        </div>
+                    </div>`;
+            }
+
+            if (isMajeur) {
+                formHTML += `
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
+                            <label class="md-text-field-label">Email de l'étudiant</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="tel" id="eleveTelephone" class="md-text-field-input" value="${eleve.tel || ''}">
+                            <label class="md-text-field-label">Téléphone de l'étudiant</label>
+                        </div>
+                    </div>`;
+            } else {
+                formHTML += `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="eleveNomParent" class="md-text-field-input" value="${eleve.parentNom || ''}">
+                                <label class="md-text-field-label">Nom du parent</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="elevePrenomParent" class="md-text-field-input" value="${eleve.parentPrenom || ''}">
+                                <label class="md-text-field-label">Prénom du parent</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="tel" id="eleveTelephoneParent" class="md-text-field-input" value="${eleve.parentTel || ''}">
+                            <label class="md-text-field-label">Téléphone du parent</label>
+                        </div>
                     </div>
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
-                            <label class="md-text-field-label">Email parent</label>
+                            <label class="md-text-field-label">Email du parent</label>
                         </div>
-                    </div>
-                </form>
-            `, async () => {
+                    </div>`;
+            }
+
+            formHTML += `
+                </form>`;
+
+            showDialog('Modifier l\'élève', formHTML, async () => {
                 const data = {
                     nom: document.getElementById('eleveNom').value,
                     prenom: document.getElementById('elevePrenom').value,
-                    dateNaissance: document.getElementById('eleveDateNaissance').value,
                     classe: document.getElementById('eleveClasse').value,
-                    email: document.getElementById('eleveEmail').value
+                    photo: eleve.photo || null
                 };
+
+                if (!isMajeur) {
+                    data.dateNaissance = document.getElementById('eleveDateNaissance').value;
+                }
+
+                if (isMajeur) {
+                    data.email = document.getElementById('eleveEmail').value;
+                    data.tel = document.getElementById('eleveTelephone').value;
+                } else {
+                    data.parentNom = document.getElementById('eleveNomParent').value;
+                    data.parentPrenom = document.getElementById('elevePrenomParent').value;
+                    data.parentTel = document.getElementById('eleveTelephoneParent').value;
+                    data.email = document.getElementById('eleveEmail').value;
+                }
+
                 try {
                     const response = await fetch(`${API_URL}/eleves/${id}`, {
                         method: 'PUT',
@@ -1366,14 +1809,24 @@
         }
 
         async function deleteEleve(id) {
-            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer cet élève ? Cette action est irréversible.</p>', async () => {
+            const eleve = allEleves.find(e => e.id === id);
+            const isPendingRegistration = eleve && !eleve.activated;
+
+            const message = isPendingRegistration
+                ? '<p>Voulez-vous vraiment supprimer ce dossier d\'inscription en attente ? Cette action est irréversible.</p>'
+                : '<p>Voulez-vous vraiment supprimer cet élève ? Cette action est irréversible.</p>';
+
+            showDialog('Confirmer la suppression', message, async () => {
                 try {
                     const response = await fetch(`${API_URL}/eleves/${id}`, {
                         method: 'DELETE',
                         headers: getHeaders()
                     });
                     if (response.ok) {
-                        showSnackbar('Élève supprimé');
+                        const successMessage = isPendingRegistration
+                            ? 'Dossier d\'inscription supprimé'
+                            : 'Élève supprimé';
+                        showSnackbar(successMessage);
                         loadEleves();
                         loadDashboardData();
                     } else {
@@ -1388,44 +1841,105 @@
         // ==================== CLASSES ====================
         async function loadClasses() {
             try {
-                // S'assurer que les données des professeurs sont chargées
-                if (allStaffMembers.length === 0) {
+                console.log('loadClasses: Début du chargement');
+                // S'assurer que toutes les données nécessaires sont chargées
+                if (allStaffMembers.length === 0 || allEleves.length === 0) {
+                    console.log('loadClasses: Chargement des données manquantes');
                     await loadAllData();
                 }
 
+                console.log('loadClasses: Chargement des classes depuis l\'API');
                 const response = await fetch(`${API_URL}/classes`, { headers: getHeaders() });
                 allClasses = await response.json();
+                console.log('loadClasses: Classes chargées:', allClasses);
                 
-                document.getElementById('classesGrid').innerHTML = allClasses.length ? allClasses.map(c => {
-                    const professeur = allStaffMembers.find(p => p.id === c.professeurId);
-                    const professeurName = professeur ? professeur.displayName : 'Non assigné';
-                    return `
-                    <div class="md-card md-card-elevated" style="padding: 16px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <div class="stat-widget-icon secondary" style="width: 48px; height: 48px;">
-                                <span class="material-icons">class</span>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="font-weight: 500;">${c.nom}</h4>
-                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${c.niveau || 'Niveau non défini'}</p>
-                                <p style="font-size: 12px; color: var(--md-sys-color-primary); margin-top: 4px;">
-                                    <span class="material-icons" style="font-size: 14px; vertical-align: middle;">person</span>
-                                    ${professeurName}
-                                </p>
-                            </div>
-                        </div>
-                        <p style="margin-bottom: 12px; font-size: 14px;">${allEleves.filter(e => e.classe === c.nom).length} élève(s)</p>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="md-btn md-btn-tonal" onclick="viewClasse('${c.id}')"><span class="material-icons">visibility</span></button>
-                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editClasse('${c.id}')"><span class="material-icons">edit</span></button>` : ''}
-                            ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>` : ''}
-                        </div>
-                    </div>
-                    `;
-                }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune classe enregistrée</p>';
+                console.log('loadClasses: Appel de renderClassesGrid');
+                renderMainClassesGrid(allClasses);
             } catch (error) {
+                console.error('Erreur lors du chargement des classes:', error);
                 showSnackbar('Erreur lors du chargement des classes');
             }
+        }
+
+        // Filtrer les classes dans la grille principale
+        function filterClassesGrid() {
+            const searchInput = document.getElementById('classesSearchInput');
+            const clearBtn = document.getElementById('clearClassesSearchBtn');
+            const resultsInfo = document.getElementById('classesSearchResultsInfo');
+            const filteredCount = document.getElementById('classesFilteredCount');
+
+            const searchTerm = searchInput.value.toLowerCase();
+
+            // Afficher/masquer le bouton d'effacement
+            if (searchTerm.length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+                resultsInfo.style.display = 'none';
+            }
+
+            // Filtrer et afficher les classes
+            const filteredClasses = searchTerm ?
+                allClasses.filter(classe =>
+                    classe.nom.toLowerCase().includes(searchTerm) ||
+                    (classe.niveau && classe.niveau.toLowerCase().includes(searchTerm))
+                ) : allClasses;
+
+            renderMainClassesGrid(filteredClasses);
+
+            // Mettre à jour les informations de résultats
+            if (searchTerm.length > 0) {
+                filteredCount.textContent = filteredClasses.length;
+                resultsInfo.style.display = filteredClasses.length !== allClasses.length ? 'block' : 'none';
+            }
+        }
+
+        // Effacer la recherche des classes
+        function clearClassesSearch() {
+            document.getElementById('classesSearchInput').value = '';
+            document.getElementById('clearClassesSearchBtn').style.display = 'none';
+            document.getElementById('classesSearchResultsInfo').style.display = 'none';
+            renderMainClassesGrid(allClasses);
+        }
+
+        // Fonction pour rendre la grille des classes avec filtrage
+        function renderMainClassesGrid(classesToShow) {
+            console.log('renderMainClassesGrid: appelée avec', classesToShow.length, 'classes');
+            const gridElement = document.getElementById('classesGrid');
+            console.log('renderMainClassesGrid: gridElement =', gridElement);
+            
+            if (!gridElement) {
+                console.error('renderMainClassesGrid: élément classesGrid non trouvé');
+                return;
+            }
+
+            document.getElementById('classesGrid').innerHTML = classesToShow.length ? classesToShow.map(c => {
+                const professeur = allStaffMembers.find(p => p.id === c.professeurId);
+                const professeurName = professeur ? professeur.displayName : 'Non assigné';
+                return `
+                <div class="md-card md-card-elevated" style="padding: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div class="stat-widget-icon secondary" style="width: 48px; height: 48px;">
+                            <span class="material-icons">class</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="font-weight: 500;">${c.nom}</h4>
+                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${c.niveau || 'Niveau non défini'}</p>
+                            <p style="font-size: 12px; color: var(--md-sys-color-primary); margin-top: 4px;">
+                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">person</span>
+                                ${professeurName}
+                            </p>
+                        </div>
+                    </div>
+                    <p style="margin-bottom: 12px; font-size: 14px;">${allEleves.filter(e => e.classe === c.nom).length} élève(s)</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="md-btn md-btn-tonal" onclick="viewClasse('${c.id}')"><span class="material-icons">visibility</span></button>
+                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editClasse('${c.id}')"><span class="material-icons">edit</span></button>` : ''}
+                        ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucune classe trouvée</p>';
         }
 
         function showAddClasseForm() {
@@ -1525,13 +2039,13 @@
                     </div>
                     <div class="md-text-field">
                         <div class="md-text-field-container">
-                            <select id="classeNiveau" class="md-text-field-input" required>
+                            <select id="classeNiveau" class="md-text-field-input">
                                 <option value="">-- Sélectionner un niveau --</option>
                                 ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
                                     `<option value="${n}" ${isEdit && n === classe.niveau ? 'selected' : ''}>${n}</option>`
                                 ).join('')}
                             </select>
-                            <label class="md-text-field-label">Niveau *</label>
+                            <label class="md-text-field-label">Niveau</label>
                         </div>
                     </div>
 
@@ -1558,10 +2072,6 @@
                 // Validation côté client
                 if (!data.nom.trim()) {
                     showSnackbar('Le nom de la classe est requis');
-                    return;
-                }
-                if (!data.niveau) {
-                    showSnackbar('Le niveau de la classe est requis');
                     return;
                 }
 
@@ -1924,6 +2434,12 @@
 
         // Sélectionner une classe pour appel
         function selectAppelClasse(nomClasse) {
+            // Si une classe différente est sélectionnée et que le formulaire de nouvel appel est ouvert, le fermer
+            const newAppelForm = document.getElementById('newAppelFormCard');
+            if (newAppelForm && newAppelForm.style.display !== 'none' && currentSelectedAppelClasse && currentSelectedAppelClasse !== nomClasse) {
+                hideNewAppelForm();
+            }
+
             currentSelectedAppelClasse = nomClasse;
 
             // Mettre à jour l'affichage des cartes
@@ -1975,6 +2491,9 @@
             const formCard = document.getElementById('appelFormCard');
             if (formCard) formCard.style.display = 'none';
 
+            const newAppelFormCard = document.getElementById('newAppelFormCard');
+            if (newAppelFormCard) newAppelFormCard.style.display = 'none';
+
             // Vider le récapitulatif
             const appelList = document.getElementById('appelList');
             if (appelList) {
@@ -1994,29 +2513,109 @@
 
         // Afficher le formulaire de nouvel appel
         function showNewAppelForm() {
-            document.getElementById('appelFormCard').style.display = 'block';
+            document.getElementById('newAppelFormCard').style.display = 'block';
 
             // Réinitialiser le formulaire
-            const appelDateInput = document.getElementById('appelDateInput');
+            const appelDateInput = document.getElementById('newAppelDateInput');
             if (appelDateInput) {
                 appelDateInput.value = new Date().toISOString().split('T')[0];
             }
-            const appelClasseLabel = document.getElementById('appelClasseLabel');
+            const appelClasseLabel = document.getElementById('newAppelClasseLabel');
             if (appelClasseLabel) {
                 appelClasseLabel.textContent = currentSelectedAppelClasse;
             }
 
-            // Réinitialiser pour création
-            document.getElementById('editAppelBatchId').value = '';
-            document.getElementById('appelFormTitle').textContent = 'Nouvel appel';
-            document.getElementById('appelSaveBtn').innerHTML = '<span class="material-icons">save</span> Enregistrer l\'appel';
-
-            // Les élèves seront chargés par editAppel() si nécessaire
+            // Charger les élèves pour le nouvel appel
+            loadElevesForNewAppelForm();
         }
 
         // Masquer le formulaire d'appel
         function hideAppelForm() {
             document.getElementById('appelFormCard').style.display = 'none';
+        }
+
+        // Masquer le formulaire de nouvel appel
+        function hideNewAppelForm() {
+            document.getElementById('newAppelFormCard').style.display = 'none';
+        }
+
+        // Charger les élèves pour le formulaire de nouvel appel
+        async function loadElevesForNewAppelForm() {
+            try {
+                const response = await fetch(`${API_URL}/appreciations/eleves/classe/${currentSelectedAppelClasse}`, { headers: getHeaders() });
+                appelEleves = await response.json();
+
+                const container = document.getElementById('newElevesAppelContainer');
+                container.innerHTML = appelEleves.map(eleve => `
+                    <div class="appel-eleve-row" style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+                            <div class="md-avatar" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                                ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">${eleve.prenom} ${eleve.nom}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                <input type="radio" name="new_appel_${eleve.id}" value="present" checked style="margin: 0;">
+                                <span style="font-size: 14px;">Présent</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                <input type="radio" name="new_appel_${eleve.id}" value="absent" style="margin: 0;">
+                                <span style="font-size: 14px;">Absent</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                <input type="radio" name="new_appel_${eleve.id}" value="retard" style="margin: 0;">
+                                <span style="font-size: 14px;">Retard</span>
+                            </label>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement des élèves');
+            }
+        }
+
+        // Sauvegarder les données du nouvel appel
+        async function saveNewAppelData() {
+            const appelDateInput = document.getElementById('newAppelDateInput');
+            const date = appelDateInput ? appelDateInput.value : new Date().toISOString().split('T')[0];
+            const classe = currentSelectedAppelClasse;
+            const absences = [];
+
+            for (const eleve of appelEleves) {
+                const status = document.querySelector(`input[name="new_appel_${eleve.id}"]:checked`).value;
+                absences.push({
+                    eleveId: eleve.id,
+                    type: status,
+                    motif: '',
+                });
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/absences/appel`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ absences, classe, date, professeurId: user?.id })
+                });
+
+                if (response.ok) {
+                    showSnackbar('Appel enregistré avec succès');
+                    hideNewAppelForm();
+                    // Recharger les statistiques
+                    loadDashboardData();
+                    // Recharger l'historique des absences si on est dans cette section
+                    if (currentSelectedAbsencesClasse) {
+                        loadAbsencesHistorique(currentSelectedAbsencesClasse);
+                    }
+                } else {
+                    const error = await response.json();
+                    showSnackbar('Erreur lors de l\'enregistrement: ' + (error.error || 'Erreur inconnue'));
+                }
+            } catch (error) {
+                showSnackbar('Erreur réseau lors de l\'enregistrement');
+            }
         }
 
 
@@ -2116,8 +2715,8 @@
                     return;
                 }
 
-                // Passer au formulaire
-                showNewAppelForm();
+                // Afficher le formulaire d'édition (dans la section absences)
+                document.getElementById('appelFormCard').style.display = 'block';
 
                 // Marquer comme édition
                 document.getElementById('editAppelBatchId').value = batchId;
@@ -2186,6 +2785,10 @@
                     showSnackbar('Appel enregistré avec succès');
                     document.getElementById('appelFormCard').style.display = 'none';
                     loadDashboardData();
+                    // Recharger l'historique des absences pour la classe actuelle
+                    if (currentSelectedAbsencesClasse) {
+                        loadAbsencesHistorique(currentSelectedAbsencesClasse);
+                    }
                 } else {
                     throw new Error('Erreur lors de la modification');
                 }
@@ -2207,12 +2810,42 @@
                 if (response.ok) {
                     showSnackbar('Appel supprimé');
                     loadDashboardData();
+                    // Recharger l'historique des absences pour la classe actuelle
+                    if (currentSelectedAbsencesClasse) {
+                        loadAbsencesHistorique(currentSelectedAbsencesClasse);
+                    }
                 } else {
                     throw new Error('Erreur lors de la suppression');
                 }
             } catch (error) {
                 showSnackbar('Erreur lors de la suppression');
             }
+        }
+
+        // Filtrer les appels par date
+        function filterAppelsByDate() {
+            const searchDate = document.getElementById('appelSearchDate').value;
+            if (!searchDate) {
+                // Revenir aux 5 derniers appels
+                const appelsToDisplay = allAppels.slice(0, 5);
+                displayAppels(appelsToDisplay);
+                return;
+            }
+
+            const filteredAppels = allAppels.filter(appel => {
+                const appelDate = new Date(appel.date).toISOString().split('T')[0];
+                return appelDate === searchDate;
+            });
+
+            displayAppels(filteredAppels);
+        }
+
+        // Effacer le filtre de date
+        function clearAppelDateFilter() {
+            document.getElementById('appelSearchDate').value = '';
+            // Revenir aux 5 derniers appels
+            const appelsToDisplay = allAppels.slice(0, 5);
+            displayAppels(appelsToDisplay);
         }
 
         // Fonction utilitaire pour formater les dates
@@ -2328,18 +2961,62 @@
         function selectAbsencesClasse(nomClasse) {
             currentSelectedAbsencesClasse = nomClasse;
             renderAbsencesClassesGrid();
+            
+            // Afficher le filtre de date et le mettre à aujourd'hui
+            const dateFilter = document.getElementById('appelDateFilter');
+            if (dateFilter) {
+                dateFilter.style.display = 'block';
+                const dateInput = document.getElementById('appelSearchDate');
+                if (dateInput) {
+                    dateInput.value = new Date().toISOString().split('T')[0];
+                }
+            }
+            
             loadAbsencesHistorique();
         }
 
+        // Variable pour stocker tous les appels
+        let allAppels = [];
+
         // Charger l'historique des absences
         async function loadAbsencesHistorique() {
+            // Cacher le filtre si aucune classe n'est sélectionnée
+            const dateFilter = document.getElementById('appelDateFilter');
+            if (dateFilter) {
+                dateFilter.style.display = currentSelectedAbsencesClasse ? 'block' : 'none';
+            }
+            
+            if (!currentSelectedAbsencesClasse) {
+                const container = document.getElementById('absencesHistoriqueList');
+                container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 24px;">Sélectionnez une classe pour voir l\'historique</p>';
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_URL}/absences/appel/historique/${currentSelectedAbsencesClasse}`, { headers: getHeaders() });
-                const appels = await response.json();
+                let appels = await response.json();
 
+                // Trier par date décroissante (plus récent en premier)
+                appels.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Stocker tous les appels pour le filtrage
+                allAppels = appels;
+
+                // Afficher seulement les 5 derniers appels par défaut
+                const appelsToDisplay = appels.slice(0, 5);
+                displayAppels(appelsToDisplay);
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'historique:', error);
+                const container = document.getElementById('absencesHistoriqueList');
+                container.innerHTML = '<p style="color: var(--md-sys-color-error); text-align: center; padding: 24px;">Erreur lors du chargement de l\'historique</p>';
+            }
+        }
+
+        // Afficher les appels
+        function displayAppels(appels) {
                 const container = document.getElementById('absencesHistoriqueList');
                 if (appels.length === 0) {
-                    container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 24px;">Aucun appel enregistré pour cette classe</p>';
+                    container.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 24px;">Aucun appel trouvé</p>';
                     return;
                 }
 
@@ -2354,27 +3031,24 @@
                                 </div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 18px; font-weight: 500; color: var(--md-sys-color-on-surface);">${appel.nbAbsences} élève(s)</div>
-                                <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
-                                    ${appel.nbPresents || 0} présent(s), ${appel.nbRetards} retard(s), ${appel.nbAbsents} absent(s)
+                                    <div style="font-size: 18px; font-weight: 500; color: var(--md-sys-color-on-surface);">${appel.nbAbsences} élève(s)</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
+                                        ${appel.nbPresents || 0} présent(s), ${appel.nbRetards} retard(s), ${appel.nbAbsents} absent(s)
+                                    </div>
                                 </div>
                             </div>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <button class="md-btn md-btn-text" style="color: var(--md-sys-color-primary);" onclick="event.stopPropagation(); editAppel('${appel.batchId}')">
+                                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
+                                    Modifier
+                                </button>
+                                <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteAppel('${appel.batchId}')">
+                                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                                    Supprimer
+                                </button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-primary);" onclick="event.stopPropagation(); editAppel('${appel.batchId}')">
-                                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
-                                Modifier
-                            </button>
-                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteAppel('${appel.batchId}')">
-                                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                showSnackbar('Erreur lors du chargement de l\'historique');
-            }
+                    `).join('');
         }
 
 
@@ -3387,7 +4061,7 @@
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                             ${!s.activated && s.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${s.id}', '${s.email}', 'staff')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
                             <button class="md-btn md-btn-tonal" onclick="editStaff('${s.id}')"><span class="material-icons">edit</span></button>
-                            <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')" title="Supprimer"><span class="material-icons">delete</span></button>
+                            ${user.id !== s.id ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')" title="Supprimer"><span class="material-icons">delete</span></button>` : ''}
                         </div>
                     </div>
                 `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun membre du bureau</p>';
@@ -3423,6 +4097,7 @@
                 <div class="md-text-field-container">
                     <select id="staffRole" class="md-text-field-input" required>
                         <option value="">-- Sélectionner un rôle --</option>
+                        ${user.role === 'admin' ? '<option value="admin">Administrateur</option>' : ''}
                         <option value="directeur">Directeur</option>
                         <option value="secretariat">Secrétariat</option>
                         <option value="professeur">Professeur</option>
@@ -3460,7 +4135,7 @@
                     showDialog('Lien d\'activation', `
                         <p>Le membre a été créé avec succès. Vous pouvez :</p>
                         <div style="margin: 16px 0;">
-                            <button class="md-btn md-btn-filled" onclick="sendActivationEmail('${userId}', '${email}', 'staff')" style="width: 100%; margin-bottom: 12px;">
+                            <button class="md-btn md-btn-filled" onclick="sendActivationEmail('${userId}', '${email.replace(/'/g, '\\\'')}', 'staff')" style="width: 100%; margin-bottom: 12px;">
                                 <span class="material-icons">email</span> Envoyer par email
                             </button>
                         </div>
@@ -3519,12 +4194,13 @@
                     </div>
                     <div class="md-text-field">
                         <div class="md-text-field-container">
-                            <select id="staffRole" class="md-text-field-input" required>
+                            <select id="staffRole" class="md-text-field-input" ${user.id === id ? 'disabled' : ''} required>
+                                ${user.role === 'admin' ? '<option value="admin" ' + (staff.role === 'admin' ? 'selected' : '') + '>Administrateur</option>' : ''}
                                 <option value="directeur" ${staff.role === 'directeur' ? 'selected' : ''}>Directeur</option>
                                 <option value="secretariat" ${staff.role === 'secretariat' ? 'selected' : ''}>Secrétariat</option>
                                 <option value="professeur" ${staff.role === 'professeur' ? 'selected' : ''}>Professeur</option>
                             </select>
-                            <label class="md-text-field-label">Rôle *</label>
+                            <label class="md-text-field-label">Rôle ${user.id === id ? '(non modifiable)' : ''} *</label>
                         </div>
                     </div>
                 </form>
@@ -3544,9 +4220,27 @@
                     if (response.ok) {
                         showSnackbar('Membre modifié');
                         loadStaff();
+                        // Si c'est l'utilisateur actuel qui a été modifié, mettre à jour les infos dans la sidebar
+                        if (id === user.id) {
+                            // Mettre à jour l'utilisateur depuis localStorage
+                            let currentUser = window.Session.getCurrentUser();
+                            currentUser.nom = data.nom;
+                            currentUser.prenom = data.prenom;
+                            currentUser.email = data.email;
+                            window.Session.saveUser(currentUser);
+                            // Mettre à jour la variable globale si elle existe
+                            if (typeof user !== 'undefined') {
+                                user = currentUser;
+                            }
+                            // Mettre à jour la sidebar
+                            updateSidebarUserInfo();
+                        }
+                    } else {
+                        const error = await response.json();
+                        showSnackbar(error.error || 'Erreur lors de la modification');
                     }
                 } catch (error) {
-                    showSnackbar('Erreur');
+                    showSnackbar('Erreur de connexion');
                 }
             });
         }
@@ -3574,6 +4268,101 @@
         // ==================== INSCRIPTIONS ====================
         let inscriptionType = 'seul';
         let inscriptionEnfantCount = 1;
+
+        // Fonction pour calculer l'âge à partir de la date de naissance
+        function calculateAge(birthDate) {
+            if (!birthDate) return null;
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // Fonction pour basculer entre mineur et majeur
+        function toggleEnfantStatus(index, status) {
+            const field = document.querySelector(`.enfant-field[data-index="${index}"]`);
+            if (!field) return;
+            
+            // Mettre à jour les boutons toggle
+            const toggleBtns = field.querySelectorAll('.status-toggle-btn');
+            toggleBtns.forEach(btn => {
+                if (btn.dataset.status === status) {
+                    btn.classList.add('active');
+                    btn.style.borderColor = 'var(--md-sys-color-primary)';
+                    btn.style.background = 'var(--md-sys-color-primary)';
+                    btn.style.color = 'var(--md-sys-color-on-primary)';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.borderColor = 'var(--md-sys-color-outline)';
+                    btn.style.background = 'transparent';
+                    btn.style.color = 'var(--md-sys-color-on-surface-variant)';
+                }
+            });
+            
+            // Afficher/masquer les champs spécifiques
+            const mineurFields = field.querySelector('.enfant-mineur-fields');
+            const majeurFields = field.querySelector('.enfant-specific-fields.enfant-majeur-fields');
+            
+            if (status === 'mineur') {
+                mineurFields.style.display = 'block';
+                majeurFields.style.display = 'none';
+            } else {
+                mineurFields.style.display = 'none';
+                majeurFields.style.display = 'block';
+            }
+            
+            // Mettre à jour le dataset du field
+            field.dataset.status = status;
+            
+            // Mettre à jour la visibilité des champs parent
+            updateParentFieldsVisibility();
+        }
+
+        // Fonction pour gérer l'affichage des champs parent selon le statut des enfants
+        function updateParentFieldsVisibility() {
+            const enfantFields = document.querySelectorAll('.enfant-field');
+            let hasMinor = false;
+            let hasAdult = false;
+
+            enfantFields.forEach(field => {
+                const status = field.dataset.status || 'mineur'; // Par défaut mineur
+                if (status === 'mineur') {
+                    hasMinor = true;
+                } else {
+                    hasAdult = true;
+                }
+            });
+
+            const parentSection = document.querySelector('.parent-info-section');
+            const parentFields = parentSection ? parentSection.querySelectorAll('input') : [];
+
+            if (hasAdult && !hasMinor) {
+                // Tous les enfants sont majeurs - masquer les champs parent
+                if (parentSection) {
+                    parentSection.style.display = 'none';
+                }
+                // Rendre les champs parent non obligatoires
+                parentFields.forEach(field => {
+                    field.required = false;
+                    field.removeAttribute('required');
+                });
+            } else {
+                // Au moins un mineur - afficher les champs parent
+                if (parentSection) {
+                    parentSection.style.display = 'block';
+                }
+                // Rendre l'email parent obligatoire
+                const parentEmail = document.getElementById('insc_parentEmail');
+                if (parentEmail) {
+                    parentEmail.required = true;
+                    parentEmail.setAttribute('required', 'required');
+                }
+            }
+        }
 
         async function loadInscriptions() {
             // Les inscriptions sont gérées via les élèves non activés
@@ -3687,13 +4476,19 @@
             document.getElementById('insc_parentEmail').value = '';
             document.getElementById('insc_parentTel').value = '';
             
+            // Réinitialiser l'affichage des champs parent
+            const parentSection = document.querySelector('.parent-info-section');
+            if (parentSection) {
+                parentSection.style.display = 'block';
+            }
+            
             // Reset type selection
             document.querySelectorAll('.inscription-type-option').forEach(opt => {
                 opt.style.borderColor = opt.dataset.type === 'seul' ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)';
             });
             
             document.getElementById('addEnfantBtn').style.display = 'none';
-            document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'enfant";
+            document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'élève";
             
             // Créer le premier champ enfant
             renderEnfantFields();
@@ -3717,10 +4512,13 @@
             
             if (type === 'famille') {
                 document.getElementById('addEnfantBtn').style.display = 'flex';
-                document.getElementById('inscriptionEnfantsTitle').textContent = "Informations des enfants";
+                document.getElementById('inscriptionEnfantsTitle').textContent = "Informations des élèves";
+                
+                // Régénérer les champs enfants pour appliquer l'héritage du nom
+                renderEnfantFields();
             } else {
                 document.getElementById('addEnfantBtn').style.display = 'none';
-                document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'enfant";
+                document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'élève";
                 inscriptionEnfantCount = 1;
                 renderEnfantFields();
             }
@@ -3732,15 +4530,56 @@
                 html += createEnfantFieldHTML(i);
             }
             document.getElementById('inscriptionEnfantsContainer').innerHTML = html;
+            
+            // Initialiser tous les champs avec le statut mineur par défaut
+            document.querySelectorAll('.enfant-field').forEach((field, index) => {
+                field.dataset.status = 'mineur';
+                
+                // Appliquer les styles initiaux pour les boutons toggle
+                const mineurBtn = field.querySelector('.status-toggle-btn[data-status="mineur"]');
+                const majeurBtn = field.querySelector('.status-toggle-btn[data-status="majeur"]');
+                
+                if (mineurBtn) {
+                    mineurBtn.classList.add('active');
+                    mineurBtn.style.borderColor = 'var(--md-sys-color-primary)';
+                    mineurBtn.style.background = 'var(--md-sys-color-primary)';
+                    mineurBtn.style.color = 'var(--md-sys-color-on-primary)';
+                }
+                
+                if (majeurBtn) {
+                    majeurBtn.classList.remove('active');
+                    majeurBtn.style.borderColor = 'var(--md-sys-color-outline)';
+                    majeurBtn.style.background = 'transparent';
+                    majeurBtn.style.color = 'var(--md-sys-color-on-surface-variant)';
+                }
+            });
+            
+            // Remplir automatiquement le nom des enfants avec le nom du parent
+            const parentNom = document.getElementById('insc_parentNom').value.trim();
+            if (parentNom) {
+                document.querySelectorAll('.enfant-nom').forEach(input => {
+                    input.value = parentNom;
+                });
+            }
         }
 
         function createEnfantFieldHTML(index) {
             return `
                 <div class="enfant-field" data-index="${index}" style="background: var(--md-sys-color-surface-container); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h5 style="color: var(--md-sys-color-primary);">Enfant ${index + 1}</h5>
+                        <h5 style="color: var(--md-sys-color-primary);"> Élève ${index + 1}</h5>
                         ${index > 0 ? `<button type="button" class="md-btn md-btn-text" onclick="removeEnfantField(${index})" style="color: var(--md-sys-color-error);"><span class="material-icons">close</span></button>` : ''}
                     </div>
+                    
+                    <!-- Bouton toggle Mineur/Majeur -->
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <span style="font-weight: 500; color: var(--md-sys-color-on-surface);">Statut :</span>
+                        <div class="toggle-container" style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="status-toggle-btn active" data-status="mineur" data-index="${index}" onclick="toggleEnfantStatus(${index}, 'mineur')" style="padding: 8px 16px; border: 2px solid var(--md-sys-color-primary); border-radius: 20px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); font-weight: 500; cursor: pointer;">Mineur</button>
+                            <button type="button" class="status-toggle-btn" data-status="majeur" data-index="${index}" onclick="toggleEnfantStatus(${index}, 'majeur')" style="padding: 8px 16px; border: 2px solid var(--md-sys-color-outline); border-radius: 20px; background: transparent; color: var(--md-sys-color-on-surface-variant); font-weight: 500; cursor: pointer;">Majeur</button>
+                        </div>
+                    </div>
+                    
                     <div class="md-form-grid">
                         <div class="md-text-field">
                             <div class="md-text-field-container">
@@ -3754,20 +4593,44 @@
                                 <label class="md-text-field-label">Prénom</label>
                             </div>
                         </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="date" class="md-text-field-input enfant-date" data-index="${index}" placeholder=" ">
-                                <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date de naissance</label>
+                        
+                        <!-- Champs spécifiques selon le statut -->
+                        <div class="enfant-specific-fields enfant-mineur-fields" data-index="${index}" style="grid-column: 1 / -1;">
+                            <div class="md-form-grid">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="date" class="md-text-field-input enfant-date" data-index="${index}" placeholder=" ">
+                                        <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date de naissance</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <select class="md-text-field-input enfant-classe" data-index="${index}" style="padding: 16px 12px;">
+                                            <option value="">Sélectionner une classe</option>
+                                            ${allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <select class="md-text-field-input enfant-classe" data-index="${index}" style="padding: 16px 12px;">
-                                    <option value="">Sélectionner une classe</option>
-                                    ${allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('')}
-                                </select>
+                        
+                        <div class="enfant-specific-fields enfant-majeur-fields" data-index="${index}" style="grid-column: 1 / -1; display: none;">
+                            <div class="md-form-grid">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="email" class="md-text-field-input enfant-email" data-index="${index}" placeholder=" ">
+                                        <label class="md-text-field-label">Email de l'étudiant</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="tel" class="md-text-field-input enfant-tel" data-index="${index}" placeholder=" ">
+                                        <label class="md-text-field-label">Téléphone de l'étudiant</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        
                         <div class="md-text-field">
                             <div class="md-text-field-container">
                                 <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="0">
@@ -3790,6 +4653,35 @@
             inscriptionEnfantCount++;
             const container = document.getElementById('inscriptionEnfantsContainer');
             container.insertAdjacentHTML('beforeend', createEnfantFieldHTML(inscriptionEnfantCount - 1));
+            
+            // Initialiser le statut par défaut à mineur pour le nouveau champ
+            const newField = container.lastElementChild;
+            newField.dataset.status = 'mineur';
+            
+            // Appliquer les styles initiaux pour les boutons toggle
+            const mineurBtn = newField.querySelector('.status-toggle-btn[data-status="mineur"]');
+            const majeurBtn = newField.querySelector('.status-toggle-btn[data-status="majeur"]');
+            
+            if (mineurBtn) {
+                mineurBtn.classList.add('active');
+                mineurBtn.style.borderColor = 'var(--md-sys-color-primary)';
+                mineurBtn.style.background = 'var(--md-sys-color-primary)';
+                mineurBtn.style.color = 'var(--md-sys-color-on-primary)';
+            }
+            
+            if (majeurBtn) {
+                majeurBtn.classList.remove('active');
+                majeurBtn.style.borderColor = 'var(--md-sys-color-outline)';
+                majeurBtn.style.background = 'transparent';
+                majeurBtn.style.color = 'var(--md-sys-color-on-surface-variant)';
+            }
+            
+            // Remplir automatiquement le nom de l'enfant avec le nom du parent
+            const parentNom = document.getElementById('insc_parentNom').value.trim();
+            const enfantNomInput = newField.querySelector('.enfant-nom');
+            if (enfantNomInput && parentNom) {
+                enfantNomInput.value = parentNom;
+            }
         }
 
         function removeEnfantField(index) {
@@ -3808,35 +4700,78 @@
         }
 
         async function submitInscription() {
+            // Vérifier si au moins un enfant est mineur
+            const enfantFields = document.querySelectorAll('.enfant-field');
+            let hasMinor = false;
+            
+            for (const field of enfantFields) {
+                const status = field.dataset.status || 'mineur';
+                if (status === 'mineur') {
+                    hasMinor = true;
+                    break;
+                }
+            }
+            
             const parentNom = document.getElementById('insc_parentNom').value.trim();
             const parentPrenom = document.getElementById('insc_parentPrenom').value.trim();
             const parentEmail = document.getElementById('insc_parentEmail').value.trim();
             const parentTel = document.getElementById('insc_parentTel').value.trim();
             
-            if (!parentEmail) {
-                showSnackbar('L\'email du parent est obligatoire');
+            // Les champs parent sont obligatoires seulement s'il y a au moins un mineur
+            if (hasMinor && !parentEmail) {
+                showSnackbar('L\'email du parent est obligatoire pour les enfants mineurs');
                 return;
             }
             
             // Collecter les enfants
             const enfants = [];
-            const enfantFields = document.querySelectorAll('.enfant-field');
             
             for (const field of enfantFields) {
                 const index = field.dataset.index;
+                const status = field.dataset.status || 'mineur';
                 const nom = field.querySelector('.enfant-nom').value.trim();
                 const prenom = field.querySelector('.enfant-prenom').value.trim();
-                const dateNaissance = field.querySelector('.enfant-date').value;
-                const classe = field.querySelector('.enfant-classe').value;
                 
                 if (!nom || !prenom) {
                     showSnackbar(`Veuillez remplir le nom et prénom de l'enfant ${parseInt(index) + 1}`);
                     return;
                 }
                 
+                let enfantData = { nom, prenom, status };
+                
+                if (status === 'mineur') {
+                    // Pour les mineurs : date de naissance et classe
+                    const dateNaissance = field.querySelector('.enfant-date').value;
+                    const classe = field.querySelector('.enfant-classe').value;
+                    
+                    if (!dateNaissance) {
+                        showSnackbar(`Veuillez saisir la date de naissance de l'enfant ${parseInt(index) + 1}`);
+                        return;
+                    }
+                    
+                    enfantData.dateNaissance = dateNaissance;
+                    enfantData.classe = classe;
+                } else {
+                    // Pour les majeurs : email et téléphone de l'étudiant
+                    const email = field.querySelector('.enfant-email').value.trim();
+                    const tel = field.querySelector('.enfant-tel').value.trim();
+                    
+                    if (!email) {
+                        showSnackbar(`Veuillez saisir l'email de l'étudiant ${parseInt(index) + 1}`);
+                        return;
+                    }
+                    
+                    enfantData.email = email;
+                    enfantData.tel = tel;
+                }
+                
                 const fraisInscription = parseFloat(field.querySelector('.enfant-frais')?.value || 0) || 0;
                 const nbPaiements = parseInt(field.querySelector('.enfant-nbPaiements')?.value || '1', 10) || 1;
-                enfants.push({ nom, prenom, dateNaissance, classe, fraisInscription, nbPaiements });
+                
+                enfantData.fraisInscription = fraisInscription;
+                enfantData.nbPaiements = nbPaiements;
+                
+                enfants.push(enfantData);
             }
             
             try {
@@ -4160,6 +5095,7 @@
                             <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
                                 <span class="material-icons" style="font-size: 16px;">calendar_today</span>
                                 ${actu.date ? new Date(actu.date).toLocaleDateString('fr-FR') : 'Non daté'}
+                                ${actu.dateFin ? ` - Expire le ${new Date(actu.dateFin).toLocaleDateString('fr-FR')}` : ''}
                                 <span style="margin-left: 8px;">par ${actu.auteurNom || 'Système'}</span>
                             </div>
                         </div>
@@ -4225,6 +5161,7 @@
             const titre = document.getElementById('actualite_titre').value.trim();
             const description = document.getElementById('actualite_description').value.trim();
             const date = document.getElementById('actualite_date').value;
+            const dateFin = document.getElementById('actualite_dateFin').value;
             
             if (!titre || !description) {
                 showToast('Veuillez remplir le titre et la description', 'error');
@@ -4256,6 +5193,7 @@
                         titre,
                         description,
                         date,
+                        dateFin: dateFin || null,
                         auteurId: user.id,
                         auteurNom: `${user.prenom || ''} ${user.nom || user.email.split('@')[0]}`.trim(),
                         cible
@@ -4285,6 +5223,7 @@
             document.getElementById('actualite_titre').value = actu.titre;
             document.getElementById('actualite_description').value = actu.description;
             document.getElementById('actualite_date').value = actu.date || '';
+            document.getElementById('actualite_dateFin').value = actu.dateFin || '';
             
             // Restaurer les cibles
             document.getElementById('cible_tous').checked = !actu.cible || actu.cible === 'tous';
@@ -4401,6 +5340,23 @@
             document.getElementById('dialogOverlay').classList.remove('show');
         }
 
+        // Fonction pour mettre à jour les infos utilisateur dans la sidebar
+        function updateSidebarUserInfo() {
+            const userNameEl = document.getElementById('userName');
+            const userRoleEl = document.getElementById('userRole');
+            const userAvatarEl = document.getElementById('userAvatar');
+            
+            if (userNameEl) {
+                userNameEl.textContent = `${user.prenom} ${user.nom}`;
+            }
+            if (userRoleEl) {
+                userRoleEl.innerHTML = `<span class="sidebar-user-badge">${getRoleName(user.role)}</span>`;
+            }
+            if (userAvatarEl) {
+                userAvatarEl.textContent = (user.prenom || 'U')[0].toUpperCase();
+            }
+        }
+
         // ==================== ENVOI EMAIL ACTIVATION ====================
         async function sendActivationEmail(userId, email, type) {
             if (!email) {
@@ -4409,7 +5365,7 @@
             }
             
             try {
-                const response = await fetch(`${API_URL}/send-activation-email`, {
+                const response = await fetch(`${API_URL}/email/send-activation-email`, {
                     method: 'POST',
                     headers: getHeaders(),
                     body: JSON.stringify({ userId, email, type })
@@ -4619,5 +5575,21 @@
             }
         }
     </style>
+
+    <!-- Modal pour les détails d'élève -->
+    <div id="eleveDetailsModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: var(--md-sys-color-surface); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                <h3 style="margin: 0; color: var(--md-sys-color-on-surface);">Détails de l'élève</h3>
+                <button class="md-icon-btn" onclick="closeEleveDetailsModal()" style="color: var(--md-sys-color-on-surface-variant);">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div id="eleveDetailsContent">
+                <!-- Le contenu sera rempli dynamiquement -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

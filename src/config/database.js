@@ -15,6 +15,9 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('❌ Erreur de connexion à la base de données:', err);
     } else {
         console.log('✅ Connecté à la base de données SQLite');
+        // Configurer la base de données pour une meilleure persistance
+        db.run('PRAGMA synchronous = FULL');
+        db.run('PRAGMA journal_mode = DELETE');
     }
 });
 
@@ -54,6 +57,10 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN fraisValide INTEGER DEFAULT 0`, () => {});
             // Nombre de paiements déjà validés
             db.run(`ALTER TABLE eleves ADD COLUMN paiementsEffectues INTEGER DEFAULT 0`, () => {});
+            // Colonne pour le téléphone de l'étudiant (pour majeurs)
+            db.run(`ALTER TABLE eleves ADD COLUMN tel TEXT`, () => {});
+            // Colonne pour le statut (mineur/majeur)
+            db.run(`ALTER TABLE eleves ADD COLUMN status TEXT DEFAULT 'mineur'`, () => {});
 
             // Table professeurs
             db.run(`CREATE TABLE IF NOT EXISTS professeurs (
@@ -157,6 +164,9 @@ function initDatabase() {
             // Ajouter la colonne cible si elle n'existe pas (migration)
             db.run(`ALTER TABLE actualites ADD COLUMN cible TEXT DEFAULT 'tous'`, () => {});
 
+            // Ajouter la colonne dateFin si elle n'existe pas (migration)
+            db.run(`ALTER TABLE actualites ADD COLUMN dateFin TEXT`, () => {});
+
             // Table tokens (pour la réinitialisation de mot de passe)
             db.run(`CREATE TABLE IF NOT EXISTS tokens (
                 id TEXT PRIMARY KEY,
@@ -167,8 +177,8 @@ function initDatabase() {
                 createdAt TEXT DEFAULT CURRENT_TIMESTAMP
             )`);
 
-            // Insérer le compte admin s'il n'existe pas
-            db.get('SELECT id FROM staff WHERE id = ?', ['admin1'], (err, row) => {
+            // Insérer le compte admin par défaut s'il n'y a aucun admin
+            db.get('SELECT id FROM staff WHERE role = ?', ['admin'], (err, row) => {
                 if (err) {
                     console.error('Erreur vérification admin:', err);
                     return;
@@ -179,7 +189,7 @@ function initDatabase() {
                         if (err) {
                             console.error('Erreur insertion admin:', err);
                         } else {
-                            console.log('✅ Compte admin créé');
+                            console.log('✅ Compte admin par défaut créé');
                         }
                     });
                 }

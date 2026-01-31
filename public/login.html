@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - Eveil & Ihsan</title>
+    
+    <!-- logo -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
@@ -17,38 +22,8 @@
             <div class="login-shape login-shape-3"></div>
         </div>
 
-        <!-- Section Branding -->
-        <div class="login-branding">
-            <div class="login-branding-content">
-                <img src="https://via.placeholder.com/120x120/1e5aa8/ffffff?text=E%26I" alt="Logo" class="login-logo">
-                <h1>Eveil & Ihsan</h1>
-                <p>Plateforme de gestion scolaire moderne pour un suivi optimal de vos élèves et de votre établissement.</p>
-                
-                <div class="login-features">
-                    <div class="login-feature">
-                        <div class="login-feature-icon">
-                            <span class="material-icons">school</span>
-                        </div>
-                        <span>Gestion des élèves</span>
-                    </div>
-                    <div class="login-feature">
-                        <div class="login-feature-icon">
-                            <span class="material-icons">event_note</span>
-                        </div>
-                        <span>Suivi des absences</span>
-                    </div>
-                    <div class="login-feature">
-                        <div class="login-feature-icon">
-                            <span class="material-icons">message</span>
-                        </div>
-                        <span>Messagerie intégrée</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Formulaire -->
-        <div class="login-form-container">
+        <!-- Section Formulaire centrée -->
+        <div class="login-form-container-centered">
             <div class="login-card">
                 <!-- Loading Overlay -->
                 <div class="login-loading" id="loginLoading">
@@ -57,6 +32,10 @@
                 </div>
 
                 <div class="login-card-header">
+                    <div class="login-logo-small">
+                        <img src="logo.png" alt="Eveil & Ihsan" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display: none; font-size: 32px; font-weight: bold; color: var(--md-sys-color-primary);">E&I</div>
+                    </div>
                     <h2>Bienvenue</h2>
                     <p>Connectez-vous pour accéder à votre espace</p>
                 </div>
@@ -105,32 +84,9 @@
                     </button>
                 </form>
 
-                <!-- Comptes de démonstration -->
-                <div class="login-demo-section">
-                    <p class="login-demo-title">Comptes de démonstration</p>
-                    <div class="login-demo-accounts">
-                        <button type="button" class="login-demo-btn" data-email="admin@ecole.fr">
-                            <span class="material-icons">admin_panel_settings</span>
-                            <span>Admin</span>
-                        </button>
-                        <button type="button" class="login-demo-btn" data-email="directeur@ecole.fr">
-                            <span class="material-icons">business</span>
-                            <span>Directeur</span>
-                        </button>
-                        <button type="button" class="login-demo-btn" data-email="prof@ecole.fr">
-                            <span class="material-icons">person</span>
-                            <span>Professeur</span>
-                        </button>
-                        <button type="button" class="login-demo-btn" data-email="eleve@ecole.fr">
-                            <span class="material-icons">school</span>
-                            <span>Élève</span>
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Footer -->
                 <div class="login-footer">
-                    <p>© 2024 Eveil & Ihsan - Tous droits réservés</p>
+                    <p>© 2026 Eveil & Ihsan - Tous droits réservés</p>
                 </div>
             </div>
         </div>
@@ -158,19 +114,6 @@
             passwordInput.type = type;
             togglePassword.querySelector('.material-icons').textContent = 
                 type === 'password' ? 'visibility' : 'visibility_off';
-        });
-
-        // Comptes de démonstration
-        document.querySelectorAll('.login-demo-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                emailInput.value = btn.dataset.email;
-                passwordInput.value = 'password';
-                // Trigger focus pour animer les labels
-                emailInput.focus();
-                emailInput.blur();
-                passwordInput.focus();
-                passwordInput.blur();
-            });
         });
 
         // Gestion de la soumission

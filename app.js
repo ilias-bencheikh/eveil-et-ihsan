@@ -13,6 +13,20 @@ const { SERVER_CONFIG } = require('./src/config/constants');
 const { initDatabase, closeDatabase } = require('./src/config/database');
 const { getLocalIpAddress } = require('./src/utils/helpers');
 
+// Fonction de nettoyage automatique des actualités expirées
+function cleanupExpiredNews() {
+    const { db } = require('./src/config/database');
+    const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    
+    db.run('DELETE FROM actualites WHERE dateFin IS NOT NULL AND dateFin < ?', [currentDate], function(err) {
+        if (err) {
+            console.error('❌ Erreur lors du nettoyage des actualités expirées:', err);
+        } else if (this.changes > 0) {
+            console.log(`🗑️ ${this.changes} actualité(s) expirée(s) supprimée(s) automatiquement`);
+        }
+    });
+}
+
 // Routes
 const {
     authRoutes,
@@ -47,6 +61,7 @@ app.use('/api/absences', absencesRoutes);
 app.use('/api/appreciations', appreciationsRoutes);
 app.use('/api/messagerie', messagerieRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/email', emailRoutes);
 app.use('/api/actualites', actualitesRoutes);
 app.use('/api', emailRoutes);
 
@@ -71,6 +86,12 @@ async function startServer() {
     try {
         // Initialiser la base de données
         await initDatabase();
+        
+        // Nettoyer les actualités expirées au démarrage
+        cleanupExpiredNews();
+        
+        // Programmer un nettoyage automatique toutes les 24 heures
+        setInterval(cleanupExpiredNews, 24 * 60 * 60 * 1000); // 24h en millisecondes
         
         // Démarrer le serveur
         app.listen(SERVER_CONFIG.PORT, SERVER_CONFIG.HOST, () => {
