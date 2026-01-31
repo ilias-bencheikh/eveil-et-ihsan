@@ -419,6 +419,27 @@
                         </div>
                     </div>
                     <div class="content-grid">
+                        <div class="widget-card" id="messagesWidget" style="display: none;">
+                            <div class="widget-card-header">
+                                <h3 class="widget-card-title">Derniers messages</h3>
+                                <div class="widget-card-actions">
+                                    <button class="md-icon-btn" onclick="switchTab('messagerie')" title="Voir tous les messages">
+                                        <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="widget-card-content">
+                                <ul class="activity-list" id="recentMessagesList">
+                                    <li class="activity-item">
+                                        <div class="activity-icon"><span class="material-icons">mail</span></div>
+                                        <div class="activity-content">
+                                            <p class="activity-text">Chargement des messages...</p>
+                                            <span class="activity-time">Maintenant</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                         <div class="widget-card">
                             <div class="widget-card-header"><h3 class="widget-card-title">Actions rapides</h3></div>
                             <div class="widget-card-content">
@@ -439,13 +460,20 @@
                             </div>
                         </div>
                         <div class="widget-card">
-                            <div class="widget-card-header"><h3 class="widget-card-title">Activité récente</h3></div>
+                            <div class="widget-card-header">
+                                <h3 class="widget-card-title">Dernières actualités</h3>
+                                <div class="widget-card-actions">
+                                    <button class="md-icon-btn" onclick="switchTab('actualites')" title="Voir toutes les actualités">
+                                        <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
                             <div class="widget-card-content">
-                                <ul class="activity-list" id="activityList">
+                                <ul class="activity-list" id="recentActualitesList">
                                     <li class="activity-item">
-                                        <div class="activity-icon"><span class="material-icons">info</span></div>
+                                        <div class="activity-icon"><span class="material-icons">newspaper</span></div>
                                         <div class="activity-content">
-                                            <p class="activity-text">Bienvenue sur votre tableau de bord</p>
+                                            <p class="activity-text">Chargement des actualités...</p>
                                             <span class="activity-time">Maintenant</span>
                                         </div>
                                     </li>
@@ -1310,8 +1338,8 @@
             return {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
-                'X-User-Role': user.role,
-                'X-User-Id': user.id
+                'x-user-role': user.role,
+                'x-user-id': user.id
             };
         }
 
@@ -1394,6 +1422,144 @@
 
             // Remplir les selects de classes après chargement
             fillClasseSelects();
+
+            // Charger les messages récents pour les comptes bureau
+            loadRecentMessages();
+
+            // Charger les actualités récentes
+            loadRecentActualites();
+        }
+
+        async function loadRecentActualites() {
+            try {
+                const response = await fetch(`${API_URL}/actualites`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erreur chargement actualités');
+                
+                const actualites = await response.json();
+                const recentActualites = actualites.slice(0, 4); // Prendre les 4 premières (déjà triées par date DESC)
+                
+                const actualitesList = document.getElementById('recentActualitesList');
+                
+                if (recentActualites.length > 0) {
+                    actualitesList.innerHTML = recentActualites.map(actu => `
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <span class="material-icons">newspaper</span>
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">
+                                    <strong>${actu.titre}</strong><br>
+                                    ${actu.description.length > 80 ? actu.description.substring(0, 80) + '...' : actu.description}
+                                </p>
+                                <span class="activity-time">${formatActualiteDate(actu.date)}</span>
+                            </div>
+                        </li>
+                    `).join('');
+                } else {
+                    actualitesList.innerHTML = `
+                        <li class="activity-item">
+                            <div class="activity-icon"><span class="material-icons">newspaper</span></div>
+                            <div class="activity-content">
+                                <p class="activity-text">Aucune actualité récente</p>
+                                <span class="activity-time">Maintenant</span>
+                            </div>
+                        </li>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erreur chargement actualités:', error);
+                const actualitesList = document.getElementById('recentActualitesList');
+                actualitesList.innerHTML = `
+                    <li class="activity-item">
+                        <div class="activity-icon"><span class="material-icons">error</span></div>
+                        <div class="activity-content">
+                            <p class="activity-text">Erreur de chargement des actualités</p>
+                            <span class="activity-time">Maintenant</span>
+                        </div>
+                    </li>
+                `;
+            }
+        }
+
+        function formatActualiteDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / 86400000);
+
+            if (days === 0) return 'Aujourd\'hui';
+            if (days === 1) return 'Hier';
+            if (days < 7) return `Il y a ${days} jours`;
+            
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        async function loadRecentMessages() {
+            const userRole = getCurrentUserRole();
+            const bureauRoles = ['directeur', 'secretariat', 'admin'];
+            
+            if (!bureauRoles.includes(userRole)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erreur chargement messages');
+                
+                const messages = await response.json();
+                const recentMessages = messages.slice(0, 3); // Prendre les 3 premiers (déjà triés par date DESC)
+                
+                const messagesList = document.getElementById('recentMessagesList');
+                const messagesWidget = document.getElementById('messagesWidget');
+                
+                if (recentMessages.length > 0) {
+                    messagesList.innerHTML = recentMessages.map(msg => `
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <span class="material-icons">${msg.lu ? 'mail' : 'mail_outline'}</span>
+                            </div>
+                            <div class="activity-content">
+                                <p class="activity-text">
+                                    <strong>${msg.expediteurNom}</strong>: ${msg.contenu.length > 50 ? msg.contenu.substring(0, 50) + '...' : msg.contenu}
+                                </p>
+                                <span class="activity-time">${formatMessageDate(msg.date)}</span>
+                            </div>
+                        </li>
+                    `).join('');
+                    messagesWidget.style.display = 'block';
+                } else {
+                    messagesList.innerHTML = `
+                        <li class="activity-item">
+                            <div class="activity-icon"><span class="material-icons">mail</span></div>
+                            <div class="activity-content">
+                                <p class="activity-text">Aucun message récent</p>
+                                <span class="activity-time">Maintenant</span>
+                            </div>
+                        </li>
+                    `;
+                    messagesWidget.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erreur chargement messages:', error);
+                const messagesWidget = document.getElementById('messagesWidget');
+                messagesWidget.style.display = 'none';
+            }
+        }
+
+        function formatMessageDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'À l\'instant';
+            if (minutes < 60) return `Il y a ${minutes} min`;
+            if (hours < 24) return `Il y a ${hours} h`;
+            if (days < 7) return `Il y a ${days} j`;
+            
+            return date.toLocaleDateString('fr-FR');
         }
 
         function fillClasseSelects() {
