@@ -177,6 +177,21 @@ function initDatabase() {
                 createdAt TEXT DEFAULT CURRENT_TIMESTAMP
             )`);
 
+            // Table sessions (pour gérer les connexions multiples)
+            db.run(`CREATE TABLE IF NOT EXISTS sessions (
+                id TEXT PRIMARY KEY,
+                token TEXT NOT NULL UNIQUE,
+                userId TEXT NOT NULL,
+                userRole TEXT NOT NULL,
+                userEmail TEXT,
+                userName TEXT,
+                createdAt INTEGER NOT NULL,
+                expiresAt INTEGER NOT NULL,
+                lastActivity INTEGER NOT NULL,
+                userAgent TEXT,
+                ipAddress TEXT
+            )`);
+
             // Insérer le compte admin par défaut s'il n'y a aucun admin
             db.get('SELECT id FROM staff WHERE role = ?', ['admin'], (err, row) => {
                 if (err) {

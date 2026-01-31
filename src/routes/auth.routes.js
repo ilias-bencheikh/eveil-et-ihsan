@@ -1,79 +1,248 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
-const { TOKEN_EXPIRY } = require('../config/constants');
+const { TOKEN_EXPIRY, SESSION_CONFIG } = require('../config/constants');
 const { sendEmail } = require('../config/email');
-const { generateToken, dbGet, dbRun } = require('../utils/helpers');
+const { generateToken, generateId, dbGet, dbRun, dbAll } = require('../utils/helpers');
 const { requireAuth } = require('../middleware/auth');
 
+// Créer une session pour un utilisateur
+async function createSession(user, req) {
+    const sessionToken = generateToken(64);
+    const sessionId = generateId('session');
+    const now = Date.now();
+    const expiresAt = now + TOKEN_EXPIRY.SESSION;
+    
+    // Récupérer le nombre de sessions actives pour cet utilisateur
+    const activeSessions = await dbAll(db, 
+        'SELECT id FROM sessions WHERE userId = ? AND userRole = ? AND expiresAt > ?',
+        [user.id, user.role, now]
+    );
+    
+    // Si le nombre max de sessions est atteint, supprimer la plus ancienne
+    if (activeSessions.length >= SESSION_CONFIG.MAX_SESSIONS_PER_USER) {
+        await dbRun(db, 
+            `DELETE FROM sessions WHERE id = (
+                SELECT id FROM sessions WHERE userId = ? AND userRole = ? 
+                ORDER BY lastActivity ASC LIMIT 1
+            )`,
+            [user.id, user.role]
+        );
+    }
+    
+    // Créer la nouvelle session
+    await dbRun(db, 
+        `INSERT INTO sessions (id, token, userId, userRole, userEmail, userName, createdAt, expiresAt, lastActivity, userAgent, ipAddress)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+            sessionId,
+            sessionToken,
+            user.id,
+            user.role,
+            user.email,
+            `${user.prenom} ${user.nom}`,
+            now,
+            expiresAt,
+            now,
+            req.headers['user-agent'] || 'Unknown',
+            req.ip || req.connection.remoteAddress || 'Unknown'
+        ]
+    );
+    
+    return sessionToken;
+}
+
 // Login
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    // Vérifier dans la table STAFF
-    db.get('SELECT * FROM staff WHERE email = ? AND password = ? AND activated = 1', 
-        [email, password], 
-        (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            if (row) {
-                return res.json({ 
-                    user: {
-                        id: row.id,
-                        email: row.email,
-                        role: row.role,
-                        nom: row.nom,
-                        prenom: row.prenom
-                    }, 
-                    token: generateToken() 
-                });
-            }
-
-            // Vérifier dans la table ÉLÈVES
-            db.get('SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', 
-                [email, password], 
-                (err, row) => {
-                    if (err) return res.status(500).json({ error: err.message });
-                    
-                    if (row) {
-                        return res.json({ 
-                            user: {
-                                id: row.id,
-                                email: row.email,
-                                role: 'eleve',
-                                nom: row.nom,
-                                prenom: row.prenom
-                            }, 
-                            token: generateToken() 
-                        });
-                    }
-
-                    // Vérifier dans la table PROFESSEURS
-                    db.get('SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', 
-                        [email, password], 
-                        (err, row) => {
-                            if (err) return res.status(500).json({ error: err.message });
-                            
-                            if (row) {
-                                return res.json({ 
-                                    user: {
-                                        id: row.id,
-                                        email: row.email,
-                                        role: 'professeur',
-                                        nom: row.nom,
-                                        prenom: row.prenom
-                                    }, 
-                                    token: generateToken() 
-                                });
-                            } else {
-                                return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-                            }
-                        }
-                    );
-                }
-            );
+    try {
+        // Vérifier dans la table STAFF
+        let row = await dbGet(db, 'SELECT * FROM staff WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        
+        if (row) {
+            const user = {
+                id: row.id,
+                email: row.email,
+                role: row.role,
+                nom: row.nom,
+                prenom: row.prenom
+            };
+            const token = await createSession(user, req);
+            return res.json({ user, token });
         }
-    );
+
+        // Vérifier dans la table ÉLÈVES
+        row = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        
+        if (row) {
+            const user = {
+                id: row.id,
+                email: row.email,
+                role: 'eleve',
+                nom: row.nom,
+                prenom: row.prenom
+            };
+            const token = await createSession(user, req);
+            return res.json({ user, token });
+        }
+
+        // Vérifier dans la table PROFESSEURS
+        row = await dbGet(db, 'SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        
+        if (row) {
+            const user = {
+                id: row.id,
+                email: row.email,
+                role: 'professeur',
+                nom: row.nom,
+                prenom: row.prenom
+            };
+            const token = await createSession(user, req);
+            return res.json({ user, token });
+        }
+
+        return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+        
+    } catch (err) {
+        console.error('Erreur login:', err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// Valider une session (vérifier si le token est valide)
+router.post('/validate-session', async (req, res) => {
+    const token = req.headers['authorization']?.replace('Bearer ', '') || req.body.token;
+    
+    if (!token) {
+        return res.status(401).json({ valid: false, message: 'Token manquant' });
+    }
+    
+    try {
+        const now = Date.now();
+        const session = await dbGet(db, 
+            'SELECT * FROM sessions WHERE token = ? AND expiresAt > ?',
+            [token, now]
+        );
+        
+        if (!session) {
+            return res.status(401).json({ valid: false, message: 'Session invalide ou expirée' });
+        }
+        
+        // Vérifier l'inactivité
+        if (now - session.lastActivity > TOKEN_EXPIRY.SESSION_INACTIVITY) {
+            await dbRun(db, 'DELETE FROM sessions WHERE token = ?', [token]);
+            return res.status(401).json({ valid: false, message: 'Session expirée par inactivité' });
+        }
+        
+        // Mettre à jour l'activité
+        await dbRun(db, 'UPDATE sessions SET lastActivity = ? WHERE token = ?', [now, token]);
+        
+        res.json({ 
+            valid: true, 
+            user: {
+                id: session.userId,
+                role: session.userRole,
+                email: session.userEmail,
+                name: session.userName
+            }
+        });
+    } catch (err) {
+        console.error('Erreur validation session:', err);
+        res.status(500).json({ valid: false, error: err.message });
+    }
+});
+
+// Déconnexion (supprimer la session)
+router.post('/logout', async (req, res) => {
+    const token = req.headers['authorization']?.replace('Bearer ', '') || req.body.token;
+    
+    if (!token) {
+        return res.json({ success: true, message: 'Déjà déconnecté' });
+    }
+    
+    try {
+        await dbRun(db, 'DELETE FROM sessions WHERE token = ?', [token]);
+        res.json({ success: true, message: 'Déconnexion réussie' });
+    } catch (err) {
+        console.error('Erreur logout:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Déconnexion de toutes les sessions d'un utilisateur
+router.post('/logout-all', requireAuth, async (req, res) => {
+    const userId = req.userId;
+    const userRole = req.userRole;
+    
+    try {
+        const result = await dbRun(db, 
+            'DELETE FROM sessions WHERE userId = ? AND userRole = ?',
+            [userId, userRole]
+        );
+        res.json({ 
+            success: true, 
+            message: `${result.changes} session(s) fermée(s)` 
+        });
+    } catch (err) {
+        console.error('Erreur logout-all:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Lister les sessions actives d'un utilisateur
+router.get('/sessions', requireAuth, async (req, res) => {
+    const userId = req.userId;
+    const userRole = req.userRole;
+    const currentToken = req.headers['authorization']?.replace('Bearer ', '');
+    
+    try {
+        const sessions = await dbAll(db, 
+            `SELECT id, createdAt, lastActivity, userAgent, ipAddress 
+             FROM sessions 
+             WHERE userId = ? AND userRole = ? AND expiresAt > ?
+             ORDER BY lastActivity DESC`,
+            [userId, userRole, Date.now()]
+        );
+        
+        // Marquer la session courante
+        const formattedSessions = sessions.map(s => ({
+            id: s.id,
+            createdAt: new Date(s.createdAt).toISOString(),
+            lastActivity: new Date(s.lastActivity).toISOString(),
+            device: s.userAgent,
+            ip: s.ipAddress,
+            current: currentToken && s.id === currentToken
+        }));
+        
+        res.json({ sessions: formattedSessions });
+    } catch (err) {
+        console.error('Erreur liste sessions:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Révoquer une session spécifique
+router.delete('/sessions/:sessionId', requireAuth, async (req, res) => {
+    const { sessionId } = req.params;
+    const userId = req.userId;
+    const userRole = req.userRole;
+    
+    try {
+        const result = await dbRun(db, 
+            'DELETE FROM sessions WHERE id = ? AND userId = ? AND userRole = ?',
+            [sessionId, userId, userRole]
+        );
+        
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Session non trouvée' });
+        }
+        
+        res.json({ success: true, message: 'Session révoquée' });
+    } catch (err) {
+        console.error('Erreur révocation session:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Demande de réinitialisation du mot de passe

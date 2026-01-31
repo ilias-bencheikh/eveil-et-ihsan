@@ -1,5 +1,6 @@
 /**
  * Service API - Communication avec le backend
+ * Support des connexions multiples avec tokens de session
  */
 
 const API_URL = `http://${window.location.hostname}:3000/api`;
@@ -7,12 +8,18 @@ const API_URL = `http://${window.location.hostname}:3000/api`;
 // Fonction utilitaire pour les requêtes
 async function apiRequest(endpoint, options = {}) {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
     
     const defaultHeaders = {
         'Content-Type': 'application/json',
         'x-user-role': user.role || '',
         'x-user-id': user.id || ''
     };
+    
+    // Ajouter le token d'authentification si disponible
+    if (token) {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+    }
     
     const config = {
         ...options,
@@ -25,6 +32,16 @@ async function apiRequest(endpoint, options = {}) {
     try {
         const response = await fetch(`${API_URL}${endpoint}`, config);
         const data = await response.json();
+        
+        // Gérer les sessions expirées
+        if (response.status === 401 && data.message?.includes('Session')) {
+            localStorage.clear();
+            if (window.UI) {
+                window.UI.showAlert('Votre session a expiré. Veuillez vous reconnecter.', 'warning');
+            }
+            setTimeout(() => window.location.href = 'login.html', 1500);
+            throw new Error('Session expirée');
+        }
         
         if (!response.ok) {
             throw new Error(data.message || data.error || 'Erreur serveur');
@@ -40,10 +57,18 @@ async function apiRequest(endpoint, options = {}) {
 // Service d'authentification
 const AuthService = {
     async login(email, password) {
-        return apiRequest('/auth/login', {
+        const response = await apiRequest('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password })
         });
+        
+        // Sauvegarder le token et l'utilisateur
+        if (response.token && response.user) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response.user));
+        }
+        
+        return response;
     },
     
     async forgotPassword(email) {
@@ -64,9 +89,57 @@ const AuthService = {
         });
     },
     
-    logout() {
+    async validateSession() {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+        
+        try {
+            const response = await apiRequest('/auth/validate-session', {
+                method: 'POST'
+            });
+            return response.valid === true;
+        } catch {
+            return false;
+        }
+    },
+    
+    async logout() {
+        try {
+            await apiRequest('/auth/logout', {
+                method: 'POST'
+            });
+        } catch (error) {
+            console.error('Erreur logout:', error);
+        }
         localStorage.clear();
         window.location.href = 'login.html';
+    },
+    
+    async logoutAll() {
+        try {
+            await apiRequest('/auth/logout-all', {
+                method: 'POST'
+            });
+        } catch (error) {
+            console.error('Erreur logout-all:', error);
+        }
+        localStorage.clear();
+        window.location.href = 'login.html';
+    },
+    
+    async getActiveSessions() {
+        try {
+            const response = await apiRequest('/auth/sessions');
+            return response.sessions || [];
+        } catch {
+            return [];
+        }
+    },
+    
+    async revokeSession(sessionId) {
+        return apiRequest(`/auth/sessions/${sessionId}`, {
+            method: 'DELETE'
+        });
     },
     
     getCurrentUser() {
@@ -74,8 +147,12 @@ const AuthService = {
         return userStr ? JSON.parse(userStr) : null;
     },
     
+    getToken() {
+        return localStorage.getItem('token');
+    },
+    
     isAuthenticated() {
-        return !!this.getCurrentUser();
+        return !!this.getCurrentUser() && !!this.getToken();
     }
 };
 

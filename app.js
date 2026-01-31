@@ -9,7 +9,7 @@ const path = require('path');
 require('dotenv').config();
 
 // Configuration
-const { SERVER_CONFIG } = require('./src/config/constants');
+const { SERVER_CONFIG, SESSION_CONFIG } = require('./src/config/constants');
 const { initDatabase, closeDatabase } = require('./src/config/database');
 const { getLocalIpAddress } = require('./src/utils/helpers');
 
@@ -23,6 +23,20 @@ function cleanupExpiredNews() {
             console.error('❌ Erreur lors du nettoyage des actualités expirées:', err);
         } else if (this.changes > 0) {
             console.log(`🗑️ ${this.changes} actualité(s) expirée(s) supprimée(s) automatiquement`);
+        }
+    });
+}
+
+// Fonction de nettoyage automatique des sessions expirées
+function cleanupExpiredSessions() {
+    const { db } = require('./src/config/database');
+    const now = Date.now();
+    
+    db.run('DELETE FROM sessions WHERE expiresAt < ?', [now], function(err) {
+        if (err) {
+            console.error('❌ Erreur lors du nettoyage des sessions expirées:', err);
+        } else if (this.changes > 0) {
+            console.log(`🗑️ ${this.changes} session(s) expirée(s) supprimée(s) automatiquement`);
         }
     });
 }
@@ -90,8 +104,14 @@ async function startServer() {
         // Nettoyer les actualités expirées au démarrage
         cleanupExpiredNews();
         
-        // Programmer un nettoyage automatique toutes les 24 heures
+        // Nettoyer les sessions expirées au démarrage
+        cleanupExpiredSessions();
+        
+        // Programmer un nettoyage automatique toutes les 24 heures pour les actualités
         setInterval(cleanupExpiredNews, 24 * 60 * 60 * 1000); // 24h en millisecondes
+        
+        // Programmer un nettoyage automatique des sessions (selon config)
+        setInterval(cleanupExpiredSessions, SESSION_CONFIG.CLEANUP_INTERVAL);
         
         // Démarrer le serveur
         app.listen(SERVER_CONFIG.PORT, SERVER_CONFIG.HOST, () => {

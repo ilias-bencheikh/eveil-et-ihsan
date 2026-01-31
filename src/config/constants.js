@@ -32,12 +32,21 @@ const NIVEAUX = [
 // Durée de validité des tokens (en millisecondes)
 const TOKEN_EXPIRY = {
     RESET_PASSWORD: 3600000, // 1 heure
-    SESSION: 10 * 60 * 1000  // 10 minutes
+    SESSION: 24 * 60 * 60 * 1000,  // 24 heures pour les sessions
+    SESSION_INACTIVITY: 30 * 60 * 1000  // 30 minutes d'inactivité max
+};
+
+// Configuration des sessions multiples
+const SESSION_CONFIG = {
+    MAX_SESSIONS_PER_USER: 5,  // Nombre max de sessions par utilisateur
+    CLEANUP_INTERVAL: 60 * 60 * 1000,  // Nettoyage toutes les heures
+    ALLOW_MULTIPLE_SESSIONS: true  // Permettre plusieurs connexions simultanées
 };
 
 module.exports = {
     SERVER_CONFIG,
     PERMISSIONS,
     NIVEAUX,
-    TOKEN_EXPIRY
+    TOKEN_EXPIRY,
+    SESSION_CONFIG
 };
