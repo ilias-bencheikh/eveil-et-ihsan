@@ -1245,6 +1245,10 @@
                                 <span class="material-icons">phone</span>
                                 <span id="profilePhoneDisplay">06 12 34 56 78</span>
                             </div>
+                            <div class="info-item">
+                                <span class="material-icons">home</span>
+                                <span id="profileAdresseDisplay">Adresse non définie</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1272,6 +1276,15 @@
                                         </label>
                                         <input type="tel" id="profilePhone" name="parentTel" class="form-input" placeholder="06 12 34 56 78">
                                         <div class="form-help">Format: 06 12 34 56 78 ou +33 6 12 34 56 78</div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label for="profileAdresse" class="form-label">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">home</span>
+                                            Adresse
+                                        </label>
+                                        <textarea id="profileAdresse" name="parentAdresse" class="form-input" placeholder="Votre adresse complète" rows="3"></textarea>
+                                        <div class="form-help">Adresse utilisée pour les communications et facturations</div>
                                     </div>
 
                                     <div class="form-field">
@@ -1606,7 +1619,8 @@
 
     <script>
         // Configuration API
-        const API_URL = `http://${window.location.hostname}:3000/api`;
+        // Utiliser l'URL actuelle du site pour l'API
+        const API_URL = `${window.location.origin}/api`;
         
         // Vérification de l'authentification
         let user = JSON.parse(localStorage.getItem('user'));
@@ -1744,8 +1758,21 @@
                         tel: userData.tel,
                         photo: userData.photo,
                         nom: userData.nom,
-                        prenom: userData.prenom
+                        prenom: userData.prenom,
+                        status: userData.status,
+                        parentNom: userData.parentNom,
+                        parentPrenom: userData.parentPrenom,
+                        parentTel: userData.parentTel
                     };
+                    // Si l'utilisateur est mineur, définir parentInfo
+                    if (user.status === 'mineur' && user.parentNom && user.parentPrenom) {
+                        parentInfo = {
+                            nom: user.parentNom,
+                            prenom: user.parentPrenom,
+                            telephone: user.parentTel,
+                            adresse: user.parentAdresse
+                        };
+                    }
                     // Mettre à jour le localStorage avec les données complètes
                     localStorage.setItem('user', JSON.stringify(user));
                 }
@@ -1786,12 +1813,14 @@
             const profileClassEl = document.getElementById('profileClass');
             const profileEmailDisplayEl = document.getElementById('profileEmailDisplay');
             const profilePhoneDisplayEl = document.getElementById('profilePhoneDisplay');
+            const profileAdresseDisplayEl = document.getElementById('profileAdresseDisplay');
             const profileAvatarEl = document.getElementById('profileAvatar');
 
             if (profileNameEl) profileNameEl.textContent = `${prenom} ${nom}`.trim();
             if (profileClassEl) profileClassEl.textContent = parentInfo ? 'Parent d\'élève' : (currentChild.classe || 'Classe non assignée');
             if (profileEmailDisplayEl) profileEmailDisplayEl.textContent = user.email || 'Non défini';
             if (profilePhoneDisplayEl) profilePhoneDisplayEl.textContent = displayInfo.telephone || currentChild.contactTel || 'Non défini';
+            if (profileAdresseDisplayEl) profileAdresseDisplayEl.textContent = displayInfo.adresse || 'Non définie';
 
             if (profileAvatarEl) {
                 // Pour le parent, utiliser une icône par défaut, pour l'élève utiliser sa photo
@@ -2012,6 +2041,7 @@
             const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
             document.getElementById('profileEmail').value = user.email || '';
             document.getElementById('profilePhone').value = currentChildInfo.contactTel || currentChildInfo.parentTel || '';
+            document.getElementById('profileAdresse').value = currentChildInfo.parentAdresse || '';
 
             // Masquer les champs spécifiques aux élèves majeurs
             document.getElementById('currentPhotoContainer').style.display = 'none';
@@ -2032,7 +2062,12 @@
 
             // Pré-remplir les champs du formulaire
             document.getElementById('profileEmail').value = user.email || '';
-            document.getElementById('profilePhone').value = user.tel || '';
+            // Pour les mineurs, utiliser le téléphone du parent
+            const phoneValue = user.status === 'mineur' ? user.parentTel || '' : user.tel || '';
+            document.getElementById('profilePhone').value = phoneValue;
+            // Pour l'adresse, utiliser parentAdresse si mineur
+            const adresseValue = user.status === 'mineur' ? user.parentAdresse || '' : '';
+            document.getElementById('profileAdresse').value = adresseValue;
 
             // Masquer les champs des enfants, afficher ceux de l'élève majeur
             document.getElementById('studentPhotosContainer').style.display = 'none';
@@ -2058,14 +2093,15 @@
             
             const email = document.getElementById('profileEmail').value.trim();
             const phone = document.getElementById('profilePhone').value.trim();
+            const adresse = document.getElementById('profileAdresse').value.trim();
             
             // Déterminer le mode
             const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
             
             if (isParentMode) {
-                await saveParentProfile(email, phone);
+                await saveParentProfile(email, phone, adresse);
             } else {
-                await saveStudentProfile(email, phone);
+                await saveStudentProfile(email, phone, adresse);
             }
         }
 
@@ -3762,52 +3798,6 @@
         }
 
         // Charger le profil en mode parent
-        async function loadParentProfile() {
-            // Pré-remplir les champs du formulaire
-            const currentChildInfo = familyMembers.find(m => m.id === user.id) || familyMembers[0];
-            document.getElementById('profileEmail').value = user.email || '';
-            document.getElementById('profilePhone').value = currentChildInfo.contactTel || currentChildInfo.parentTel || '';
-
-            // Masquer les champs spécifiques aux élèves majeurs
-            document.getElementById('currentPhotoContainer').style.display = 'none';
-            document.getElementById('photo-upload').style.display = 'none';
-            document.getElementById('studentPhotosContainer').style.display = 'grid';
-
-            // Générer les champs de photo pour chaque élève
-            generateStudentPhotoFields();
-
-            // Synchroniser tous les affichages
-            syncDisplay();
-        }
-
-        // Charger le profil en mode élève majeur
-        async function loadStudentProfile() {
-            // S'assurer que les données de l'utilisateur sont à jour
-            await loadUserCompleteData();
-
-            // Pré-remplir les champs du formulaire
-            document.getElementById('profileEmail').value = user.email || '';
-            document.getElementById('profilePhone').value = user.tel || '';
-
-            // Masquer les champs des enfants, afficher ceux de l'élève majeur
-            document.getElementById('studentPhotosContainer').style.display = 'none';
-            document.getElementById('photo-upload').style.display = 'block';
-
-            // Ajouter l'event listener pour la suppression de photo
-            const deleteBtn = document.getElementById('deleteCurrentPhotoBtn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function() {
-                    document.getElementById('delete-photo-current').value = 'true';
-                    const currentPhotoContainer = document.getElementById('currentPhotoContainer');
-                    if (currentPhotoContainer) currentPhotoContainer.style.display = 'none';
-                    showSnackbar('Photo marquée pour suppression. Cliquez sur "Enregistrer" pour confirmer.');
-                });
-            }
-
-            // Synchroniser tous les affichages
-            syncDisplay();
-        }
-
         function populateStudentSelector() {
             const selector = document.getElementById('studentPhotoSelector');
             if (!selector) return;
@@ -3868,24 +3858,8 @@
             });
         }
 
-        async function saveProfile(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('profileEmail').value.trim();
-            const phone = document.getElementById('profilePhone').value.trim();
-            
-            // Déterminer le mode
-            const isParentMode = familyMembers && familyMembers.length > 0 && familyMembers.some(m => m.id !== user.id);
-            
-            if (isParentMode) {
-                await saveParentProfile(email, phone);
-            } else {
-                await saveStudentProfile(email, phone);
-            }
-        }
-
         // Sauvegarder le profil en mode parent
-        async function saveParentProfile(email, phone) {
+        async function saveParentProfile(email, phone, adresse) {
             const photoUploads = [];
             const photoDeletions = [];
             

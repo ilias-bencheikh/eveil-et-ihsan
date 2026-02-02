@@ -310,7 +310,7 @@ router.get('/famille-by-email/:email', (req, res) => {
 
 // Route d'inscription publique (sans authentification)
 router.post('/inscription', async (req, res) => {
-    const { parentNom, parentPrenom, parentEmail, parentTel, enFamille, enfants } = req.body;
+    const { parentNom, parentPrenom, parentEmail, parentTel, parentAdresse, enFamille, enfants } = req.body;
     
     // Validation : soit un email parent (pour mineurs) soit au moins un enfant avec email (pour majeurs)
     const hasParentEmail = parentEmail && parentEmail.trim();
@@ -384,7 +384,7 @@ router.post('/inscription', async (req, res) => {
             const activationToken = enFamille ? familleActivationToken : generateToken();
             
             // Déterminer l'email et téléphone à utiliser selon le statut
-            let emailToUse, telToUse, parentNomToUse, parentPrenomToUse, parentTelToUse;
+            let emailToUse, telToUse, parentNomToUse, parentPrenomToUse, parentTelToUse, parentAdresseToUse;
             
             if (enfant.status === 'majeur') {
                 // Pour les majeurs : utiliser l'email et téléphone de l'étudiant
@@ -393,6 +393,7 @@ router.post('/inscription', async (req, res) => {
                 parentNomToUse = null; // Pas de parent pour les majeurs
                 parentPrenomToUse = null;
                 parentTelToUse = null;
+                parentAdresseToUse = null;
             } else {
                 // Pour les mineurs : utiliser l'email parent
                 emailToUse = parentEmail;
@@ -400,13 +401,14 @@ router.post('/inscription', async (req, res) => {
                 parentNomToUse = parentNom || null;
                 parentPrenomToUse = parentPrenom || null;
                 parentTelToUse = parentTel || null;
+                parentAdresseToUse = parentAdresse || null;
             }
             
             await new Promise((resolve, reject) => {
                 const frais = parseFloat(enfant.fraisInscription || 0) || 0;
                 const nbPaiements = parseInt(enfant.nbPaiements || 1, 10) || 1;
-                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, tel, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel, parentAdresse, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, tel, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 
                     [
                         id, 
@@ -427,6 +429,7 @@ router.post('/inscription', async (req, res) => {
                         parentNomToUse,
                         parentPrenomToUse,
                         parentTelToUse,
+                        parentAdresseToUse,
                         frais,
                         nbPaiements,
                         0,
@@ -465,7 +468,7 @@ router.post('/inscription', async (req, res) => {
 
 // Créer un élève
 router.post('/', checkPermission('create'), (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, parentNom, parentPrenom, parentTel } = req.body;
+    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, parentNom, parentPrenom, parentTel, parentAdresse } = req.body;
     
     // Vérifier que l'email n'est pas déjà utilisé
     if (email) {
@@ -487,9 +490,9 @@ router.post('/', checkPermission('create'), (req, res) => {
 
                     const frais = parseFloat(fraisInscription || 0) || 0;
                     const nb = parseInt(nbPaiements || 1, 10) || 1;
-                    db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, parentNom, parentPrenom, parentTel) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                        [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0, parentNom || null, parentPrenom || null, parentTel || null],
+                    db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, parentNom, parentPrenom, parentTel, parentAdresse) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0, parentNom || null, parentPrenom || null, parentTel || null, parentAdresse || null],
                         function(err) {
                             if (err) return res.status(500).json({ error: err.message });
                             const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
@@ -510,9 +513,9 @@ router.post('/', checkPermission('create'), (req, res) => {
 
         const frais = parseFloat(fraisInscription || 0) || 0;
         const nb = parseInt(nbPaiements || 1, 10) || 1;
-        db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, parentNom, parentPrenom, parentTel) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0, parentNom || null, parentPrenom || null, parentTel || null],
+        db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, parentNom, parentPrenom, parentTel, parentAdresse) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [id, nom, prenom, dateNaissance, classe, email || '', null, activationToken, 0, null, null, enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, 0, 0, parentNom || null, parentPrenom || null, parentTel || null, parentAdresse || null],
             function(err) {
                 if (err) return res.status(500).json({ error: err.message });
                 const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}`;
@@ -586,7 +589,7 @@ router.post('/validate-frais-famille', checkPermission('update'), (req, res) => 
 
 // Mettre à jour un élève
 router.put('/:id', checkPermission('update'), (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, tel } = req.body;
+    const { nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, parentAdresse, tel } = req.body;
 
     // Vérifier que l'email n'est pas déjà utilisé par quelqu'un d'autre
     if (email) {
@@ -603,12 +606,12 @@ router.put('/:id', checkPermission('update'), (req, res) => {
                     if (staffRow) return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du bureau' });
                     
                     // Procéder à la mise à jour
-                    db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, parentNom = ?, parentPrenom = ?, parentTel = ?, tel = ? WHERE id = ?',
-                        [nom, prenom, dateNaissance, classe, email || '', photo || null, parentNom || null, parentPrenom || null, parentTel || null, tel || null, req.params.id],
+                    db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, parentNom = ?, parentPrenom = ?, parentTel = ?, parentAdresse = ?, tel = ? WHERE id = ?',
+                        [nom, prenom, dateNaissance, classe, email || '', photo || null, parentNom || null, parentPrenom || null, parentTel || null, parentAdresse || null, tel || null, req.params.id],
                         function(err) {
                             if (err) return res.status(500).json({ error: err.message });
                             if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
-                            res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, tel });
+                            res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, parentAdresse, tel });
                         }
                     );
                 });
@@ -616,12 +619,12 @@ router.put('/:id', checkPermission('update'), (req, res) => {
         });
     } else {
         // Si pas d'email, procéder directement
-        db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, parentNom = ?, parentPrenom = ?, parentTel = ?, tel = ? WHERE id = ?',
-            [nom, prenom, dateNaissance, classe, email || '', photo || null, parentNom || null, parentPrenom || null, parentTel || null, tel || null, req.params.id],
+        db.run('UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, parentNom = ?, parentPrenom = ?, parentTel = ?, parentAdresse = ?, tel = ? WHERE id = ?',
+            [nom, prenom, dateNaissance, classe, email || '', photo || null, parentNom || null, parentPrenom || null, parentTel || null, parentAdresse || null, tel || null, req.params.id],
             function(err) {
                 if (err) return res.status(500).json({ error: err.message });
                 if (this.changes === 0) return res.status(404).json({ message: 'Élève non trouvé' });
-                res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, tel });
+                res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, parentNom, parentPrenom, parentTel, parentAdresse, tel });
             }
         );
     }

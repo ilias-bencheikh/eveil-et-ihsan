@@ -3,7 +3,8 @@
  * Support des connexions multiples avec tokens de session
  */
 
-const API_URL = `http://${window.location.hostname}:3000/api`;
+// Utiliser l'URL actuelle du site pour l'API
+const API_URL = `${window.location.origin}/api`;
 
 // Fonction utilitaire pour les requêtes
 async function apiRequest(endpoint, options = {}) {

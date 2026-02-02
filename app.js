@@ -59,7 +59,12 @@ const {
 const app = express();
 
 // Middleware globaux
-app.use(cors());
+app.use(cors({
+    origin: true, // Permet toutes les origines
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-role', 'x-user-id']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

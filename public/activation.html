@@ -191,7 +191,8 @@
     </div>
 
     <script>
-        const API_URL = `http://${window.location.hostname}:3000/api`;
+        // Utiliser l'URL actuelle du site pour l'API
+        const API_URL = `${window.location.origin}/api`;
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const type = urlParams.get('type') || 'eleve'; // Par défaut élève

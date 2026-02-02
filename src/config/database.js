@@ -51,6 +51,7 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN parentNom TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN parentPrenom TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN parentTel TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parentAdresse TEXT`, () => {});
             // Colonnes pour les frais d'inscription
             db.run(`ALTER TABLE eleves ADD COLUMN fraisInscription REAL DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN nbPaiements INTEGER DEFAULT 1`, () => {});
