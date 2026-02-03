@@ -25,76 +25,29 @@ const db = new sqlite3.Database(dbPath, (err) => {
 function initDatabase() {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
-            // ==================== TABLE PARENTS ====================
-            // Nouveau système : les comptes sont maintenant des comptes PARENTS
-            db.run(`CREATE TABLE IF NOT EXISTS parents (
-                id TEXT PRIMARY KEY,
-                nom TEXT NOT NULL,
-                prenom TEXT NOT NULL,
-                email TEXT UNIQUE,
-                password TEXT,
-                tel TEXT,
-                adresse TEXT,
-                activationToken TEXT,
-                activated INTEGER DEFAULT 0,
-                resetToken TEXT,
-                resetExpires INTEGER,
-                createdAt TEXT DEFAULT CURRENT_TIMESTAMP
-            )`);
-
-            // Table élèves - maintenant liée aux parents
+            // Table élèves
             db.run(`CREATE TABLE IF NOT EXISTS eleves (
                 id TEXT PRIMARY KEY,
                 nom TEXT NOT NULL,
                 prenom TEXT NOT NULL,
                 dateNaissance TEXT,
                 classe TEXT,
-                photo TEXT,
-                enFamille INTEGER DEFAULT 0,
-                nombreFamille INTEGER DEFAULT 1,
-                familleLienId TEXT,
-                -- Liens vers les parents (un enfant peut avoir 2 parents)
-                parent1Id TEXT,
-                parent2Id TEXT,
-                -- Pour les étudiants majeurs (ont leur propre compte)
                 email TEXT,
                 password TEXT,
-                tel TEXT,
                 activationToken TEXT,
                 activated INTEGER DEFAULT 0,
                 resetToken TEXT,
                 resetExpires INTEGER,
-                status TEXT DEFAULT 'mineur',
-                -- Frais d'inscription
-                fraisInscription REAL DEFAULT 0,
-                nbMensualites INTEGER DEFAULT 1,
-                totalPaye REAL DEFAULT 0,
-                fraisValide INTEGER DEFAULT 0,
-                createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (parent1Id) REFERENCES parents(id),
-                FOREIGN KEY (parent2Id) REFERENCES parents(id)
+                enFamille INTEGER DEFAULT 0,
+                nombreFamille INTEGER DEFAULT 1,
+                familleLienId TEXT,
+                photo TEXT,
+                parentNom TEXT,
+                parentPrenom TEXT,
+                parentTel TEXT
             )`);
 
-            // Table historique des paiements
-            db.run(`CREATE TABLE IF NOT EXISTS paiements_historique (
-                id TEXT PRIMARY KEY,
-                eleveId TEXT NOT NULL,
-                montant REAL NOT NULL,
-                modePaiement TEXT NOT NULL,
-                reference TEXT,
-                notes TEXT,
-                datePaiement TEXT NOT NULL,
-                enregistrePar TEXT,
-                createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (eleveId) REFERENCES eleves(id)
-            )`);
-
-            // Migrations pour ancienne structure si nécessaire
-            db.run(`ALTER TABLE eleves ADD COLUMN parent1Id TEXT`, () => {});
-            db.run(`ALTER TABLE eleves ADD COLUMN parent2Id TEXT`, () => {});
-            db.run(`ALTER TABLE eleves ADD COLUMN nbMensualites INTEGER DEFAULT 1`, () => {});
-            db.run(`ALTER TABLE eleves ADD COLUMN totalPaye REAL DEFAULT 0`, () => {});
-            // Anciennes colonnes gardées pour compatibilité
+            // Ajouter les colonnes parent si elles n'existent pas (migration)
             db.run(`ALTER TABLE eleves ADD COLUMN parentNom TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN parentPrenom TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN parentTel TEXT`, () => {});
@@ -103,7 +56,7 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN fraisInscription REAL DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN nbPaiements INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN fraisValide INTEGER DEFAULT 0`, () => {});
-            // Nombre de paiements déjà validés (ancienne colonne)
+            // Nombre de paiements déjà validés
             db.run(`ALTER TABLE eleves ADD COLUMN paiementsEffectues INTEGER DEFAULT 0`, () => {});
             // Colonne pour le téléphone de l'étudiant (pour majeurs)
             db.run(`ALTER TABLE eleves ADD COLUMN tel TEXT`, () => {});

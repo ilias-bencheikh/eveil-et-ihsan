@@ -148,7 +148,7 @@
                     
                     setTimeout(() => {
                         // Redirection selon le rôle de l'utilisateur
-                        if (data.user.role === 'eleve' || data.user.role === 'parent') {
+                        if (data.user.role === 'eleve') {
                             window.location.href = 'eleve-dashboard.html';
                         } else {
                             window.location.href = 'index.html';

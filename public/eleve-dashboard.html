@@ -1630,8 +1630,8 @@
             window.location.href = 'login.html';
         }
 
-        // Redirection si pas un rôle autorisé (élève, parent, secrétaire, directeur, admin)
-        const allowedRoles = ['eleve', 'parent', 'secretaire', 'directeur', 'admin'];
+        // Redirection si pas un rôle autorisé (élève, secrétaire, directeur, admin)
+        const allowedRoles = ['eleve', 'secretaire', 'directeur', 'admin'];
         if (!allowedRoles.includes(user.role)) {
             window.location.href = 'index.html';
         }
@@ -1695,78 +1695,42 @@
 
         async function loadFamilyData() {
             try {
-                // Si c'est un parent, charger ses enfants via la route dédiée
-                if (user.role === 'parent') {
-                    const response = await fetch(`${API_URL}/parents/mes-enfants`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'x-user-id': user.id,
-                            'x-user-role': user.role
-                        }
-                    });
+                // Charger les membres de la famille par email
+                const response = await fetch(`${API_URL}/eleves/famille-by-email/${encodeURIComponent(user.email)}`);
 
-                    if (response.ok) {
-                        familyMembers = await response.json();
-                        
-                        // Définir parentInfo avec les infos du parent connecté
-                        parentInfo = {
-                            nom: user.nom,
-                            prenom: user.prenom,
-                            telephone: user.tel || ''
-                        };
-                        
-                        // Définir l'enfant courant (le premier de la liste)
-                        if (familyMembers.length > 0) {
-                            currentChild = familyMembers[0];
-                        } else {
-                            currentChild = { nom: '', prenom: '', classe: '' };
-                        }
-                        
-                        updateUserDisplay();
-                    } else {
-                        console.error('Erreur chargement enfants du parent');
-                        familyMembers = [];
-                        currentChild = user;
-                        updateUserDisplay();
-                    }
-                } else {
-                    // Pour les élèves, charger les membres de la famille par email
-                    const response = await fetch(`${API_URL}/eleves/famille-by-email/${encodeURIComponent(user.email)}`);
+                if (response.ok) {
+                    familyMembers = await response.json();
 
-                    if (response.ok) {
-                        familyMembers = await response.json();
-
-                        // Définir l'enfant actuel (le premier ou celui connecté)
-                        if (familyMembers.length > 0) {
-                            // Vérifier si c'est un élève majeur (pas de parent dans la famille)
-                            const isMajor = !familyMembers.some(m => m.id !== user.id);
-                            
-                            if (isMajor) {
-                                // Pour les élèves majeurs, utiliser directement l'objet user
-                                currentChild = user;
-                                // Mettre à jour user avec les données de familyMembers si elles existent
-                                const userInFamily = familyMembers.find(m => m.id === user.id);
-                                if (userInFamily) {
-                                    Object.assign(user, userInFamily);
-                                }
-                            } else {
-                                // Pour les élèves mineurs, utiliser les données de la famille
-                                currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
-                            }
-                            
-                            // Charger les informations complètes si nécessaire
-                            if (isMajor) {
-                                await loadUserCompleteData();
-                            }
-                        } else {
-                            // Fallback si pas de données famille
+                    // Définir l'enfant actuel (le premier ou celui connecté)
+                    if (familyMembers.length > 0) {
+                        // Vérifier si c'est un élève majeur (pas de parent dans la famille)
+                        const isMajor = !familyMembers.some(m => m.id !== user.id);
+                        
+                        if (isMajor) {
+                            // Pour les élèves majeurs, utiliser directement l'objet user
                             currentChild = user;
-                            // Charger les informations complètes de l'utilisateur
+                            // Mettre à jour user avec les données de familyMembers si elles existent
+                            const userInFamily = familyMembers.find(m => m.id === user.id);
+                            if (userInFamily) {
+                                Object.assign(user, userInFamily);
+                            }
+                        } else {
+                            // Pour les parents, utiliser l'enfant de la famille
+                            currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                        }
+                        
+                        // Charger les informations complètes si nécessaire
+                        if (isMajor) {
                             await loadUserCompleteData();
                         }
-
-                        updateUserDisplay();
+                    } else {
+                        // Fallback si pas de données famille
+                        currentChild = user;
+                        // Charger les informations complètes de l'utilisateur
+                        await loadUserCompleteData();
                     }
+
+                    updateUserDisplay();
                 }
             } catch (error) {
                 console.error('Erreur chargement famille:', error);
@@ -1784,71 +1748,33 @@
         // Charger les informations complètes de l'utilisateur actuel
         async function loadUserCompleteData() {
             try {
-                // Si c'est un parent, charger les infos parent
-                if (user.role === 'parent') {
-                    const response = await fetch(`${API_URL}/parents/profil`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'x-user-id': user.id,
-                            'x-user-role': user.role
-                        }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        // Mettre à jour l'objet user avec les données parent
-                        user = {
-                            ...user,
-                            email: data.parent.email,
-                            tel: data.parent.tel,
-                            nom: data.parent.nom,
-                            prenom: data.parent.prenom,
-                            adresse: data.parent.adresse
-                        };
-                        // Définir parentInfo
+                const response = await fetch(`${API_URL}/eleves/${user.id}`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    // Mettre à jour l'objet user avec les données complètes
+                    user = {
+                        ...user,
+                        email: userData.email,
+                        tel: userData.tel,
+                        photo: userData.photo,
+                        nom: userData.nom,
+                        prenom: userData.prenom,
+                        status: userData.status,
+                        parentNom: userData.parentNom,
+                        parentPrenom: userData.parentPrenom,
+                        parentTel: userData.parentTel
+                    };
+                    // Si l'utilisateur est mineur, définir parentInfo
+                    if (user.status === 'mineur' && user.parentNom && user.parentPrenom) {
                         parentInfo = {
-                            nom: data.parent.nom,
-                            prenom: data.parent.prenom,
-                            telephone: data.parent.tel,
-                            adresse: data.parent.adresse
+                            nom: user.parentNom,
+                            prenom: user.parentPrenom,
+                            telephone: user.parentTel,
+                            adresse: user.parentAdresse
                         };
-                        // Mettre à jour familyMembers avec les enfants
-                        if (data.enfants && data.enfants.length > 0) {
-                            familyMembers = data.enfants;
-                            currentChild = familyMembers[0];
-                        }
-                        // Mettre à jour le localStorage
-                        localStorage.setItem('user', JSON.stringify(user));
                     }
-                } else {
-                    // Pour les élèves
-                    const response = await fetch(`${API_URL}/eleves/${user.id}`);
-                    if (response.ok) {
-                        const userData = await response.json();
-                        // Mettre à jour l'objet user avec les données complètes
-                        user = {
-                            ...user,
-                            email: userData.email,
-                            tel: userData.tel,
-                            photo: userData.photo,
-                            nom: userData.nom,
-                            prenom: userData.prenom,
-                            status: userData.status,
-                            parentNom: userData.parentNom,
-                            parentPrenom: userData.parentPrenom,
-                            parentTel: userData.parentTel
-                        };
-                        // Si l'utilisateur est mineur, définir parentInfo
-                        if (user.status === 'mineur' && user.parentNom && user.parentPrenom) {
-                            parentInfo = {
-                                nom: user.parentNom,
-                                prenom: user.parentPrenom,
-                                telephone: user.parentTel,
-                                adresse: user.parentAdresse
-                            };
-                        }
-                        // Mettre à jour le localStorage avec les données complètes
-                        localStorage.setItem('user', JSON.stringify(user));
-                    }
+                    // Mettre à jour le localStorage avec les données complètes
+                    localStorage.setItem('user', JSON.stringify(user));
                 }
             } catch (error) {
                 console.error('Erreur chargement données utilisateur:', error);

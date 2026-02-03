@@ -8,8 +8,6 @@ const messagerieRoutes = require('./messagerie.routes');
 const staffRoutes = require('./staff.routes');
 const emailRoutes = require('./email.routes');
 const actualitesRoutes = require('./actualites.routes');
-const parentsRoutes = require('./parents.routes');
-const fraisRoutes = require('./frais.routes');
 
 module.exports = {
     authRoutes,
@@ -21,7 +19,5 @@ module.exports = {
     messagerieRoutes,
     staffRoutes,
     emailRoutes,
-    actualitesRoutes,
-    parentsRoutes,
-    fraisRoutes
+    actualitesRoutes
 };

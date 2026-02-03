@@ -3,8 +3,6 @@ const router = express.Router();
 const { db } = require('../config/database');
 const { checkPermission, requireAuth } = require('../middleware/auth');
 const { generateToken, generateId } = require('../utils/helpers');
-const { sendEmail } = require('../config/email');
-const { SERVER_CONFIG } = require('../config/constants');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -312,26 +310,10 @@ router.get('/famille-by-email/:email', (req, res) => {
 
 // Route d'inscription publique (sans authentification)
 router.post('/inscription', async (req, res) => {
-    const { 
-        // Parent 1 (principal)
-        parent1Nom, parent1Prenom, parent1Email, parent1Tel, parent1Adresse,
-        // Parent 2 (optionnel)
-        parent2Nom, parent2Prenom, parent2Email, parent2Tel, parent2Adresse,
-        // Ancien format (compatibilité)
-        parentNom, parentPrenom, parentEmail, parentTel, parentAdresse,
-        // Données générales
-        enFamille, enfants 
-    } = req.body;
-    
-    // Compatibilité avec l'ancien format (convertir parentX vers parent1X)
-    const p1Nom = parent1Nom || parentNom;
-    const p1Prenom = parent1Prenom || parentPrenom;
-    const p1Email = parent1Email || parentEmail;
-    const p1Tel = parent1Tel || parentTel;
-    const p1Adresse = parent1Adresse || parentAdresse;
+    const { parentNom, parentPrenom, parentEmail, parentTel, parentAdresse, enFamille, enfants } = req.body;
     
     // Validation : soit un email parent (pour mineurs) soit au moins un enfant avec email (pour majeurs)
-    const hasParentEmail = p1Email && p1Email.trim();
+    const hasParentEmail = parentEmail && parentEmail.trim();
     const hasStudentEmails = enfants && enfants.some(enfant => enfant.email && enfant.email.trim());
     
     if ((!hasParentEmail && !hasStudentEmails) || !enfants || enfants.length === 0) {
@@ -339,70 +321,37 @@ router.post('/inscription', async (req, res) => {
     }
     
     try {
-        let parent1Id = null;
-        let parent2Id = null;
-        let parent1Token = null;
-        let parent2Token = null;
-        
-        // Créer Parent 1 s'il y a un email
+        // Vérifier les emails existants
         if (hasParentEmail) {
-            // Vérifier si le parent 1 existe déjà
-            const existingParent1 = await new Promise((resolve, reject) => {
-                db.get(`SELECT id FROM parents WHERE email = ?`, [p1Email], (err, row) => {
+            // Pour les mineurs : vérifier que l'email parent n'est pas déjà utilisé par une autre famille
+            const existingParent = await new Promise((resolve, reject) => {
+                db.get(`SELECT id, enFamille, familleLienId FROM eleves WHERE email = ?`, [parentEmail], (err, row) => {
                     if (err) reject(err);
                     else resolve(row);
                 });
             });
             
-            if (existingParent1) {
-                parent1Id = existingParent1.id;
-            } else {
-                // Créer le parent 1
-                parent1Id = generateId('PAR');
-                const activationToken1 = generateToken();
-                parent1Token = activationToken1;
-                
-                await new Promise((resolve, reject) => {
-                    db.run(`INSERT INTO parents (id, nom, prenom, email, tel, adresse, activationToken, activated) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                        [parent1Id, p1Nom || '', p1Prenom || '', p1Email, p1Tel || '', p1Adresse || '', activationToken1, 0],
-                        function(err) {
+            if (existingParent) {
+                // Si c'est une inscription familiale et que l'email existe déjà dans la même famille, c'est OK
+                if (enFamille && existingParent.enFamille && existingParent.familleLienId) {
+                    // Vérifier si c'est la même famille en comparant les noms
+                    const familyMembers = await new Promise((resolve, reject) => {
+                        db.all(`SELECT parentNom, parentPrenom FROM eleves WHERE familleLienId = ?`, [existingParent.familleLienId], (err, rows) => {
                             if (err) reject(err);
-                            else resolve();
-                        }
+                            else resolve(rows);
+                        });
+                    });
+                    
+                    const isSameFamily = familyMembers.some(member => 
+                        member.parentNom === parentNom && member.parentPrenom === parentPrenom
                     );
-                });
-            }
-        }
-        
-        // Créer Parent 2 s'il y a un email (optionnel)
-        if (parent2Email && parent2Email.trim()) {
-            // Vérifier si le parent 2 existe déjà
-            const existingParent2 = await new Promise((resolve, reject) => {
-                db.get(`SELECT id FROM parents WHERE email = ?`, [parent2Email], (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                });
-            });
-            
-            if (existingParent2) {
-                parent2Id = existingParent2.id;
-            } else {
-                // Créer le parent 2
-                parent2Id = generateId('PAR');
-                const activationToken2 = generateToken();
-                parent2Token = activationToken2;
-                
-                await new Promise((resolve, reject) => {
-                    db.run(`INSERT INTO parents (id, nom, prenom, email, tel, adresse, activationToken, activated) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                        [parent2Id, parent2Nom || '', parent2Prenom || '', parent2Email, parent2Tel || '', parent2Adresse || '', activationToken2, 0],
-                        function(err) {
-                            if (err) reject(err);
-                            else resolve();
-                        }
-                    );
-                });
+                    
+                    if (!isSameFamily) {
+                        return res.status(400).json({ error: 'Cet email est déjà utilisé par une autre famille' });
+                    }
+                } else if (!enFamille || !existingParent.enFamille) {
+                    return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+                }
             }
         }
         
@@ -435,24 +384,32 @@ router.post('/inscription', async (req, res) => {
             const activationToken = enFamille ? familleActivationToken : generateToken();
             
             // Déterminer l'email et téléphone à utiliser selon le statut
-            let emailToUse, telToUse;
+            let emailToUse, telToUse, parentNomToUse, parentPrenomToUse, parentTelToUse, parentAdresseToUse;
             
             if (enfant.status === 'majeur') {
                 // Pour les majeurs : utiliser l'email et téléphone de l'étudiant
                 emailToUse = enfant.email;
                 telToUse = enfant.tel;
+                parentNomToUse = null; // Pas de parent pour les majeurs
+                parentPrenomToUse = null;
+                parentTelToUse = null;
+                parentAdresseToUse = null;
             } else {
-                // Pour les mineurs : utiliser l'email parent 1
-                emailToUse = p1Email;
-                telToUse = null;
+                // Pour les mineurs : utiliser l'email parent
+                emailToUse = parentEmail;
+                telToUse = null; // Le téléphone est stocké dans parentTel
+                parentNomToUse = parentNom || null;
+                parentPrenomToUse = parentPrenom || null;
+                parentTelToUse = parentTel || null;
+                parentAdresseToUse = parentAdresse || null;
             }
             
             await new Promise((resolve, reject) => {
                 const frais = parseFloat(enfant.fraisInscription || 0) || 0;
                 const nbPaiements = parseInt(enfant.nbPaiements || 1, 10) || 1;
-                
-                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parent1Id, parent2Id, fraisInscription, nbMensualites, totalPaye, tel, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                db.run(`INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, resetToken, resetExpires, enFamille, nombreFamille, familleLienId, photo, parentNom, parentPrenom, parentTel, parentAdresse, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, tel, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+
                     [
                         id, 
                         enfant.nom, 
@@ -469,12 +426,15 @@ router.post('/inscription', async (req, res) => {
                         nombreFamille, 
                         familleLienId,
                         null,
-                        enfant.status === 'mineur' ? parent1Id : null, // Parent 1 seulement pour mineurs
-                        enfant.status === 'mineur' ? parent2Id : null, // Parent 2 seulement pour mineurs
+                        parentNomToUse,
+                        parentPrenomToUse,
+                        parentTelToUse,
+                        parentAdresseToUse,
                         frais,
                         nbPaiements,
-                        0, // totalPaye initialisé à 0
-                        telToUse,
+                        0,
+                        0,
+                        telToUse, // Téléphone de l'étudiant (pour majeurs)
                         enfant.status || 'mineur'
                     ],
                     function(err) {
@@ -494,36 +454,10 @@ router.post('/inscription', async (req, res) => {
             });
         }
         
-        // Envoyer les emails d'activation aux parents nouvellement créés
-        const emailPromises = [];
-        if (parent1Token) {
-            const activationLink1 = `${SERVER_CONFIG.BASE_URL}/activation.html?token=${parent1Token}&type=parent`;
-            emailPromises.push(sendEmail(p1Email, 'activation', `${p1Prenom} ${p1Nom}`, activationLink1));
-        }
-        if (parent2Token) {
-            const activationLink2 = `${SERVER_CONFIG.BASE_URL}/activation.html?token=${parent2Token}&type=parent`;
-            emailPromises.push(sendEmail(parent2Email, 'activation', `${parent2Prenom} ${parent2Nom}`, activationLink2));
-        }
-        
-        // Envoyer les emails en arrière-plan (ne pas attendre)
-        if (emailPromises.length > 0) {
-            Promise.allSettled(emailPromises).then(results => {
-                results.forEach((result, index) => {
-                    if (result.status === 'rejected') {
-                        console.error(`Erreur envoi email parent ${index + 1}:`, result.reason);
-                    } else {
-                        console.log(`Email d'activation envoyé au parent ${index + 1}`);
-                    }
-                });
-            });
-        }
-        
         res.status(201).json({ 
             success: true,
             message: `${createdEleves.length} élève(s) inscrit(s) avec succès. En attente de validation.`,
-            eleves: createdEleves.map(e => ({ id: e.id, nom: e.nom, prenom: e.prenom })),
-            parent1Id,
-            parent2Id
+            eleves: createdEleves.map(e => ({ id: e.id, nom: e.nom, prenom: e.prenom }))
         });
         
     } catch (error) {
