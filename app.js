@@ -52,7 +52,9 @@ const {
     messagerieRoutes,
     staffRoutes,
     emailRoutes,
-    actualitesRoutes
+    actualitesRoutes,
+    parentsRoutes,
+    fraisRoutes
 } = require('./src/routes');
 
 // Initialisation de l'application
@@ -82,6 +84,8 @@ app.use('/api/messagerie', messagerieRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/actualites', actualitesRoutes);
+app.use('/api/parents', parentsRoutes);
+app.use('/api/frais', fraisRoutes);
 app.use('/api', emailRoutes);
 
 // Route principale

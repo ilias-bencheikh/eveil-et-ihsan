@@ -1094,39 +1094,88 @@
                                 </div>
                             </div>
 
-                            <!-- Info parent -->
-                            <div class="parent-info-section" style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                            <!-- Info parent 1 (principal) -->
+                            <div class="parent-info-section" style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 16px;">
                                 <h4 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-icons">person</span> Informations du parent/tuteur
+                                    <span class="material-icons">person</span> Parent / Tuteur 1 (principal) *
                                 </h4>
                                 <div class="md-form-grid">
                                     <div class="md-text-field">
                                         <div class="md-text-field-container">
-                                            <input type="text" id="insc_parentNom" class="md-text-field-input" placeholder=" ">
-                                            <label class="md-text-field-label">Nom du parent</label>
+                                            <input type="text" id="insc_parent1Nom" class="md-text-field-input" placeholder=" " required>
+                                            <label class="md-text-field-label">Nom *</label>
                                         </div>
                                     </div>
                                     <div class="md-text-field">
                                         <div class="md-text-field-container">
-                                            <input type="text" id="insc_parentPrenom" class="md-text-field-input" placeholder=" ">
-                                            <label class="md-text-field-label">Prénom du parent</label>
+                                            <input type="text" id="insc_parent1Prenom" class="md-text-field-input" placeholder=" " required>
+                                            <label class="md-text-field-label">Prénom *</label>
                                         </div>
                                     </div>
                                     <div class="md-text-field">
                                         <div class="md-text-field-container">
-                                            <input type="email" id="insc_parentEmail" class="md-text-field-input" placeholder=" " required>
+                                            <input type="email" id="insc_parent1Email" class="md-text-field-input" placeholder=" " required>
+                                            <label class="md-text-field-label">Email (pour la connexion) *</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="tel" id="insc_parent1Tel" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Téléphone</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field" style="grid-column: span 2;">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="insc_parent1Adresse" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Adresse</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bouton pour ajouter Parent 2 -->
+                            <button type="button" id="addParent2Btn" class="md-btn md-btn-outlined" style="width: 100%; margin-bottom: 16px;" onclick="toggleParent2Section()">
+                                <span class="material-icons">person_add</span> Ajouter un 2ème parent / tuteur
+                            </button>
+
+                            <!-- Info parent 2 (optionnel) -->
+                            <div id="parent2Section" class="parent-info-section" style="background: var(--md-sys-color-secondary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px; display: none;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <h4 style="color: var(--md-sys-color-on-secondary-container); display: flex; align-items: center; gap: 8px;">
+                                        <span class="material-icons">person</span> Parent / Tuteur 2 (optionnel)
+                                    </h4>
+                                    <button type="button" class="md-btn md-btn-text" onclick="toggleParent2Section()" style="color: var(--md-sys-color-on-secondary-container);">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </div>
+                                <div class="md-form-grid">
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="insc_parent2Nom" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Nom</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="insc_parent2Prenom" class="md-text-field-input" placeholder=" ">
+                                            <label class="md-text-field-label">Prénom</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field">
+                                        <div class="md-text-field-container">
+                                            <input type="email" id="insc_parent2Email" class="md-text-field-input" placeholder=" ">
                                             <label class="md-text-field-label">Email (pour la connexion)</label>
                                         </div>
                                     </div>
                                     <div class="md-text-field">
                                         <div class="md-text-field-container">
-                                            <input type="tel" id="insc_parentTel" class="md-text-field-input" placeholder=" ">
+                                            <input type="tel" id="insc_parent2Tel" class="md-text-field-input" placeholder=" ">
                                             <label class="md-text-field-label">Téléphone</label>
                                         </div>
                                     </div>
-                                    <div class="md-text-field">
+                                    <div class="md-text-field" style="grid-column: span 2;">
                                         <div class="md-text-field-container">
-                                            <input type="text" id="insc_parentAdresse" class="md-text-field-input" placeholder=" ">
+                                            <input type="text" id="insc_parent2Adresse" class="md-text-field-input" placeholder=" ">
                                             <label class="md-text-field-label">Adresse</label>
                                         </div>
                                     </div>
@@ -1172,26 +1221,56 @@
                     <!-- ========== FRAIS D'INSCRIPTION (visible aux admins/directeur/secretariat) ========= -->
                     <div class="widget-card" id="fraisInscriptionCard" style="display: none; margin-top: 16px;">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Frais d'inscription</h3>
+                            <h3 class="widget-card-title">Gestion des frais d'inscription</h3>
                             <div class="widget-card-actions">
+                                <button class="md-btn md-btn-tonal" onclick="showFraisStats()">
+                                    <span class="material-icons">bar_chart</span> Statistiques
+                                </button>
                                 <button class="md-btn md-btn-outlined" onclick="loadFraisInscriptions()">
                                     <span class="material-icons">refresh</span> Rafraîchir
                                 </button>
                             </div>
                         </div>
                         <div class="widget-card-content">
-                            <!-- Barre de recherche -->
-                            <div style="margin-bottom: 16px;">
-                                <div class="topbar-search" style="width: 100%;">
+                            <!-- Statistiques rapides -->
+                            <div id="fraisStatsBar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+                                <div style="background: var(--md-sys-color-primary-container); padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 600; color: var(--md-sys-color-on-primary-container);" id="statsTotalFrais">0 €</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-primary-container);">Total attendu</div>
+                                </div>
+                                <div style="background: var(--md-sys-color-tertiary-container); padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 600; color: var(--md-sys-color-on-tertiary-container);" id="statsTotalPaye">0 €</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-tertiary-container);">Total payé</div>
+                                </div>
+                                <div style="background: var(--md-sys-color-error-container); padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 600; color: var(--md-sys-color-on-error-container);" id="statsResteAPayer">0 €</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-error-container);">Reste à payer</div>
+                                </div>
+                                <div style="background: var(--md-sys-color-secondary-container); padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: 600; color: var(--md-sys-color-on-secondary-container);" id="statsTauxRecouvrement">0%</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-secondary-container);">Taux recouvrement</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Filtres -->
+                            <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                                <div class="topbar-search" style="flex: 1; min-width: 200px;">
                                     <span class="material-icons">search</span>
-                                    <input type="text" id="fraisSearchInput" placeholder="Rechercher par nom, prénom ou famille..." oninput="filterFraisInscriptions()">
-                                    <button type="button" id="clearFraisSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearFraisSearch()">
+                                    <input type="text" id="fraisSearchInput" placeholder="Rechercher par nom, prénom..." oninput="filterFraisInscriptions()">
+                                    <button type="button" id="clearFraisSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearFraisSearch()" style="display: none;">
                                         <span class="material-icons">clear</span>
                                     </button>
                                 </div>
-                                <div id="fraisSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
-                                    <span id="filteredFraisCount">0</span> dossier(s) trouvé(s)
-                                </div>
+                                <select id="fraisFilterStatus" class="md-select" onchange="filterFraisInscriptions()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline);">
+                                    <option value="all">Tous les statuts</option>
+                                    <option value="pending">En attente de paiement</option>
+                                    <option value="paid">Entièrement payé</option>
+                                    <option value="partial">Partiellement payé</option>
+                                </select>
+                            </div>
+                            
+                            <div id="fraisSearchResultsInfo" style="margin-bottom: 12px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                <span id="filteredFraisCount">0</span> dossier(s) trouvé(s)
                             </div>
                             <div id="fraisList" class="md-grid md-grid-auto">
                                 <p style="color: var(--md-sys-color-on-surface-variant);">Chargement des frais...</p>
@@ -5102,8 +5181,8 @@
                 majeurBtn.style.color = 'var(--md-sys-color-on-surface-variant)';
             }
             
-            // Remplir automatiquement le nom de l'enfant avec le nom du parent
-            const parentNom = document.getElementById('insc_parentNom').value.trim();
+            // Remplir automatiquement le nom de l'enfant avec le nom du parent 1
+            const parentNom = document.getElementById('insc_parent1Nom').value.trim();
             const enfantNomInput = newField.querySelector('.enfant-nom');
             if (enfantNomInput && parentNom) {
                 enfantNomInput.value = parentNom;
@@ -5138,16 +5217,32 @@
                 }
             }
             
-            const parentNom = document.getElementById('insc_parentNom').value.trim();
-            const parentPrenom = document.getElementById('insc_parentPrenom').value.trim();
-            const parentEmail = document.getElementById('insc_parentEmail').value.trim();
-            const parentTel = document.getElementById('insc_parentTel').value.trim();
-            const parentAdresse = document.getElementById('insc_parentAdresse').value.trim();
+            // Parent 1 (obligatoire)
+            const parent1Nom = document.getElementById('insc_parent1Nom').value.trim();
+            const parent1Prenom = document.getElementById('insc_parent1Prenom').value.trim();
+            const parent1Email = document.getElementById('insc_parent1Email').value.trim();
+            const parent1Tel = document.getElementById('insc_parent1Tel').value.trim();
+            const parent1Adresse = document.getElementById('insc_parent1Adresse').value.trim();
             
-            // Les champs parent sont obligatoires seulement s'il y a au moins un mineur
-            if (hasMinor && !parentEmail) {
-                showSnackbar('L\'email du parent est obligatoire pour les enfants mineurs');
-                return;
+            // Parent 2 (optionnel)
+            const parent2Section = document.getElementById('parent2Section');
+            const hasParent2 = parent2Section.style.display !== 'none';
+            const parent2Nom = hasParent2 ? document.getElementById('insc_parent2Nom').value.trim() : '';
+            const parent2Prenom = hasParent2 ? document.getElementById('insc_parent2Prenom').value.trim() : '';
+            const parent2Email = hasParent2 ? document.getElementById('insc_parent2Email').value.trim() : '';
+            const parent2Tel = hasParent2 ? document.getElementById('insc_parent2Tel').value.trim() : '';
+            const parent2Adresse = hasParent2 ? document.getElementById('insc_parent2Adresse').value.trim() : '';
+            
+            // Validation parent 1
+            if (hasMinor) {
+                if (!parent1Nom || !parent1Prenom) {
+                    showSnackbar('Le nom et prénom du parent 1 sont obligatoires pour les enfants mineurs');
+                    return;
+                }
+                if (!parent1Email) {
+                    showSnackbar('L\'email du parent 1 est obligatoire pour les enfants mineurs');
+                    return;
+                }
             }
             
             // Collecter les enfants
@@ -5210,11 +5305,19 @@
                         'x-user-id': user.id
                     },
                     body: JSON.stringify({
-                        parentNom,
-                        parentPrenom,
-                        parentEmail,
-                        parentTel,
-                        parentAdresse,
+                        // Parent 1
+                        parent1Nom,
+                        parent1Prenom,
+                        parent1Email,
+                        parent1Tel,
+                        parent1Adresse,
+                        // Parent 2 (si renseigné)
+                        parent2Nom: parent2Nom || null,
+                        parent2Prenom: parent2Prenom || null,
+                        parent2Email: parent2Email || null,
+                        parent2Tel: parent2Tel || null,
+                        parent2Adresse: parent2Adresse || null,
+                        // Enfants
                         enFamille: inscriptionType === 'famille' ? 1 : 0,
                         enfants
                     })
@@ -5236,113 +5339,153 @@
             }
         }
 
+        // Toggle affichage Parent 2
+        function toggleParent2Section() {
+            const section = document.getElementById('parent2Section');
+            const btn = document.getElementById('addParent2Btn');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                btn.style.display = 'none';
+            } else {
+                section.style.display = 'none';
+                btn.style.display = 'flex';
+                // Vider les champs
+                document.getElementById('insc_parent2Nom').value = '';
+                document.getElementById('insc_parent2Prenom').value = '';
+                document.getElementById('insc_parent2Email').value = '';
+                document.getElementById('insc_parent2Tel').value = '';
+                document.getElementById('insc_parent2Adresse').value = '';
+            }
+        }
+
         function showNewInscriptionForm() {
             showInscriptionForm();
         }
 
         // Variable globale pour stocker les données des frais
-        let allFraisData = { familles: {}, seuls: [] };
+        let allFraisData = [];
 
         // ==================== FRAIS D'INSCRIPTION ====================
         async function loadFraisInscriptions() {
             try {
-                // Récupérer les élèves avec frais d'inscription non validés
-                const frais = allEleves.filter(e => e.fraisInscription && !e.fraisValide);
-
-                // Grouper par famille si applicable
-                const familles = {};
-                const seuls = [];
-
-                frais.forEach(e => {
-                    if (e.enFamille && e.familleLienId) {
-                        if (!familles[e.familleLienId]) familles[e.familleLienId] = [];
-                        familles[e.familleLienId].push(e);
-                    } else {
-                        seuls.push(e);
-                    }
-                });
-
-                // Stocker les données pour le filtrage
-                allFraisData = { familles, seuls };
-
+                // Charger les frais depuis la nouvelle API
+                const response = await fetch(`${API_URL}/frais`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erreur chargement frais');
+                const data = await response.json();
+                allFraisData = data.eleves || [];
+                
+                // Mettre à jour les statistiques
+                updateFraisStats(data.stats);
+                
                 // Afficher tous les résultats
-                renderFraisInscriptions(allFraisData.familles, allFraisData.seuls);
+                renderFraisInscriptions(allFraisData);
             } catch (error) {
                 console.error('Erreur loadFraisInscriptions:', error);
                 document.getElementById('fraisList').innerHTML = '<p style="color: var(--md-sys-color-error);">Erreur lors du chargement des frais</p>';
             }
         }
 
+        // Mise à jour des statistiques
+        function updateFraisStats(stats) {
+            if (!stats) {
+                // Calculer côté client si pas fourni par l'API
+                let totalFrais = 0;
+                let totalPaye = 0;
+                
+                allFraisData.forEach(e => {
+                    totalFrais += parseFloat(e.fraisInscription) || 0;
+                    totalPaye += parseFloat(e.totalPaye) || 0;
+                });
+                
+                const resteAPayer = totalFrais - totalPaye;
+                const tauxRecouvrement = totalFrais > 0 ? Math.round((totalPaye / totalFrais) * 100) : 0;
+                
+                document.getElementById('statsTotalFrais').textContent = totalFrais.toFixed(2) + ' €';
+                document.getElementById('statsTotalPaye').textContent = totalPaye.toFixed(2) + ' €';
+                document.getElementById('statsResteAPayer').textContent = resteAPayer.toFixed(2) + ' €';
+                document.getElementById('statsTauxRecouvrement').textContent = tauxRecouvrement + '%';
+            } else {
+                // Utiliser les statistiques de l'API
+                document.getElementById('statsTotalFrais').textContent = (stats.totalFrais || 0).toFixed(2) + ' €';
+                document.getElementById('statsTotalPaye').textContent = (stats.totalPaye || 0).toFixed(2) + ' €';
+                document.getElementById('statsResteAPayer').textContent = (stats.totalResteAPayer || 0).toFixed(2) + ' €';
+                const tauxRecouvrement = stats.totalFrais > 0 ? Math.round((stats.totalPaye / stats.totalFrais) * 100) : 0;
+                document.getElementById('statsTauxRecouvrement').textContent = tauxRecouvrement + '%';
+            }
+        }
+
         // Fonction pour rendre les frais d'inscription
-        function renderFraisInscriptions(familles, seuls) {
+        function renderFraisInscriptions(eleves) {
             let html = '';
 
-            // Familles
-            Object.keys(familles).forEach(fid => {
-                const membres = familles[fid];
-                const total = membres.reduce((s, m) => s + (parseFloat(m.fraisInscription) || 0), 0);
-                const parentNom = membres[0].parentNom || '';
-                const parentPrenom = membres[0].parentPrenom || '';
-
-                html += `
-                    <div class="md-card md-card-elevated" style="padding:16px; border-left:4px solid var(--md-sys-color-primary);">
-                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;">
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <div class="md-avatar" style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container);">
-                                    <span class="material-icons">groups</span>
-                                </div>
-                                <div>
-                                    <h4 style="margin:0;">Famille ${parentPrenom} ${parentNom}</h4>
-                                    <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
-                                </div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="font-weight:600;">Total: ${total.toFixed(2)} €</div>
-                            </div>
-                        </div>
-                        <div style="background:var(--md-sys-color-surface-container); padding:12px; border-radius:8px;">
-                            ${membres.map(m => `
-                                <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--md-sys-color-outline-variant);">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span class="md-avatar" style="width:32px; height:32px;">${(m.prenom||'E')[0]}</span>
-                                        <div>${m.prenom} ${m.nom}</div>
-                                    </div>
-                                    <div style="text-align:right;">
-                                        <div style="font-size:14px; font-weight:500;">${(parseFloat(m.fraisInscription)||0).toFixed(2)} €</div>
-                                        <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${m.nbPaiements ? m.nbPaiements + ' fois' : '1 fois'} • ${m.paiementsEffectues ? m.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
-                                        <button class="md-btn md-btn-outlined" style="margin-top:6px;" onclick="validateFraisEleve('${m.id}')">Valider</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Individuels
-            seuls.forEach(e => {
+            eleves.forEach(e => {
                 const montant = parseFloat(e.fraisInscription) || 0;
+                const totalPaye = parseFloat(e.totalPaye) || 0;
+                const reste = montant - totalPaye;
+                const pourcentage = montant > 0 ? Math.round((totalPaye / montant) * 100) : 0;
+                
+                let statusColor = 'var(--md-sys-color-error)';
+                let statusText = 'En attente';
+                if (pourcentage >= 100) {
+                    statusColor = 'var(--md-sys-color-tertiary)';
+                    statusText = 'Payé';
+                } else if (pourcentage > 0) {
+                    statusColor = 'var(--md-sys-color-primary)';
+                    statusText = 'Partiel';
+                }
+
+                // Info parents
+                let parentsInfo = '';
+                if (e.parent1Nom || e.parent2Nom) {
+                    parentsInfo = '<div style="font-size:11px; color:var(--md-sys-color-on-surface-variant); margin-top:4px;">';
+                    if (e.parent1Nom) parentsInfo += `Parent 1: ${e.parent1Prenom || ''} ${e.parent1Nom}`;
+                    if (e.parent2Nom) parentsInfo += `${e.parent1Nom ? ' | ' : ''}Parent 2: ${e.parent2Prenom || ''} ${e.parent2Nom}`;
+                    parentsInfo += '</div>';
+                }
+
                 html += `
-                    <div class="md-card md-card-elevated" style="padding:16px;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
-                            <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="md-card md-card-elevated" style="padding:16px; border-left:4px solid ${statusColor};">
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                            <div style="display:flex; align-items:center; gap:12px; flex:1;">
                                 <div class="md-avatar">${(e.prenom||'E')[0].toUpperCase()}</div>
-                                <div>
+                                <div style="flex:1;">
                                     <h4 style="margin:0;">${e.prenom} ${e.nom}</h4>
                                     <p style="margin:0; font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
+                                    ${parentsInfo}
                                 </div>
                             </div>
-                            <div style="text-align:right;">
-                                <div style="font-weight:600;">${montant.toFixed(2)} €</div>
-                                <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${e.nbPaiements ? e.nbPaiements + ' fois' : '1 fois'} • ${e.paiementsEffectues ? e.paiementsEffectues + ' validé(s)' : '0 validé'}</div>
-                                <button class="md-btn md-btn-filled" style="margin-top:8px;" onclick="validateFraisEleve('${e.id}')">Valider</button>
+                            <div style="text-align:right; min-width:140px;">
+                                <span class="md-chip" style="font-size:11px; background:${statusColor}20; color:${statusColor};">${statusText}</span>
+                                <div style="font-weight:600; margin-top:8px;">${montant.toFixed(2)} €</div>
+                                <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">
+                                    Payé: ${totalPaye.toFixed(2)} € | Reste: ${reste.toFixed(2)} €
+                                </div>
                             </div>
+                        </div>
+                        
+                        <!-- Barre de progression -->
+                        <div style="margin-top:12px; background:var(--md-sys-color-surface-container); border-radius:8px; height:8px; overflow:hidden;">
+                            <div style="height:100%; width:${pourcentage}%; background:${statusColor}; transition:width 0.3s;"></div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                            <button class="md-btn md-btn-filled" onclick="showPaiementDialog('${e.id}', '${e.prenom} ${e.nom}', ${montant}, ${totalPaye})">
+                                <span class="material-icons">payments</span> Enregistrer paiement
+                            </button>
+                            <button class="md-btn md-btn-outlined" onclick="showHistoriquePaiements('${e.id}', '${e.prenom} ${e.nom}')">
+                                <span class="material-icons">history</span> Historique
+                            </button>
+                            <button class="md-btn md-btn-text" onclick="editFraisEleve('${e.id}', ${montant}, ${e.nbMensualites || 1})">
+                                <span class="material-icons">edit</span>
+                            </button>
                         </div>
                     </div>
                 `;
             });
 
-            document.getElementById('fraisList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun frais d\'inscription en attente</p>';
+            document.getElementById('fraisList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève avec frais d\'inscription</p>';
         }
 
         // Fonction de filtrage des frais d'inscription
@@ -5351,6 +5494,7 @@
             const clearBtn = document.getElementById('clearFraisSearchBtn');
             const resultsInfo = document.getElementById('fraisSearchResultsInfo');
             const filteredCount = document.getElementById('filteredFraisCount');
+            const statusFilter = document.getElementById('fraisFilterStatus').value;
 
             const searchTerm = searchInput.value.toLowerCase().trim();
 
@@ -5359,106 +5503,371 @@
                 clearBtn.style.display = 'flex';
             } else {
                 clearBtn.style.display = 'none';
-                resultsInfo.style.display = 'none';
-                // Réafficher tous les résultats
-                renderFraisInscriptions(allFraisData.familles, allFraisData.seuls);
-                return;
             }
 
-            // Filtrer les familles
-            const filteredFamilles = {};
-            Object.keys(allFraisData.familles).forEach(fid => {
-                const membres = allFraisData.familles[fid];
-                const parentNom = membres[0].parentNom || '';
-                const parentPrenom = membres[0].parentPrenom || '';
+            // Filtrer les élèves
+            let filtered = allFraisData;
 
-                // Vérifier si la famille correspond à la recherche
-                const familleMatch = `${parentPrenom} ${parentNom}`.toLowerCase().includes(searchTerm) ||
-                                   membres.some(m => `${m.prenom} ${m.nom}`.toLowerCase().includes(searchTerm));
+            // Filtre par recherche textuelle
+            if (searchTerm) {
+                filtered = filtered.filter(e => 
+                    `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm) ||
+                    (e.parent1Nom && `${e.parent1Prenom || ''} ${e.parent1Nom}`.toLowerCase().includes(searchTerm)) ||
+                    (e.parent2Nom && `${e.parent2Prenom || ''} ${e.parent2Nom}`.toLowerCase().includes(searchTerm))
+                );
+            }
 
-                if (familleMatch) {
-                    filteredFamilles[fid] = membres;
-                }
-            });
+            // Filtre par statut
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(e => {
+                    const montant = parseFloat(e.fraisInscription) || 0;
+                    const totalPaye = parseFloat(e.totalPaye) || 0;
+                    const pourcentage = montant > 0 ? (totalPaye / montant) * 100 : 0;
 
-            // Filtrer les élèves individuels
-            const filteredSeuls = allFraisData.seuls.filter(e =>
-                `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm) ||
-                (e.parentNom && e.parentPrenom && `${e.parentPrenom} ${e.parentNom}`.toLowerCase().includes(searchTerm))
-            );
-
-            // Calculer le nombre total de dossiers trouvés
-            const totalFound = Object.keys(filteredFamilles).length + filteredSeuls.length;
+                    if (statusFilter === 'paid') return pourcentage >= 100;
+                    if (statusFilter === 'partial') return pourcentage > 0 && pourcentage < 100;
+                    if (statusFilter === 'pending') return pourcentage === 0;
+                    return true;
+                });
+            }
 
             // Afficher les résultats filtrés
-            renderFraisInscriptions(filteredFamilles, filteredSeuls);
+            renderFraisInscriptions(filtered);
 
             // Mettre à jour les informations de résultats
-            filteredCount.textContent = totalFound;
-            resultsInfo.style.display = totalFound !== (Object.keys(allFraisData.familles).length + allFraisData.seuls.length) ? 'block' : 'none';
+            filteredCount.textContent = filtered.length;
+            resultsInfo.style.display = (searchTerm || statusFilter !== 'all') ? 'block' : 'none';
         }
 
         // Fonction pour effacer la recherche des frais
         function clearFraisSearch() {
             document.getElementById('fraisSearchInput').value = '';
+            document.getElementById('fraisFilterStatus').value = 'all';
             filterFraisInscriptions();
         }
 
-        async function validateFraisEleve(eleveId) {
-            const defaultCount = 1;
-            let countStr = prompt('Nombre de mensualités à valider (par défaut 1):', String(defaultCount));
-            if (countStr === null) return; // annuler
-            const count = parseInt(countStr, 10) || defaultCount;
+        // Dialog pour enregistrer un paiement
+        function showPaiementDialog(eleveId, eleveNom, totalFrais, totalPaye) {
+            const reste = totalFrais - totalPaye;
+            
+            const dialogHtml = `
+                <div id="paiementDialog" class="md-dialog-overlay" style="display:flex; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+                    <div class="md-dialog" style="background:var(--md-sys-color-surface); border-radius:28px; padding:24px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto;">
+                        <h2 style="margin:0 0 8px 0;">Enregistrer un paiement</h2>
+                        <p style="color:var(--md-sys-color-on-surface-variant); margin-bottom:20px;">
+                            ${eleveNom} - Reste à payer: <strong>${reste.toFixed(2)} €</strong>
+                        </p>
+                        
+                        <div style="display:flex; flex-direction:column; gap:16px;">
+                            <div class="md-text-field">
+                                <label>Montant du paiement (€) *</label>
+                                <input type="number" id="paiement_montant" min="0.01" max="${reste}" step="0.01" value="${reste.toFixed(2)}" required>
+                            </div>
+                            
+                            <div class="md-text-field">
+                                <label>Mode de paiement *</label>
+                                <select id="paiement_mode" required style="width:100%; padding:12px; border:1px solid var(--md-sys-color-outline); border-radius:8px;">
+                                    <option value="espece">💵 Espèces</option>
+                                    <option value="virement">🏦 Virement bancaire</option>
+                                    <option value="cheque">📝 Chèque</option>
+                                </select>
+                            </div>
+                            
+                            <div class="md-text-field" id="referenceField" style="display:none;">
+                                <label>Référence (n° chèque / réf. virement)</label>
+                                <input type="text" id="paiement_reference" placeholder="Ex: CHQ-12345 ou VIR-2024-001">
+                            </div>
+                            
+                            <div class="md-text-field">
+                                <label>Notes (optionnel)</label>
+                                <textarea id="paiement_notes" rows="2" placeholder="Notes additionnelles..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:24px;">
+                            <button class="md-btn md-btn-text" onclick="closePaiementDialog()">Annuler</button>
+                            <button class="md-btn md-btn-filled" onclick="submitPaiement('${eleveId}')">
+                                <span class="material-icons">check</span> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', dialogHtml);
+            
+            // Afficher/masquer le champ référence selon le mode
+            document.getElementById('paiement_mode').addEventListener('change', function() {
+                document.getElementById('referenceField').style.display = 
+                    (this.value === 'cheque' || this.value === 'virement') ? 'block' : 'none';
+            });
+        }
+
+        function closePaiementDialog() {
+            const dialog = document.getElementById('paiementDialog');
+            if (dialog) dialog.remove();
+        }
+
+        async function submitPaiement(eleveId) {
+            const montant = parseFloat(document.getElementById('paiement_montant').value);
+            const modePaiement = document.getElementById('paiement_mode').value;
+            const reference = document.getElementById('paiement_reference')?.value || '';
+            const notes = document.getElementById('paiement_notes').value || '';
+            
+            if (!montant || montant <= 0) {
+                showSnackbar('Veuillez saisir un montant valide');
+                return;
+            }
+            
             try {
-                const headers = Object.assign({}, getHeaders());
-                headers['Content-Type'] = 'application/json';
-                const response = await fetch(`${API_URL}/eleves/${eleveId}/validate-frais`, { method: 'POST', headers, body: JSON.stringify({ count }) });
+                const response = await fetch(`${API_URL}/frais/paiement`, {
+                    method: 'POST',
+                    headers: {
+                        ...getHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        eleveId,
+                        montant,
+                        modePaiement,
+                        reference,
+                        notes
+                    })
+                });
+                
                 if (response.ok) {
-                    const data = await response.json();
-                    showSnackbar(`✅ Paiements mis à jour (${data.paiementsEffectues} validé(s))`);
+                    showSnackbar('✅ Paiement enregistré avec succès');
+                    closePaiementDialog();
+                    await loadFraisInscriptions();
                 } else {
-                    // fallback : marquer localement (incrémenter paiementsEffectues)
-                    const el = allEleves.find(e => e.id === eleveId);
-                    if (el) {
-                        el.paiementsEffectues = (parseInt(el.paiementsEffectues || 0, 10) + count);
-                        if (el.paiementsEffectues >= (el.nbPaiements || 1)) el.fraisValide = 1;
-                    }
-                    showSnackbar('✅ Paiements mis à jour (local)');
+                    const data = await response.json();
+                    throw new Error(data.error || 'Erreur lors de l\'enregistrement');
                 }
             } catch (error) {
-                console.warn('API validate failed, fallback local', error);
-                const el = allEleves.find(e => e.id === eleveId);
-                if (el) {
-                    el.paiementsEffectues = (parseInt(el.paiementsEffectues || 0, 10) + count);
-                    if (el.paiementsEffectues >= (el.nbPaiements || 1)) el.fraisValide = 1;
-                }
-                showSnackbar('✅ Paiements mis à jour (local)');
+                console.error('Erreur:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'enregistrement du paiement');
             }
-            // Rafraîchir l'affichage
-            await loadAllData();
-            loadInscriptions();
-            loadFraisInscriptions();
+        }
+
+        // Afficher l'historique des paiements
+        async function showHistoriquePaiements(eleveId, eleveNom) {
+            try {
+                const response = await fetch(`${API_URL}/frais/historique/${eleveId}`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erreur chargement historique');
+                const historique = await response.json();
+                
+                const modeLabels = {
+                    'espece': '💵 Espèces',
+                    'virement': '🏦 Virement',
+                    'cheque': '📝 Chèque'
+                };
+                
+                let historiqueHtml = historique.length ? historique.map(p => `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:8px;">
+                        <div>
+                            <div style="font-weight:500;">${parseFloat(p.montant).toFixed(2)} €</div>
+                            <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">
+                                ${new Date(p.datePaiement).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                            </div>
+                            ${p.reference ? `<div style="font-size:11px; color:var(--md-sys-color-outline);">Réf: ${p.reference}</div>` : ''}
+                            ${p.notes ? `<div style="font-size:11px; color:var(--md-sys-color-outline); font-style:italic;">${p.notes}</div>` : ''}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="md-chip" style="font-size:11px;">${modeLabels[p.modePaiement] || p.modePaiement}</span>
+                            <button class="md-btn md-btn-text" style="color:var(--md-sys-color-error);" onclick="deletePaiement('${p.id}', '${eleveId}', '${eleveNom}')">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') : '<p style="color:var(--md-sys-color-on-surface-variant); text-align:center;">Aucun paiement enregistré</p>';
+                
+                const dialogHtml = `
+                    <div id="historiqueDialog" class="md-dialog-overlay" style="display:flex; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+                        <div class="md-dialog" style="background:var(--md-sys-color-surface); border-radius:28px; padding:24px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto;">
+                            <h2 style="margin:0 0 8px 0;">Historique des paiements</h2>
+                            <p style="color:var(--md-sys-color-on-surface-variant); margin-bottom:20px;">${eleveNom}</p>
+                            
+                            <div id="historiqueContent">${historiqueHtml}</div>
+                            
+                            <div style="display:flex; justify-content:flex-end; margin-top:24px;">
+                                <button class="md-btn md-btn-filled" onclick="closeHistoriqueDialog()">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', dialogHtml);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSnackbar('Erreur lors du chargement de l\'historique');
+            }
+        }
+
+        function closeHistoriqueDialog() {
+            const dialog = document.getElementById('historiqueDialog');
+            if (dialog) dialog.remove();
+        }
+
+        async function deletePaiement(paiementId, eleveId, eleveNom) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/frais/paiement/${paiementId}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+                
+                if (response.ok) {
+                    showSnackbar('✅ Paiement supprimé');
+                    closeHistoriqueDialog();
+                    await loadFraisInscriptions();
+                    showHistoriquePaiements(eleveId, eleveNom);
+                } else {
+                    throw new Error('Erreur lors de la suppression');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSnackbar('Erreur lors de la suppression du paiement');
+            }
+        }
+
+        // Modifier les frais d'un élève
+        function editFraisEleve(eleveId, montantActuel, nbMensualites) {
+            const dialogHtml = `
+                <div id="editFraisDialog" class="md-dialog-overlay" style="display:flex; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+                    <div class="md-dialog" style="background:var(--md-sys-color-surface); border-radius:28px; padding:24px; max-width:400px; width:90%;">
+                        <h2 style="margin:0 0 16px 0;">Modifier les frais</h2>
+                        
+                        <div style="display:flex; flex-direction:column; gap:16px;">
+                            <div class="md-text-field">
+                                <label>Montant total des frais (€)</label>
+                                <input type="number" id="edit_frais_montant" min="0" step="0.01" value="${montantActuel}">
+                            </div>
+                            
+                            <div class="md-text-field">
+                                <label>Nombre de mensualités</label>
+                                <input type="number" id="edit_frais_mensualites" min="1" max="12" value="${nbMensualites}">
+                            </div>
+                        </div>
+                        
+                        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:24px;">
+                            <button class="md-btn md-btn-text" onclick="closeEditFraisDialog()">Annuler</button>
+                            <button class="md-btn md-btn-filled" onclick="submitEditFrais('${eleveId}')">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', dialogHtml);
+        }
+
+        function closeEditFraisDialog() {
+            const dialog = document.getElementById('editFraisDialog');
+            if (dialog) dialog.remove();
+        }
+
+        async function submitEditFrais(eleveId) {
+            const fraisInscription = parseFloat(document.getElementById('edit_frais_montant').value) || 0;
+            const nbMensualites = parseInt(document.getElementById('edit_frais_mensualites').value) || 1;
+            
+            try {
+                const response = await fetch(`${API_URL}/frais/eleve/${eleveId}`, {
+                    method: 'PUT',
+                    headers: {
+                        ...getHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ fraisInscription, nbMensualites })
+                });
+                
+                if (response.ok) {
+                    showSnackbar('✅ Frais mis à jour');
+                    closeEditFraisDialog();
+                    await loadFraisInscriptions();
+                } else {
+                    throw new Error('Erreur lors de la mise à jour');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSnackbar('Erreur lors de la mise à jour des frais');
+            }
+        }
+
+        // Afficher les statistiques globales
+        async function showFraisStats() {
+            try {
+                const [statsResponse, modesResponse] = await Promise.all([
+                    fetch(`${API_URL}/frais/stats`, { headers: getHeaders() }),
+                    fetch(`${API_URL}/frais/stats/modes`, { headers: getHeaders() })
+                ]);
+                
+                const stats = await statsResponse.json();
+                const modes = await modesResponse.json();
+                
+                const modeLabels = {
+                    'espece': '💵 Espèces',
+                    'virement': '🏦 Virement',
+                    'cheque': '📝 Chèque'
+                };
+                
+                const modesHtml = modes.map(m => `
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                        <span>${modeLabels[m.modePaiement] || m.modePaiement}</span>
+                        <span style="font-weight:500;">${parseFloat(m.total).toFixed(2)} € (${m.count} paiement(s))</span>
+                    </div>
+                `).join('') || '<p>Aucun paiement enregistré</p>';
+                
+                const dialogHtml = `
+                    <div id="statsDialog" class="md-dialog-overlay" style="display:flex; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+                        <div class="md-dialog" style="background:var(--md-sys-color-surface); border-radius:28px; padding:24px; max-width:500px; width:90%;">
+                            <h2 style="margin:0 0 20px 0;">Statistiques des frais</h2>
+                            
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                                <div style="background:var(--md-sys-color-primary-container); padding:16px; border-radius:12px; text-align:center;">
+                                    <div style="font-size:24px; font-weight:600;">${stats.totalEleves || 0}</div>
+                                    <div style="font-size:12px;">Élèves</div>
+                                </div>
+                                <div style="background:var(--md-sys-color-tertiary-container); padding:16px; border-radius:12px; text-align:center;">
+                                    <div style="font-size:24px; font-weight:600;">${parseFloat(stats.totalPaye || 0).toFixed(0)} €</div>
+                                    <div style="font-size:12px;">Total encaissé</div>
+                                </div>
+                            </div>
+                            
+                            <h3 style="margin:16px 0 12px 0; font-size:14px;">Répartition par mode de paiement</h3>
+                            <div>${modesHtml}</div>
+                            
+                            <div style="display:flex; justify-content:flex-end; margin-top:24px;">
+                                <button class="md-btn md-btn-filled" onclick="closeStatsDialog()">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', dialogHtml);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSnackbar('Erreur lors du chargement des statistiques');
+            }
+        }
+
+        function closeStatsDialog() {
+            const dialog = document.getElementById('statsDialog');
+            if (dialog) dialog.remove();
+        }
+
+        // Anciennes fonctions de compatibilité (peuvent être supprimées plus tard)
+        async function validateFraisEleve(eleveId) {
+            // Rediriger vers le nouveau dialogue de paiement
+            const eleve = allFraisData.find(e => e.id === eleveId);
+            if (eleve) {
+                const montant = parseFloat(eleve.fraisInscription) || 0;
+                const totalPaye = parseFloat(eleve.totalPaye) || 0;
+                showPaiementDialog(eleveId, `${eleve.prenom} ${eleve.nom}`, montant, totalPaye);
+            }
         }
 
         async function validateFraisFamille(familleId) {
-            if (!confirm('Valider le paiement des frais pour cette famille et tous ses enfants ?')) return;
-            try {
-                const response = await fetch(`${API_URL}/eleves/validate-frais-famille`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ familleId }) });
-                if (response.ok) {
-                    showSnackbar('✅ Frais de la famille validés');
-                } else {
-                    // fallback local
-                    allEleves.forEach(e => { if (e.familleLienId === familleId) e.fraisValide = true; });
-                    showSnackbar('✅ Frais marqués comme validés (local)');
-                }
-            } catch (error) {
-                console.warn('API validate famille failed, fallback local', error);
-                allEleves.forEach(e => { if (e.familleLienId === familleId) e.fraisValide = true; });
-                showSnackbar('✅ Frais marqués comme validés (local)');
-            }
-            await loadAllData();
-            loadInscriptions();
-            loadFraisInscriptions();
+            showSnackbar('Utilisez la gestion individuelle des paiements pour chaque élève');
         }
 
         // ==================== ACTUALITÉS ====================

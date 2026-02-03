@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
-const { TOKEN_EXPIRY, SESSION_CONFIG } = require('../config/constants');
+const { TOKEN_EXPIRY, SESSION_CONFIG, SERVER_CONFIG } = require('../config/constants');
 const { sendEmail } = require('../config/email');
 const { generateToken, generateId, dbGet, dbRun, dbAll } = require('../utils/helpers');
 const { requireAuth } = require('../middleware/auth');
@@ -72,8 +72,23 @@ router.post('/login', async (req, res) => {
             return res.json({ user, token });
         }
 
-        // Vérifier dans la table ÉLÈVES
-        row = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        // Vérifier dans la table PARENTS (nouveau système)
+        row = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        
+        if (row) {
+            const user = {
+                id: row.id,
+                email: row.email,
+                role: 'parent',
+                nom: row.nom,
+                prenom: row.prenom
+            };
+            const token = await createSession(user, req);
+            return res.json({ user, token });
+        }
+
+        // Vérifier dans la table ÉLÈVES (pour les étudiants majeurs)
+        row = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1 AND status = ?', [email, password, 'majeur']);
         
         if (row) {
             const user = {
@@ -296,11 +311,22 @@ router.post('/forgot-password', async (req, res) => {
             }
         }
         
+        // Vérifier parents
+        if (!userFound) {
+            const parent = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND activated = 1', [email]);
+            if (parent) {
+                await dbRun(db, 'UPDATE parents SET resetToken = ?, resetExpires = ? WHERE id = ?', 
+                    [resetToken, resetExpires, parent.id]);
+                userName = `${parent.prenom} ${parent.nom}`;
+                userFound = true;
+            }
+        }
+        
         if (!userFound) {
             return res.json({ message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
         }
         
-        const resetLink = `http://${req.headers.host}/reset-password.html?token=${resetToken}`;
+        const resetLink = `${SERVER_CONFIG.BASE_URL}/reset-password.html?token=${resetToken}`;
         
         try {
             await sendEmail(email, 'resetPassword', userName, resetLink);
@@ -321,6 +347,10 @@ router.get('/check-reset-token/:token', async (req, res) => {
     const { token } = req.params;
     
     try {
+        const parent = await dbGet(db, 'SELECT id FROM parents WHERE resetToken = ? AND resetExpires > ?', 
+            [token, Date.now()]);
+        if (parent) return res.json({ valid: true, type: 'parent' });
+        
         const eleve = await dbGet(db, 'SELECT id FROM eleves WHERE resetToken = ? AND resetExpires > ?', 
             [token, Date.now()]);
         if (eleve) return res.json({ valid: true, type: 'eleve' });
@@ -352,7 +382,7 @@ router.post('/reset-password', async (req, res) => {
     }
     
     try {
-        const tables = ['eleves', 'professeurs', 'staff'];
+        const tables = ['parents', 'eleves', 'professeurs', 'staff'];
         let updated = false;
         
         for (const table of tables) {
@@ -394,7 +424,8 @@ router.put('/change-password', requireAuth, (req, res) => {
     
     // Déterminer la table selon le rôle
     let tableName;
-    if (userRole === 'eleve') tableName = 'eleves';
+    if (userRole === 'parent') tableName = 'parents';
+    else if (userRole === 'eleve') tableName = 'eleves';
     else if (userRole === 'professeur') tableName = 'professeurs';
     else if (userRole === 'staff') tableName = 'staff';
     else return res.status(400).json({ error: 'Rôle utilisateur invalide' });

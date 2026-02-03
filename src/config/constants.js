@@ -3,7 +3,8 @@
 // Configuration du serveur
 const SERVER_CONFIG = {
     PORT: process.env.PORT || 3000,
-    HOST: '0.0.0.0'
+    HOST: '0.0.0.0',
+    BASE_URL: process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
 };
 
 // Permissions par rôle
@@ -12,6 +13,7 @@ const PERMISSIONS = {
     directeur: ['create', 'read', 'update', 'delete'],
     secretariat: ['create', 'read', 'update'],
     professeur: ['read', 'create_absence', 'create_appreciation'],
+    parent: ['read_own'],
     eleve: ['read_own']
 };
 
