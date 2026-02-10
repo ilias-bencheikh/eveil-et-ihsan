@@ -31,7 +31,20 @@ async function apiRequest(endpoint, options = {}) {
     };
     
     try {
-        const response = await fetch(`${API_URL}${endpoint}`, config);
+        // Construire l'URL de façon robuste :
+        // - si `endpoint` est une URL absolue, l'utiliser telle quelle
+        // - si `endpoint` commence par `/api`, éviter de préfixer `API_URL` (évite `/api/api`)
+        // - sinon préfixer par `API_URL`
+        let url;
+        if (/^https?:\/\//i.test(endpoint)) {
+            url = endpoint;
+        } else if (endpoint.startsWith('/api')) {
+            url = `${window.location.origin}${endpoint}`;
+        } else {
+            url = `${API_URL}${endpoint}`;
+        }
+
+        const response = await fetch(url, config);
         const data = await response.json();
         
         // Gérer les sessions expirées
@@ -439,6 +452,93 @@ const EmailService = {
     }
 };
 
+// Service des parents
+const ParentsService = {
+    async getAll() {
+        return apiRequest('/parents');
+    },
+    
+    async getById(id) {
+        return apiRequest(`/parents/${id}`);
+    },
+    
+    async create(parent) {
+        return apiRequest('/parents', {
+            method: 'POST',
+            body: JSON.stringify(parent)
+        });
+    },
+    
+    async update(id, parent) {
+        return apiRequest(`/parents/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(parent)
+        });
+    },
+    
+    async delete(id) {
+        return apiRequest(`/parents/${id}`, {
+            method: 'DELETE'
+        });
+    },
+    
+    async activate(token, password) {
+        return apiRequest('/parents/activate', {
+            method: 'POST',
+            body: JSON.stringify({ token, password })
+        });
+    },
+    
+    async checkToken(token) {
+        return apiRequest(`/parents/check-token/${token}`);
+    },
+    
+    async getProfile() {
+        return apiRequest('/parents/profil/me');
+    },
+    
+    async updateProfile(data) {
+        return apiRequest('/parents/profil/me', {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    },
+    
+    async getMyChildren() {
+        return apiRequest('/parents/mes-enfants');
+    },
+    
+    async getParentsOfEleve(eleveId) {
+        return apiRequest(`/parents/eleve/${eleveId}`);
+    },
+    
+    async linkEleveParent(eleveId, parentId, relation, isPrimary) {
+        return apiRequest('/parents/link', {
+            method: 'POST',
+            body: JSON.stringify({ eleveId, parentId, relation, isPrimary })
+        });
+    },
+    
+    async unlinkEleveParent(linkId) {
+        return apiRequest(`/parents/link/${linkId}`, {
+            method: 'DELETE'
+        });
+    },
+    
+    async inscription(data) {
+        return apiRequest('/parents/inscription', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+    
+    async sendActivation(id) {
+        return apiRequest(`/parents/${id}/send-activation`, {
+            method: 'POST'
+        });
+    }
+};
+
 // Export global
 window.API = {
     Auth: AuthService,
@@ -449,5 +549,6 @@ window.API = {
     Appreciations: AppreciationsService,
     Messagerie: MessagerieService,
     Staff: StaffService,
-    Email: EmailService
+    Email: EmailService,
+    Parents: ParentsService
 };

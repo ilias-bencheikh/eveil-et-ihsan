@@ -11,7 +11,9 @@ const PERMISSIONS = {
     admin: ['create', 'read', 'update', 'delete'],
     directeur: ['create', 'read', 'update', 'delete'],
     secretariat: ['create', 'read', 'update'],
+    secretaire: ['create', 'read', 'update'],
     professeur: ['read', 'create_absence', 'create_appreciation'],
+    parent: ['read_own', 'read_children'],
     eleve: ['read_own']
 };
 

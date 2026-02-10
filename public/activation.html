@@ -210,6 +210,8 @@
                     checkUrl = `${API_URL}/professeurs/check-token/${token}`;
                 } else if (type === 'staff') {
                     checkUrl = `${API_URL}/staff/check-token/${token}`;
+                } else if (type === 'parent') {
+                    checkUrl = `${API_URL}/parents/check-token/${token}`;
                 } else {
                     checkUrl = `${API_URL}/eleves/check-token/${token}`;
                 }
@@ -281,6 +283,8 @@
                     activateUrl = `${API_URL}/professeurs/activate`;
                 } else if (type === 'staff') {
                     activateUrl = `${API_URL}/staff/activate`;
+                } else if (type === 'parent') {
+                    activateUrl = `${API_URL}/parents/activate`;
                 } else {
                     activateUrl = `${API_URL}/eleves/activate`;
                 }

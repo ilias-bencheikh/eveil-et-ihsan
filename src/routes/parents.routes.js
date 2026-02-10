@@ -1,0 +1,585 @@
+const express = require('express');
+const router = express.Router();
+const { db } = require('../config/database');
+const { checkPermission, requireAuth } = require('../middleware/auth');
+const { generateToken, generateId, dbGet, dbRun, dbAll } = require('../utils/helpers');
+const { sendEmail } = require('../config/email');
+
+// ====================================================================
+//  ROUTES SPÉCIFIQUES (AVANT /:id pour éviter les conflits de routing)
+// ====================================================================
+
+// ================== PROFIL PARENT (connecté) ==================
+
+// Obtenir le profil du parent connecté
+router.get('/profil/me', requireAuth, async (req, res) => {
+    if (req.userRole !== 'parent') {
+        return res.status(403).json({ error: 'Accès réservé aux parents' });
+    }
+    
+    try {
+        const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession FROM parents WHERE id = ?', [req.userId]);
+        
+        if (!parent) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+        
+        // Récupérer les enfants
+        const enfants = await dbAll(db, `
+            SELECT e.id, e.nom, e.prenom, e.dateNaissance, e.classe, e.photo, e.status, 
+                   e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues,
+                   ep.relation, ep.isPrimary
+            FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [req.userId]);
+        
+        res.json({ ...parent, enfants });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Mettre à jour le profil du parent connecté
+router.put('/profil/me', requireAuth, async (req, res) => {
+    if (req.userRole !== 'parent') {
+        return res.status(403).json({ error: 'Accès réservé aux parents' });
+    }
+    
+    const { tel, adresse } = req.body;
+    
+    try {
+        await dbRun(db, 'UPDATE parents SET tel = ?, adresse = ? WHERE id = ?', [tel || null, adresse || null, req.userId]);
+        
+        const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession FROM parents WHERE id = ?', [req.userId]);
+        res.json({ message: 'Profil mis à jour', parent });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Obtenir les enfants du parent connecté
+router.get('/mes-enfants', requireAuth, async (req, res) => {
+    if (req.userRole !== 'parent') {
+        return res.status(403).json({ error: 'Accès réservé aux parents' });
+    }
+    
+    try {
+        const enfants = await dbAll(db, `
+            SELECT e.*, ep.relation, ep.isPrimary
+            FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [req.userId]);
+        
+        res.json(enfants);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ================== ACTIVATION PARENT ==================
+
+// Vérifier un token d'activation parent
+router.get('/check-token/:token', async (req, res) => {
+    try {
+        const parent = await dbGet(db, 
+            'SELECT nom, prenom, email FROM parents WHERE activationToken = ? AND activated = 0', 
+            [req.params.token]
+        );
+        
+        if (!parent) {
+            return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
+        }
+        
+        res.json(parent);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Activer un compte parent
+router.post('/activate', async (req, res) => {
+    const { token, password } = req.body;
+    
+    if (!token || !password) {
+        return res.status(400).json({ error: 'Token et mot de passe requis' });
+    }
+    
+    if (password.length < 6) {
+        return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
+    }
+    
+    try {
+        const parent = await dbGet(db, 'SELECT * FROM parents WHERE activationToken = ? AND activated = 0', [token]);
+        
+        if (!parent) {
+            return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
+        }
+        
+        await dbRun(db, 
+            'UPDATE parents SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
+            [password, parent.id]
+        );
+        
+        res.json({ 
+            message: 'Compte activé avec succès! Vous pouvez maintenant vous connecter.',
+            email: parent.email
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ================== INSCRIPTION PARENT (publique) ==================
+
+// Inscription d'enfants avec 0, 1 ou 2 parents
+router.post('/inscription', async (req, res) => {
+    const { 
+        parent1, // { nom, prenom, email, tel, adresse, profession } - optionnel
+        parent2, // { nom, prenom, email, tel, adresse, profession } - optionnel
+        enfants  // [{ nom, prenom, dateNaissance, classe, fraisInscription, nbPaiements, email }]
+    } = req.body;
+    
+    // parent1 peut être null/vide (0 parent)
+    const hasParent1 = parent1 && parent1.email && parent1.nom && parent1.prenom;
+    const hasParent2 = parent2 && parent2.email && parent2.nom && parent2.prenom;
+    
+    if (!enfants || enfants.length === 0) {
+        return res.status(400).json({ error: 'Au moins un enfant requis' });
+    }
+    
+    // Si aucun parent, chaque enfant doit avoir un email pour créer son propre compte
+    if (!hasParent1 && !hasParent2) {
+        for (let i = 0; i < enfants.length; i++) {
+            if (!enfants[i].email || !enfants[i].email.trim()) {
+                return res.status(400).json({ error: `L'email est obligatoire pour l'élève ${enfants[i].prenom || (i+1)} car aucun parent n'est renseigné` });
+            }
+        }
+    }
+    
+    try {
+        // Vérifier que les emails des parents ne sont pas déjà utilisés
+        const parentsToCheck = [parent1, parent2].filter(p => p && p.email && p.nom && p.prenom);
+        for (const parentData of parentsToCheck) {
+            const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [parentData.email]);
+            if (existingParent) {
+                return res.status(400).json({ error: `L'email ${parentData.email} est déjà utilisé par un parent` });
+            }
+            
+            const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [parentData.email]);
+            if (existingEleve) {
+                return res.status(400).json({ error: `L'email ${parentData.email} est déjà utilisé` });
+            }
+            
+            const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [parentData.email]);
+            if (existingProf) {
+                return res.status(400).json({ error: `L'email ${parentData.email} est déjà utilisé` });
+            }
+            
+            const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [parentData.email]);
+            if (existingStaff) {
+                return res.status(400).json({ error: `L'email ${parentData.email} est déjà utilisé` });
+            }
+        }
+        
+        // Vérifier les emails des enfants (surtout si 0 parent)
+        for (const enfant of enfants) {
+            if (enfant.email && enfant.email.trim()) {
+                const emailToCheck = enfant.email.trim();
+                const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [emailToCheck]);
+                if (existingEleve) return res.status(400).json({ error: `L'email ${emailToCheck} est déjà utilisé par un élève` });
+                const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [emailToCheck]);
+                if (existingParent) return res.status(400).json({ error: `L'email ${emailToCheck} est déjà utilisé` });
+                const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [emailToCheck]);
+                if (existingProf) return res.status(400).json({ error: `L'email ${emailToCheck} est déjà utilisé` });
+                const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [emailToCheck]);
+                if (existingStaff) return res.status(400).json({ error: `L'email ${emailToCheck} est déjà utilisé` });
+            }
+        }
+        
+        // Vérifier que parent1 et parent2 n'ont pas le même email
+        if (hasParent1 && hasParent2 && parent1.email === parent2.email) {
+            return res.status(400).json({ error: 'Les deux parents doivent avoir des emails différents' });
+        }
+        
+        const createdParents = [];
+        const createdEnfants = [];
+        
+        // Créer le premier parent si fourni
+        let parent1Id = null;
+        if (hasParent1) {
+            parent1Id = generateId('parent');
+            const activationToken1 = generateToken();
+            await dbRun(db, `
+                INSERT INTO parents (id, nom, prenom, email, tel, adresse, profession, activationToken, activated)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+            `, [parent1Id, parent1.nom, parent1.prenom, parent1.email, parent1.tel || null, parent1.adresse || null, parent1.profession || null, activationToken1]);
+            createdParents.push({ id: parent1Id, ...parent1, isPrimary: true, activationToken: activationToken1 });
+        }
+        
+        // Créer le second parent si fourni
+        let parent2Id = null;
+        if (hasParent2) {
+            parent2Id = generateId('parent');
+            const activationToken2 = generateToken();
+            await dbRun(db, `
+                INSERT INTO parents (id, nom, prenom, email, tel, adresse, profession, activationToken, activated)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+            `, [parent2Id, parent2.nom, parent2.prenom, parent2.email, parent2.tel || null, parent2.adresse || null, parent2.profession || null, activationToken2]);
+            createdParents.push({ id: parent2Id, ...parent2, isPrimary: false, activationToken: activationToken2 });
+        }
+        
+        // Générer un ID de famille si plusieurs enfants
+        const familleLienId = enfants.length > 1 ? `FAM_${Date.now()}` : null;
+        
+        // Créer les enfants et les liaisons
+        for (const enfant of enfants) {
+            const eleveId = generateId('eleve');
+            const frais = parseFloat(enfant.fraisInscription || 0) || 0;
+            const nbPaiements = parseInt(enfant.nbPaiements || 1, 10) || 1;
+            
+            // Email de l'élève (obligatoire si 0 parent, optionnel sinon)
+            let eleveEmail = null;
+            let eleveActivationToken = null;
+            if (enfant.email && enfant.email.trim()) {
+                eleveEmail = enfant.email.trim();
+                eleveActivationToken = generateToken();
+            }
+            
+            await dbRun(db, `
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues)
+                VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, 0, 0)
+            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, enfants.length > 1 ? 1 : 0, enfants.length, familleLienId, frais, nbPaiements]);
+            
+            createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail });
+            
+            // Lier l'enfant au premier parent si présent
+            if (parent1Id) {
+                await dbRun(db, `
+                    INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+                    VALUES (?, ?, ?, 'parent', 1)
+                `, [generateId('ep'), eleveId, parent1Id]);
+            }
+            
+            // Lier l'enfant au second parent si présent
+            if (parent2Id) {
+                await dbRun(db, `
+                    INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+                    VALUES (?, ?, ?, 'parent', 0)
+                `, [generateId('ep'), eleveId, parent2Id]);
+            }
+        }
+        
+        res.status(201).json({
+            success: true,
+            message: `Inscription réussie. ${createdParents.length} parent(s) et ${createdEnfants.length} enfant(s) créé(s). En attente de validation.`,
+            parents: createdParents.map(p => ({ id: p.id, nom: p.nom, prenom: p.prenom, email: p.email })),
+            enfants: createdEnfants
+        });
+        
+    } catch (err) {
+        console.error('Erreur inscription parent:', err);
+        res.status(500).json({ error: 'Erreur lors de l\'inscription' });
+    }
+});
+
+// ================== LIAISONS ÉLÈVE-PARENT ==================
+
+// Lier un élève à un parent
+router.post('/link', checkPermission('update'), async (req, res) => {
+    const { eleveId, parentId, relation, isPrimary } = req.body;
+    
+    if (!eleveId || !parentId) {
+        return res.status(400).json({ error: 'eleveId et parentId requis' });
+    }
+    
+    try {
+        // Vérifier que l'élève existe
+        const eleve = await dbGet(db, 'SELECT id, status FROM eleves WHERE id = ?', [eleveId]);
+        if (!eleve) {
+            return res.status(404).json({ error: 'Élève non trouvé' });
+        }
+        
+        // Vérifier que le parent existe
+        const parent = await dbGet(db, 'SELECT id FROM parents WHERE id = ?', [parentId]);
+        if (!parent) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+        
+        // Vérifier que l'élève n'a pas déjà 2 parents
+        const existingLinks = await dbAll(db, 'SELECT id FROM eleve_parent WHERE eleveId = ?', [eleveId]);
+        if (existingLinks.length >= 2) {
+            return res.status(400).json({ error: 'Cet élève a déjà 2 parents liés. Supprimez une liaison d\'abord.' });
+        }
+        
+        // Vérifier que ce lien n'existe pas déjà
+        const existingLink = await dbGet(db, 'SELECT id FROM eleve_parent WHERE eleveId = ? AND parentId = ?', [eleveId, parentId]);
+        if (existingLink) {
+            return res.status(400).json({ error: 'Ce parent est déjà lié à cet élève' });
+        }
+        
+        const id = generateId('ep');
+        await dbRun(db, `
+            INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+            VALUES (?, ?, ?, ?, ?)
+        `, [id, eleveId, parentId, relation || 'parent', isPrimary ? 1 : 0]);
+        
+        // Note: L'élève garde son propre compte même s'il a des parents
+        
+        res.status(201).json({ id, eleveId, parentId, relation, isPrimary, message: 'Liaison créée' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Supprimer une liaison élève-parent
+router.delete('/link/:linkId', checkPermission('delete'), async (req, res) => {
+    const { linkId } = req.params;
+    
+    try {
+        const result = await dbRun(db, 'DELETE FROM eleve_parent WHERE id = ?', [linkId]);
+        
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Liaison non trouvée' });
+        }
+        
+        res.json({ message: 'Liaison supprimée' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Obtenir les parents d'un élève
+router.get('/eleve/:eleveId', requireAuth, async (req, res) => {
+    const { eleveId } = req.params;
+    
+    try {
+        const parents = await dbAll(db, `
+            SELECT p.id, p.nom, p.prenom, p.email, p.tel, p.adresse, p.profession, ep.relation, ep.isPrimary, ep.id as linkId
+            FROM parents p
+            INNER JOIN eleve_parent ep ON p.id = ep.parentId
+            WHERE ep.eleveId = ?
+        `, [eleveId]);
+        
+        res.json(parents);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ====================================================================
+//  ROUTES ADMIN (avec paramètre :id)
+// ====================================================================
+
+// Obtenir tous les parents
+router.get('/', requireAuth, async (req, res) => {
+    const userRole = req.userRole;
+    
+    if (!['admin', 'secretaire', 'directeur'].includes(userRole)) {
+        return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+    
+    try {
+        const parents = await dbAll(db, 'SELECT id, nom, prenom, email, tel, adresse, profession, activated, createdAt FROM parents', []);
+        
+        // Pour chaque parent, récupérer le nombre d'enfants
+        for (const parent of parents) {
+            const enfants = await dbAll(db, `
+                SELECT e.id, e.nom, e.prenom, e.classe
+                FROM eleves e
+                INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                WHERE ep.parentId = ?
+            `, [parent.id]);
+            parent.enfants = enfants;
+            parent.nbEnfants = enfants.length;
+        }
+        
+        res.json(parents);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Obtenir un parent par ID avec ses enfants
+router.get('/:id', requireAuth, async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession, activated FROM parents WHERE id = ?', [id]);
+        
+        if (!parent) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+        
+        // Récupérer les enfants liés à ce parent
+        const enfants = await dbAll(db, `
+            SELECT e.id, e.nom, e.prenom, e.dateNaissance, e.classe, e.photo, e.status, ep.relation, ep.isPrimary, ep.id as linkId
+            FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [id]);
+        
+        res.json({ ...parent, enfants });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Créer un parent (admin/secretariat)
+router.post('/', checkPermission('create'), async (req, res) => {
+    const { nom, prenom, email, tel, adresse, profession } = req.body;
+    
+    if (!nom || !prenom || !email) {
+        return res.status(400).json({ error: 'Nom, prénom et email requis' });
+    }
+    
+    try {
+        // Vérifier que l'email n'est pas déjà utilisé
+        const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [email]);
+        if (existingParent) {
+            return res.status(400).json({ error: 'Cet email est déjà utilisé par un parent' });
+        }
+        
+        const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [email]);
+        if (existingEleve) {
+            return res.status(400).json({ error: 'Cet email est déjà utilisé par un élève' });
+        }
+        
+        const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [email]);
+        if (existingProf) {
+            return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
+        }
+        
+        const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [email]);
+        if (existingStaff) {
+            return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du personnel' });
+        }
+        
+        const id = generateId('parent');
+        const activationToken = generateToken();
+        
+        await dbRun(db, `
+            INSERT INTO parents (id, nom, prenom, email, tel, adresse, profession, activationToken, activated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+        `, [id, nom, prenom, email, tel || null, adresse || null, profession || null, activationToken]);
+        
+        const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}&type=parent`;
+        
+        res.status(201).json({
+            id, nom, prenom, email, tel, adresse, profession,
+            activationLink,
+            message: 'Parent créé. Envoyez le lien d\'activation au parent.'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Mettre à jour un parent
+router.put('/:id', checkPermission('update'), async (req, res) => {
+    const { id } = req.params;
+    const { nom, prenom, email, tel, adresse, profession } = req.body;
+    
+    try {
+        // Vérifier que le parent existe
+        const existingParentById = await dbGet(db, 'SELECT id FROM parents WHERE id = ?', [id]);
+        if (!existingParentById) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+        
+        // Vérifier que l'email n'est pas déjà utilisé par un autre
+        if (email) {
+            const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ? AND id != ?', [email, id]);
+            if (existingParent) {
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un autre parent' });
+            }
+            
+            const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [email]);
+            if (existingEleve) {
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un élève' });
+            }
+            
+            const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [email]);
+            if (existingProf) {
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
+            }
+            
+            const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [email]);
+            if (existingStaff) {
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du personnel' });
+            }
+        }
+        
+        await dbRun(db, `
+            UPDATE parents SET nom = ?, prenom = ?, email = ?, tel = ?, adresse = ?, profession = ?
+            WHERE id = ?
+        `, [nom, prenom, email, tel || null, adresse || null, profession || null, id]);
+        
+        res.json({ id, nom, prenom, email, tel, adresse, profession });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Supprimer un parent
+router.delete('/:id', checkPermission('delete'), async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        // Vérifier que le parent existe
+        const parent = await dbGet(db, 'SELECT id FROM parents WHERE id = ?', [id]);
+        if (!parent) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+        
+        // Supprimer les liaisons élève-parent
+        await dbRun(db, 'DELETE FROM eleve_parent WHERE parentId = ?', [id]);
+        
+        // Supprimer le parent
+        await dbRun(db, 'DELETE FROM parents WHERE id = ?', [id]);
+        
+        res.json({ message: 'Parent supprimé' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Envoyer le lien d'activation à un parent
+router.post('/:id/send-activation', checkPermission('update'), async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const parent = await dbGet(db, 'SELECT * FROM parents WHERE id = ?', [id]);
+        
+        if (!parent) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+        
+        if (parent.activated) {
+            return res.status(400).json({ error: 'Ce compte est déjà activé' });
+        }
+        
+        // Générer un nouveau token si nécessaire
+        let token = parent.activationToken;
+        if (!token) {
+            token = generateToken();
+            await dbRun(db, 'UPDATE parents SET activationToken = ? WHERE id = ?', [token, id]);
+        }
+        
+        const activationLink = `http://${req.headers.host}/activation.html?token=${token}&type=parent`;
+        
+        try {
+            await sendEmail(parent.email, 'activation', `${parent.prenom} ${parent.nom}`, activationLink);
+            res.json({ message: 'Email d\'activation envoyé', activationLink });
+        } catch (emailError) {
+            console.error('Erreur envoi email:', emailError);
+            res.json({ message: 'Erreur envoi email, mais voici le lien:', activationLink });
+        }
+        
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;

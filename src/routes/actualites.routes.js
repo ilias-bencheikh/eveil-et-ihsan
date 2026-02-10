@@ -7,11 +7,43 @@ const { generateId } = require('../utils/helpers');
 router.get('/', (req, res) => {
     const userRole = req.headers['x-user-role'];
     const userClasse = req.headers['x-user-classe'];
+    const userId = req.headers['x-user-id'];
     
     // Filtrer les actualités non expirées (dateFin NULL ou > date actuelle)
     const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
     db.all('SELECT * FROM actualites WHERE (dateFin IS NULL OR dateFin > ?) ORDER BY date DESC, createdAt DESC', [currentDate], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
+        
+        // Pour les parents, on doit d'abord récupérer les classes de leurs enfants
+        if (userRole === 'parent') {
+            db.all(`
+                SELECT DISTINCT e.classe FROM eleves e
+                INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                WHERE ep.parentId = ? AND e.classe IS NOT NULL
+            `, [userId], (err2, classesRows) => {
+                if (err2) return res.status(500).json({ error: err2.message });
+                
+                const enfantClasses = classesRows.map(r => r.classe);
+                
+                const filtered = (rows || []).filter(actu => {
+                    if (!actu.cible || actu.cible === 'tous') return true;
+                    
+                    try {
+                        const cibles = JSON.parse(actu.cible);
+                        // Parents voient les actus ciblant "eleves" ou les classes de leurs enfants
+                        if (cibles.includes('eleves')) return true;
+                        // Vérifier si une des classes des enfants est ciblée
+                        if (enfantClasses.some(c => cibles.includes(c))) return true;
+                        return false;
+                    } catch {
+                        return true;
+                    }
+                });
+                
+                res.json(filtered);
+            });
+            return;
+        }
         
         // Filtrer les actualités selon le rôle et la classe
         let filtered = (rows || []).filter(actu => {

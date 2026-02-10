@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Élève - Eveil & Ihsan</title>
+    <title>Espace �?lève - Eveil & Ihsan</title>
     
     <!-- logo -->
     <link rel="icon" type="image/png" href="logo.png">
@@ -1054,7 +1054,7 @@
                 </div>
                 <div class="sidebar-brand">
                     <h1>Eveil & Ihsan</h1>
-                    <span>Espace Élève</span>
+                    <span>Espace �?lève</span>
                 </div>
             </div>
 
@@ -1517,13 +1517,13 @@
                                 </div>
                             </div>
 
-                            <!-- État vide -->
+                            <!-- �?tat vide -->
                             <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
                                 <span class="material-icons" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; display: block;">mail</span>
                                 <h4 style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Aucun message</h4>
                                 <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">Vous n'avez pas encore de messages dans cette boîte.</p>
                                 <button class="md-btn md-btn-filled" onclick="showComposeMessage()" style="min-height: 36px; padding: 0 16px; font-size: 14px;">
-                                    <span class="material-icons" style="font-size: 18px;">edit</span> Écrire un message
+                                    <span class="material-icons" style="font-size: 18px;">edit</span> �?crire un message
                                 </button>
                             </div>
                         </div>
@@ -1548,14 +1548,14 @@
                 <div id="frais-admin" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Administration — Gestion des frais</h3>
+                            <h3 class="widget-card-title">Administration �?" Gestion des frais</h3>
                         </div>
                         <div class="widget-card-content">
                             <div style="display:flex; flex-direction:column; gap:12px;">
                                 <div>
                                     <label class="form-label">Cible</label>
                                     <div style="display:flex; gap:12px; align-items:center;">
-                                        <label><input type="radio" name="adminFraisTarget" value="eleve" checked onchange="adminFraisTargetChanged()"> Élève</label>
+                                        <label><input type="radio" name="adminFraisTarget" value="eleve" checked onchange="adminFraisTargetChanged()"> �?lève</label>
                                         <label><input type="radio" name="adminFraisTarget" value="famille" onchange="adminFraisTargetChanged()"> Famille</label>
                                     </div>
                                 </div>
@@ -1575,7 +1575,7 @@
 
                                 <div style="display:flex; gap:12px;">
                                     <div style="flex:1;">
-                                        <label class="form-label">Montant total (€)</label>
+                                        <label class="form-label">Montant total (�,�)</label>
                                         <input id="adminInitTotal" type="number" class="form-input" placeholder="Ex: 300" />
                                     </div>
                                     <div style="width:150px;">
@@ -1636,7 +1636,7 @@
             window.location.href = 'index.html';
         }
 
-        // --- GESTION DES DONNÉES DE FAMILLE ---
+        // --- GESTION DES DONN�?ES DE FAMILLE ---
 
         let familyMembers = [];
         let currentChild = user;
@@ -1703,26 +1703,13 @@
 
                     // Définir l'enfant actuel (le premier ou celui connecté)
                     if (familyMembers.length > 0) {
-                        // Vérifier si c'est un élève majeur (pas de parent dans la famille)
-                        const isMajor = !familyMembers.some(m => m.id !== user.id);
-                        
-                        if (isMajor) {
-                            // Pour les élèves majeurs, utiliser directement l'objet user
-                            currentChild = user;
-                            // Mettre à jour user avec les données de familyMembers si elles existent
-                            const userInFamily = familyMembers.find(m => m.id === user.id);
-                            if (userInFamily) {
-                                Object.assign(user, userInFamily);
-                            }
-                        } else {
-                            // Pour les parents, utiliser l'enfant de la famille
-                            currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                        // Définir l'enfant actuel
+                        currentChild = familyMembers.find(m => m.id === user.id) || familyMembers[0];
+                        const userInFamily = familyMembers.find(m => m.id === user.id);
+                        if (userInFamily) {
+                            Object.assign(user, userInFamily);
                         }
-                        
-                        // Charger les informations complètes si nécessaire
-                        if (isMajor) {
-                            await loadUserCompleteData();
-                        }
+                        await loadUserCompleteData();
                     } else {
                         // Fallback si pas de données famille
                         currentChild = user;
@@ -1758,21 +1745,8 @@
                         tel: userData.tel,
                         photo: userData.photo,
                         nom: userData.nom,
-                        prenom: userData.prenom,
-                        status: userData.status,
-                        parentNom: userData.parentNom,
-                        parentPrenom: userData.parentPrenom,
-                        parentTel: userData.parentTel
+                        prenom: userData.prenom
                     };
-                    // Si l'utilisateur est mineur, définir parentInfo
-                    if (user.status === 'mineur' && user.parentNom && user.parentPrenom) {
-                        parentInfo = {
-                            nom: user.parentNom,
-                            prenom: user.parentPrenom,
-                            telephone: user.parentTel,
-                            adresse: user.parentAdresse
-                        };
-                    }
                     // Mettre à jour le localStorage avec les données complètes
                     localStorage.setItem('user', JSON.stringify(user));
                 }
@@ -1799,7 +1773,7 @@
                 // Parent : icône par défaut
                 avatarEl.innerHTML = '<i class="material-icons" style="font-size: 24px;">person</i>';
             } else {
-                // Élève : sa propre photo ou icône par défaut
+                // �?lève : sa propre photo ou icône par défaut
                 const avatarSource = currentChild.photo;
                 if (avatarSource) {
                     avatarEl.innerHTML = `<img src="${avatarSource}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
@@ -1828,7 +1802,7 @@
                     // Parent : icône par défaut
                     profileAvatarEl.innerHTML = '<i class="material-icons" style="font-size: 48px;">person</i>';
                 } else {
-                    // Élève : sa propre photo ou icône par défaut
+                    // �?lève : sa propre photo ou icône par défaut
                     const profileAvatarSource = currentChild.photo;
                     profileAvatarEl.innerHTML = profileAvatarSource ? 
                         `<img src="${profileAvatarSource}" alt="${prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : 
@@ -1853,7 +1827,7 @@
                     <div class="eleve-avatar">
                         <span class="material-icons" style="font-size: 48px;">person</span>
                     </div>
-                    <h2 class="eleve-name">${currentChild.prenom || 'Élève'} ${currentChild.nom || ''}</h2>
+                    <h2 class="eleve-name">${currentChild.prenom || '�?lève'} ${currentChild.nom || ''}</h2>
                     <p class="eleve-class">${currentChild.classe || 'Classe non assignée'}</p>
                 `;
                 familyCardsContainer.appendChild(card);
@@ -1873,7 +1847,7 @@
                     <div class="eleve-avatar">
                         ${avatarHtml}
                     </div>
-                    <h2 class="eleve-name">${member.prenom || 'Élève'} ${member.nom || ''}</h2>
+                    <h2 class="eleve-name">${member.prenom || '�?lève'} ${member.nom || ''}</h2>
                     <p class="eleve-class">${member.classe || 'Classe non assignée'}</p>
                 `;
                 
@@ -1937,7 +1911,7 @@
                     profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
                 }
             } else {
-                // Mode élève majeur : mettre à jour avec les informations de l'élève
+                // Mode élève : mettre à jour avec les informations de l'élève
                 document.getElementById('profileName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim();
                 document.getElementById('profileClass').textContent = user.classe || 'Classe non assignée';
                 document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
@@ -1990,7 +1964,7 @@
                     profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
                 }
             } else {
-                // Mode élève majeur : mettre à jour avec les informations de l'élève
+                // Mode élève : mettre à jour avec les informations de l'élève
                 document.getElementById('profileName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim();
                 document.getElementById('profileClass').textContent = user.classe || 'Classe non assignée';
                 document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
@@ -2026,7 +2000,7 @@
                     // Mode parent : configurer l'affichage
                     await loadParentProfile();
                 } else {
-                    // Mode élève majeur : configurer l'affichage
+                    // Mode élève : configurer l'affichage
                     await loadStudentProfile();
                 }
             } catch (error) {
@@ -2043,7 +2017,7 @@
             document.getElementById('profilePhone').value = currentChildInfo.contactTel || currentChildInfo.parentTel || '';
             document.getElementById('profileAdresse').value = currentChildInfo.parentAdresse || '';
 
-            // Masquer les champs spécifiques aux élèves majeurs
+            // Masquer les champs spécifiques au mode parent
             document.getElementById('currentPhotoContainer').style.display = 'none';
             document.getElementById('photo-upload').style.display = 'none';
             document.getElementById('studentPhotosContainer').style.display = 'grid';
@@ -2055,21 +2029,18 @@
             syncDisplay();
         }
 
-        // Charger le profil en mode élève majeur
+        // Charger le profil en mode élève
         async function loadStudentProfile() {
             // S'assurer que les données de l'utilisateur sont à jour
             await loadUserCompleteData();
 
             // Pré-remplir les champs du formulaire
             document.getElementById('profileEmail').value = user.email || '';
-            // Pour les mineurs, utiliser le téléphone du parent
-            const phoneValue = user.status === 'mineur' ? user.parentTel || '' : user.tel || '';
+            const phoneValue = user.tel || '';
             document.getElementById('profilePhone').value = phoneValue;
-            // Pour l'adresse, utiliser parentAdresse si mineur
-            const adresseValue = user.status === 'mineur' ? user.parentAdresse || '' : '';
-            document.getElementById('profileAdresse').value = adresseValue;
+            document.getElementById('profileAdresse').value = '';
 
-            // Masquer les champs des enfants, afficher ceux de l'élève majeur
+            // Masquer les champs des enfants, afficher ceux de l'élève
             document.getElementById('studentPhotosContainer').style.display = 'none';
             document.getElementById('photo-upload').style.display = 'block';
 
@@ -2266,7 +2237,7 @@
             }
         }
 
-        // Sauvegarder le profil en mode élève majeur
+        // Sauvegarder le profil en mode élève
         async function saveStudentProfile(email, phone) {
             const photoUploads = [];
             const photoDeletions = [];
@@ -2835,8 +2806,8 @@
                                     </div>
                                     <p class="actualite-preview">${a.description.length > 120 ? a.description.substring(0, 120) + '...' : a.description}</p>
                                     <div class="actualite-footer">
-                                        <span class="actualite-author">Par ${a.auteurNom || 'École'}</span>
-                                        <span class="actualite-read-more">Lire la suite →</span>
+                                        <span class="actualite-author">Par ${a.auteurNom || '�?cole'}</span>
+                                        <span class="actualite-read-more">Lire la suite �?'</span>
                                     </div>
                                 </div>
                             `;
@@ -2865,7 +2836,7 @@
                                                     month: 'long',
                                                     year: 'numeric'
                                                 })}</span>
-                                                <span class="actualite-author-full">Par ${a.auteurNom || 'École'}</span>
+                                                <span class="actualite-author-full">Par ${a.auteurNom || '�?cole'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -3041,7 +3012,7 @@
                     <div class="message-avatar">${otherInitial}</div>
                     <div class="message-content">
                         <div class="message-header">
-                            <span class="message-sender">${isReceived ? 'De: ' : 'À: '}${otherName || 'Inconnu'}</span>
+                            <span class="message-sender">${isReceived ? 'De: ' : '�?: '}${otherName || 'Inconnu'}</span>
                             <span class="message-date">${date}</span>
                         </div>
                         ${childBadge}
@@ -3127,7 +3098,7 @@
                 <div class="message-detail">
                     <div class="message-detail-header">
                         <div class="message-detail-meta">
-                            <span class="message-detail-label">${isReceived ? 'De:' : 'À:'}</span>
+                            <span class="message-detail-label">${isReceived ? 'De:' : '�?:'}</span>
                             <span class="message-detail-value">${otherName || 'Inconnu'}</span>
                         </div>
                         <div class="message-detail-meta">
@@ -3234,7 +3205,7 @@
                             </div>
                         </div>
                         <div class="message-content-section">
-                            <textarea id="messageContent" placeholder="Écrivez votre message..." rows="8"></textarea>
+                            <textarea id="messageContent" placeholder="�?crivez votre message..." rows="8"></textarea>
                         </div>
                     </div>
                 `);
@@ -3556,7 +3527,7 @@
             showDialog('Enregistrer un paiement', `
                 <div style="display:flex; flex-direction:column; gap:12px;">
                     <label class="form-label">Montant</label>
-                    <input type="number" id="newPaymentAmount" class="form-input" placeholder="Montant en €" />
+                    <input type="number" id="newPaymentAmount" class="form-input" placeholder="Montant en �,�" />
                     <label class="form-label">Date</label>
                     <input type="date" id="newPaymentDate" class="form-input" />
                 </div>
@@ -3647,7 +3618,7 @@
                 const resp = await fetch(`${API_URL}/eleves`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!resp.ok) throw new Error('Erreur chargement élèves');
                 const eleves = await resp.json();
-                select.innerHTML = '<option value="">-- Sélectionner --</option>' + eleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom} (${e.classe || '—'})</option>`).join('');
+                select.innerHTML = '<option value="">-- Sélectionner --</option>' + eleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom} (${e.classe || '�?"'})</option>`).join('');
             } catch (error) {
                 console.error('loadAdminEleves:', error);
                 select.innerHTML = '<option value="">Erreur chargement</option>';
@@ -3694,7 +3665,7 @@
                         <div style="margin-top:12px;"><strong>Historique des paiements</strong></div>
                         <div style="margin-top:8px;">${payments.length === 0 ? '<p class="text-on-surface-variant">Aucun paiement</p>' : payments.map(p => `
                             <div style="display:flex; justify-content:space-between; padding:8px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:8px;">
-                                <div>${formatCurrency(p.montant)} — ${new Date(p.date).toLocaleDateString('fr-FR')}</div>
+                                <div>${formatCurrency(p.montant)} �?" ${new Date(p.date).toLocaleDateString('fr-FR')}</div>
                                 <div>${p.valide ? '<span style="color:var(--md-sys-color-primary)">Validé</span>' : `<button class="md-btn md-btn-text" onclick="validatePayment('${p.id}')">Valider</button>`}</div>
                             </div>
                         `).join('')}</div>
@@ -3771,7 +3742,7 @@
                     profileAvatarEl.innerHTML = `<span class="material-icons" style="font-size: 48px;">person</span>`;
                 }
             } else {
-                // Mode élève majeur : mettre à jour avec les informations de l'élève
+                // Mode élève : mettre à jour avec les informations de l'élève
                 document.getElementById('profileName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim();
                 document.getElementById('profileClass').textContent = user.classe || 'Classe non assignée';
                 document.getElementById('profileEmailDisplay').textContent = user.email || 'Non défini';
@@ -4019,7 +3990,7 @@
             }
         }
 
-        // Sauvegarder le profil en mode élève majeur
+        // Sauvegarder le profil en mode élève
         async function saveStudentProfile(email, phone) {
             const photoUploads = [];
             const photoDeletions = [];
@@ -4261,13 +4232,13 @@
 
         // Initialisation des événements
         document.addEventListener('DOMContentLoaded', function() {
-            // Événement pour le formulaire de profil
+            // �?vénement pour le formulaire de profil
             const profileForm = document.getElementById('profileForm');
             if (profileForm) {
                 profileForm.addEventListener('submit', saveProfile);
             }
 
-            // Événement pour le formulaire de mot de passe
+            // �?vénement pour le formulaire de mot de passe
             const passwordForm = document.getElementById('passwordForm');
             if (passwordForm) {
                 passwordForm.addEventListener('submit', changePassword);

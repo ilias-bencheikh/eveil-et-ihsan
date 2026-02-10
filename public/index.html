@@ -1094,11 +1094,30 @@
                                 </div>
                             </div>
 
-                            <!-- Info parent -->
-                            <div class="parent-info-section" style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                            <!-- Bouton pour ajouter/retirer la section parent -->
+                            <div style="margin-bottom: 16px;">
+                                <button type="button" id="toggleParentSectionBtn" class="md-btn md-btn-tonal" onclick="toggleParentSection()" style="display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; padding: 12px;">
+                                    <span class="material-icons">person_add</span>
+                                    <span>Ajouter un parent / tuteur</span>
+                                </button>
+                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-align: center; margin-top: 8px;">
+                                    Si aucun parent n'est renseigné, un compte sera créé pour chaque élève (email obligatoire).
+                                </p>
+                            </div>
+
+                            <!-- Info parent (caché par défaut) -->
+                            <div class="parent-info-section" style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px; display: none;">
                                 <h4 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                                     <span class="material-icons">person</span> Informations du parent/tuteur
+                                    <button type="button" class="md-btn md-btn-text" onclick="toggleParentSection()" style="margin-left: auto; color: var(--md-sys-color-error);">
+                                        <span class="material-icons">close</span> Retirer
+                                    </button>
                                 </h4>
+                                <div style="display:flex; gap:8px; margin-bottom:12px;">
+                                    <button type="button" id="toggleAddParent2Btn" class="md-btn md-btn-outlined" style="margin-left:auto;" onclick="toggleParent2()">
+                                        <span class="material-icons">person_add</span> Ajouter un 2ᵉ parent
+                                    </button>
+                                </div>
                                 <div class="md-form-grid">
                                     <div class="md-text-field">
                                         <div class="md-text-field-container">
@@ -1128,6 +1147,42 @@
                                         <div class="md-text-field-container">
                                             <input type="text" id="insc_parentAdresse" class="md-text-field-input" placeholder=" ">
                                             <label class="md-text-field-label">Adresse</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Deuxième parent (caché par défaut) -->
+                                <div id="parent2Section" style="display:none; margin-top:16px; background: rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                                    <h5 style="margin:0 0 8px 0; font-size:14px; color:var(--md-sys-color-on-primary-container);">Deuxième parent / tuteur</h5>
+                                    <div class="md-form-grid">
+                                        <div class="md-text-field">
+                                            <div class="md-text-field-container">
+                                                <input type="text" id="insc_parent2Nom" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Nom du 2ᵉ parent</label>
+                                            </div>
+                                        </div>
+                                        <div class="md-text-field">
+                                            <div class="md-text-field-container">
+                                                <input type="text" id="insc_parent2Prenom" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Prénom du 2ᵉ parent</label>
+                                            </div>
+                                        </div>
+                                        <div class="md-text-field">
+                                            <div class="md-text-field-container">
+                                                <input type="email" id="insc_parent2Email" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Email (connexion)</label>
+                                            </div>
+                                        </div>
+                                        <div class="md-text-field">
+                                            <div class="md-text-field-container">
+                                                <input type="tel" id="insc_parent2Tel" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Téléphone</label>
+                                            </div>
+                                        </div>
+                                        <div class="md-text-field">
+                                            <div class="md-text-field-container">
+                                                <input type="text" id="insc_parent2Adresse" class="md-text-field-input" placeholder=" ">
+                                                <label class="md-text-field-label">Adresse</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1665,10 +1720,22 @@
 
         // Afficher les détails d'un élève dans la page principale
         async function showEleveDetails(eleveId) {
-            const eleve = allEleves.find(e => e.id === eleveId);
+            // Récupérer l'élève avec ses parents depuis l'API
+            let eleve;
+            try {
+                const response = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
+                if (response.ok) {
+                    eleve = await response.json();
+                } else {
+                    eleve = allEleves.find(e => e.id === eleveId);
+                }
+            } catch (error) {
+                eleve = allEleves.find(e => e.id === eleveId);
+            }
             if (!eleve) return;
 
-            // Récupérer les membres de la famille
+            const parents = eleve.parents || [];
+            const hasParents = parents.length > 0;
             let familyMembers = [];
             try {
                 const response = await fetch(`${API_URL}/eleves/${eleveId}/famille`, { headers: getHeaders() });
@@ -1682,7 +1749,6 @@
 
             // Filtrer les autres enfants (exclure l'élève actuellement affiché)
             const otherChildren = familyMembers.filter(m => m.id !== eleveId);
-            const isMajeur = eleve.status === 'majeur';
 
             // Sauvegarder l'état actuel pour pouvoir revenir
             if (!window.eleveDetailsBackup) {
@@ -1707,16 +1773,16 @@
                     </div>
                 </div>
 
-                <!-- SECTION 1: Informations du Parent/Responsable (pour les mineurs uniquement) -->
-                ${!isMajeur ? `
+                <!-- SECTION 1: Informations des Parents / Responsables -->
+                ${parents.length > 0 ? `
                 <div style="margin-bottom: 32px; padding: 24px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-tertiary-container)); border-radius: 20px; border: 2px solid var(--md-sys-color-primary);">
                     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
                         <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--md-sys-color-primary); color: white; display: flex; align-items: center; justify-content: center;">
                             <span class="material-icons" style="font-size: 28px;">family_restroom</span>
                         </div>
                         <div style="flex: 1;">
-                            <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-primary-container); font-size: 20px;">Parent / Responsable</h4>
-                            <p style="margin: 0; color: var(--md-sys-color-on-primary-container); opacity: 0.8; font-size: 14px;">Informations de contact</p>
+                            <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-primary-container); font-size: 20px;">Parent${parents.length > 1 ? 's' : ''} / Responsable${parents.length > 1 ? 's' : ''}</h4>
+                            <p style="margin: 0; color: var(--md-sys-color-on-primary-container); opacity: 0.8; font-size: 14px;">${parents.length} parent${parents.length > 1 ? 's' : ''} enregistré${parents.length > 1 ? 's' : ''}</p>
                         </div>
                         ${canModifyData() ? `
                         <button class="md-btn md-btn-filled" onclick="editParentInfo('${eleveId}')" style="display: flex; align-items: center; gap: 8px;">
@@ -1725,41 +1791,67 @@
                         </button>
                         ` : ''}
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div style="padding: 16px; background: rgba(255,255,255,0.6); border-radius: 12px;">
-                            <div style="font-size: 12px; color: var(--md-sys-color-on-primary-container); opacity: 0.7; margin-bottom: 4px;">NOM</div>
-                            <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 16px;">${eleve.parentNom || '-'}</div>
+                    
+                    ${parents.map((parent, idx) => `
+                    <div style="padding: 20px; background: rgba(255,255,255,0.7); border-radius: 16px; ${idx > 0 ? 'margin-top: 16px;' : ''}">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--md-sys-color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">
+                                ${(parent.prenom || 'P')[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; font-size: 18px; color: var(--md-sys-color-on-primary-container);">${parent.prenom || ''} ${parent.nom || ''}</div>
+                                <div style="font-size: 13px; color: var(--md-sys-color-on-primary-container); opacity: 0.7;">
+                                    ${parent.relation || (parent.isPrimary ? 'Parent principal' : 'Parent secondaire')}
+                                    ${parent.isPrimary ? ' ⭐' : ''}
+                                </div>
+                            </div>
                         </div>
-                        <div style="padding: 16px; background: rgba(255,255,255,0.6); border-radius: 12px;">
-                            <div style="font-size: 12px; color: var(--md-sys-color-on-primary-container); opacity: 0.7; margin-bottom: 4px;">PRÉNOM</div>
-                            <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 16px;">${eleve.parentPrenom || '-'}</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
+                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">email</span>
+                                <div>
+                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">EMAIL</div>
+                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.email || '-'}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
+                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">phone</span>
+                                <div>
+                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">TÉLÉPHONE</div>
+                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.tel || '-'}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
+                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">home</span>
+                                <div>
+                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">ADRESSE</div>
+                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.adresse || '-'}</div>
+                                </div>
+                            </div>
+                            ${parent.profession ? `
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
+                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">work</span>
+                                <div>
+                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">PROFESSION</div>
+                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.profession}</div>
+                                </div>
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
-                        <div style="padding: 16px; background: rgba(255,255,255,0.6); border-radius: 12px; display: flex; align-items: center; gap: 12px;">
-                            <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">phone</span>
-                            <div>
-                                <div style="font-size: 12px; color: var(--md-sys-color-on-primary-container); opacity: 0.7;">TÉLÉPHONE</div>
-                                <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container);">${eleve.parentTel || '-'}</div>
-                            </div>
-                        </div>
-                        <div style="padding: 16px; background: rgba(255,255,255,0.6); border-radius: 12px; display: flex; align-items: center; gap: 12px;">
-                            <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">email</span>
-                            <div>
-                                <div style="font-size: 12px; color: var(--md-sys-color-on-primary-container); opacity: 0.7;">EMAIL</div>
-                                <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container);">${eleve.email || '-'}</div>
-                            </div>
-                        </div>
-                        <div style="padding: 16px; background: rgba(255,255,255,0.6); border-radius: 12px; display: flex; align-items: center; gap: 12px;">
-                            <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">home</span>
-                            <div>
-                                <div style="font-size: 12px; color: var(--md-sys-color-on-primary-container); opacity: 0.7;">ADRESSE</div>
-                                <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container);">${eleve.parentAdresse || '-'}</div>
-                            </div>
+                    `).join('')}
+                </div>
+                ` : `
+                <div style="margin-bottom: 32px; padding: 24px; background: var(--md-sys-color-error-container); border-radius: 20px; border: 2px solid var(--md-sys-color-error);">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <span class="material-icons" style="font-size: 28px; color: var(--md-sys-color-error);">warning</span>
+                        <div>
+                            <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-error-container);">Aucun parent enregistré</h4>
+                            <p style="margin: 0; color: var(--md-sys-color-on-error-container); opacity: 0.8;">Cet élève n'a pas encore de parent associé.</p>
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                `}
 
                 <!-- SECTION 2: Fiche de l'élève sélectionné -->
                 <div style="margin-bottom: 32px; padding: 24px; background: var(--md-sys-color-surface-variant); border-radius: 20px; border: 3px solid var(--md-sys-color-primary); box-shadow: var(--md-sys-elevation-3);">
@@ -1770,7 +1862,6 @@
                         <div style="flex: 1;">
                             <h4 style="margin: 0 0 8px 0; color: var(--md-sys-color-on-surface); font-size: 24px;">${eleve.prenom} ${eleve.nom}</h4>
                             <p style="margin: 0; color: var(--md-sys-color-primary); font-weight: 500; font-size: 16px;">Classe ${eleve.classe || 'Non assigné'}</p>
-                            ${isMajeur ? '<span style="font-size: 13px; background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); padding: 4px 12px; border-radius: 16px; margin-top: 8px; display: inline-block;">Étudiant majeur</span>' : ''}
                             ${!eleve.activated ? '<span style="font-size: 13px; color: var(--md-sys-color-error); display: block; margin-top: 8px;">⏳ Compte non activé</span>' : ''}
                         </div>
                         ${canModifyData() ? `
@@ -1782,7 +1873,7 @@
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 16px;">
-                        ${!isMajeur && eleve.dateNaissance ? `
+                        ${eleve.dateNaissance ? `
                         <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px; border-left: 4px solid var(--md-sys-color-primary);">
                             <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-primary);">cake</span>
                             <div>
@@ -1792,7 +1883,7 @@
                         </div>
                         ` : ''}
 
-                        ${isMajeur ? `
+                        ${eleve.email ? `
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px;">
                                 <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-primary);">email</span>
@@ -1879,91 +1970,109 @@
         }
 
         // Fonction pour éditer les informations du parent
-        function editParentInfo(eleveId) {
-            const eleve = allEleves.find(e => e.id === eleveId);
+        async function editParentInfo(eleveId) {
+            // Récupérer l'élève avec ses parents
+            let eleve;
+            try {
+                const response = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
+                if (response.ok) {
+                    eleve = await response.json();
+                }
+            } catch (error) {
+                showSnackbar('Erreur lors du chargement');
+                return;
+            }
             if (!eleve) return;
 
-            const formHTML = `
-                <form id="parentForm" style="display: flex; flex-direction: column; gap: 16px;">
+            const parents = eleve.parents || [];
+
+            let formHTML = `
+                <form id="parentForm" style="display: flex; flex-direction: column; gap: 20px;">
                     <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin: 0 0 8px 0;">
                         <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
-                        Les modifications seront appliquées à tous les enfants de cette famille.
+                        Modifiez les informations des parents enregistrés.
                     </p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="parentNom" class="md-text-field-input" value="${eleve.parentNom || ''}" required>
-                                <label class="md-text-field-label">Nom du parent *</label>
-                            </div>
-                        </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="parentPrenom" class="md-text-field-input" value="${eleve.parentPrenom || ''}" required>
-                                <label class="md-text-field-label">Prénom du parent *</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="tel" id="parentTel" class="md-text-field-input" value="${eleve.parentTel || ''}">
-                            <label class="md-text-field-label">Téléphone</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="email" id="parentEmail" class="md-text-field-input" value="${eleve.email || ''}">
-                            <label class="md-text-field-label">Email</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="text" id="parentAdresse" class="md-text-field-input" value="${eleve.parentAdresse || ''}">
-                            <label class="md-text-field-label">Adresse</label>
-                        </div>
-                    </div>
-                </form>
             `;
 
-            showDialog('Modifier les informations du parent', formHTML, async () => {
-                const parentData = {
-                    parentNom: document.getElementById('parentNom').value,
-                    parentPrenom: document.getElementById('parentPrenom').value,
-                    parentTel: document.getElementById('parentTel').value,
-                    email: document.getElementById('parentEmail').value,
-                    parentAdresse: document.getElementById('parentAdresse').value
-                };
+            if (parents.length === 0) {
+                formHTML += `<p style="text-align: center; color: var(--md-sys-color-on-surface-variant);">Aucun parent enregistré pour cet élève.</p>`;
+            }
 
+            parents.forEach((parent, idx) => {
+                formHTML += `
+                    <div style="padding: 16px; background: var(--md-sys-color-surface-container); border-radius: 12px;">
+                        <h5 style="margin: 0 0 12px 0; color: var(--md-sys-color-primary);">
+                            ${parent.isPrimary ? '⭐ ' : ''}Parent ${idx + 1} — ${parent.relation || (parent.isPrimary ? 'Principal' : 'Secondaire')}
+                        </h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="text" id="parentNom_${parent.id}" class="md-text-field-input" value="${parent.nom || ''}" required>
+                                    <label class="md-text-field-label">Nom *</label>
+                                </div>
+                            </div>
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="text" id="parentPrenom_${parent.id}" class="md-text-field-input" value="${parent.prenom || ''}" required>
+                                    <label class="md-text-field-label">Prénom *</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md-text-field" style="margin-top: 12px;">
+                            <div class="md-text-field-container">
+                                <input type="email" id="parentEmail_${parent.id}" class="md-text-field-input" value="${parent.email || ''}">
+                                <label class="md-text-field-label">Email</label>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="tel" id="parentTel_${parent.id}" class="md-text-field-input" value="${parent.tel || ''}">
+                                    <label class="md-text-field-label">Téléphone</label>
+                                </div>
+                            </div>
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="text" id="parentProfession_${parent.id}" class="md-text-field-input" value="${parent.profession || ''}">
+                                    <label class="md-text-field-label">Profession</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md-text-field" style="margin-top: 12px;">
+                            <div class="md-text-field-container">
+                                <input type="text" id="parentAdresse_${parent.id}" class="md-text-field-input" value="${parent.adresse || ''}">
+                                <label class="md-text-field-label">Adresse</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            formHTML += `</form>`;
+
+            showDialog('Modifier les informations des parents', formHTML, async () => {
                 try {
-                    // Récupérer tous les membres de la famille pour mettre à jour les infos parent
-                    const familyResponse = await fetch(`${API_URL}/eleves/${eleveId}/famille`, { headers: getHeaders() });
-                    let familyMembers = [];
-                    if (familyResponse.ok) {
-                        familyMembers = await familyResponse.json();
-                    } else {
-                        familyMembers = [eleve];
-                    }
-
-                    // Mettre à jour chaque membre de la famille (seulement les mineurs)
                     let successCount = 0;
-                    for (const member of familyMembers) {
-                        if (member.status !== 'majeur') {
-                            const response = await fetch(`${API_URL}/eleves/${member.id}`, {
-                                method: 'PUT',
-                                headers: getHeaders(),
-                                body: JSON.stringify({
-                                    nom: member.nom,
-                                    prenom: member.prenom,
-                                    dateNaissance: member.dateNaissance,
-                                    classe: member.classe,
-                                    ...parentData
-                                })
-                            });
-                            if (response.ok) successCount++;
-                        }
+                    for (const parent of parents) {
+                        const updateData = {
+                            nom: document.getElementById(`parentNom_${parent.id}`).value,
+                            prenom: document.getElementById(`parentPrenom_${parent.id}`).value,
+                            email: document.getElementById(`parentEmail_${parent.id}`).value,
+                            tel: document.getElementById(`parentTel_${parent.id}`).value,
+                            adresse: document.getElementById(`parentAdresse_${parent.id}`).value,
+                            profession: document.getElementById(`parentProfession_${parent.id}`).value
+                        };
+
+                        const response = await fetch(`${API_URL}/parents/${parent.id}`, {
+                            method: 'PUT',
+                            headers: getHeaders(),
+                            body: JSON.stringify(updateData)
+                        });
+                        if (response.ok) successCount++;
                     }
 
                     if (successCount > 0) {
-                        showSnackbar(`Informations parent mises à jour pour ${successCount} élève(s)`);
+                        showSnackbar(`${successCount} parent(s) mis à jour avec succès`);
                         await loadEleves();
                         showEleveDetails(eleveId);
                     } else {
@@ -2013,38 +2122,16 @@
                             <label class="md-text-field-label">Classe</label>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="eleveNomParent" class="md-text-field-input" placeholder=" ">
-                                <label class="md-text-field-label">Nom du parent</label>
-                            </div>
-                        </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="elevePrenomParent" class="md-text-field-input" placeholder=" ">
-                                <label class="md-text-field-label">Prénom du parent</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="tel" id="eleveTelephoneParent" class="md-text-field-input" placeholder=" ">
-                            <label class="md-text-field-label">Téléphone du parent</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="text" id="eleveAdresseParent" class="md-text-field-input" placeholder=" ">
-                            <label class="md-text-field-label">Adresse du parent</label>
-                        </div>
-                    </div>
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <input type="email" id="eleveEmail" class="md-text-field-input" placeholder=" ">
-                            <label class="md-text-field-label">Email parent</label>
+                            <label class="md-text-field-label">Email (si compte nécessaire)</label>
                         </div>
                     </div>
+                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 13px; margin: 0;">
+                        <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
+                        Les parents sont gérés via le formulaire d'inscription ou par la fiche élève.
+                    </p>
                 </form>
             `, saveEleve);
         }
@@ -2055,10 +2142,6 @@
                 prenom: document.getElementById('elevePrenom').value,
                 dateNaissance: document.getElementById('eleveDateNaissance').value,
                 classe: document.getElementById('eleveClasse').value,
-                parentNom: document.getElementById('eleveNomParent').value,
-                parentPrenom: document.getElementById('elevePrenomParent').value,
-                parentTel: document.getElementById('eleveTelephoneParent').value,
-                parentAdresse: document.getElementById('eleveAdresseParent').value,
                 email: document.getElementById('eleveEmail').value
             };
 
@@ -2099,7 +2182,7 @@
             const eleve = allEleves.find(e => e.id === id);
             if (!eleve) return;
 
-            const isMajeur = eleve.status === 'majeur';
+            const hasParents = eleve.parents && eleve.parents.length > 0;
 
             let formHTML = `
                 <form id="eleveForm" style="display: flex; flex-direction: column; gap: 16px;">
@@ -2130,65 +2213,28 @@
                         </div>
                     </div>`;
 
-            if (!isMajeur) {
-                formHTML += `
+            formHTML += `
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
                             <label class="md-text-field-label">Date de naissance</label>
                         </div>
                     </div>`;
-            }
 
-            if (isMajeur) {
-                formHTML += `
+            // Toujours afficher email et téléphone
+            formHTML += `
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
-                            <label class="md-text-field-label">Email de l'étudiant</label>
+                            <label class="md-text-field-label">Email de l'élève</label>
                         </div>
                     </div>
                     <div class="md-text-field">
                         <div class="md-text-field-container">
                             <input type="tel" id="eleveTelephone" class="md-text-field-input" value="${eleve.tel || ''}">
-                            <label class="md-text-field-label">Téléphone de l'étudiant</label>
+                            <label class="md-text-field-label">Téléphone</label>
                         </div>
                     </div>`;
-            } else {
-                formHTML += `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="eleveNomParent" class="md-text-field-input" value="${eleve.parentNom || ''}">
-                                <label class="md-text-field-label">Nom du parent</label>
-                            </div>
-                        </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="elevePrenomParent" class="md-text-field-input" value="${eleve.parentPrenom || ''}">
-                                <label class="md-text-field-label">Prénom du parent</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="tel" id="eleveTelephoneParent" class="md-text-field-input" value="${eleve.parentTel || ''}">
-                            <label class="md-text-field-label">Téléphone du parent</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="text" id="eleveAdresseParent" class="md-text-field-input" value="${eleve.parentAdresse || ''}">
-                            <label class="md-text-field-label">Adresse du parent</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
-                            <label class="md-text-field-label">Email du parent</label>
-                        </div>
-                    </div>`;
-            }
 
             formHTML += `
                 </form>`;
@@ -2201,19 +2247,11 @@
                     photo: eleve.photo || null
                 };
 
-                if (!isMajeur) {
-                    data.dateNaissance = document.getElementById('eleveDateNaissance').value;
-                }
+                data.dateNaissance = document.getElementById('eleveDateNaissance').value;
 
-                if (isMajeur) {
-                    data.email = document.getElementById('eleveEmail').value;
-                    data.tel = document.getElementById('eleveTelephone').value;
-                } else {
-                    data.parentNom = document.getElementById('eleveNomParent').value;
-                    data.parentPrenom = document.getElementById('elevePrenomParent').value;
-                    data.parentTel = document.getElementById('eleveTelephoneParent').value;
-                    data.email = document.getElementById('eleveEmail').value;
-                }
+                // Toujours envoyer email et tel
+                data.email = document.getElementById('eleveEmail').value;
+                data.tel = document.getElementById('eleveTelephone').value;
 
                 try {
                     const response = await fetch(`${API_URL}/eleves/${id}`, {
@@ -4707,86 +4745,38 @@
             return age;
         }
 
-        // Fonction pour basculer entre mineur et majeur
-        function toggleEnfantStatus(index, status) {
-            const field = document.querySelector(`.enfant-field[data-index="${index}"]`);
-            if (!field) return;
-            
-            // Mettre à jour les boutons toggle
-            const toggleBtns = field.querySelectorAll('.status-toggle-btn');
-            toggleBtns.forEach(btn => {
-                if (btn.dataset.status === status) {
-                    btn.classList.add('active');
-                    btn.style.borderColor = 'var(--md-sys-color-primary)';
-                    btn.style.background = 'var(--md-sys-color-primary)';
-                    btn.style.color = 'var(--md-sys-color-on-primary)';
-                } else {
-                    btn.classList.remove('active');
-                    btn.style.borderColor = 'var(--md-sys-color-outline)';
-                    btn.style.background = 'transparent';
-                    btn.style.color = 'var(--md-sys-color-on-surface-variant)';
-                }
-            });
-            
-            // Afficher/masquer les champs spécifiques
-            const mineurFields = field.querySelector('.enfant-mineur-fields');
-            const majeurFields = field.querySelector('.enfant-specific-fields.enfant-majeur-fields');
-            
-            if (status === 'mineur') {
-                mineurFields.style.display = 'block';
-                majeurFields.style.display = 'none';
-            } else {
-                mineurFields.style.display = 'none';
-                majeurFields.style.display = 'block';
-            }
-            
-            // Mettre à jour le dataset du field
-            field.dataset.status = status;
-            
-            // Mettre à jour la visibilité des champs parent
-            updateParentFieldsVisibility();
-        }
+        // Fonction pour basculer entre mineur et majeur - SUPPRIMÉE
+        // Le système mineur/majeur n'existe plus
 
-        // Fonction pour gérer l'affichage des champs parent selon le statut des enfants
+        // Fonction pour gérer l'affichage des champs email élève selon la présence de parents
         function updateParentFieldsVisibility() {
+            const parentSection = document.querySelector('.parent-info-section');
+            const isParentVisible = parentSection && parentSection.style.display !== 'none';
+            
             const enfantFields = document.querySelectorAll('.enfant-field');
-            let hasMinor = false;
-            let hasAdult = false;
-
             enfantFields.forEach(field => {
-                const status = field.dataset.status || 'mineur'; // Par défaut mineur
-                if (status === 'mineur') {
-                    hasMinor = true;
-                } else {
-                    hasAdult = true;
+                const emailInput = field.querySelector('.enfant-email');
+                const emailSection = field.querySelector('.enfant-email-section');
+                const accountToggle = field.querySelector('.enfant-account-toggle');
+                
+                if (emailInput && emailSection && accountToggle) {
+                    if (!isParentVisible) {
+                        // Pas de parent : email obligatoire, toujours visible, toggle masqué
+                        emailInput.required = true;
+                        emailInput.setAttribute('required', 'required');
+                        emailSection.style.display = 'block';
+                        emailSection.querySelector('.email-required-note').style.display = 'block';
+                        accountToggle.style.display = 'none';
+                    } else {
+                        // Parent présent : toggle visible, email masqué par défaut
+                        emailInput.required = false;
+                        emailInput.removeAttribute('required');
+                        accountToggle.style.display = 'block';
+                        emailSection.querySelector('.email-required-note').style.display = 'none';
+                        // Garder l'état actuel du toggle (ne pas fermer si déjà ouvert)
+                    }
                 }
             });
-
-            const parentSection = document.querySelector('.parent-info-section');
-            const parentFields = parentSection ? parentSection.querySelectorAll('input') : [];
-
-            if (hasAdult && !hasMinor) {
-                // Tous les enfants sont majeurs - masquer les champs parent
-                if (parentSection) {
-                    parentSection.style.display = 'none';
-                }
-                // Rendre les champs parent non obligatoires
-                parentFields.forEach(field => {
-                    field.required = false;
-                    field.removeAttribute('required');
-                });
-            } else {
-                // Au moins un mineur - afficher les champs parent
-                if (parentSection) {
-                    parentSection.style.display = 'block';
-                }
-                // Rendre l'email parent obligatoire
-                const parentEmail = document.getElementById('insc_parentEmail');
-                if (parentEmail) {
-                    parentEmail.required = true;
-                    parentEmail.setAttribute('required', 'required');
-                }
-            }
         }
 
         async function loadInscriptions() {
@@ -4811,11 +4801,21 @@
             let html = '';
             
             // Afficher les familles
-            Object.keys(familles).forEach(familleId => {
+            for (const familleId of Object.keys(familles)) {
                 const membres = familles[familleId];
-                const parentEmail = membres[0].email || 'Non renseigné';
-                const parentNom = membres[0].parentNom || '';
-                const parentPrenom = membres[0].parentPrenom || '';
+                
+                // Récupérer les parents du premier membre via l'API
+                let parentInfo = { nom: 'Non renseigné', prenom: '', email: 'Non renseigné' };
+                try {
+                    const resp = await fetch(`${API_URL}/eleves/${membres[0].id}`, { headers: getHeaders() });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data.parents && data.parents.length > 0) {
+                            const primaryParent = data.parents.find(p => p.isPrimary) || data.parents[0];
+                            parentInfo = { nom: primaryParent.nom || '', prenom: primaryParent.prenom || '', email: primaryParent.email || 'Non renseigné' };
+                        }
+                    }
+                } catch (e) { /* ignore */ }
                 
                 html += `
                     <div class="md-card md-card-elevated" style="padding: 16px; border-left: 4px solid var(--md-sys-color-tertiary);">
@@ -4824,13 +4824,13 @@
                                 <span class="material-icons">groups</span>
                             </div>
                             <div style="flex: 1;">
-                                <h4 style="font-weight: 500;">Famille ${parentNom || 'Non renseigné'}</h4>
+                                <h4 style="font-weight: 500;">Famille ${parentInfo.nom || 'Non renseigné'}</h4>
                                 <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
                             </div>
                             <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-tertiary-container);">Famille</span>
                         </div>
-                        <p style="font-size: 14px; margin-bottom: 8px;"><strong>Parent:</strong> ${parentPrenom} ${parentNom}</p>
-                        <p style="font-size: 14px; margin-bottom: 12px;"><strong>Email:</strong> ${parentEmail}</p>
+                        <p style="font-size: 14px; margin-bottom: 8px;"><strong>Parent:</strong> ${parentInfo.prenom} ${parentInfo.nom}</p>
+                        <p style="font-size: 14px; margin-bottom: 12px;"><strong>Email:</strong> ${parentInfo.email}</p>
                         <div style="background: var(--md-sys-color-surface-container); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
                             <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Enfants:</p>
                             ${membres.map(m => `
@@ -4842,13 +4842,13 @@
                             `).join('')}
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${membres[0].id}', '${parentEmail}', 'eleve')">
+                            <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${membres[0].id}', '${parentInfo.email}', 'eleve')">
                                 <span class="material-icons">send</span> Envoyer l'email d'activation
                             </button>
                         </div>
                     </div>
                 `;
-            });
+            }
             
             // Afficher les élèves seuls
             seuls.forEach(e => {
@@ -4901,11 +4901,24 @@
             document.getElementById('insc_parentEmail').value = '';
             document.getElementById('insc_parentTel').value = '';
             document.getElementById('insc_parentAdresse').value = '';
+            // Reset second parent
+            const p2 = document.getElementById('parent2Section');
+            if (p2) p2.style.display = 'none';
+            if (document.getElementById('insc_parent2Nom')) document.getElementById('insc_parent2Nom').value = '';
+            if (document.getElementById('insc_parent2Prenom')) document.getElementById('insc_parent2Prenom').value = '';
+            if (document.getElementById('insc_parent2Email')) document.getElementById('insc_parent2Email').value = '';
+            if (document.getElementById('insc_parent2Tel')) document.getElementById('insc_parent2Tel').value = '';
+            if (document.getElementById('insc_parent2Adresse')) document.getElementById('insc_parent2Adresse').value = '';
             
-            // Réinitialiser l'affichage des champs parent
+            // Masquer la section parent par défaut
             const parentSection = document.querySelector('.parent-info-section');
             if (parentSection) {
-                parentSection.style.display = 'block';
+                parentSection.style.display = 'none';
+            }
+            const toggleBtn = document.getElementById('toggleParentSectionBtn');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<span class="material-icons">person_add</span><span>Ajouter un parent / tuteur</span>';
+                toggleBtn.style.display = 'flex';
             }
             
             // Reset type selection
@@ -4918,6 +4931,55 @@
             
             // Créer le premier champ enfant
             renderEnfantFields();
+            
+            // Mettre à jour la visibilité des emails élèves
+            updateParentFieldsVisibility();
+        }
+
+        function toggleParentSection() {
+            const parentSection = document.querySelector('.parent-info-section');
+            const toggleBtn = document.getElementById('toggleParentSectionBtn');
+            if (!parentSection) return;
+            
+            const isVisible = parentSection.style.display !== 'none';
+            
+            if (isVisible) {
+                // Masquer la section parent
+                parentSection.style.display = 'none';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<span class="material-icons">person_add</span><span>Ajouter un parent / tuteur</span>';
+                    toggleBtn.style.display = 'flex';
+                }
+                // Vider les champs parent
+                document.getElementById('insc_parentNom').value = '';
+                document.getElementById('insc_parentPrenom').value = '';
+                document.getElementById('insc_parentEmail').value = '';
+                document.getElementById('insc_parentTel').value = '';
+                document.getElementById('insc_parentAdresse').value = '';
+            } else {
+                // Afficher la section parent
+                parentSection.style.display = 'block';
+                if (toggleBtn) {
+                    toggleBtn.style.display = 'none';
+                }
+            }
+            
+            // Mettre à jour les champs email élèves
+            updateParentFieldsVisibility();
+        }
+
+        function toggleParent2() {
+            const section = document.getElementById('parent2Section');
+            if (!section) return;
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+                document.getElementById('toggleAddParent2Btn').textContent = '';
+                document.getElementById('toggleAddParent2Btn').insertAdjacentHTML('afterbegin', '<span class="material-icons">person_remove</span> Retirer le 2ᵉ parent');
+            } else {
+                section.style.display = 'none';
+                document.getElementById('toggleAddParent2Btn').textContent = '';
+                document.getElementById('toggleAddParent2Btn').insertAdjacentHTML('afterbegin', '<span class="material-icons">person_add</span> Ajouter un 2ᵉ parent');
+            }
         }
 
         function hideInscriptionForm() {
@@ -4957,28 +5019,8 @@
             }
             document.getElementById('inscriptionEnfantsContainer').innerHTML = html;
             
-            // Initialiser tous les champs avec le statut mineur par défaut
-            document.querySelectorAll('.enfant-field').forEach((field, index) => {
-                field.dataset.status = 'mineur';
-                
-                // Appliquer les styles initiaux pour les boutons toggle
-                const mineurBtn = field.querySelector('.status-toggle-btn[data-status="mineur"]');
-                const majeurBtn = field.querySelector('.status-toggle-btn[data-status="majeur"]');
-                
-                if (mineurBtn) {
-                    mineurBtn.classList.add('active');
-                    mineurBtn.style.borderColor = 'var(--md-sys-color-primary)';
-                    mineurBtn.style.background = 'var(--md-sys-color-primary)';
-                    mineurBtn.style.color = 'var(--md-sys-color-on-primary)';
-                }
-                
-                if (majeurBtn) {
-                    majeurBtn.classList.remove('active');
-                    majeurBtn.style.borderColor = 'var(--md-sys-color-outline)';
-                    majeurBtn.style.background = 'transparent';
-                    majeurBtn.style.color = 'var(--md-sys-color-on-surface-variant)';
-                }
-            });
+            // Mettre à jour la visibilité des emails élèves
+            updateParentFieldsVisibility();
             
             // Remplir automatiquement le nom des enfants avec le nom du parent
             const parentNom = document.getElementById('insc_parentNom').value.trim();
@@ -4997,15 +5039,6 @@
                         ${index > 0 ? `<button type="button" class="md-btn md-btn-text" onclick="removeEnfantField(${index})" style="color: var(--md-sys-color-error);"><span class="material-icons">close</span></button>` : ''}
                     </div>
                     
-                    <!-- Bouton toggle Mineur/Majeur -->
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                        <span style="font-weight: 500; color: var(--md-sys-color-on-surface);">Statut :</span>
-                        <div class="toggle-container" style="display: flex; align-items: center; gap: 8px;">
-                            <button type="button" class="status-toggle-btn active" data-status="mineur" data-index="${index}" onclick="toggleEnfantStatus(${index}, 'mineur')" style="padding: 8px 16px; border: 2px solid var(--md-sys-color-primary); border-radius: 20px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); font-weight: 500; cursor: pointer;">Mineur</button>
-                            <button type="button" class="status-toggle-btn" data-status="majeur" data-index="${index}" onclick="toggleEnfantStatus(${index}, 'majeur')" style="padding: 8px 16px; border: 2px solid var(--md-sys-color-outline); border-radius: 20px; background: transparent; color: var(--md-sys-color-on-surface-variant); font-weight: 500; cursor: pointer;">Majeur</button>
-                        </div>
-                    </div>
-                    
                     <div class="md-form-grid">
                         <div class="md-text-field">
                             <div class="md-text-field-container">
@@ -5020,8 +5053,7 @@
                             </div>
                         </div>
                         
-                        <!-- Champs spécifiques selon le statut -->
-                        <div class="enfant-specific-fields enfant-mineur-fields" data-index="${index}" style="grid-column: 1 / -1;">
+                        <div style="grid-column: 1 / -1;">
                             <div class="md-form-grid">
                                 <div class="md-text-field">
                                     <div class="md-text-field-container">
@@ -5040,21 +5072,39 @@
                             </div>
                         </div>
                         
-                        <div class="enfant-specific-fields enfant-majeur-fields" data-index="${index}" style="grid-column: 1 / -1; display: none;">
+                        <!-- Bouton pour créer un compte élève (visible quand il y a des parents) -->
+                        <div class="enfant-account-toggle" data-index="${index}" style="grid-column: 1 / -1;">
+                            <button type="button" class="md-btn md-btn-tonal toggle-account-btn" data-index="${index}" onclick="toggleEnfantAccount(${index})" style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                                <span class="material-icons">person_add</span>
+                                <span>Créer un compte pour cet élève</span>
+                                <span class="material-icons toggle-icon" style="margin-left: auto;">expand_more</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Email de l'élève (obligatoire si pas de parent, optionnel sinon) -->
+                        <div class="enfant-email-section" data-index="${index}" style="grid-column: 1 / -1; display: none;">
                             <div class="md-form-grid">
                                 <div class="md-text-field">
                                     <div class="md-text-field-container">
                                         <input type="email" class="md-text-field-input enfant-email" data-index="${index}" placeholder=" ">
-                                        <label class="md-text-field-label">Email de l'étudiant</label>
+                                        <label class="md-text-field-label">Email de l'élève</label>
                                     </div>
                                 </div>
                                 <div class="md-text-field">
                                     <div class="md-text-field-container">
                                         <input type="tel" class="md-text-field-input enfant-tel" data-index="${index}" placeholder=" ">
-                                        <label class="md-text-field-label">Téléphone de l'étudiant</label>
+                                        <label class="md-text-field-label">Téléphone</label>
                                     </div>
                                 </div>
                             </div>
+                            <p class="email-required-note" style="margin: 4px 0 0; font-size: 12px; color: var(--md-sys-color-error); display: none;">
+                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
+                                Email obligatoire car aucun parent n'est renseigné — un compte sera créé pour l'élève.
+                            </p>
+                            <p style="margin: 4px 0 0; font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
+                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
+                                Un compte personnel sera créé pour l'élève si un email est fourni.
+                            </p>
                         </div>
                         
                         <div class="md-text-field">
@@ -5075,32 +5125,42 @@
             `;
         }
 
+        function toggleEnfantAccount(index) {
+            const field = document.querySelector(`.enfant-field[data-index="${index}"]`);
+            if (!field) return;
+            const emailSection = field.querySelector('.enfant-email-section');
+            const toggleBtn = field.querySelector('.toggle-account-btn');
+            const toggleIcon = field.querySelector('.toggle-icon');
+            
+            if (emailSection.style.display === 'none' || !emailSection.style.display) {
+                emailSection.style.display = 'block';
+                toggleBtn.classList.add('active');
+                toggleBtn.querySelector('span:nth-child(2)').textContent = 'Compte élève activé';
+                toggleIcon.textContent = 'expand_less';
+                toggleBtn.style.background = 'var(--md-sys-color-primary-container)';
+                toggleBtn.style.color = 'var(--md-sys-color-on-primary-container)';
+            } else {
+                emailSection.style.display = 'none';
+                // Vider les champs email/tel quand on ferme
+                const emailInput = emailSection.querySelector('.enfant-email');
+                const telInput = emailSection.querySelector('.enfant-tel');
+                if (emailInput) emailInput.value = '';
+                if (telInput) telInput.value = '';
+                toggleBtn.classList.remove('active');
+                toggleBtn.querySelector('span:nth-child(2)').textContent = 'Créer un compte pour cet élève';
+                toggleIcon.textContent = 'expand_more';
+                toggleBtn.style.background = '';
+                toggleBtn.style.color = '';
+            }
+        }
+
         function addEnfantField() {
             inscriptionEnfantCount++;
             const container = document.getElementById('inscriptionEnfantsContainer');
             container.insertAdjacentHTML('beforeend', createEnfantFieldHTML(inscriptionEnfantCount - 1));
             
-            // Initialiser le statut par défaut à mineur pour le nouveau champ
-            const newField = container.lastElementChild;
-            newField.dataset.status = 'mineur';
-            
-            // Appliquer les styles initiaux pour les boutons toggle
-            const mineurBtn = newField.querySelector('.status-toggle-btn[data-status="mineur"]');
-            const majeurBtn = newField.querySelector('.status-toggle-btn[data-status="majeur"]');
-            
-            if (mineurBtn) {
-                mineurBtn.classList.add('active');
-                mineurBtn.style.borderColor = 'var(--md-sys-color-primary)';
-                mineurBtn.style.background = 'var(--md-sys-color-primary)';
-                mineurBtn.style.color = 'var(--md-sys-color-on-primary)';
-            }
-            
-            if (majeurBtn) {
-                majeurBtn.classList.remove('active');
-                majeurBtn.style.borderColor = 'var(--md-sys-color-outline)';
-                majeurBtn.style.background = 'transparent';
-                majeurBtn.style.color = 'var(--md-sys-color-on-surface-variant)';
-            }
+            // Mettre à jour la visibilité des emails élèves
+            updateParentFieldsVisibility();
             
             // Remplir automatiquement le nom de l'enfant avec le nom du parent
             const parentNom = document.getElementById('insc_parentNom').value.trim();
@@ -5126,17 +5186,8 @@
         }
 
         async function submitInscription() {
-            // Vérifier si au moins un enfant est mineur
-            const enfantFields = document.querySelectorAll('.enfant-field');
-            let hasMinor = false;
-            
-            for (const field of enfantFields) {
-                const status = field.dataset.status || 'mineur';
-                if (status === 'mineur') {
-                    hasMinor = true;
-                    break;
-                }
-            }
+            const parentSection = document.querySelector('.parent-info-section');
+            const isParentVisible = parentSection && parentSection.style.display !== 'none';
             
             const parentNom = document.getElementById('insc_parentNom').value.trim();
             const parentPrenom = document.getElementById('insc_parentPrenom').value.trim();
@@ -5144,86 +5195,60 @@
             const parentTel = document.getElementById('insc_parentTel').value.trim();
             const parentAdresse = document.getElementById('insc_parentAdresse').value.trim();
             
-            // Les champs parent sont obligatoires seulement s'il y a au moins un mineur
-            if (hasMinor && !parentEmail) {
-                showSnackbar('L\'email du parent est obligatoire pour les enfants mineurs');
-                return;
-            }
+            const hasParent1 = isParentVisible && parentEmail && parentNom && parentPrenom;
             
             // Collecter les enfants
+            const enfantFields = document.querySelectorAll('.enfant-field');
             const enfants = [];
             
             for (const field of enfantFields) {
                 const index = field.dataset.index;
-                const status = field.dataset.status || 'mineur';
                 const nom = field.querySelector('.enfant-nom').value.trim();
                 const prenom = field.querySelector('.enfant-prenom').value.trim();
                 
                 if (!nom || !prenom) {
-                    showSnackbar(`Veuillez remplir le nom et prénom de l'enfant ${parseInt(index) + 1}`);
+                    showSnackbar(`Veuillez remplir le nom et prénom de l'élève ${parseInt(index) + 1}`);
                     return;
                 }
                 
-                let enfantData = { nom, prenom, status };
+                const dateNaissance = field.querySelector('.enfant-date').value;
+                const classe = field.querySelector('.enfant-classe').value;
+                const email = field.querySelector('.enfant-email')?.value.trim() || '';
+                const tel = field.querySelector('.enfant-tel')?.value.trim() || '';
                 
-                if (status === 'mineur') {
-                    // Pour les mineurs : date de naissance et classe
-                    const dateNaissance = field.querySelector('.enfant-date').value;
-                    const classe = field.querySelector('.enfant-classe').value;
-                    
-                    if (!dateNaissance) {
-                        showSnackbar(`Veuillez saisir la date de naissance de l'enfant ${parseInt(index) + 1}`);
-                        return;
-                    }
-                    
-                    enfantData.dateNaissance = dateNaissance;
-                    enfantData.classe = classe;
-                } else {
-                    // Pour les majeurs : email et téléphone de l'étudiant
-                    const email = field.querySelector('.enfant-email').value.trim();
-                    const tel = field.querySelector('.enfant-tel').value.trim();
-                    
-                    if (!email) {
-                        showSnackbar(`Veuillez saisir l'email de l'étudiant ${parseInt(index) + 1}`);
-                        return;
-                    }
-                    
-                    enfantData.email = email;
-                    enfantData.tel = tel;
+                // Si pas de parent, l'email élève est obligatoire
+                if (!hasParent1 && !email) {
+                    showSnackbar(`L'email est obligatoire pour l'élève ${prenom} car aucun parent n'est renseigné`);
+                    return;
                 }
                 
                 const fraisInscription = parseFloat(field.querySelector('.enfant-frais')?.value || 0) || 0;
                 const nbPaiements = parseInt(field.querySelector('.enfant-nbPaiements')?.value || '1', 10) || 1;
                 
-                enfantData.fraisInscription = fraisInscription;
-                enfantData.nbPaiements = nbPaiements;
-                
-                enfants.push(enfantData);
+                enfants.push({ nom, prenom, dateNaissance, classe, email, tel, fraisInscription, nbPaiements });
             }
             
             try {
-                const response = await fetch(`${API_URL}/eleves/inscription`, {
+                // Préparer le second parent si présent
+                const parent2Nom = document.getElementById('insc_parent2Nom')?.value.trim() || '';
+                const parent2Prenom = document.getElementById('insc_parent2Prenom')?.value.trim() || '';
+                const parent2Email = document.getElementById('insc_parent2Email')?.value.trim() || '';
+                const parent2Tel = document.getElementById('insc_parent2Tel')?.value.trim() || '';
+                const parent2Adresse = document.getElementById('insc_parent2Adresse')?.value.trim() || '';
+
+                const parent1 = hasParent1 ? { nom: parentNom, prenom: parentPrenom, email: parentEmail, tel: parentTel, adresse: parentAdresse } : null;
+                const parent2 = (isParentVisible && parent2Email && parent2Nom && parent2Prenom) ? { nom: parent2Nom, prenom: parent2Prenom, email: parent2Email, tel: parent2Tel, adresse: parent2Adresse } : null;
+
+                // Toujours utiliser l'endpoint parents/inscription (gère 0, 1 ou 2 parents)
+                const response = await fetch(`${API_URL}/parents/inscription`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'x-user-role': user.role,
-                        'x-user-id': user.id
-                    },
-                    body: JSON.stringify({
-                        parentNom,
-                        parentPrenom,
-                        parentEmail,
-                        parentTel,
-                        parentAdresse,
-                        enFamille: inscriptionType === 'famille' ? 1 : 0,
-                        enfants
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parent1, parent2, enfants, enFamille: inscriptionType === 'famille' ? 1 : 0 })
                 });
-                
+
                 const data = await response.json();
-                
                 if (response.ok) {
-                    showSnackbar(`${enfants.length} élève(s) inscrit(s) avec succès !`);
+                    showSnackbar(data.message || `${enfants.length} élève(s) inscrit(s) avec succès !`);
                     hideInscriptionForm();
                     await loadAllData();
                     loadInscriptions();
@@ -5787,10 +5812,7 @@
 
         // ==================== ENVOI EMAIL ACTIVATION ====================
         async function sendActivationEmail(userId, email, type) {
-            if (!email) {
-                showSnackbar('Aucun email associé à ce compte');
-                return;
-            }
+            // Laisser le serveur décider de la cible si aucun email fourni (ex: élève rattaché à des parents)
             
             try {
                 const response = await fetch(`${API_URL}/email/send-activation-email`, {

@@ -3,100 +3,119 @@ const router = express.Router();
 const { db } = require('../config/database');
 const { generateId, formatDate } = require('../utils/helpers');
 
+// Helper promisifié
+const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows || []));
+});
+
 // Obtenir les destinataires possibles selon les droits de l'utilisateur
-router.get('/destinataires', (req, res) => {
+router.get('/destinataires', async (req, res) => {
     const userRole = req.headers['x-user-role'];
     const userId = req.headers['x-user-id'];
 
-    if (userRole === 'eleve') {
-        // Élèves peuvent envoyer à leurs professeurs et au secrétariat
-        Promise.all([
-            // Récupérer les professeurs depuis la table `professeurs` et également depuis `staff` (role = 'professeur')
-            new Promise((resolve, reject) => {
-                db.all(`
-                    SELECT id, nom, prenom FROM professeurs
-                    UNION
-                    SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur'
-                `, (err, profs) => {
-                    if (err) reject(err);
-                    else resolve(profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, prenom, role FROM staff WHERE lower(role) = ?', ['secretariat'], (err, staffs) => {
-                    if (err) reject(err);
-                    else resolve(staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: 'Secrétariat', type: 'user' })));
-                });
-            })
-        ]).then(([profs, staffs]) => {
-            res.json([...profs, ...staffs]);
-        }).catch(err => res.status(500).json({ error: err.message }));
-    } else if (userRole === 'professeur') {
-        // Professeurs peuvent envoyer à tous les élèves de leurs classes, autres profs, et staff
-        Promise.all([
-            new Promise((resolve, reject) => {
-                db.all(`
-                    SELECT DISTINCT e.id, e.nom, e.prenom FROM eleves e
-                    INNER JOIN classes c ON e.classe = c.nom
-                    WHERE c.professeurId = ?
-                `, [userId], (err, eleves) => {
-                    if (err) reject(err);
-                    else resolve(eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, prenom FROM professeurs WHERE id != ?', [userId], (err, profs) => {
-                    if (err) reject(err);
-                    else resolve(profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, role FROM staff', (err, staffs) => {
-                    if (err) reject(err);
-                    else resolve(staffs.map(s => ({ id: s.id, nom: s.nom, role: s.role, type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT nom FROM classes', (err, classes) => {
-                    if (err) reject(err);
-                    else resolve(classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' })));
-                });
-            })
-        ]).then(([eleves, profs, staffs, classes]) => {
-            res.json([...profs, ...staffs, ...eleves, ...classes]);
-        }).catch(err => res.status(500).json({ error: err.message }));
-    } else if (userRole && ['directeur', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
-        // Staff peut envoyer à tous
-        Promise.all([
-            new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, prenom FROM eleves', (err, eleves) => {
-                    if (err) reject(err);
-                    else resolve(eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, prenom FROM professeurs', (err, profs) => {
-                    if (err) reject(err);
-                    else resolve(profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT id, nom, role FROM staff WHERE id != ?', [userId], (err, staffs) => {
-                    if (err) reject(err);
-                    else resolve(staffs.map(s => ({ id: s.id, nom: s.nom, role: s.role, type: 'user' })));
-                });
-            }),
-            new Promise((resolve, reject) => {
-                db.all('SELECT nom FROM classes', (err, classes) => {
-                    if (err) reject(err);
-                    else resolve(classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' })));
-                });
-            })
-        ]).then(([eleves, profs, staffs, classes]) => {
-            res.json([...eleves, ...profs, ...staffs, ...classes]);
-        }).catch(err => res.status(500).json({ error: err.message }));
-    } else {
-        res.status(403).json({ error: 'Rôle non autorisé' });
+    try {
+        if (userRole === 'eleve') {
+            // Élèves peuvent envoyer à leurs professeurs et au secrétariat
+            const profs = await dbAll(`
+                SELECT id, nom, prenom FROM professeurs
+                UNION
+                SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur'
+            `);
+            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) = ?', ['secretariat']);
+
+            res.json([
+                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: 'Secrétariat', type: 'user' }))
+            ]);
+
+        } else if (userRole === 'parent') {
+            // Parents peuvent envoyer aux profs de leurs enfants + tout le staff du bureau
+            const enfants = await dbAll(`
+                SELECT e.id, e.nom, e.prenom, e.classe FROM eleves e
+                INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                WHERE ep.parentId = ?
+            `, [userId]);
+
+            const classeNames = [...new Set(enfants.map(e => e.classe).filter(Boolean))];
+
+            // Professeurs des classes de leurs enfants
+            let profs = [];
+            if (classeNames.length > 0) {
+                const placeholders = classeNames.map(() => '?').join(',');
+                profs = await dbAll(`
+                    SELECT DISTINCT p.id, p.nom, p.prenom FROM professeurs p
+                    INNER JOIN classes c ON c.professeurId = p.id
+                    WHERE c.nom IN (${placeholders})
+                `, classeNames);
+            }
+
+            // Tout le staff (directeur, secretariat, admin)
+            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff');
+
+            res.json([
+                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' }))
+            ]);
+
+        } else if (userRole === 'professeur') {
+            // Professeurs peuvent envoyer à élèves de leurs classes, autres profs, staff, classes, ET parents de leurs élèves
+            const eleves = await dbAll(`
+                SELECT DISTINCT e.id, e.nom, e.prenom FROM eleves e
+                INNER JOIN classes c ON e.classe = c.nom
+                WHERE c.professeurId = ?
+            `, [userId]);
+
+            const profs = await dbAll('SELECT id, nom, prenom FROM professeurs WHERE id != ?', [userId]);
+            const staffs = await dbAll('SELECT id, nom, role FROM staff');
+            const classes = await dbAll('SELECT nom FROM classes');
+
+            // Parents des élèves de ses classes
+            const parents = await dbAll(`
+                SELECT DISTINCT pa.id, pa.nom, pa.prenom, e.prenom as enfantPrenom, e.nom as enfantNom
+                FROM parents pa
+                INNER JOIN eleve_parent ep ON pa.id = ep.parentId
+                INNER JOIN eleves e ON ep.eleveId = e.id
+                INNER JOIN classes c ON e.classe = c.nom
+                WHERE c.professeurId = ?
+            `, [userId]);
+
+            res.json([
+                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: s.nom, role: s.role, type: 'user' })),
+                ...parents.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom} (parent de ${p.enfantPrenom} ${p.enfantNom})`, role: 'Parent', type: 'user' })),
+                ...eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })),
+                ...classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' }))
+            ]);
+
+        } else if (userRole && ['directeur', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
+            // Staff peut envoyer à tous (y compris parents)
+            const eleves = await dbAll('SELECT id, nom, prenom FROM eleves');
+            const profs = await dbAll('SELECT id, nom, prenom FROM professeurs');
+            const staffs = await dbAll('SELECT id, nom, role FROM staff WHERE id != ?', [userId]);
+            const classes = await dbAll('SELECT nom FROM classes');
+            const parents = await dbAll(`
+                SELECT DISTINCT pa.id, pa.nom, pa.prenom,
+                    GROUP_CONCAT(e.prenom || ' ' || e.nom, ', ') as enfantsNoms
+                FROM parents pa
+                INNER JOIN eleve_parent ep ON pa.id = ep.parentId
+                INNER JOIN eleves e ON ep.eleveId = e.id
+                GROUP BY pa.id
+            `);
+
+            res.json([
+                ...eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })),
+                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: s.nom, role: s.role, type: 'user' })),
+                ...parents.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom} (parent de ${p.enfantsNoms})`, role: 'Parent', type: 'user' })),
+                ...classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' }))
+            ]);
+
+        } else {
+            res.status(403).json({ error: 'Rôle non autorisé' });
+        }
+    } catch (err) {
+        console.error('Erreur destinataires:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -110,16 +129,22 @@ router.get('/', (req, res) => {
                e.prenom as expPrenom, e.nom as expNomEleve,
                p.prenom as expPrenomProf, p.nom as expNomProf,
                es.nom as expNomStaff,
+               ep.prenom as expPrenomParent, ep.nom as expNomParent,
                de.prenom as destPrenom, de.nom as destNomEleve,
                dp.prenom as destPrenomProf, dp.nom as destNomProf,
-               ds.nom as destNomStaff
+               ds.nom as destNomStaff,
+               dpa.prenom as destPrenomParent, dpa.nom as destNomParent,
+               enf.prenom as enfantPrenom, enf.nom as enfantNom
         FROM messages m
         LEFT JOIN eleves e ON m.expediteurId = e.id
         LEFT JOIN professeurs p ON m.expediteurId = p.id
         LEFT JOIN staff es ON m.expediteurId = es.id
+        LEFT JOIN parents ep ON m.expediteurId = ep.id
         LEFT JOIN eleves de ON m.destinataireId = de.id
         LEFT JOIN professeurs dp ON m.destinataireId = dp.id
         LEFT JOIN staff ds ON m.destinataireId = ds.id
+        LEFT JOIN parents dpa ON m.destinataireId = dpa.id
+        LEFT JOIN eleves enf ON m.enfantId = enf.id
         WHERE m.destinataireId = ? OR m.expediteurId = ?
         ORDER BY m.date DESC
     `, [userId, userId], (err, messages) => {
@@ -127,7 +152,14 @@ router.get('/', (req, res) => {
 
         const enrichedMessages = messages.map(m => {
             let expediteurNom = 'Système';
-            if (m.expPrenom && m.expNomEleve) {
+            if (m.expPrenomParent && m.expNomParent) {
+                // Parent : afficher "Parent de (enfant)" si enfantId présent
+                if (m.enfantPrenom && m.enfantNom) {
+                    expediteurNom = `Parent de ${m.enfantPrenom} ${m.enfantNom}`;
+                } else {
+                    expediteurNom = `${m.expPrenomParent} ${m.expNomParent}`;
+                }
+            } else if (m.expPrenom && m.expNomEleve) {
                 expediteurNom = `${m.expPrenom} ${m.expNomEleve}`;
             } else if (m.expPrenomProf && m.expNomProf) {
                 expediteurNom = `${m.expPrenomProf} ${m.expNomProf}`;
@@ -138,6 +170,8 @@ router.get('/', (req, res) => {
             let destinataireNom = 'Utilisateur';
             if (m.destinataireId.startsWith('class_')) {
                 destinataireNom = `Classe ${m.destinataireId.replace('class_', '')}`;
+            } else if (m.destPrenomParent && m.destNomParent) {
+                destinataireNom = `${m.destPrenomParent} ${m.destNomParent}`;
             } else if (m.destPrenom && m.destNomEleve) {
                 destinataireNom = `${m.destPrenom} ${m.destNomEleve}`;
             } else if (m.destPrenomProf && m.destNomProf) {
@@ -154,7 +188,8 @@ router.get('/', (req, res) => {
                 date: m.date,
                 lu: m.lu === 1,
                 expediteurNom: expediteurNom,
-                destinataireNom: destinataireNom
+                destinataireNom: destinataireNom,
+                enfantId: m.enfantId || null
             };
         });
 
@@ -164,7 +199,7 @@ router.get('/', (req, res) => {
 
 // Envoyer un message
 router.post('/', (req, res) => {
-    const { expediteurId, destinataires, contenu } = req.body;
+    const { expediteurId, destinataires, contenu, enfantId } = req.body;
     const userRole = req.headers['x-user-role'];
 
     if (!contenu || !contenu.trim()) {
@@ -184,6 +219,8 @@ router.post('/', (req, res) => {
     const sentMessages = [];
     let completed = 0;
     const total = destinataires.length;
+    // enfantId est utilisé uniquement pour les parents (contexte "Parent de enfant")
+    const msgEnfantId = (userRole === 'parent' && enfantId) ? enfantId : null;
 
     destinataires.forEach(dest => {
         if (dest.type === 'class') {
@@ -206,8 +243,8 @@ router.post('/', (req, res) => {
 
                 eleves.forEach(eleve => {
                     const msgId = generateId();
-                    db.run('INSERT INTO messages VALUES (?, ?, ?, ?, ?, 0)',
-                        [msgId, expediteurId, eleve.id, contenu, date],
+                    db.run('INSERT INTO messages (id, expediteurId, destinataireId, contenu, date, lu, enfantId) VALUES (?, ?, ?, ?, ?, 0, ?)',
+                        [msgId, expediteurId, eleve.id, contenu, date, msgEnfantId],
                         function(err) {
                             if (err) {
                                 console.error('Erreur insertion message:', err);
@@ -238,8 +275,8 @@ router.post('/', (req, res) => {
         } else {
             // Message individuel
             const msgId = generateId();
-            db.run('INSERT INTO messages VALUES (?, ?, ?, ?, ?, 0)',
-                [msgId, expediteurId, dest.id, contenu, date],
+            db.run('INSERT INTO messages (id, expediteurId, destinataireId, contenu, date, lu, enfantId) VALUES (?, ?, ?, ?, ?, 0, ?)',
+                [msgId, expediteurId, dest.id, contenu, date, msgEnfantId],
                 function(err) {
                     if (err) {
                         console.error('Erreur insertion message:', err);
@@ -279,6 +316,13 @@ function canSendToDestinataires(userRole, destinataires) {
     if (userRole === 'eleve') {
         return destinataires.every(dest => {
             return dest.type === 'user' && (dest.role === 'Professeur' || dest.role === 'Secrétariat');
+        });
+    }
+
+    if (userRole === 'parent') {
+        // Parents peuvent envoyer aux professeurs et au staff
+        return destinataires.every(dest => {
+            return dest.type === 'user';
         });
     }
 

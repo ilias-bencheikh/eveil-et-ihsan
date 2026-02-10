@@ -72,6 +72,30 @@ router.post('/login', async (req, res) => {
             return res.json({ user, token });
         }
 
+        // Vérifier dans la table PARENTS
+        row = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        
+        if (row) {
+            // Récupérer les enfants du parent
+            const enfants = await dbAll(db, `
+                SELECT e.id, e.nom, e.prenom, e.classe, e.photo, ep.isPrimary
+                FROM eleves e
+                INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                WHERE ep.parentId = ?
+            `, [row.id]);
+            
+            const user = {
+                id: row.id,
+                email: row.email,
+                role: 'parent',
+                nom: row.nom,
+                prenom: row.prenom,
+                enfants: enfants
+            };
+            const token = await createSession(user, req);
+            return res.json({ user, token });
+        }
+
         // Vérifier dans la table ÉLÈVES
         row = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', [email, password]);
         
@@ -260,18 +284,24 @@ router.post('/forgot-password', async (req, res) => {
         let userFound = false;
         let userName = '';
         
-        // Vérifier élèves
-        const eleve = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND activated = 1', [email]);
-        if (eleve) {
-            await dbRun(db, 'UPDATE eleves SET resetToken = ?, resetExpires = ? WHERE id = ?', 
-                [resetToken, resetExpires, eleve.id]);
-            // Utiliser le nom du parent si disponible
-            if (eleve.parentNom) {
-                userName = eleve.parentPrenom ? `${eleve.parentPrenom} ${eleve.parentNom}` : eleve.parentNom;
-            } else {
-                userName = `${eleve.prenom} ${eleve.nom}`;
-            }
+        // Vérifier parents
+        const parent = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND activated = 1', [email]);
+        if (parent) {
+            await dbRun(db, 'UPDATE parents SET resetToken = ?, resetExpires = ? WHERE id = ?', 
+                [resetToken, resetExpires, parent.id]);
+            userName = `${parent.prenom} ${parent.nom}`;
             userFound = true;
+        }
+        
+        // Vérifier élèves
+        if (!userFound) {
+            const eleve = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND activated = 1', [email]);
+            if (eleve) {
+                await dbRun(db, 'UPDATE eleves SET resetToken = ?, resetExpires = ? WHERE id = ?', 
+                    [resetToken, resetExpires, eleve.id]);
+                userName = `${eleve.prenom} ${eleve.nom}`;
+                userFound = true;
+            }
         }
         
         // Vérifier professeurs
@@ -321,6 +351,10 @@ router.get('/check-reset-token/:token', async (req, res) => {
     const { token } = req.params;
     
     try {
+        const parent = await dbGet(db, 'SELECT id FROM parents WHERE resetToken = ? AND resetExpires > ?', 
+            [token, Date.now()]);
+        if (parent) return res.json({ valid: true, type: 'parent' });
+        
         const eleve = await dbGet(db, 'SELECT id FROM eleves WHERE resetToken = ? AND resetExpires > ?', 
             [token, Date.now()]);
         if (eleve) return res.json({ valid: true, type: 'eleve' });
@@ -352,7 +386,7 @@ router.post('/reset-password', async (req, res) => {
     }
     
     try {
-        const tables = ['eleves', 'professeurs', 'staff'];
+        const tables = ['parents', 'eleves', 'professeurs', 'staff'];
         let updated = false;
         
         for (const table of tables) {
@@ -394,9 +428,10 @@ router.put('/change-password', requireAuth, (req, res) => {
     
     // Déterminer la table selon le rôle
     let tableName;
-    if (userRole === 'eleve') tableName = 'eleves';
+    if (userRole === 'parent') tableName = 'parents';
+    else if (userRole === 'eleve') tableName = 'eleves';
     else if (userRole === 'professeur') tableName = 'professeurs';
-    else if (userRole === 'staff') tableName = 'staff';
+    else if (['admin', 'directeur', 'secretaire', 'secretariat', 'staff'].includes(userRole)) tableName = 'staff';
     else return res.status(400).json({ error: 'Rôle utilisateur invalide' });
     
     // Vérifier l'ancien mot de passe

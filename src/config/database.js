@@ -42,26 +42,50 @@ function initDatabase() {
                 nombreFamille INTEGER DEFAULT 1,
                 familleLienId TEXT,
                 photo TEXT,
-                parentNom TEXT,
-                parentPrenom TEXT,
-                parentTel TEXT
+                status TEXT DEFAULT 'mineur',
+                tel TEXT,
+                fraisInscription REAL DEFAULT 0,
+                nbPaiements INTEGER DEFAULT 1,
+                fraisValide INTEGER DEFAULT 0,
+                paiementsEffectues INTEGER DEFAULT 0
             )`);
 
-            // Ajouter les colonnes parent si elles n'existent pas (migration)
-            db.run(`ALTER TABLE eleves ADD COLUMN parentNom TEXT`, () => {});
-            db.run(`ALTER TABLE eleves ADD COLUMN parentPrenom TEXT`, () => {});
-            db.run(`ALTER TABLE eleves ADD COLUMN parentTel TEXT`, () => {});
-            db.run(`ALTER TABLE eleves ADD COLUMN parentAdresse TEXT`, () => {});
-            // Colonnes pour les frais d'inscription
+            // Migrations pour élèves
             db.run(`ALTER TABLE eleves ADD COLUMN fraisInscription REAL DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN nbPaiements INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN fraisValide INTEGER DEFAULT 0`, () => {});
-            // Nombre de paiements déjà validés
             db.run(`ALTER TABLE eleves ADD COLUMN paiementsEffectues INTEGER DEFAULT 0`, () => {});
-            // Colonne pour le téléphone de l'étudiant (pour majeurs)
             db.run(`ALTER TABLE eleves ADD COLUMN tel TEXT`, () => {});
-            // Colonne pour le statut (mineur/majeur)
             db.run(`ALTER TABLE eleves ADD COLUMN status TEXT DEFAULT 'mineur'`, () => {});
+
+            // Table parents (nouveau système - comptes séparés)
+            db.run(`CREATE TABLE IF NOT EXISTS parents (
+                id TEXT PRIMARY KEY,
+                nom TEXT NOT NULL,
+                prenom TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT,
+                tel TEXT,
+                adresse TEXT,
+                profession TEXT,
+                activationToken TEXT,
+                activated INTEGER DEFAULT 0,
+                resetToken TEXT,
+                resetExpires INTEGER,
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
+
+            // Table de liaison élève-parent (un élève peut avoir 2 parents)
+            db.run(`CREATE TABLE IF NOT EXISTS eleve_parent (
+                id TEXT PRIMARY KEY,
+                eleveId TEXT NOT NULL,
+                parentId TEXT NOT NULL,
+                relation TEXT DEFAULT 'parent',
+                isPrimary INTEGER DEFAULT 0,
+                FOREIGN KEY (eleveId) REFERENCES eleves(id) ON DELETE CASCADE,
+                FOREIGN KEY (parentId) REFERENCES parents(id) ON DELETE CASCADE,
+                UNIQUE(eleveId, parentId)
+            )`);
 
             // Table professeurs
             db.run(`CREATE TABLE IF NOT EXISTS professeurs (
@@ -132,8 +156,12 @@ function initDatabase() {
                 destinataireId TEXT NOT NULL,
                 contenu TEXT NOT NULL,
                 date TEXT NOT NULL,
-                lu INTEGER DEFAULT 0
+                lu INTEGER DEFAULT 0,
+                enfantId TEXT
             )`);
+
+            // Migration : ajouter enfantId aux messages (pour contexte "Parent de enfant")
+            db.run(`ALTER TABLE messages ADD COLUMN enfantId TEXT`, () => {});
 
             // Table staff (directeur, secretariat)
             db.run(`CREATE TABLE IF NOT EXISTS staff (
