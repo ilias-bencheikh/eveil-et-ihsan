@@ -47,7 +47,8 @@ function initDatabase() {
                 fraisInscription REAL DEFAULT 0,
                 nbPaiements INTEGER DEFAULT 1,
                 fraisValide INTEGER DEFAULT 0,
-                paiementsEffectues INTEGER DEFAULT 0
+                paiementsEffectues INTEGER DEFAULT 0,
+                montantPaye REAL DEFAULT 0
             )`);
 
             // Migrations pour élèves
@@ -55,8 +56,21 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN nbPaiements INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN fraisValide INTEGER DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN paiementsEffectues INTEGER DEFAULT 0`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN montantPaye REAL DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN tel TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN status TEXT DEFAULT 'mineur'`, () => {});
+
+            // Table paiements (historique des transactions)
+            db.run(`CREATE TABLE IF NOT EXISTS paiements (
+                id TEXT PRIMARY KEY,
+                eleveId TEXT NOT NULL,
+                montant REAL NOT NULL,
+                methodePaiement TEXT NOT NULL DEFAULT 'espece',
+                date TEXT NOT NULL,
+                note TEXT,
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (eleveId) REFERENCES eleves(id) ON DELETE CASCADE
+            )`);
 
             // Table parents (nouveau système - comptes séparés)
             db.run(`CREATE TABLE IF NOT EXISTS parents (
@@ -219,6 +233,15 @@ function initDatabase() {
                 lastActivity INTEGER NOT NULL,
                 userAgent TEXT,
                 ipAddress TEXT
+            )`);
+
+            // Table maintenance (mode maintenance)
+            db.run(`CREATE TABLE IF NOT EXISTS maintenance (
+                id INTEGER PRIMARY KEY,
+                active INTEGER DEFAULT 0,
+                dateDebut TEXT,
+                dateFin TEXT,
+                message TEXT
             )`);
 
             // Insérer le compte admin par défaut s'il n'y a aucun admin

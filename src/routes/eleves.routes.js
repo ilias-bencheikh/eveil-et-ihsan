@@ -61,7 +61,16 @@ router.get('/', (req, res) => {
             res.json(rows);
         });
     } else {
-        db.all('SELECT * FROM eleves', (err, rows) => {
+        db.all(`
+            SELECT e.*,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM eleve_parent ep
+                    INNER JOIN parents p ON ep.parentId = p.id
+                    WHERE ep.eleveId = e.id AND p.activated = 1
+                ) THEN 1 ELSE 0 END AS parentsActivated,
+                (SELECT COUNT(*) FROM eleve_parent ep2 WHERE ep2.eleveId = e.id) AS nbParents
+            FROM eleves e
+        `, (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
         });
@@ -280,14 +289,17 @@ router.get('/:id', async (req, res) => {
         
         // Récupérer les parents de l'élève
         const parents = await dbAll(db, `
-            SELECT p.id, p.nom, p.prenom, p.email, p.tel, p.adresse, p.profession, ep.relation, ep.isPrimary
+            SELECT p.id, p.nom, p.prenom, p.email, p.tel, p.adresse, p.profession, p.activated, ep.relation, ep.isPrimary
             FROM parents p
             INNER JOIN eleve_parent ep ON p.id = ep.parentId
             WHERE ep.eleveId = ?
             ORDER BY ep.isPrimary DESC
         `, [req.params.id]);
         
-        res.json({ ...eleve, parents });
+        // Vérifier si au moins un parent a activé son compte
+        const parentsActivated = parents.length > 0 && parents.some(p => p.activated === 1);
+        
+        res.json({ ...eleve, parents, parentsActivated });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -435,7 +447,136 @@ router.post('/', checkPermission('create'), async (req, res) => {
     }
 });
 
-// Endpoint pour valider les frais d'un élève (admin/secretariat/directeur)
+// Endpoint pour enregistrer un paiement partiel avec méthode de paiement
+router.post('/:id/paiement', checkPermission('update'), async (req, res) => {
+    const { montant, methodePaiement, date, note } = req.body;
+    const eleveId = req.params.id;
+
+    if (!montant || parseFloat(montant) <= 0) {
+        return res.status(400).json({ error: 'Montant invalide (doit être > 0)' });
+    }
+
+    const methodes = ['carte', 'virement', 'espece'];
+    if (!methodePaiement || !methodes.includes(methodePaiement)) {
+        return res.status(400).json({ error: 'Méthode de paiement invalide. Choisir: carte, virement, espece' });
+    }
+
+    try {
+        const eleve = await dbGet(db, 'SELECT id, fraisInscription, montantPaye, paiementsEffectues, fraisValide FROM eleves WHERE id = ?', [eleveId]);
+        if (!eleve) return res.status(404).json({ error: 'Élève non trouvé' });
+
+        const totalFrais = parseFloat(eleve.fraisInscription || 0);
+        const dejaPaye = parseFloat(eleve.montantPaye || 0);
+        const montantPaiement = parseFloat(montant);
+        const resteAvant = totalFrais - dejaPaye;
+
+        if (montantPaiement > resteAvant + 0.01) {
+            return res.status(400).json({ error: `Le montant dépasse le reste à payer (${resteAvant.toFixed(2)} €)` });
+        }
+
+        const paiementId = generateId('paie');
+        const datePaiement = date || new Date().toISOString();
+
+        await dbRun(db, `
+            INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [paiementId, eleveId, montantPaiement, methodePaiement, datePaiement, note || null]);
+
+        const nouveauMontantPaye = dejaPaye + montantPaiement;
+        const nouveauNbPaiements = (parseInt(eleve.paiementsEffectues || 0, 10)) + 1;
+        const fraisValide = nouveauMontantPaye >= totalFrais - 0.01 ? 1 : 0;
+
+        await dbRun(db, 
+            'UPDATE eleves SET montantPaye = ?, paiementsEffectues = ?, fraisValide = ? WHERE id = ?',
+            [nouveauMontantPaye, nouveauNbPaiements, fraisValide, eleveId]
+        );
+
+        res.json({
+            message: 'Paiement enregistré',
+            paiement: { id: paiementId, montant: montantPaiement, methodePaiement, date: datePaiement },
+            eleve: {
+                montantPaye: nouveauMontantPaye,
+                paiementsEffectues: nouveauNbPaiements,
+                fraisValide,
+                resteAPayer: Math.max(0, totalFrais - nouveauMontantPaye)
+            }
+        });
+    } catch (err) {
+        console.error('Erreur enregistrement paiement:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Endpoint pour enregistrer un paiement famille (tous les enfants d'une famille)
+router.post('/paiement-famille', checkPermission('update'), async (req, res) => {
+    const { parentId, eleveIds, montant, methodePaiement, date, note, targetEleveId } = req.body;
+
+    if (!parentId) return res.status(400).json({ error: 'parentId requis' });
+    if (!Array.isArray(eleveIds) || eleveIds.length === 0) {
+        return res.status(400).json({ error: 'eleveIds requis' });
+    }
+    if (!montant || parseFloat(montant) <= 0) {
+        return res.status(400).json({ error: 'Montant invalide' });
+    }
+
+    const methodes = ['carte', 'virement', 'espece'];
+    if (!methodePaiement || !methodes.includes(methodePaiement)) {
+        return res.status(400).json({ error: 'Méthode de paiement invalide' });
+    }
+
+    try {
+        const montantTotal = parseFloat(montant);
+        let montantRestant = montantTotal;
+        const results = [];
+        const datePaiement = date || new Date().toISOString();
+
+        // Vérifier que les élèves appartiennent bien au parent via eleve_parent
+        const eleves = [];
+        const idsToProcess = targetEleveId ? [targetEleveId] : eleveIds;
+        for (const id of idsToProcess) {
+            // Vérifier la liaison parent-enfant
+            const lien = await dbGet(db, 'SELECT id FROM eleve_parent WHERE parentId = ? AND eleveId = ?', [parentId, id]);
+            if (!lien) continue;
+            const row = await dbGet(db, 'SELECT id, fraisInscription, montantPaye, paiementsEffectues, familleLienId FROM eleves WHERE id = ?', [id]);
+            if (!row) continue;
+            const reste = Math.max(0, (row.fraisInscription || 0) - (row.montantPaye || 0));
+            if (reste > 0) eleves.push({ ...row, reste });
+        }
+
+        const totalReste = eleves.reduce((s, e) => s + e.reste, 0);
+        if (montantTotal > totalReste + 0.01) {
+            return res.status(400).json({ error: `Le montant dépasse le reste total à payer (${totalReste.toFixed(2)} €)` });
+        }
+
+        for (const eleve of eleves) {
+            if (montantRestant <= 0) break;
+            const part = totalReste > 0 ? Math.min(eleve.reste, (eleve.reste / totalReste) * montantTotal) : 0;
+            const montantEleve = Math.min(part, montantRestant);
+            if (montantEleve <= 0) continue;
+
+            const paiementId = generateId('paie');
+            await dbRun(db, `INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note) VALUES (?, ?, ?, ?, ?, ?)`,
+                [paiementId, eleve.id, montantEleve, methodePaiement, datePaiement, note || null]);
+
+            const nouveauMontantPaye = (eleve.montantPaye || 0) + montantEleve;
+            const nouveauNb = (eleve.paiementsEffectues || 0) + 1;
+            const fraisValide = nouveauMontantPaye >= (eleve.fraisInscription || 0) - 0.01 ? 1 : 0;
+
+            await dbRun(db, 'UPDATE eleves SET montantPaye = ?, paiementsEffectues = ?, fraisValide = ? WHERE id = ?',
+                [nouveauMontantPaye, nouveauNb, fraisValide, eleve.id]);
+
+            results.push({ id: eleve.id, montantPaye: nouveauMontantPaye, fraisValide });
+            montantRestant -= montantEleve;
+        }
+
+        res.json({ message: 'Paiement famille enregistré', results });
+    } catch (err) {
+        console.error('Erreur paiement famille:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Endpoint ancien pour compat - valider les frais d'un élève (incrémente de 1)
 router.post('/:id/validate-frais', checkPermission('update'), (req, res) => {
     const count = parseInt(req.body.count || '1', 10) || 1;
     db.get('SELECT paiementsEffectues, nbPaiements FROM eleves WHERE id = ?', [req.params.id], (err, row) => {
@@ -603,7 +744,88 @@ router.get('/check-token/:token', async (req, res) => {
 
 // ================== FRAIS D'INSCRIPTION ==================
 
-// Obtenir les frais d'un élève
+// Obtenir les frais d'une famille (par parent connecté) — AVANT /frais/:id pour éviter conflit
+router.get('/frais/famille/me', requireAuth, async (req, res) => {
+    if (req.userRole !== 'parent') {
+        return res.status(403).json({ message: 'Accès réservé aux parents' });
+    }
+    
+    try {
+        const enfants = await dbAll(db, `
+            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye 
+            FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [req.userId]);
+
+        // Récupérer les paiements pour chaque enfant
+        for (const enfant of enfants) {
+            enfant.paiements = await dbAll(db, 
+                'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
+                [enfant.id]
+            );
+            enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
+        }
+        
+        const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
+        const totalMontantPaye = enfants.reduce((sum, e) => sum + (e.montantPaye || 0), 0);
+        const resteAPayer = Math.max(0, totalFrais - totalMontantPaye);
+        
+        res.json({
+            enfants,
+            totalFrais,
+            totalMontantPaye,
+            totalPaiementsEffectues: enfants.reduce((sum, e) => sum + (e.paiementsEffectues || 0), 0),
+            totalNbPaiements: enfants.reduce((sum, e) => sum + (e.nbPaiements || 0), 0),
+            resteAPayer
+        });
+        
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Obtenir les frais d'une famille (admin)
+router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
+    const { parentId } = req.params;
+    
+    if (!['admin', 'secretaire', 'directeur'].includes(req.userRole)) {
+        return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+    
+    try {
+        const enfants = await dbAll(db, `
+            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye 
+            FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [parentId]);
+
+        for (const enfant of enfants) {
+            enfant.paiements = await dbAll(db, 
+                'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
+                [enfant.id]
+            );
+            enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
+        }
+        
+        const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
+        const totalMontantPaye = enfants.reduce((sum, e) => sum + (e.montantPaye || 0), 0);
+        const resteAPayer = Math.max(0, totalFrais - totalMontantPaye);
+        
+        res.json({
+            enfants,
+            totalFrais,
+            totalMontantPaye,
+            resteAPayer
+        });
+        
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Obtenir les frais d'un élève (avec historique des paiements)
 router.get('/frais/:id', requireAuth, async (req, res) => {
     const eleveId = req.params.id;
     console.log('Requête frais pour élève:', eleveId, 'par utilisateur:', req.userId, 'rôle:', req.userRole);
@@ -623,92 +845,29 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
         }
         
         const eleve = await dbGet(db, 
-            'SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues FROM eleves WHERE id = ?', 
+            'SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, montantPaye FROM eleves WHERE id = ?', 
             [eleveId]
         );
         
         if (!eleve) {
             return res.status(404).json({ message: 'Élève non trouvé' });
         }
+
+        // Récupérer l'historique des paiements
+        const paiements = await dbAll(db, 
+            'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC', 
+            [eleveId]
+        );
         
-        const fraisParPaiement = eleve.fraisInscription / eleve.nbPaiements;
-        const resteAPayer = eleve.fraisInscription - (eleve.paiementsEffectues * fraisParPaiement);
+        const montantPaye = parseFloat(eleve.montantPaye || 0);
+        const fraisParPaiement = eleve.nbPaiements > 0 ? eleve.fraisInscription / eleve.nbPaiements : eleve.fraisInscription;
+        const resteAPayer = Math.max(0, eleve.fraisInscription - montantPaye);
         
         res.json({
-            eleve,
+            eleve: { ...eleve, montantPaye },
             fraisParPaiement,
-            resteAPayer
-        });
-        
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Obtenir les frais d'une famille (par parent connecté)
-router.get('/frais/famille/me', requireAuth, async (req, res) => {
-    if (req.userRole !== 'parent') {
-        return res.status(403).json({ message: 'Accès réservé aux parents' });
-    }
-    
-    try {
-        // Récupérer tous les enfants du parent
-        const enfants = await dbAll(db, `
-            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues 
-            FROM eleves e
-            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
-            WHERE ep.parentId = ?
-        `, [req.userId]);
-        
-        const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
-        const totalPaiementsEffectues = enfants.reduce((sum, e) => sum + (e.paiementsEffectues || 0), 0);
-        const totalNbPaiements = enfants.reduce((sum, e) => sum + (e.nbPaiements || 0), 0);
-        const resteAPayer = enfants.reduce((sum, e) => {
-            const fraisParPaiement = e.fraisInscription / e.nbPaiements;
-            return sum + (e.fraisInscription - (e.paiementsEffectues * fraisParPaiement));
-        }, 0);
-        
-        res.json({
-            enfants,
-            totalFrais,
-            totalPaiementsEffectues,
-            totalNbPaiements,
-            resteAPayer
-        });
-        
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Obtenir les frais d'une famille (admin)
-router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
-    const { parentId } = req.params;
-    
-    // Vérifier les permissions : seuls les admins/secrétaires/directeurs peuvent voir les frais famille
-    if (!['admin', 'secretaire', 'directeur'].includes(req.userRole)) {
-        return res.status(403).json({ message: 'Accès non autorisé' });
-    }
-    
-    try {
-        // Récupérer tous les enfants du parent
-        const enfants = await dbAll(db, `
-            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues 
-            FROM eleves e
-            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
-            WHERE ep.parentId = ?
-        `, [parentId]);
-        
-        const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
-        const resteAPayer = enfants.reduce((sum, e) => {
-            const fraisParPaiement = e.fraisInscription / e.nbPaiements;
-            return sum + (e.fraisInscription - (e.paiementsEffectues * fraisParPaiement));
-        }, 0);
-        
-        res.json({
-            enfants,
-            totalFrais,
-            resteAPayer
+            resteAPayer,
+            paiements
         });
         
     } catch (err) {

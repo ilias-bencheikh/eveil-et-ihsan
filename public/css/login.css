@@ -507,3 +507,80 @@
         background-color: rgba(0, 0, 0, 0.8);
     }
 }
+
+/* ===========================================
+   BANNIÈRE DE MAINTENANCE
+   =========================================== */
+
+.maintenance-banner {
+    display: none;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    margin: 0 0 24px 0;
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 1px solid #ff9800;
+    border-left: 5px solid #e65100;
+    border-radius: 16px;
+    animation: maintenanceSlideIn 0.5s ease-out;
+}
+
+.maintenance-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e65100;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 24px;
+}
+
+.maintenance-icon .material-icons {
+    font-size: 26px;
+}
+
+.maintenance-text {
+    flex: 1;
+}
+
+.maintenance-text h3 {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #bf360c;
+}
+
+.maintenance-text p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #4e342e;
+    line-height: 1.4;
+}
+
+.maintenance-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.maintenance-dates span {
+    font-size: 13px;
+    color: #5d4037;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+@keyframes maintenanceSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

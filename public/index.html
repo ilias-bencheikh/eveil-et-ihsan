@@ -349,6 +349,14 @@
                         <span class="material-icons">assignment</span>
                         <span>Inscriptions</span>
                     </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="frais-admin">
+                        <span class="material-icons">payments</span>
+                        <span>Gestion des frais</span>
+                    </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="maintenance" id="nav-maintenance">
+                        <span class="material-icons">engineering</span>
+                        <span>Maintenance</span>
+                    </a>
                 </div>
             </nav>
 
@@ -1071,142 +1079,277 @@
 
                 <!-- ========== INSCRIPTIONS TAB ========== -->
                 <div id="inscriptions" class="tab-content">
-                    <!-- Formulaire d'inscription -->
+                    <!-- Formulaire d'inscription (caché par défaut) -->
                     <div class="widget-card" id="inscriptionFormCard" style="display: none;">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title" id="inscriptionFormTitle">Nouvelle inscription</h3>
+                            <h3 class="widget-card-title" id="inscriptionFormTitle">
+                                <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">edit_note</span>
+                                Nouveau dossier d'inscription
+                            </h3>
                             <button class="md-btn md-btn-text" onclick="hideInscriptionForm()">
                                 <span class="material-icons">close</span>
                             </button>
                         </div>
                         <div class="widget-card-content">
-                            <!-- Type d'inscription -->
-                            <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                                <div class="inscription-type-option selected" data-type="seul" onclick="selectInscriptionType('seul')" style="flex: 1; padding: 20px; border: 2px solid var(--md-sys-color-primary); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
-                                    <span class="material-icons" style="font-size: 40px; color: var(--md-sys-color-primary);">person</span>
-                                    <h4 style="margin-top: 8px;">Élève seul</h4>
-                                    <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Inscrire un seul enfant</p>
+
+                            <!-- Stepper -->
+                            <div class="md-stepper" id="inscriptionStepper">
+                                <div class="md-stepper-step active" data-step="1">
+                                    <div class="md-stepper-indicator" onclick="goToInscriptionStep(1)">
+                                        <div class="md-stepper-number">1</div>
+                                        <div class="md-stepper-label">Type</div>
+                                    </div>
                                 </div>
-                                <div class="inscription-type-option" data-type="famille" onclick="selectInscriptionType('famille')" style="flex: 1; padding: 20px; border: 2px solid var(--md-sys-color-outline); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;">
-                                    <span class="material-icons" style="font-size: 40px; color: var(--md-sys-color-secondary);">groups</span>
-                                    <h4 style="margin-top: 8px;">Famille</h4>
-                                    <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Inscrire plusieurs enfants</p>
+                                <div class="md-stepper-connector"></div>
+                                <div class="md-stepper-step" data-step="2">
+                                    <div class="md-stepper-indicator" onclick="goToInscriptionStep(2)">
+                                        <div class="md-stepper-number">2</div>
+                                        <div class="md-stepper-label">Parents</div>
+                                    </div>
+                                </div>
+                                <div class="md-stepper-connector"></div>
+                                <div class="md-stepper-step" data-step="3">
+                                    <div class="md-stepper-indicator" onclick="goToInscriptionStep(3)">
+                                        <div class="md-stepper-number">3</div>
+                                        <div class="md-stepper-label">Élèves</div>
+                                    </div>
+                                </div>
+                                <div class="md-stepper-connector"></div>
+                                <div class="md-stepper-step" data-step="4">
+                                    <div class="md-stepper-indicator" onclick="goToInscriptionStep(4)">
+                                        <div class="md-stepper-number">4</div>
+                                        <div class="md-stepper-label">Récap</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Bouton pour ajouter/retirer la section parent -->
-                            <div style="margin-bottom: 16px;">
-                                <button type="button" id="toggleParentSectionBtn" class="md-btn md-btn-tonal" onclick="toggleParentSection()" style="display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; padding: 12px;">
-                                    <span class="material-icons">person_add</span>
-                                    <span>Ajouter un parent / tuteur</span>
-                                </button>
-                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-align: center; margin-top: 8px;">
-                                    Si aucun parent n'est renseigné, un compte sera créé pour chaque élève (email obligatoire).
+                            <!-- ÉTAPE 1 : Type d'inscription -->
+                            <div class="inscription-step active" id="inscriptionStep1">
+                                <h4 style="margin-bottom: 8px; color: var(--md-sys-color-on-surface);">Quel type d'inscription ?</h4>
+                                <p style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">Choisissez le mode d'inscription adapté à la situation.</p>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                    <div class="inscription-type-card selected" data-type="seul" onclick="selectInscriptionType('seul')">
+                                        <span class="material-icons" style="font-size: 44px; color: var(--md-sys-color-primary); margin-bottom: 12px;">person</span>
+                                        <h4 style="margin-bottom: 4px;">Élève seul</h4>
+                                        <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Un seul enfant</p>
+                                    </div>
+                                    <div class="inscription-type-card" data-type="famille" onclick="selectInscriptionType('famille')">
+                                        <span class="material-icons" style="font-size: 44px; color: var(--md-sys-color-secondary); margin-bottom: 12px;">groups</span>
+                                        <h4 style="margin-bottom: 4px;">Famille</h4>
+                                        <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Plusieurs enfants</p>
+                                    </div>
+                                    <div class="inscription-type-card" data-type="existante" onclick="selectInscriptionType('existante')">
+                                        <span class="material-icons" style="font-size: 44px; color: var(--md-sys-color-tertiary); margin-bottom: 12px;">family_restroom</span>
+                                        <h4 style="margin-bottom: 4px;">Famille existante</h4>
+                                        <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Ajouter à une famille déjà inscrite</p>
+                                    </div>
+                                </div>
+
+                                <!-- Recherche famille existante (caché par défaut) -->
+                                <div id="existingFamilySearch" style="display: none; margin-top: 24px;">
+                                    <div style="padding: 20px; background: var(--md-sys-color-tertiary-container); border-radius: 16px;">
+                                        <h5 style="margin-bottom: 12px; color: var(--md-sys-color-on-tertiary-container); display: flex; align-items: center; gap: 8px;">
+                                            <span class="material-icons">search</span> Rechercher la famille
+                                        </h5>
+                                        <div class="md-text-field" style="margin-bottom: 16px;">
+                                            <div class="md-text-field-container">
+                                                <input type="text" id="searchFamilleInput" class="md-text-field-input" placeholder=" " oninput="searchExistingFamilies()">
+                                                <label class="md-text-field-label">Nom du parent ou de l'élève...</label>
+                                            </div>
+                                        </div>
+                                        <div id="familleSearchResults" style="max-height: 300px; overflow-y: auto;"></div>
+                                        <div id="selectedFamilleInfo" style="display: none; margin-top: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px; border: 2px solid var(--md-sys-color-tertiary);"></div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                                    <button class="md-btn md-btn-filled" onclick="nextInscriptionStep()">
+                                        Suivant <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 2 : Parents -->
+                            <div class="inscription-step" id="inscriptionStep2">
+                                <h4 style="margin-bottom: 8px; color: var(--md-sys-color-on-surface);">Informations du parent / tuteur</h4>
+                                <p style="margin-bottom: 20px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
+                                    Optionnel — si aucun parent n'est renseigné, un email sera requis pour chaque élève.
                                 </p>
+
+                                <!-- Toggle parent -->
+                                <div id="parentToggleArea" style="margin-bottom: 20px;">
+                                    <button type="button" id="toggleParentSectionBtn" class="account-toggle-btn" onclick="toggleParentSection()">
+                                        <span class="material-icons">person_add</span>
+                                        <span>Ajouter un parent / tuteur</span>
+                                        <span class="material-icons" style="margin-left: auto;">add</span>
+                                    </button>
+                                </div>
+
+                                <!-- Section parent 1 -->
+                                <div class="parent-info-section" style="display: none;">
+                                    <div class="parent-card" style="margin-bottom: 16px;">
+                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--md-sys-color-primary); color: white; display: flex; align-items: center; justify-content: center;">
+                                                <span class="material-icons">person</span>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">Parent principal</div>
+                                                <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Responsable légal</div>
+                                            </div>
+                                            <button type="button" class="md-btn md-btn-text" onclick="toggleParentSection()" style="color: var(--md-sys-color-error);">
+                                                <span class="material-icons">close</span>
+                                            </button>
+                                        </div>
+                                        <div class="md-form-grid">
+                                            <div class="md-text-field">
+                                                <div class="md-text-field-container">
+                                                    <input type="text" id="insc_parentNom" class="md-text-field-input" placeholder=" ">
+                                                    <label class="md-text-field-label">Nom *</label>
+                                                </div>
+                                            </div>
+                                            <div class="md-text-field">
+                                                <div class="md-text-field-container">
+                                                    <input type="text" id="insc_parentPrenom" class="md-text-field-input" placeholder=" ">
+                                                    <label class="md-text-field-label">Prénom *</label>
+                                                </div>
+                                            </div>
+                                            <div class="md-text-field">
+                                                <div class="md-text-field-container">
+                                                    <input type="email" id="insc_parentEmail" class="md-text-field-input" placeholder=" " required>
+                                                    <label class="md-text-field-label">Email (connexion) *</label>
+                                                </div>
+                                            </div>
+                                            <div class="md-text-field">
+                                                <div class="md-text-field-container">
+                                                    <input type="tel" id="insc_parentTel" class="md-text-field-input" placeholder=" ">
+                                                    <label class="md-text-field-label">Téléphone</label>
+                                                </div>
+                                            </div>
+                                            <div class="md-text-field full-width">
+                                                <div class="md-text-field-container">
+                                                    <input type="text" id="insc_parentAdresse" class="md-text-field-input" placeholder=" ">
+                                                    <label class="md-text-field-label">Adresse</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bouton ajouter 2e parent -->
+                                    <button type="button" id="toggleAddParent2Btn" class="account-toggle-btn" onclick="toggleParent2()" style="margin-bottom: 16px;">
+                                        <span class="material-icons">person_add</span>
+                                        <span>Ajouter un 2ᵉ parent / tuteur</span>
+                                        <span class="material-icons" style="margin-left: auto;">add</span>
+                                    </button>
+
+                                    <!-- Section parent 2 -->
+                                    <div id="parent2Section" style="display: none;">
+                                        <div class="parent-card">
+                                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--md-sys-color-secondary); color: white; display: flex; align-items: center; justify-content: center;">
+                                                    <span class="material-icons">person</span>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">2ᵉ Parent / Tuteur</div>
+                                                    <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Optionnel</div>
+                                                </div>
+                                                <button type="button" class="md-btn md-btn-text" onclick="toggleParent2()" style="color: var(--md-sys-color-error);">
+                                                    <span class="material-icons">close</span>
+                                                </button>
+                                            </div>
+                                            <div class="md-form-grid">
+                                                <div class="md-text-field">
+                                                    <div class="md-text-field-container">
+                                                        <input type="text" id="insc_parent2Nom" class="md-text-field-input" placeholder=" ">
+                                                        <label class="md-text-field-label">Nom *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="md-text-field">
+                                                    <div class="md-text-field-container">
+                                                        <input type="text" id="insc_parent2Prenom" class="md-text-field-input" placeholder=" ">
+                                                        <label class="md-text-field-label">Prénom *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="md-text-field">
+                                                    <div class="md-text-field-container">
+                                                        <input type="email" id="insc_parent2Email" class="md-text-field-input" placeholder=" ">
+                                                        <label class="md-text-field-label">Email (connexion) *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="md-text-field">
+                                                    <div class="md-text-field-container">
+                                                        <input type="tel" id="insc_parent2Tel" class="md-text-field-input" placeholder=" ">
+                                                        <label class="md-text-field-label">Téléphone</label>
+                                                    </div>
+                                                </div>
+                                                <div class="md-text-field full-width">
+                                                    <div class="md-text-field-container">
+                                                        <input type="text" id="insc_parent2Adresse" class="md-text-field-input" placeholder=" ">
+                                                        <label class="md-text-field-label">Adresse</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 16px; justify-content: space-between; margin-top: 24px;">
+                                    <button class="md-btn md-btn-outlined" onclick="prevInscriptionStep()">
+                                        <span class="material-icons">arrow_back</span> Précédent
+                                    </button>
+                                    <button class="md-btn md-btn-filled" onclick="nextInscriptionStep()">
+                                        Suivant <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- Info parent (caché par défaut) -->
-                            <div class="parent-info-section" style="background: var(--md-sys-color-primary-container); padding: 20px; border-radius: 12px; margin-bottom: 24px; display: none;">
-                                <h4 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-icons">person</span> Informations du parent/tuteur
-                                    <button type="button" class="md-btn md-btn-text" onclick="toggleParentSection()" style="margin-left: auto; color: var(--md-sys-color-error);">
-                                        <span class="material-icons">close</span> Retirer
+                            <!-- ÉTAPE 3 : Élèves -->
+                            <div class="inscription-step" id="inscriptionStep3">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                                    <div>
+                                        <h4 style="color: var(--md-sys-color-on-surface);">
+                                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">school</span>
+                                            <span id="inscriptionEnfantsTitle">Informations de l'élève</span>
+                                        </h4>
+                                        <p style="margin-top: 4px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">Renseignez les informations de chaque élève</p>
+                                    </div>
+                                    <button type="button" id="addEnfantBtn" class="md-btn md-btn-tonal" style="display: none;" onclick="addEnfantField()">
+                                        <span class="material-icons">add</span> Ajouter un élève
                                     </button>
+                                </div>
+                                <div id="inscriptionEnfantsContainer"></div>
+
+                                <div style="display: flex; gap: 16px; justify-content: space-between; margin-top: 24px;">
+                                    <button class="md-btn md-btn-outlined" onclick="prevInscriptionStep()">
+                                        <span class="material-icons">arrow_back</span> Précédent
+                                    </button>
+                                    <button class="md-btn md-btn-filled" onclick="nextInscriptionStep()">
+                                        Suivant <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 4 : Récapitulatif -->
+                            <div class="inscription-step" id="inscriptionStep4">
+                                <h4 style="margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">fact_check</span>
+                                    Récapitulatif de l'inscription
                                 </h4>
-                                <div style="display:flex; gap:8px; margin-bottom:12px;">
-                                    <button type="button" id="toggleAddParent2Btn" class="md-btn md-btn-outlined" style="margin-left:auto;" onclick="toggleParent2()">
-                                        <span class="material-icons">person_add</span> Ajouter un 2ᵉ parent
+                                <p style="margin-bottom: 20px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
+                                    Vérifiez les informations avant de valider.
+                                </p>
+                                <div id="inscriptionRecap"></div>
+
+                                <div style="display: flex; gap: 16px; justify-content: space-between; margin-top: 24px;">
+                                    <button class="md-btn md-btn-outlined" onclick="prevInscriptionStep()">
+                                        <span class="material-icons">arrow_back</span> Précédent
+                                    </button>
+                                    <button class="md-btn md-btn-filled" onclick="submitInscription()" style="min-width: 200px;">
+                                        <span class="material-icons">check_circle</span> Valider l'inscription
                                     </button>
                                 </div>
-                                <div class="md-form-grid">
-                                    <div class="md-text-field">
-                                        <div class="md-text-field-container">
-                                            <input type="text" id="insc_parentNom" class="md-text-field-input" placeholder=" ">
-                                            <label class="md-text-field-label">Nom du parent</label>
-                                        </div>
-                                    </div>
-                                    <div class="md-text-field">
-                                        <div class="md-text-field-container">
-                                            <input type="text" id="insc_parentPrenom" class="md-text-field-input" placeholder=" ">
-                                            <label class="md-text-field-label">Prénom du parent</label>
-                                        </div>
-                                    </div>
-                                    <div class="md-text-field">
-                                        <div class="md-text-field-container">
-                                            <input type="email" id="insc_parentEmail" class="md-text-field-input" placeholder=" " required>
-                                            <label class="md-text-field-label">Email (pour la connexion)</label>
-                                        </div>
-                                    </div>
-                                    <div class="md-text-field">
-                                        <div class="md-text-field-container">
-                                            <input type="tel" id="insc_parentTel" class="md-text-field-input" placeholder=" ">
-                                            <label class="md-text-field-label">Téléphone</label>
-                                        </div>
-                                    </div>
-                                    <div class="md-text-field">
-                                        <div class="md-text-field-container">
-                                            <input type="text" id="insc_parentAdresse" class="md-text-field-input" placeholder=" ">
-                                            <label class="md-text-field-label">Adresse</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Deuxième parent (caché par défaut) -->
-                                <div id="parent2Section" style="display:none; margin-top:16px; background: rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
-                                    <h5 style="margin:0 0 8px 0; font-size:14px; color:var(--md-sys-color-on-primary-container);">Deuxième parent / tuteur</h5>
-                                    <div class="md-form-grid">
-                                        <div class="md-text-field">
-                                            <div class="md-text-field-container">
-                                                <input type="text" id="insc_parent2Nom" class="md-text-field-input" placeholder=" ">
-                                                <label class="md-text-field-label">Nom du 2ᵉ parent</label>
-                                            </div>
-                                        </div>
-                                        <div class="md-text-field">
-                                            <div class="md-text-field-container">
-                                                <input type="text" id="insc_parent2Prenom" class="md-text-field-input" placeholder=" ">
-                                                <label class="md-text-field-label">Prénom du 2ᵉ parent</label>
-                                            </div>
-                                        </div>
-                                        <div class="md-text-field">
-                                            <div class="md-text-field-container">
-                                                <input type="email" id="insc_parent2Email" class="md-text-field-input" placeholder=" ">
-                                                <label class="md-text-field-label">Email (connexion)</label>
-                                            </div>
-                                        </div>
-                                        <div class="md-text-field">
-                                            <div class="md-text-field-container">
-                                                <input type="tel" id="insc_parent2Tel" class="md-text-field-input" placeholder=" ">
-                                                <label class="md-text-field-label">Téléphone</label>
-                                            </div>
-                                        </div>
-                                        <div class="md-text-field">
-                                            <div class="md-text-field-container">
-                                                <input type="text" id="insc_parent2Adresse" class="md-text-field-input" placeholder=" ">
-                                                <label class="md-text-field-label">Adresse</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
-                            <!-- Enfants -->
-                            <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <span class="material-icons">child_care</span>
-                                <span id="inscriptionEnfantsTitle">Informations de l'élève</span>
-                            </h4>
-                            <div id="inscriptionEnfantsContainer"></div>
-                            
-                            <button type="button" id="addEnfantBtn" class="md-btn md-btn-outlined" style="width: 100%; margin-top: 16px; display: none;" onclick="addEnfantField()">
-                                <span class="material-icons">add</span> Ajouter un autre élève
-                            </button>
-
-                            <div style="display: flex; gap: 16px; margin-top: 24px;">
-                                <button class="md-btn md-btn-outlined" style="flex: 1;" onclick="hideInscriptionForm()">
-                                    Annuler
-                                </button>
-                                <button class="md-btn md-btn-filled" style="flex: 1;" onclick="submitInscription()">
-                                    <span class="material-icons">check</span> Valider l'inscription
-                                </button>
-                            </div>
                         </div>
                     </div>
 
@@ -1250,6 +1393,179 @@
                             </div>
                             <div id="fraisList" class="md-grid md-grid-auto">
                                 <p style="color: var(--md-sys-color-on-surface-variant);">Chargement des frais...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== FRAIS ADMIN TAB ========== -->
+                <div id="frais-admin" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Administration — Gestion des frais</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <div style="display:flex; flex-direction:column; gap:12px;">
+                                <div>
+                                    <label style="font-weight:500; margin-bottom:4px; display:block;">Cible</label>
+                                    <div style="display:flex; gap:12px; align-items:center;">
+                                        <label><input type="radio" name="adminFraisTarget" value="eleve" checked onchange="adminFraisTargetChanged()"> Élève</label>
+                                        <label><input type="radio" name="adminFraisTarget" value="famille" onchange="adminFraisTargetChanged()"> Famille</label>
+                                    </div>
+                                </div>
+
+                                <div id="adminFraisEleveSelect">
+                                    <label style="font-weight:500; margin-bottom:4px; display:block;">Sélectionner un élève</label>
+                                    <select id="adminEleveList" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px; background:var(--md-sys-color-surface);" onchange="adminLoadSelectedFrais()">
+                                        <option value="">Chargement...</option>
+                                    </select>
+                                </div>
+
+                                <div id="adminFraisFamille" style="display:none;">
+                                    <label style="font-weight:500; margin-bottom:4px; display:block;">Rechercher une famille</label>
+                                    <input id="adminFamilleSearch" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px; background:var(--md-sys-color-surface);" placeholder="Nom, prénom d'un parent ou enfant..." oninput="adminSearchFamilles()" />
+                                    <div id="adminFamilleSearchResults" style="max-height:250px; overflow-y:auto; margin-top:8px;"></div>
+                                    <div id="adminFamilleSelected" style="display:none; margin-top:12px; padding:12px; background:var(--md-sys-color-surface-container); border-radius:12px; border:2px solid var(--md-sys-color-primary);">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <strong id="adminFamilleSelectedName" style="font-size:1rem;"></strong>
+                                            <button class="md-btn md-btn-text" onclick="adminDeselectFamille()" style="padding:4px 8px; font-size:0.8rem;">Changer</button>
+                                        </div>
+                                        <div id="adminFamilleEnfantsList"></div>
+                                        <div style="margin-top:8px;">
+                                            <label style="font-weight:500; margin-bottom:4px; display:block;">Payer pour :</label>
+                                            <select id="adminFamilleTargetEnfant" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px; background:var(--md-sys-color-surface);" onchange="adminLoadSelectedFrais()">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section Initialisation des frais -->
+                                <details style="border:1px solid var(--md-sys-color-outline-variant); border-radius:12px; padding:12px;">
+                                    <summary style="cursor:pointer; font-weight:600; color:var(--md-sys-color-on-surface);">Initialiser les frais</summary>
+                                    <div style="display:flex; gap:12px; margin-top:12px;">
+                                        <div style="flex:1;">
+                                            <label style="font-weight:500; margin-bottom:4px; display:block;">Montant total (€)</label>
+                                            <input id="adminInitTotal" type="number" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" placeholder="Ex: 300" />
+                                        </div>
+                                        <div style="width:150px;">
+                                            <label style="font-weight:500; margin-bottom:4px; display:block;">Réduction (%)</label>
+                                            <input id="adminInitReduction" type="number" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" placeholder="0" />
+                                        </div>
+                                    </div>
+                                    <div style="margin-top:8px;">
+                                        <button class="md-btn md-btn-filled" onclick="adminInitFrais()">Initialiser les frais</button>
+                                    </div>
+                                </details>
+
+                                <!-- Section Enregistrer un paiement -->
+                                <div id="adminPaiementSection" style="display:none; border:1px solid var(--md-sys-color-primary); border-radius:12px; padding:16px; background:var(--md-sys-color-surface-container-low);">
+                                    <h4 style="margin:0 0 12px 0; color:var(--md-sys-color-primary);">
+                                        <span class="material-icons" style="vertical-align:middle; margin-right:4px;">payments</span>
+                                        Enregistrer un paiement
+                                    </h4>
+                                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                                        <div style="flex:1; min-width:150px;">
+                                            <label style="font-weight:500; margin-bottom:4px; display:block;">Montant (€)</label>
+                                            <input id="adminPaiementMontant" type="number" step="0.01" min="0.01" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" placeholder="Ex: 50" />
+                                        </div>
+                                        <div style="flex:1; min-width:150px;">
+                                            <label style="font-weight:500; margin-bottom:4px; display:block;">Méthode de paiement</label>
+                                            <select id="adminPaiementMethode" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px; background:var(--md-sys-color-surface);">
+                                                <option value="espece">💵 Espèce</option>
+                                                <option value="carte">💳 Carte</option>
+                                                <option value="virement">🏦 Virement</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex:1; min-width:150px;">
+                                            <label style="font-weight:500; margin-bottom:4px; display:block;">Date</label>
+                                            <input id="adminPaiementDate" type="date" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" />
+                                        </div>
+                                    </div>
+                                    <div style="margin-top:8px;">
+                                        <label style="font-weight:500; margin-bottom:4px; display:block;">Note (optionnel)</label>
+                                        <input id="adminPaiementNote" type="text" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" placeholder="Ex: Paiement 1er trimestre" />
+                                    </div>
+                                    <div style="margin-top:12px; display:flex; gap:8px;">
+                                        <button class="md-btn md-btn-filled" onclick="adminEnregistrerPaiement()">
+                                            <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:4px;">check</span>
+                                            Enregistrer le paiement
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; gap:8px;">
+                                    <button class="md-btn md-btn-text" onclick="adminLoadSelectedFrais()">
+                                        <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:4px;">refresh</span>
+                                        Actualiser
+                                    </button>
+                                </div>
+
+                                <div id="adminFraisResult" style="margin-top:12px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== MAINTENANCE TAB ========== -->
+                <div id="maintenance" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">
+                                <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">engineering</span>
+                                Mode Maintenance
+                            </h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">
+                                Lorsque le mode maintenance est activé, seuls les administrateurs et le staff peuvent se connecter au site. 
+                                Les élèves, parents et professeurs verront un message de maintenance sur la page de connexion.
+                            </p>
+
+                            <!-- Statut actuel -->
+                            <div id="maintenanceCurrentStatus" style="padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                                <span class="material-icons" id="maintenanceStatusIcon" style="font-size: 32px;">check_circle</span>
+                                <div>
+                                    <div id="maintenanceStatusText" style="font-weight: 600; font-size: 16px;">Statut en cours de chargement...</div>
+                                    <div id="maintenanceStatusDates" style="font-size: 13px; margin-top: 4px; opacity: 0.8;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Formulaire -->
+                            <div style="display: flex; flex-direction: column; gap: 16px; max-width: 500px;">
+                                <div>
+                                    <label style="font-weight: 500; margin-bottom: 6px; display: block; color: var(--md-sys-color-on-surface);">
+                                        <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:4px;">message</span>
+                                        Message personnalisé (optionnel)
+                                    </label>
+                                    <textarea id="maintenanceMsg" rows="3" placeholder="Ex: Mise à jour du système en cours..."
+                                        style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 12px; 
+                                        font-family: inherit; font-size: 14px; resize: vertical; background: var(--md-sys-color-surface-container-lowest);
+                                        color: var(--md-sys-color-on-surface);"></textarea>
+                                </div>
+
+                                <div>
+                                    <label style="font-weight: 500; margin-bottom: 6px; display: block; color: var(--md-sys-color-on-surface);">
+                                        <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:4px;">event</span>
+                                        Date de fin prévue (optionnel)
+                                    </label>
+                                    <input type="datetime-local" id="maintenanceDateFin"
+                                        style="width: 100%; padding: 12px; border: 1px solid var(--md-sys-color-outline); border-radius: 12px;
+                                        font-family: inherit; font-size: 14px; background: var(--md-sys-color-surface-container-lowest);
+                                        color: var(--md-sys-color-on-surface);">
+                                </div>
+
+                                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                                    <button class="md-btn md-btn-filled" id="btnActivateMaintenance" onclick="toggleMaintenance(true)"
+                                        style="background: #e65100; flex: 1;">
+                                        <span class="material-icons">power_settings_new</span>
+                                        Activer la maintenance
+                                    </button>
+                                    <button class="md-btn md-btn-filled" id="btnDeactivateMaintenance" onclick="toggleMaintenance(false)"
+                                        style="background: var(--md-sys-color-success); flex: 1; display: none;">
+                                        <span class="material-icons">check_circle</span>
+                                        Désactiver la maintenance
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1435,7 +1751,8 @@
             const titles = {
                 dashboard: 'Tableau de bord', eleves: 'Gestion des élèves', classes: 'Gestion des classes',
                 appel: "Faire l'appel", absences: 'Suivi des absences', appreciations: 'Appréciations',
-                actualites: 'Actualités', messagerie: 'Messagerie', bureau: 'Gestion du bureau', inscriptions: "Dossiers d'inscription"
+                actualites: 'Actualités', messagerie: 'Messagerie', bureau: 'Gestion du bureau', inscriptions: "Dossiers d'inscription",
+                'frais-admin': 'Gestion des frais'
             };
             document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
             loadTabData(tabName);
@@ -1644,6 +1961,8 @@
                 case 'messagerie': await loadMessages(); break;
                 case 'bureau': await loadStaff(); break;
                 case 'inscriptions': await loadInscriptions(); break;
+                case 'frais-admin': await adminFraisTabInit(); break;
+                case 'maintenance': await loadMaintenanceStatus(); break;
             }
         }
 
@@ -1693,15 +2012,15 @@
                         <div style="flex: 1;">
                             <h4 style="font-weight: 500;">${e.prenom} ${e.nom}</h4>
                             <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
-                            ${!e.activated ? '<span style="font-size: 11px; color: var(--md-sys-color-error);">⏳ Non activé</span>' : ''}
+                            ${e.nbParents > 0 && !e.parentsActivated ? '<span style="font-size: 11px; color: var(--md-sys-color-error);">⏳ Compte parent non activé</span>' : ''}
+                            ${e.nbParents === 0 ? '<span style="font-size: 11px; color: var(--md-sys-color-on-surface-variant);">Aucun parent</span>' : ''}
                         </div>
                     </div>
                     <div style="flex: 1; display: flex; align-items: flex-end; justify-content: space-between;">
                         <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Cliquez pour voir les détails</div>
                         <div style="display: flex; gap: 4px;">
-                            ${!e.activated && e.email ? `<button class="md-btn md-btn-tonal" onclick="event.stopPropagation(); sendActivationEmail('${e.id}', '${e.email}', 'eleve')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
                             ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="event.stopPropagation(); editEleve('${e.id}')" title="Modifier"><span class="material-icons">edit</span></button>` : ''}
-                            ${canModifyData() ? `<button class="md-btn ${!e.activated ? 'md-btn-filled' : 'md-btn-text'}" style="color: ${!e.activated ? 'var(--md-sys-color-on-error)' : 'var(--md-sys-color-error)'}; background: ${!e.activated ? 'var(--md-sys-color-error)' : 'transparent'};" onclick="event.stopPropagation(); deleteEleve('${e.id}')" title="${!e.activated ? 'Supprimer le dossier d\'inscription' : 'Supprimer'}"><span class="material-icons">delete</span></button>` : ''}
+                            ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteEleve('${e.id}')" title="Supprimer"><span class="material-icons">delete</span></button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1720,7 +2039,6 @@
 
         // Afficher les détails d'un élève dans la page principale
         async function showEleveDetails(eleveId) {
-            // Récupérer l'élève avec ses parents depuis l'API
             let eleve;
             try {
                 const response = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
@@ -1735,7 +2053,6 @@
             if (!eleve) return;
 
             const parents = eleve.parents || [];
-            const hasParents = parents.length > 0;
             let familyMembers = [];
             try {
                 const response = await fetch(`${API_URL}/eleves/${eleveId}/famille`, { headers: getHeaders() });
@@ -1743,14 +2060,11 @@
                     familyMembers = await response.json();
                 }
             } catch (error) {
-                console.error('Erreur chargement famille:', error);
                 familyMembers = [eleve];
             }
 
-            // Filtrer les autres enfants (exclure l'élève actuellement affiché)
             const otherChildren = familyMembers.filter(m => m.id !== eleveId);
 
-            // Sauvegarder l'état actuel pour pouvoir revenir
             if (!window.eleveDetailsBackup) {
                 window.eleveDetailsBackup = {
                     searchValue: document.getElementById('searchEleve').value,
@@ -1760,194 +2074,193 @@
 
             const widgetCardContent = document.querySelector('#eleves .widget-card-content');
             widgetCardContent.innerHTML = `
-                <!-- Bouton retour -->
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 16px; background: var(--md-sys-color-surface-variant); border-radius: 12px;">
-                    <button class="md-btn md-btn-text" onclick="backToElevesList()" style="display: flex; align-items: center; gap: 8px;">
+                <!-- Header de navigation -->
+                <div class="fiche-header">
+                    <button class="md-btn md-btn-text" onclick="backToElevesList()">
                         <span class="material-icons">arrow_back</span>
-                        Retour à la liste
+                        Retour
                     </button>
                     <div style="flex: 1;"></div>
                     <div style="text-align: right;">
                         <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Fiche famille / élève</div>
-                        <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${familyMembers.length} membre${familyMembers.length > 1 ? 's' : ''} dans la famille</div>
+                        <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${familyMembers.length} membre${familyMembers.length > 1 ? 's' : ''}</div>
                     </div>
                 </div>
 
-                <!-- SECTION 1: Informations des Parents / Responsables -->
-                ${parents.length > 0 ? `
-                <div style="margin-bottom: 32px; padding: 24px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-tertiary-container)); border-radius: 20px; border: 2px solid var(--md-sys-color-primary);">
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-                        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--md-sys-color-primary); color: white; display: flex; align-items: center; justify-content: center;">
-                            <span class="material-icons" style="font-size: 28px;">family_restroom</span>
+                <!-- SECTION : Fiche élève -->
+                <div class="fiche-section" style="margin-bottom: 24px; border-color: var(--md-sys-color-primary);">
+                    <div class="fiche-section-header" style="background: var(--md-sys-color-primary-container);">
+                        <div class="md-avatar" style="width: 64px; height: 64px; background: var(--md-sys-color-primary); color: white; font-size: 28px; flex-shrink: 0;">
+                            ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
                         </div>
                         <div style="flex: 1;">
-                            <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-primary-container); font-size: 20px;">Parent${parents.length > 1 ? 's' : ''} / Responsable${parents.length > 1 ? 's' : ''}</h4>
-                            <p style="margin: 0; color: var(--md-sys-color-on-primary-container); opacity: 0.8; font-size: 14px;">${parents.length} parent${parents.length > 1 ? 's' : ''} enregistré${parents.length > 1 ? 's' : ''}</p>
+                            <h4 style="margin: 0; color: var(--md-sys-color-on-primary-container); font-size: 22px;">${eleve.prenom} ${eleve.nom}</h4>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); height: 26px; font-size: 12px; padding: 0 10px;">${eleve.classe || 'Sans classe'}</span>
+                                ${parents.length > 0 ? (parents.some(p => p.activated) ? '<span class="md-chip md-chip-filter" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); height: 26px; font-size: 12px; padding: 0 10px;">✓ Compte parent activé</span>' : '<span class="md-chip md-chip-filter" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); height: 26px; font-size: 12px; padding: 0 10px;">⏳ Compte parent non activé</span>') : ''}
+                            </div>
                         </div>
                         ${canModifyData() ? `
-                        <button class="md-btn md-btn-filled" onclick="editParentInfo('${eleveId}')" style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-icons">edit</span>
-                            Modifier
+                        <button class="md-btn md-btn-filled" onclick="editEleve('${eleveId}')">
+                            <span class="material-icons">edit</span> Modifier
                         </button>
                         ` : ''}
                     </div>
-                    
-                    ${parents.map((parent, idx) => `
-                    <div style="padding: 20px; background: rgba(255,255,255,0.7); border-radius: 16px; ${idx > 0 ? 'margin-top: 16px;' : ''}">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--md-sys-color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">
-                                ${(parent.prenom || 'P')[0].toUpperCase()}
-                            </div>
-                            <div>
-                                <div style="font-weight: 700; font-size: 18px; color: var(--md-sys-color-on-primary-container);">${parent.prenom || ''} ${parent.nom || ''}</div>
-                                <div style="font-size: 13px; color: var(--md-sys-color-on-primary-container); opacity: 0.7;">
-                                    ${parent.relation || (parent.isPrimary ? 'Parent principal' : 'Parent secondaire')}
-                                    ${parent.isPrimary ? ' ⭐' : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
-                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">email</span>
+                    <div class="fiche-section-content">
+                        <div class="fiche-info-grid">
+                            ${eleve.dateNaissance ? `
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon">cake</span>
                                 <div>
-                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">EMAIL</div>
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.email || '-'}</div>
+                                    <div class="fiche-info-label">Date de naissance</div>
+                                    <div class="fiche-info-value">${new Date(eleve.dateNaissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
                                 </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
-                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">phone</span>
+                            </div>` : ''}
+                            ${eleve.email ? `
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon">email</span>
                                 <div>
-                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">TÉLÉPHONE</div>
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.tel || '-'}</div>
+                                    <div class="fiche-info-label">Email</div>
+                                    <div class="fiche-info-value">${eleve.email}</div>
                                 </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
-                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">home</span>
+                            </div>` : ''}
+                            ${eleve.tel ? `
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon">phone</span>
                                 <div>
-                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">ADRESSE</div>
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.adresse || '-'}</div>
+                                    <div class="fiche-info-label">Téléphone</div>
+                                    <div class="fiche-info-value">${eleve.tel}</div>
                                 </div>
-                            </div>
-                            ${parent.profession ? `
-                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 10px;">
-                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-primary);">work</span>
+                            </div>` : ''}
+                            <div class="fiche-info-item" style="border-left: 3px solid ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
+                                <span class="material-icons fiche-info-icon" style="color: ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">payments</span>
                                 <div>
-                                    <div style="font-size: 11px; color: var(--md-sys-color-on-primary-container); opacity: 0.6;">PROFESSION</div>
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-primary-container); font-size: 14px;">${parent.profession}</div>
+                                    <div class="fiche-info-label">Frais d'inscription</div>
+                                    <div class="fiche-info-value">${eleve.fraisValide ? '✓ Payé intégralement' : `${eleve.paiementsEffectues || 0}/${eleve.nbPaiements || 1} paiements`}</div>
                                 </div>
                             </div>
-                            ` : ''}
                         </div>
                     </div>
-                    `).join('')}
+                </div>
+
+                <!-- SECTION : Parents -->
+                ${parents.length > 0 ? `
+                <div class="fiche-section" style="margin-bottom: 24px;">
+                    <div class="fiche-section-header">
+                        <div class="fiche-section-icon" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">
+                            <span class="material-icons">family_restroom</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <h5 style="margin: 0; font-size: 18px;">Parent${parents.length > 1 ? 's' : ''} / Responsable${parents.length > 1 ? 's' : ''}</h5>
+                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${parents.length} enregistré${parents.length > 1 ? 's' : ''}</p>
+                        </div>
+                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editParentInfo('${eleveId}')"><span class="material-icons">edit</span> Modifier</button>` : ''}
+                    </div>
+                    <div class="fiche-section-content">
+                        ${parents.map((parent, idx) => `
+                        <div style="${idx > 0 ? 'margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--md-sys-color-outline-variant);' : ''}">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                <div class="md-avatar" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 18px; font-weight: 600;">
+                                    ${(parent.prenom || 'P')[0].toUpperCase()}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 16px;">${parent.prenom || ''} ${parent.nom || ''}</div>
+                                    <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); display: flex; align-items: center; gap: 8px;">
+                                        ${parent.isPrimary ? '⭐ Principal' : 'Secondaire'}
+                                        ${parent.activated ? '<span style="color: var(--md-sys-color-tertiary);">✓ Activé</span>' : '<span style="color: var(--md-sys-color-error);">⏳ Non activé</span>'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fiche-info-grid">
+                                <div class="fiche-info-item">
+                                    <span class="material-icons fiche-info-icon">email</span>
+                                    <div>
+                                        <div class="fiche-info-label">Email</div>
+                                        <div class="fiche-info-value">${parent.email || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="fiche-info-item">
+                                    <span class="material-icons fiche-info-icon">phone</span>
+                                    <div>
+                                        <div class="fiche-info-label">Téléphone</div>
+                                        <div class="fiche-info-value">${parent.tel || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="fiche-info-item">
+                                    <span class="material-icons fiche-info-icon">home</span>
+                                    <div>
+                                        <div class="fiche-info-label">Adresse</div>
+                                        <div class="fiche-info-value">${parent.adresse || '-'}</div>
+                                    </div>
+                                </div>
+                                ${parent.profession ? `
+                                <div class="fiche-info-item">
+                                    <span class="material-icons fiche-info-icon">work</span>
+                                    <div>
+                                        <div class="fiche-info-label">Profession</div>
+                                        <div class="fiche-info-value">${parent.profession}</div>
+                                    </div>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                        `).join('')}
+                    </div>
                 </div>
                 ` : `
-                <div style="margin-bottom: 32px; padding: 24px; background: var(--md-sys-color-error-container); border-radius: 20px; border: 2px solid var(--md-sys-color-error);">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <span class="material-icons" style="font-size: 28px; color: var(--md-sys-color-error);">warning</span>
+                <div class="fiche-section" style="margin-bottom: 24px; border-color: var(--md-sys-color-error);">
+                    <div class="fiche-section-header" style="background: var(--md-sys-color-error-container);">
+                        <div class="fiche-section-icon" style="background: var(--md-sys-color-error); color: var(--md-sys-color-on-error);">
+                            <span class="material-icons">warning</span>
+                        </div>
                         <div>
-                            <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-error-container);">Aucun parent enregistré</h4>
-                            <p style="margin: 0; color: var(--md-sys-color-on-error-container); opacity: 0.8;">Cet élève n'a pas encore de parent associé.</p>
+                            <h5 style="margin: 0; color: var(--md-sys-color-on-error-container);">Aucun parent enregistré</h5>
+                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--md-sys-color-on-error-container);">Cet élève n'a pas encore de parent associé.</p>
                         </div>
                     </div>
                 </div>
                 `}
 
-                <!-- SECTION 2: Fiche de l'élève sélectionné -->
-                <div style="margin-bottom: 32px; padding: 24px; background: var(--md-sys-color-surface-variant); border-radius: 20px; border: 3px solid var(--md-sys-color-primary); box-shadow: var(--md-sys-elevation-3);">
-                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                        <div class="md-avatar" style="width: 80px; height: 80px; background: var(--md-sys-color-primary); color: white; font-size: 32px; font-weight: 500; flex-shrink: 0;">
-                            ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
-                        </div>
-                        <div style="flex: 1;">
-                            <h4 style="margin: 0 0 8px 0; color: var(--md-sys-color-on-surface); font-size: 24px;">${eleve.prenom} ${eleve.nom}</h4>
-                            <p style="margin: 0; color: var(--md-sys-color-primary); font-weight: 500; font-size: 16px;">Classe ${eleve.classe || 'Non assigné'}</p>
-                            ${!eleve.activated ? '<span style="font-size: 13px; color: var(--md-sys-color-error); display: block; margin-top: 8px;">⏳ Compte non activé</span>' : ''}
-                        </div>
-                        ${canModifyData() ? `
-                        <button class="md-btn md-btn-filled" onclick="editEleve('${eleveId}')" style="display: flex; align-items: center; gap: 8px; height: 48px;">
-                            <span class="material-icons">edit</span>
-                            Modifier l'élève
-                        </button>
-                        ` : ''}
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 16px;">
-                        ${eleve.dateNaissance ? `
-                        <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px; border-left: 4px solid var(--md-sys-color-primary);">
-                            <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-primary);">cake</span>
-                            <div>
-                                <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 2px;">DATE DE NAISSANCE</div>
-                                <div style="font-weight: 600; color: var(--md-sys-color-on-surface); font-size: 16px;">${new Date(eleve.dateNaissance).toLocaleDateString('fr-FR')}</div>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        ${eleve.email ? `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px;">
-                                <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-primary);">email</span>
-                                <div>
-                                    <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 2px;">EMAIL</div>
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-surface); font-size: 16px;">${eleve.email || '-'}</div>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px;">
-                                <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-primary);">phone</span>
-                                <div>
-                                    <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 2px;">TÉLÉPHONE</div>
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-surface); font-size: 16px;">${eleve.tel || '-'}</div>
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        <!-- Frais d'inscription résumé -->
-                        <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: ${eleve.fraisValide ? 'var(--md-sys-color-tertiary-container)' : 'var(--md-sys-color-error-container)'}; border-radius: 12px; border-left: 4px solid ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
-                            <span class="material-icons" style="font-size: 24px; color: ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">payments</span>
-                            <div style="flex: 1;">
-                                <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 2px;">FRAIS D'INSCRIPTION</div>
-                                <div style="font-weight: 600; color: var(--md-sys-color-on-surface); font-size: 16px;">
-                                    ${eleve.fraisValide ? '✓ Payé intégralement' : `${eleve.paiementsEffectues || 0}/${eleve.nbPaiements || 1} paiements`}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 3: Autres enfants de la famille -->
+                <!-- SECTION : Autres enfants -->
                 ${otherChildren.length > 0 ? `
-                <div style="padding: 24px; background: var(--md-sys-color-surface-container); border-radius: 20px; border: 2px solid var(--md-sys-color-outline-variant);">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                        <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 28px;">group</span>
+                <div class="fiche-section" style="margin-bottom: 24px;">
+                    <div class="fiche-section-header">
+                        <div class="fiche-section-icon" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                            <span class="material-icons">group</span>
+                        </div>
                         <div>
-                            <h5 style="margin: 0; color: var(--md-sys-color-on-surface); font-size: 20px;">Autres enfants de la famille (${otherChildren.length})</h5>
-                            <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">Cliquez sur un enfant pour voir sa fiche</p>
+                            <h5 style="margin: 0; font-size: 18px;">Autres enfants de la famille (${otherChildren.length})</h5>
+                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Cliquez pour voir la fiche</p>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                        ${otherChildren.map(child => `
-                        <div onclick="showEleveDetails('${child.id}')" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 16px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--md-sys-color-primary)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--md-sys-elevation-2)';" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                            <div class="md-avatar" style="width: 50px; height: 50px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 20px;">
-                                ${child.photo ? `<img src="${child.photo}" alt="${child.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (child.prenom || 'E')[0].toUpperCase()}
+                    <div class="fiche-section-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                            ${otherChildren.map(child => `
+                            <div class="family-member-card" onclick="showEleveDetails('${child.id}')">
+                                <div class="md-avatar" style="width: 44px; height: 44px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 18px;">
+                                    ${child.photo ? `<img src="${child.photo}" alt="${child.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (child.prenom || 'E')[0].toUpperCase()}
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">${child.prenom} ${child.nom}</div>
+                                    <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${child.classe || 'Sans classe'}</div>
+                                </div>
+                                <span class="material-icons" style="color: var(--md-sys-color-primary);">chevron_right</span>
                             </div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: var(--md-sys-color-on-surface); font-size: 16px;">${child.prenom} ${child.nom}</div>
-                                <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Classe ${child.classe || 'Non assigné'}</div>
-                            </div>
-                            <span class="material-icons" style="color: var(--md-sys-color-primary);">chevron_right</span>
+                            `).join('')}
                         </div>
-                        `).join('')}
                     </div>
                 </div>
                 ` : ''}
 
                 <!-- Boutons d'action -->
-                <div style="display: flex; gap: 16px; margin-top: 24px; justify-content: center; flex-wrap: wrap;">
-                    ${canModifyData() && !eleve.activated && eleve.email ? `
-                    <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${eleve.id}', '${eleve.email}', 'eleve')" style="display: flex; align-items: center; gap: 8px; padding: 12px 24px;">
-                        <span class="material-icons">email</span>
-                        Envoyer email d'activation
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+                    ${canModifyData() && parents.length > 0 && !parents.some(p => p.activated) ? parents.filter(p => p.email).map(p => `
+                    <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${p.id}', '${p.email}', 'parent')">
+                        <span class="material-icons">email</span> Activer compte de ${p.prenom}
+                    </button>
+                    `).join('') : ''}
+                    ${canModifyData() ? `
+                    <button class="md-btn md-btn-outlined" style="color: var(--md-sys-color-error); border-color: var(--md-sys-color-error);" onclick="deleteEleve('${eleve.id}')">
+                        <span class="material-icons">delete</span> Supprimer l'élève
                     </button>
                     ` : ''}
                 </div>
@@ -1971,7 +2284,6 @@
 
         // Fonction pour éditer les informations du parent
         async function editParentInfo(eleveId) {
-            // Récupérer l'élève avec ses parents
             let eleve;
             try {
                 const response = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
@@ -1986,62 +2298,68 @@
 
             const parents = eleve.parents || [];
 
-            let formHTML = `
-                <form id="parentForm" style="display: flex; flex-direction: column; gap: 20px;">
-                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin: 0 0 8px 0;">
-                        <span class="material-icons" style="font-size: 16px; vertical-align: middle;">info</span>
-                        Modifiez les informations des parents enregistrés.
-                    </p>
-            `;
+            let formHTML = `<form id="parentForm" style="display: flex; flex-direction: column; gap: 20px;">`;
 
             if (parents.length === 0) {
-                formHTML += `<p style="text-align: center; color: var(--md-sys-color-on-surface-variant);">Aucun parent enregistré pour cet élève.</p>`;
+                formHTML += `
+                    <div style="text-align: center; padding: 32px 16px; color: var(--md-sys-color-on-surface-variant);">
+                        <span class="material-icons" style="font-size: 48px; opacity: 0.4; display: block; margin-bottom: 8px;">person_off</span>
+                        Aucun parent enregistré pour cet élève.
+                    </div>`;
             }
 
             parents.forEach((parent, idx) => {
                 formHTML += `
-                    <div style="padding: 16px; background: var(--md-sys-color-surface-container); border-radius: 12px;">
-                        <h5 style="margin: 0 0 12px 0; color: var(--md-sys-color-primary);">
-                            ${parent.isPrimary ? '⭐ ' : ''}Parent ${idx + 1} — ${parent.relation || (parent.isPrimary ? 'Principal' : 'Secondaire')}
-                        </h5>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                            <div class="md-text-field">
-                                <div class="md-text-field-container">
-                                    <input type="text" id="parentNom_${parent.id}" class="md-text-field-input" value="${parent.nom || ''}" required>
-                                    <label class="md-text-field-label">Nom *</label>
-                                </div>
+                    <div class="fiche-section" style="margin: 0; border-color: ${parent.isPrimary ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'};">
+                        <div class="fiche-section-header" style="padding: 12px 16px; ${parent.isPrimary ? 'background: var(--md-sys-color-primary-container);' : ''}">
+                            <div class="md-avatar" style="width: 36px; height: 36px; background: ${parent.isPrimary ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-secondary-container)'}; color: ${parent.isPrimary ? 'white' : 'var(--md-sys-color-on-secondary-container)'}; font-size: 16px; font-weight: 600;">
+                                ${(parent.prenom || 'P')[0].toUpperCase()}
                             </div>
-                            <div class="md-text-field">
-                                <div class="md-text-field-container">
-                                    <input type="text" id="parentPrenom_${parent.id}" class="md-text-field-input" value="${parent.prenom || ''}" required>
-                                    <label class="md-text-field-label">Prénom *</label>
-                                </div>
+                            <div>
+                                <h5 style="margin: 0; font-size: 15px;">${parent.isPrimary ? '⭐ ' : ''}Parent ${idx + 1}</h5>
+                                <span style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${parent.isPrimary ? 'Principal' : 'Secondaire'}</span>
                             </div>
                         </div>
-                        <div class="md-text-field" style="margin-top: 12px;">
-                            <div class="md-text-field-container">
-                                <input type="email" id="parentEmail_${parent.id}" class="md-text-field-input" value="${parent.email || ''}">
-                                <label class="md-text-field-label">Email</label>
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
-                            <div class="md-text-field">
-                                <div class="md-text-field-container">
-                                    <input type="tel" id="parentTel_${parent.id}" class="md-text-field-input" value="${parent.tel || ''}">
-                                    <label class="md-text-field-label">Téléphone</label>
+                        <div class="fiche-section-content" style="padding: 16px;">
+                            <div class="md-form-grid">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="parentNom_${parent.id}" class="md-text-field-input" value="${parent.nom || ''}" required>
+                                        <label class="md-text-field-label">Nom *</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="parentPrenom_${parent.id}" class="md-text-field-input" value="${parent.prenom || ''}" required>
+                                        <label class="md-text-field-label">Prénom *</label>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="md-text-field">
+                            <div class="md-text-field" style="margin-top: 12px;">
                                 <div class="md-text-field-container">
-                                    <input type="text" id="parentProfession_${parent.id}" class="md-text-field-input" value="${parent.profession || ''}">
-                                    <label class="md-text-field-label">Profession</label>
+                                    <input type="email" id="parentEmail_${parent.id}" class="md-text-field-input" value="${parent.email || ''}">
+                                    <label class="md-text-field-label">Email</label>
                                 </div>
                             </div>
-                        </div>
-                        <div class="md-text-field" style="margin-top: 12px;">
-                            <div class="md-text-field-container">
-                                <input type="text" id="parentAdresse_${parent.id}" class="md-text-field-input" value="${parent.adresse || ''}">
-                                <label class="md-text-field-label">Adresse</label>
+                            <div class="md-form-grid" style="margin-top: 12px;">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="tel" id="parentTel_${parent.id}" class="md-text-field-input" value="${parent.tel || ''}">
+                                        <label class="md-text-field-label">Téléphone</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="parentProfession_${parent.id}" class="md-text-field-input" value="${parent.profession || ''}">
+                                        <label class="md-text-field-label">Profession</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md-text-field" style="margin-top: 12px;">
+                                <div class="md-text-field-container">
+                                    <input type="text" id="parentAdresse_${parent.id}" class="md-text-field-input" value="${parent.adresse || ''}">
+                                    <label class="md-text-field-label">Adresse</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2050,7 +2368,7 @@
 
             formHTML += `</form>`;
 
-            showDialog('Modifier les informations des parents', formHTML, async () => {
+            showDialog('Modifier les parents', formHTML, async () => {
                 try {
                     let successCount = 0;
                     for (const parent of parents) {
@@ -2182,76 +2500,88 @@
             const eleve = allEleves.find(e => e.id === id);
             if (!eleve) return;
 
-            const hasParents = eleve.parents && eleve.parents.length > 0;
-
-            let formHTML = `
-                <form id="eleveForm" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="eleveNom" class="md-text-field-input" value="${eleve.nom}" required>
-                                <label class="md-text-field-label">Nom *</label>
+            const formHTML = `
+                <form id="eleveForm" style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Identité -->
+                    <div class="fiche-section" style="margin: 0;">
+                        <div class="fiche-section-header" style="padding: 12px 16px;">
+                            <div class="fiche-section-icon" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                                <span class="material-icons" style="font-size: 18px;">person</span>
                             </div>
+                            <h5 style="margin: 0; font-size: 15px;">Identité</h5>
                         </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="elevePrenom" class="md-text-field-input" value="${eleve.prenom}" required>
-                                <label class="md-text-field-label">Prénom *</label>
+                        <div class="fiche-section-content" style="padding: 16px;">
+                            <div class="md-form-grid">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="eleveNom" class="md-text-field-input" value="${eleve.nom}" required>
+                                        <label class="md-text-field-label">Nom *</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" id="elevePrenom" class="md-text-field-input" value="${eleve.prenom}" required>
+                                        <label class="md-text-field-label">Prénom *</label>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>`;
-
-            // Champ classe toujours affiché pour tous les élèves
-            formHTML += `
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="eleveClasse" class="md-text-field-input">
-                                <option value="">-- Sélectionner une classe --</option>
-                                ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
-                            </select>
-                            <label class="md-text-field-label">Classe</label>
-                        </div>
-                    </div>`;
-
-            formHTML += `
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
-                            <label class="md-text-field-label">Date de naissance</label>
-                        </div>
-                    </div>`;
-
-            // Toujours afficher email et téléphone
-            formHTML += `
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
-                            <label class="md-text-field-label">Email de l'élève</label>
+                            <div class="md-form-grid" style="margin-top: 12px;">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
+                                        <label class="md-text-field-label">Date de naissance</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <select id="eleveClasse" class="md-text-field-input">
+                                            <option value="">-- Sélectionner --</option>
+                                            ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
+                                        </select>
+                                        <label class="md-text-field-label">Classe</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="tel" id="eleveTelephone" class="md-text-field-input" value="${eleve.tel || ''}">
-                            <label class="md-text-field-label">Téléphone</label>
-                        </div>
-                    </div>`;
 
-            formHTML += `
+                    <!-- Contact -->
+                    <div class="fiche-section" style="margin: 0;">
+                        <div class="fiche-section-header" style="padding: 12px 16px;">
+                            <div class="fiche-section-icon" style="width: 32px; height: 32px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">
+                                <span class="material-icons" style="font-size: 18px;">contact_mail</span>
+                            </div>
+                            <h5 style="margin: 0; font-size: 15px;">Contact</h5>
+                        </div>
+                        <div class="fiche-section-content" style="padding: 16px;">
+                            <div class="md-form-grid">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
+                                        <label class="md-text-field-label">Email</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="tel" id="eleveTelephone" class="md-text-field-input" value="${eleve.tel || ''}">
+                                        <label class="md-text-field-label">Téléphone</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </form>`;
 
-            showDialog('Modifier l\'élève', formHTML, async () => {
+            showDialog('Modifier l\'élève — ' + eleve.prenom + ' ' + eleve.nom, formHTML, async () => {
                 const data = {
                     nom: document.getElementById('eleveNom').value,
                     prenom: document.getElementById('elevePrenom').value,
                     classe: document.getElementById('eleveClasse').value,
+                    dateNaissance: document.getElementById('eleveDateNaissance').value,
+                    email: document.getElementById('eleveEmail').value,
+                    tel: document.getElementById('eleveTelephone').value,
                     photo: eleve.photo || null
                 };
-
-                data.dateNaissance = document.getElementById('eleveDateNaissance').value;
-
-                // Toujours envoyer email et tel
-                data.email = document.getElementById('eleveEmail').value;
-                data.tel = document.getElementById('eleveTelephone').value;
 
                 try {
                     const response = await fetch(`${API_URL}/eleves/${id}`, {
@@ -2261,7 +2591,8 @@
                     });
                     if (response.ok) {
                         showSnackbar('Élève modifié avec succès');
-                        loadEleves();
+                        await loadEleves();
+                        showEleveDetails(id);
                     } else {
                         showSnackbar('Erreur lors de la modification');
                     }
@@ -2273,9 +2604,9 @@
 
         async function deleteEleve(id) {
             const eleve = allEleves.find(e => e.id === id);
-            const isPendingRegistration = eleve && !eleve.activated;
+            const isPending = eleve && !eleve.parentsActivated;
 
-            const message = isPendingRegistration
+            const message = isPending
                 ? '<p>Voulez-vous vraiment supprimer ce dossier d\'inscription en attente ? Cette action est irréversible.</p>'
                 : '<p>Voulez-vous vraiment supprimer cet élève ? Cette action est irréversible.</p>';
 
@@ -2286,7 +2617,7 @@
                         headers: getHeaders()
                     });
                     if (response.ok) {
-                        const successMessage = isPendingRegistration
+                        const successMessage = isPending
                             ? 'Dossier d\'inscription supprimé'
                             : 'Élève supprimé';
                         showSnackbar(successMessage);
@@ -4780,8 +5111,8 @@
         }
 
         async function loadInscriptions() {
-            // Les inscriptions sont gérées via les élèves non activés
-            const pendingEleves = allEleves.filter(e => !e.activated);
+            // Les inscriptions sont gérées via les élèves dont les parents ne sont pas activés
+            const pendingEleves = allEleves.filter(e => !e.parentsActivated);
             
             // Grouper par familleLienId
             const familles = {};
@@ -4892,8 +5223,10 @@
         function showInscriptionForm() {
             document.getElementById('inscriptionFormCard').style.display = 'block';
             document.getElementById('inscriptionsListCard').style.display = 'none';
+            currentInscriptionStep = 1;
             inscriptionType = 'seul';
             inscriptionEnfantCount = 1;
+            selectedExistingFamily = null;
             
             // Reset form
             document.getElementById('insc_parentNom').value = '';
@@ -4901,7 +5234,6 @@
             document.getElementById('insc_parentEmail').value = '';
             document.getElementById('insc_parentTel').value = '';
             document.getElementById('insc_parentAdresse').value = '';
-            // Reset second parent
             const p2 = document.getElementById('parent2Section');
             if (p2) p2.style.display = 'none';
             if (document.getElementById('insc_parent2Nom')) document.getElementById('insc_parent2Nom').value = '';
@@ -4910,30 +5242,275 @@
             if (document.getElementById('insc_parent2Tel')) document.getElementById('insc_parent2Tel').value = '';
             if (document.getElementById('insc_parent2Adresse')) document.getElementById('insc_parent2Adresse').value = '';
             
-            // Masquer la section parent par défaut
+            // Masquer section parent
             const parentSection = document.querySelector('.parent-info-section');
-            if (parentSection) {
-                parentSection.style.display = 'none';
-            }
+            if (parentSection) parentSection.style.display = 'none';
             const toggleBtn = document.getElementById('toggleParentSectionBtn');
             if (toggleBtn) {
-                toggleBtn.innerHTML = '<span class="material-icons">person_add</span><span>Ajouter un parent / tuteur</span>';
-                toggleBtn.style.display = 'flex';
+                toggleBtn.classList.remove('active');
+                toggleBtn.querySelector('span:nth-child(2)').textContent = 'Ajouter un parent / tuteur';
+                toggleBtn.querySelector('span:last-child').textContent = 'add';
             }
             
-            // Reset type selection
-            document.querySelectorAll('.inscription-type-option').forEach(opt => {
-                opt.style.borderColor = opt.dataset.type === 'seul' ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)';
+            // Reset type cards
+            document.querySelectorAll('.inscription-type-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.type === 'seul');
             });
+            document.getElementById('existingFamilySearch').style.display = 'none';
+            document.getElementById('searchFamilleInput').value = '';
+            document.getElementById('familleSearchResults').innerHTML = '';
+            document.getElementById('selectedFamilleInfo').style.display = 'none';
             
             document.getElementById('addEnfantBtn').style.display = 'none';
             document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'élève";
             
-            // Créer le premier champ enfant
             renderEnfantFields();
-            
-            // Mettre à jour la visibilité des emails élèves
             updateParentFieldsVisibility();
+            updateStepperUI();
+        }
+
+        // ========== STEPPER NAVIGATION ==========
+        let currentInscriptionStep = 1;
+        let selectedExistingFamily = null;
+
+        function goToInscriptionStep(step) {
+            if (step > currentInscriptionStep + 1) return; // Can't skip ahead
+            if (step < 1 || step > 4) return;
+            
+            // For type "existante", skip parent step
+            if (inscriptionType === 'existante' && step === 2) {
+                step = currentInscriptionStep < 2 ? 3 : 1;
+            }
+            
+            currentInscriptionStep = step;
+            updateStepperUI();
+        }
+
+        function nextInscriptionStep() {
+            // Validation before proceeding
+            if (currentInscriptionStep === 1) {
+                if (inscriptionType === 'existante' && !selectedExistingFamily) {
+                    showSnackbar('Veuillez sélectionner une famille existante');
+                    return;
+                }
+            }
+            if (currentInscriptionStep === 3) {
+                // Validate enfants
+                const enfantFields = document.querySelectorAll('.enfant-field');
+                for (const field of enfantFields) {
+                    const nom = field.querySelector('.enfant-nom').value.trim();
+                    const prenom = field.querySelector('.enfant-prenom').value.trim();
+                    if (!nom || !prenom) {
+                        showSnackbar('Veuillez remplir le nom et prénom de chaque élève');
+                        return;
+                    }
+                }
+            }
+            
+            let nextStep = currentInscriptionStep + 1;
+            
+            // Skip parent step for "existante"
+            if (inscriptionType === 'existante' && nextStep === 2) {
+                nextStep = 3;
+            }
+            
+            if (nextStep > 4) return;
+            
+            // Generate recap at step 4
+            if (nextStep === 4) {
+                generateInscriptionRecap();
+            }
+            
+            currentInscriptionStep = nextStep;
+            updateStepperUI();
+        }
+
+        function prevInscriptionStep() {
+            let prevStep = currentInscriptionStep - 1;
+            
+            // Skip parent step for "existante"
+            if (inscriptionType === 'existante' && prevStep === 2) {
+                prevStep = 1;
+            }
+            
+            if (prevStep < 1) return;
+            currentInscriptionStep = prevStep;
+            updateStepperUI();
+        }
+
+        function updateStepperUI() {
+            // Update step indicators
+            document.querySelectorAll('.md-stepper-step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                if (stepNum === currentInscriptionStep) {
+                    step.classList.add('active');
+                } else if (stepNum < currentInscriptionStep) {
+                    step.classList.add('completed');
+                    step.querySelector('.md-stepper-number').innerHTML = '<span class="material-icons" style="font-size: 18px;">check</span>';
+                } else {
+                    step.querySelector('.md-stepper-number').textContent = stepNum;
+                }
+            });
+            
+            // Update connectors
+            document.querySelectorAll('.md-stepper-connector').forEach((conn, idx) => {
+                conn.classList.toggle('completed', idx + 1 < currentInscriptionStep);
+            });
+
+            // Show/hide steps
+            for (let i = 1; i <= 4; i++) {
+                const stepDiv = document.getElementById(`inscriptionStep${i}`);
+                if (stepDiv) {
+                    stepDiv.classList.toggle('active', i === currentInscriptionStep);
+                }
+            }
+        }
+
+        function generateInscriptionRecap() {
+            const parentSection = document.querySelector('.parent-info-section');
+            const isParentVisible = parentSection && parentSection.style.display !== 'none';
+            
+            let html = '';
+            
+            // Type
+            const typeLabels = { seul: 'Élève seul', famille: 'Famille', existante: 'Ajout à famille existante' };
+            html += `
+                <div class="fiche-section" style="margin-bottom: 16px;">
+                    <div class="fiche-section-header">
+                        <div class="fiche-section-icon" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                            <span class="material-icons">assignment</span>
+                        </div>
+                        <div><h5 style="margin: 0;">Type d'inscription</h5><p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${typeLabels[inscriptionType] || inscriptionType}</p></div>
+                    </div>
+                </div>
+            `;
+
+            // Parent info
+            if (inscriptionType === 'existante' && selectedExistingFamily) {
+                html += `
+                    <div class="fiche-section" style="margin-bottom: 16px;">
+                        <div class="fiche-section-header" style="background: var(--md-sys-color-tertiary-container);">
+                            <div class="fiche-section-icon" style="background: var(--md-sys-color-tertiary); color: var(--md-sys-color-on-tertiary);">
+                                <span class="material-icons">family_restroom</span>
+                            </div>
+                            <div>
+                                <h5 style="margin: 0; color: var(--md-sys-color-on-tertiary-container);">Famille existante</h5>
+                                <p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-tertiary-container);">${selectedExistingFamily.parentNom} — ${selectedExistingFamily.nbEnfants} enfant(s) déjà inscrit(s)</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (isParentVisible) {
+                const p1Nom = document.getElementById('insc_parentNom').value.trim();
+                const p1Prenom = document.getElementById('insc_parentPrenom').value.trim();
+                const p1Email = document.getElementById('insc_parentEmail').value.trim();
+                html += `
+                    <div class="fiche-section" style="margin-bottom: 16px;">
+                        <div class="fiche-section-header">
+                            <div class="fiche-section-icon" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                                <span class="material-icons">person</span>
+                            </div>
+                            <div><h5 style="margin: 0;">Parent principal</h5><p style="margin: 0; font-size: 13px;">${p1Prenom} ${p1Nom} — ${p1Email}</p></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Enfants
+            const enfantFields = document.querySelectorAll('.enfant-field');
+            enfantFields.forEach((field, idx) => {
+                const nom = field.querySelector('.enfant-nom').value.trim();
+                const prenom = field.querySelector('.enfant-prenom').value.trim();
+                const classe = field.querySelector('.enfant-classe').value || 'Non assigné';
+                const email = field.querySelector('.enfant-email')?.value.trim() || '';
+                const frais = field.querySelector('.enfant-frais')?.value || '0';
+                
+                html += `
+                    <div class="fiche-section" style="margin-bottom: 12px;">
+                        <div class="fiche-section-header">
+                            <div class="fiche-section-icon" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">
+                                <span class="material-icons">school</span>
+                            </div>
+                            <div style="flex: 1;">
+                                <h5 style="margin: 0;">Élève ${idx + 1} — ${prenom} ${nom}</h5>
+                                <p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Classe: ${classe} ${email ? '| Email: ' + email : ''} | Frais: ${frais}€</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('inscriptionRecap').innerHTML = html;
+        }
+
+        // ========== EXISTING FAMILY SEARCH ==========
+        async function searchExistingFamilies() {
+            const query = document.getElementById('searchFamilleInput').value.trim().toLowerCase();
+            const container = document.getElementById('familleSearchResults');
+            
+            if (query.length < 2) {
+                container.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 16px;">Tapez au moins 2 caractères...</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/parents`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erreur');
+                const parents = await response.json();
+                
+                const filtered = parents.filter(p => 
+                    p.nom.toLowerCase().includes(query) || 
+                    p.prenom.toLowerCase().includes(query) ||
+                    p.email.toLowerCase().includes(query) ||
+                    (p.enfants || []).some(e => e.nom.toLowerCase().includes(query) || e.prenom.toLowerCase().includes(query))
+                );
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 16px;">Aucune famille trouvée</p>';
+                    return;
+                }
+
+                container.innerHTML = filtered.map(p => `
+                    <div class="famille-search-result ${selectedExistingFamily && selectedExistingFamily.parentId === p.id ? 'selected' : ''}" onclick="selectExistingFamily('${p.id}', '${(p.prenom + ' ' + p.nom).replace(/'/g, "\\'")}', ${p.nbEnfants || 0})">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="md-avatar" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                                ${(p.prenom || 'P')[0].toUpperCase()}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">${p.prenom} ${p.nom}</div>
+                                <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${p.email} — ${p.nbEnfants || 0} enfant(s)</div>
+                            </div>
+                            ${p.enfants && p.enfants.length > 0 ? `
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                ${p.enfants.slice(0, 3).map(e => `<span class="md-chip md-chip-filter" style="height: 24px; font-size: 11px; padding: 0 8px;">${e.prenom}</span>`).join('')}
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p style="color: var(--md-sys-color-error); padding: 16px; text-align: center;">Erreur lors de la recherche</p>';
+            }
+        }
+
+        function selectExistingFamily(parentId, parentNom, nbEnfants) {
+            selectedExistingFamily = { parentId, parentNom, nbEnfants };
+            
+            // Highlight selected
+            document.querySelectorAll('.famille-search-result').forEach(r => r.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            const infoDiv = document.getElementById('selectedFamilleInfo');
+            infoDiv.style.display = 'block';
+            infoDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="material-icons" style="color: var(--md-sys-color-tertiary); font-size: 28px;">check_circle</span>
+                    <div>
+                        <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">Famille sélectionnée : ${parentNom}</div>
+                        <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${nbEnfants} enfant(s) déjà inscrit(s). Le(s) nouvel(aux) élève(s) seront ajoutés à cette famille.</div>
+                    </div>
+                </div>
+            `;
         }
 
         function toggleParentSection() {
@@ -4944,41 +5521,43 @@
             const isVisible = parentSection.style.display !== 'none';
             
             if (isVisible) {
-                // Masquer la section parent
                 parentSection.style.display = 'none';
                 if (toggleBtn) {
-                    toggleBtn.innerHTML = '<span class="material-icons">person_add</span><span>Ajouter un parent / tuteur</span>';
-                    toggleBtn.style.display = 'flex';
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.querySelector('span:nth-child(2)').textContent = 'Ajouter un parent / tuteur';
+                    toggleBtn.querySelector('span:last-child').textContent = 'add';
                 }
-                // Vider les champs parent
                 document.getElementById('insc_parentNom').value = '';
                 document.getElementById('insc_parentPrenom').value = '';
                 document.getElementById('insc_parentEmail').value = '';
                 document.getElementById('insc_parentTel').value = '';
                 document.getElementById('insc_parentAdresse').value = '';
             } else {
-                // Afficher la section parent
                 parentSection.style.display = 'block';
                 if (toggleBtn) {
-                    toggleBtn.style.display = 'none';
+                    toggleBtn.classList.add('active');
+                    toggleBtn.querySelector('span:nth-child(2)').textContent = 'Parent / tuteur ajouté';
+                    toggleBtn.querySelector('span:last-child').textContent = 'check';
                 }
             }
             
-            // Mettre à jour les champs email élèves
             updateParentFieldsVisibility();
         }
 
         function toggleParent2() {
             const section = document.getElementById('parent2Section');
+            const btn = document.getElementById('toggleAddParent2Btn');
             if (!section) return;
             if (section.style.display === 'none' || section.style.display === '') {
                 section.style.display = 'block';
-                document.getElementById('toggleAddParent2Btn').textContent = '';
-                document.getElementById('toggleAddParent2Btn').insertAdjacentHTML('afterbegin', '<span class="material-icons">person_remove</span> Retirer le 2ᵉ parent');
+                btn.classList.add('active');
+                btn.querySelector('span:nth-child(2)').textContent = '2ᵉ parent ajouté';
+                btn.querySelector('span:last-child').textContent = 'check';
             } else {
                 section.style.display = 'none';
-                document.getElementById('toggleAddParent2Btn').textContent = '';
-                document.getElementById('toggleAddParent2Btn').insertAdjacentHTML('afterbegin', '<span class="material-icons">person_add</span> Ajouter un 2ᵉ parent');
+                btn.classList.remove('active');
+                btn.querySelector('span:nth-child(2)').textContent = 'Ajouter un 2ᵉ parent / tuteur';
+                btn.querySelector('span:last-child').textContent = 'add';
             }
         }
 
@@ -4990,25 +5569,33 @@
         function selectInscriptionType(type) {
             inscriptionType = type;
             
-            document.querySelectorAll('.inscription-type-option').forEach(opt => {
-                if (opt.dataset.type === type) {
-                    opt.style.borderColor = 'var(--md-sys-color-primary)';
-                } else {
-                    opt.style.borderColor = 'var(--md-sys-color-outline)';
-                }
+            document.querySelectorAll('.inscription-type-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.type === type);
             });
             
-            if (type === 'famille') {
-                document.getElementById('addEnfantBtn').style.display = 'flex';
+            // Show/hide existing family search
+            document.getElementById('existingFamilySearch').style.display = type === 'existante' ? 'block' : 'none';
+            
+            if (type === 'famille' || type === 'existante') {
+                document.getElementById('addEnfantBtn').style.display = 'inline-flex';
                 document.getElementById('inscriptionEnfantsTitle').textContent = "Informations des élèves";
-                
-                // Régénérer les champs enfants pour appliquer l'héritage du nom
-                renderEnfantFields();
             } else {
                 document.getElementById('addEnfantBtn').style.display = 'none';
                 document.getElementById('inscriptionEnfantsTitle').textContent = "Informations de l'élève";
                 inscriptionEnfantCount = 1;
-                renderEnfantFields();
+            }
+            
+            renderEnfantFields();
+            
+            // For "existante" type, auto-show parent info section is hidden (parent already exists)
+            if (type === 'existante') {
+                const parentSection = document.querySelector('.parent-info-section');
+                if (parentSection) parentSection.style.display = 'none';
+                const parentToggle = document.getElementById('parentToggleArea');
+                if (parentToggle) parentToggle.style.display = 'none';
+            } else {
+                const parentToggle = document.getElementById('parentToggleArea');
+                if (parentToggle) parentToggle.style.display = 'block';
             }
         }
 
@@ -5019,105 +5606,107 @@
             }
             document.getElementById('inscriptionEnfantsContainer').innerHTML = html;
             
-            // Mettre à jour la visibilité des emails élèves
             updateParentFieldsVisibility();
             
-            // Remplir automatiquement le nom des enfants avec le nom du parent
+            // Auto-fill child name with parent name
             const parentNom = document.getElementById('insc_parentNom').value.trim();
             if (parentNom) {
                 document.querySelectorAll('.enfant-nom').forEach(input => {
-                    input.value = parentNom;
+                    if (!input.value) input.value = parentNom;
                 });
             }
         }
 
         function createEnfantFieldHTML(index) {
             return `
-                <div class="enfant-field" data-index="${index}" style="background: var(--md-sys-color-surface-container); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h5 style="color: var(--md-sys-color-primary);"> Élève ${index + 1}</h5>
-                        ${index > 0 ? `<button type="button" class="md-btn md-btn-text" onclick="removeEnfantField(${index})" style="color: var(--md-sys-color-error);"><span class="material-icons">close</span></button>` : ''}
+                <div class="enfant-card enfant-field" data-index="${index}" style="margin-bottom: 16px;">
+                    <div class="enfant-card-header">
+                        <div class="enfant-card-number">${index + 1}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">Élève ${index + 1}</div>
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Informations scolaires</div>
+                        </div>
+                        ${index > 0 ? `<button type="button" class="md-btn md-btn-text" onclick="removeEnfantField(${index})" style="color: var(--md-sys-color-error);"><span class="material-icons">delete</span></button>` : ''}
                     </div>
                     
                     <div class="md-form-grid">
                         <div class="md-text-field">
                             <div class="md-text-field-container">
                                 <input type="text" class="md-text-field-input enfant-nom" data-index="${index}" placeholder=" " required>
-                                <label class="md-text-field-label">Nom</label>
+                                <label class="md-text-field-label">Nom *</label>
                             </div>
                         </div>
                         <div class="md-text-field">
                             <div class="md-text-field-container">
                                 <input type="text" class="md-text-field-input enfant-prenom" data-index="${index}" placeholder=" " required>
-                                <label class="md-text-field-label">Prénom</label>
-                            </div>
-                        </div>
-                        
-                        <div style="grid-column: 1 / -1;">
-                            <div class="md-form-grid">
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="date" class="md-text-field-input enfant-date" data-index="${index}" placeholder=" ">
-                                        <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date de naissance</label>
-                                    </div>
-                                </div>
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <select class="md-text-field-input enfant-classe" data-index="${index}" style="padding: 16px 12px;">
-                                            <option value="">Sélectionner une classe</option>
-                                            ${allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Bouton pour créer un compte élève (visible quand il y a des parents) -->
-                        <div class="enfant-account-toggle" data-index="${index}" style="grid-column: 1 / -1;">
-                            <button type="button" class="md-btn md-btn-tonal toggle-account-btn" data-index="${index}" onclick="toggleEnfantAccount(${index})" style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                                <span class="material-icons">person_add</span>
-                                <span>Créer un compte pour cet élève</span>
-                                <span class="material-icons toggle-icon" style="margin-left: auto;">expand_more</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Email de l'élève (obligatoire si pas de parent, optionnel sinon) -->
-                        <div class="enfant-email-section" data-index="${index}" style="grid-column: 1 / -1; display: none;">
-                            <div class="md-form-grid">
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="email" class="md-text-field-input enfant-email" data-index="${index}" placeholder=" ">
-                                        <label class="md-text-field-label">Email de l'élève</label>
-                                    </div>
-                                </div>
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="tel" class="md-text-field-input enfant-tel" data-index="${index}" placeholder=" ">
-                                        <label class="md-text-field-label">Téléphone</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="email-required-note" style="margin: 4px 0 0; font-size: 12px; color: var(--md-sys-color-error); display: none;">
-                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
-                                Email obligatoire car aucun parent n'est renseigné — un compte sera créé pour l'élève.
-                            </p>
-                            <p style="margin: 4px 0 0; font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
-                                <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
-                                Un compte personnel sera créé pour l'élève si un email est fourni.
-                            </p>
-                        </div>
-                        
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="0">
-                                <label class="md-text-field-label">Frais d'inscription (€)</label>
+                                <label class="md-text-field-label">Prénom *</label>
                             </div>
                         </div>
                         <div class="md-text-field">
                             <div class="md-text-field-container">
-                                <select class="md-text-field-input enfant-nbPaiements" data-index="${index}" style="padding: 12px;">
-                                    ${[1,2,3,4,6,8,10,12].map(n => `<option value="${n}">${n} fois</option>`).join('')}
+                                <input type="date" class="md-text-field-input enfant-date" data-index="${index}" placeholder=" ">
+                                <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date de naissance</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <select class="md-text-field-input enfant-classe" data-index="${index}" style="padding: 16px 12px;">
+                                    <option value="">Sélectionner une classe</option>
+                                    ${allClasses.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('')}
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Toggle compte élève -->
+                    <div class="enfant-account-toggle" data-index="${index}" style="margin-top: 16px;">
+                        <button type="button" class="account-toggle-btn toggle-account-btn" data-index="${index}" onclick="toggleEnfantAccount(${index})">
+                            <span class="material-icons">person_add</span>
+                            <span>Créer un compte pour cet élève</span>
+                            <span class="material-icons toggle-icon" style="margin-left: auto;">expand_more</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Email section (caché par défaut) -->
+                    <div class="enfant-email-section" data-index="${index}" style="display: none; margin-top: 12px; padding: 16px; background: var(--md-sys-color-surface); border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant);">
+                        <div class="md-form-grid">
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="email" class="md-text-field-input enfant-email" data-index="${index}" placeholder=" ">
+                                    <label class="md-text-field-label">Email de l'élève</label>
+                                </div>
+                            </div>
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="tel" class="md-text-field-input enfant-tel" data-index="${index}" placeholder=" ">
+                                    <label class="md-text-field-label">Téléphone</label>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="email-required-note" style="margin: 8px 0 0; font-size: 12px; color: var(--md-sys-color-error); display: none;">
+                            <span class="material-icons" style="font-size: 14px; vertical-align: middle;">warning</span>
+                            Email obligatoire car aucun parent n'est renseigné.
+                        </p>
+                    </div>
+                    
+                    <!-- Frais -->
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                        <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+                            <span class="material-icons" style="font-size: 16px;">payments</span> Frais d'inscription
+                        </div>
+                        <div class="md-form-grid">
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="0">
+                                    <label class="md-text-field-label">Montant (€)</label>
+                                </div>
+                            </div>
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <select class="md-text-field-input enfant-nbPaiements" data-index="${index}" style="padding: 12px;">
+                                        ${[1,2,3,4,6,8,10,12].map(n => `<option value="${n}">${n} paiement${n > 1 ? 's' : ''}</option>`).join('')}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -5137,11 +5726,8 @@
                 toggleBtn.classList.add('active');
                 toggleBtn.querySelector('span:nth-child(2)').textContent = 'Compte élève activé';
                 toggleIcon.textContent = 'expand_less';
-                toggleBtn.style.background = 'var(--md-sys-color-primary-container)';
-                toggleBtn.style.color = 'var(--md-sys-color-on-primary-container)';
             } else {
                 emailSection.style.display = 'none';
-                // Vider les champs email/tel quand on ferme
                 const emailInput = emailSection.querySelector('.enfant-email');
                 const telInput = emailSection.querySelector('.enfant-tel');
                 if (emailInput) emailInput.value = '';
@@ -5149,8 +5735,6 @@
                 toggleBtn.classList.remove('active');
                 toggleBtn.querySelector('span:nth-child(2)').textContent = 'Créer un compte pour cet élève';
                 toggleIcon.textContent = 'expand_more';
-                toggleBtn.style.background = '';
-                toggleBtn.style.color = '';
             }
         }
 
@@ -5159,14 +5743,14 @@
             const container = document.getElementById('inscriptionEnfantsContainer');
             container.insertAdjacentHTML('beforeend', createEnfantFieldHTML(inscriptionEnfantCount - 1));
             
-            // Mettre à jour la visibilité des emails élèves
             updateParentFieldsVisibility();
             
-            // Remplir automatiquement le nom de l'enfant avec le nom du parent
+            // Auto-fill name
             const parentNom = document.getElementById('insc_parentNom').value.trim();
-            const enfantNomInput = newField.querySelector('.enfant-nom');
-            if (enfantNomInput && parentNom) {
-                enfantNomInput.value = parentNom;
+            if (parentNom) {
+                const newField = container.querySelector(`.enfant-field[data-index="${inscriptionEnfantCount - 1}"]`);
+                const enfantNomInput = newField ? newField.querySelector('.enfant-nom') : null;
+                if (enfantNomInput) enfantNomInput.value = parentNom;
             }
         }
 
@@ -5174,18 +5758,65 @@
             if (inscriptionEnfantCount > 1) {
                 document.querySelector(`.enfant-field[data-index="${index}"]`).remove();
                 inscriptionEnfantCount--;
-                // Re-numéroter
                 document.querySelectorAll('.enfant-field').forEach((field, i) => {
                     field.dataset.index = i;
-                    field.querySelector('h5').textContent = `Enfant ${i + 1}`;
+                    const header = field.querySelector('.enfant-card-number');
+                    if (header) header.textContent = i + 1;
+                    const title = field.querySelector('.enfant-card-header > div:nth-child(2) > div:first-child');
+                    if (title) title.textContent = `Élève ${i + 1}`;
                     field.querySelectorAll('input, select').forEach(input => input.dataset.index = i);
                     const removeBtn = field.querySelector('button[onclick^="removeEnfantField"]');
                     if (removeBtn) removeBtn.setAttribute('onclick', `removeEnfantField(${i})`);
+                    const toggleBtn = field.querySelector('.toggle-account-btn');
+                    if (toggleBtn) toggleBtn.setAttribute('onclick', `toggleEnfantAccount(${i})`);
                 });
             }
         }
 
         async function submitInscription() {
+            // Mode "famille existante" — use dedicated endpoint
+            if (inscriptionType === 'existante' && selectedExistingFamily) {
+                const enfantFields = document.querySelectorAll('.enfant-field');
+                const enfants = [];
+                
+                for (const field of enfantFields) {
+                    const nom = field.querySelector('.enfant-nom').value.trim();
+                    const prenom = field.querySelector('.enfant-prenom').value.trim();
+                    if (!nom || !prenom) {
+                        showSnackbar('Veuillez remplir le nom et prénom de chaque élève');
+                        return;
+                    }
+                    const dateNaissance = field.querySelector('.enfant-date').value;
+                    const classe = field.querySelector('.enfant-classe').value;
+                    const email = field.querySelector('.enfant-email')?.value.trim() || '';
+                    const tel = field.querySelector('.enfant-tel')?.value.trim() || '';
+                    const fraisInscription = parseFloat(field.querySelector('.enfant-frais')?.value || 0) || 0;
+                    const nbPaiements = parseInt(field.querySelector('.enfant-nbPaiements')?.value || '1', 10) || 1;
+                    enfants.push({ nom, prenom, dateNaissance, classe, email, tel, fraisInscription, nbPaiements });
+                }
+                
+                try {
+                    const response = await fetch(`${API_URL}/parents/inscription/famille-existante`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify({ parentId: selectedExistingFamily.parentId, enfants })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showSnackbar(data.message || 'Élève(s) ajouté(s) à la famille !');
+                        hideInscriptionForm();
+                        await loadAllData();
+                        loadInscriptions();
+                    } else {
+                        throw new Error(data.error || 'Erreur');
+                    }
+                } catch (error) {
+                    showSnackbar(error.message || 'Erreur lors de l\'inscription');
+                }
+                return;
+            }
+
+            // Mode normal (seul / famille)
             const parentSection = document.querySelector('.parent-info-section');
             const isParentVisible = parentSection && parentSection.style.display !== 'none';
             
@@ -5197,7 +5828,6 @@
             
             const hasParent1 = isParentVisible && parentEmail && parentNom && parentPrenom;
             
-            // Collecter les enfants
             const enfantFields = document.querySelectorAll('.enfant-field');
             const enfants = [];
             
@@ -5216,7 +5846,6 @@
                 const email = field.querySelector('.enfant-email')?.value.trim() || '';
                 const tel = field.querySelector('.enfant-tel')?.value.trim() || '';
                 
-                // Si pas de parent, l'email élève est obligatoire
                 if (!hasParent1 && !email) {
                     showSnackbar(`L'email est obligatoire pour l'élève ${prenom} car aucun parent n'est renseigné`);
                     return;
@@ -5229,7 +5858,6 @@
             }
             
             try {
-                // Préparer le second parent si présent
                 const parent2Nom = document.getElementById('insc_parent2Nom')?.value.trim() || '';
                 const parent2Prenom = document.getElementById('insc_parent2Prenom')?.value.trim() || '';
                 const parent2Email = document.getElementById('insc_parent2Email')?.value.trim() || '';
@@ -5239,7 +5867,6 @@
                 const parent1 = hasParent1 ? { nom: parentNom, prenom: parentPrenom, email: parentEmail, tel: parentTel, adresse: parentAdresse } : null;
                 const parent2 = (isParentVisible && parent2Email && parent2Nom && parent2Prenom) ? { nom: parent2Nom, prenom: parent2Prenom, email: parent2Email, tel: parent2Tel, adresse: parent2Adresse } : null;
 
-                // Toujours utiliser l'endpoint parents/inscription (gère 0, 1 ou 2 parents)
                 const response = await fetch(`${API_URL}/parents/inscription`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -5263,6 +5890,446 @@
 
         function showNewInscriptionForm() {
             showInscriptionForm();
+        }
+
+        // ==================== GESTION DES FRAIS (Admin) ====================
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount || 0);
+        }
+
+        function getMethodeLabel(methode) {
+            const labels = { carte: '💳 Carte', virement: '🏦 Virement', espece: '💵 Espèce' };
+            return labels[methode] || methode;
+        }
+
+        async function adminFraisTabInit() {
+            await loadAdminEleves();
+            // Reset famille state
+            _selectedFamille = null;
+        }
+
+        // Variable globale pour la famille sélectionnée
+        let _selectedFamille = null; // { parentId, parentNom, enfants: [...] }
+        let _searchFamilleTimeout = null;
+
+        async function adminFraisTargetChanged() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            document.getElementById('adminFraisEleveSelect').style.display = target === 'eleve' ? 'block' : 'none';
+            document.getElementById('adminFraisFamille').style.display = target === 'famille' ? 'block' : 'none';
+            document.getElementById('adminPaiementSection').style.display = 'none';
+            document.getElementById('adminFraisResult').innerHTML = '';
+            if (target === 'eleve') {
+                await loadAdminEleves();
+            } else {
+                _selectedFamille = null;
+                document.getElementById('adminFamilleSelected').style.display = 'none';
+                document.getElementById('adminFamilleSearch').value = '';
+                document.getElementById('adminFamilleSearchResults').innerHTML = '';
+            }
+        }
+
+        async function adminSearchFamilles() {
+            clearTimeout(_searchFamilleTimeout);
+            const query = document.getElementById('adminFamilleSearch').value.trim();
+            const container = document.getElementById('adminFamilleSearchResults');
+
+            if (query.length < 2) {
+                container.innerHTML = '<p style="text-align:center; color:var(--md-sys-color-on-surface-variant); padding:12px; font-size:0.9rem;">Tapez au moins 2 caractères...</p>';
+                return;
+            }
+
+            _searchFamilleTimeout = setTimeout(async () => {
+                container.innerHTML = '<p style="text-align:center; color:var(--md-sys-color-on-surface-variant); padding:12px;">Recherche...</p>';
+                try {
+                    const resp = await fetch(`${API_URL}/parents/search-familles?q=${encodeURIComponent(query)}`, { headers: getHeaders() });
+                    if (!resp.ok) throw new Error('Erreur recherche');
+                    const parents = await resp.json();
+
+                    if (parents.length === 0) {
+                        container.innerHTML = '<p style="text-align:center; color:var(--md-sys-color-on-surface-variant); padding:12px;">Aucune famille trouvée</p>';
+                        return;
+                    }
+
+                    container.innerHTML = parents.map(p => `
+                        <div style="padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:10px; margin-bottom:6px; cursor:pointer; transition:background 0.2s;" 
+                             onmouseover="this.style.background='var(--md-sys-color-surface-container-high)'" 
+                             onmouseout="this.style.background='var(--md-sys-color-surface-container)'"
+                             onclick="adminSelectFamille('${p.id}', '${(p.prenom + ' ' + p.nom).replace(/'/g, "\\'")}', ${JSON.stringify(p.enfants || []).replace(/"/g, '&quot;')})">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:36px; height:36px; border-radius:50%; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.9rem;">
+                                    ${(p.prenom || 'P')[0].toUpperCase()}
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:600;">${p.prenom} ${p.nom}</div>
+                                    <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">${p.email} — ${p.nbEnfants || 0} enfant(s)</div>
+                                </div>
+                                ${(p.enfants || []).length > 0 ? `<div style="display:flex; gap:4px; flex-wrap:wrap;">
+                                    ${p.enfants.slice(0, 3).map(e => `<span style="padding:2px 8px; border-radius:12px; font-size:0.75rem; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">${e.prenom} ${e.nom}</span>`).join('')}
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    console.error('adminSearchFamilles error:', err);
+                    container.innerHTML = '<p style="color:var(--md-sys-color-error); padding:12px; text-align:center;">Erreur lors de la recherche</p>';
+                }
+            }, 300);
+        }
+
+        function adminSelectFamille(parentId, parentNom, enfants) {
+            _selectedFamille = { parentId, parentNom, enfants: typeof enfants === 'string' ? JSON.parse(enfants) : enfants };
+            
+            document.getElementById('adminFamilleSearch').value = '';
+            document.getElementById('adminFamilleSearchResults').innerHTML = '';
+            document.getElementById('adminFamilleSelected').style.display = 'block';
+            document.getElementById('adminFamilleSelectedName').textContent = `👨‍👩‍👧‍👦 Famille ${parentNom}`;
+
+            // Afficher les enfants
+            const enfantsEl = document.getElementById('adminFamilleEnfantsList');
+            enfantsEl.innerHTML = _selectedFamille.enfants.map(e => {
+                const ePaye = parseFloat(e.montantPaye || 0);
+                const eReste = Math.max(0, (e.fraisInscription || 0) - ePaye);
+                return `<div style="padding:6px 10px; background:var(--md-sys-color-surface-container-low); border-radius:8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:500;">${e.prenom} ${e.nom}</span>
+                    <span style="font-size:0.8rem; color:${eReste > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">Reste: ${formatCurrency(eReste)}</span>
+                </div>`;
+            }).join('');
+
+            // Remplir le select de ciblage
+            const selectEl = document.getElementById('adminFamilleTargetEnfant');
+            let options = '<option value="">Tous les enfants (répartir)</option>';
+            _selectedFamille.enfants.forEach(e => {
+                const eReste = Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0));
+                if (eReste > 0) {
+                    options += `<option value="${e.id}">${e.prenom} ${e.nom} (reste: ${formatCurrency(eReste)})</option>`;
+                }
+            });
+            selectEl.innerHTML = options;
+
+            adminLoadSelectedFrais();
+        }
+
+        function adminDeselectFamille() {
+            _selectedFamille = null;
+            document.getElementById('adminFamilleSelected').style.display = 'none';
+            document.getElementById('adminFraisResult').innerHTML = '';
+            document.getElementById('adminPaiementSection').style.display = 'none';
+        }
+
+        async function loadAdminEleves() {
+            const select = document.getElementById('adminEleveList');
+            if (!select) return;
+            select.innerHTML = '<option value="">Chargement...</option>';
+
+            try {
+                const resp = await fetch(`${API_URL}/eleves`, { headers: getHeaders() });
+                if (!resp.ok) throw new Error('Erreur chargement élèves');
+                const eleves = await resp.json();
+                select.innerHTML = '<option value="">-- Sélectionner --</option>' + eleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom} (${e.classe || '—'})</option>`).join('');
+            } catch (error) {
+                console.error('loadAdminEleves:', error);
+                select.innerHTML = '<option value="">Erreur chargement</option>';
+            }
+        }
+
+        async function adminLoadSelectedFrais() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            const resultEl = document.getElementById('adminFraisResult');
+            const paiementSection = document.getElementById('adminPaiementSection');
+            resultEl.innerHTML = '<p style="color:var(--md-sys-color-on-surface-variant);">Chargement...</p>';
+            paiementSection.style.display = 'none';
+
+            try {
+                let data = null;
+                if (target === 'eleve') {
+                    const eleveId = document.getElementById('adminEleveList').value;
+                    if (!eleveId) { resultEl.innerHTML = '<p style="color:var(--md-sys-color-on-surface-variant);">Veuillez sélectionner un élève.</p>'; return; }
+                    const resp = await fetch(`${API_URL}/eleves/frais/${eleveId}`, { headers: getHeaders() });
+                    if (!resp.ok) throw await resp.json();
+                    data = await resp.json();
+                    const eleve = data.eleve;
+                    const montantPaye = parseFloat(eleve.montantPaye || 0);
+                    const resteAPayer = Math.max(0, data.resteAPayer || 0);
+                    
+                    renderAdminFraisResult(resultEl, {
+                        total: eleve.fraisInscription || 0,
+                        montantPaye,
+                        resteAPayer,
+                        paiements: data.paiements || [],
+                        enfants: [{ ...eleve, montantPaye, paiements: data.paiements || [] }]
+                    });
+
+                    if (resteAPayer > 0) {
+                        paiementSection.style.display = 'block';
+                        document.getElementById('adminPaiementMontant').max = resteAPayer;
+                        document.getElementById('adminPaiementMontant').placeholder = `Max: ${resteAPayer.toFixed(2)}`;
+                        document.getElementById('adminPaiementDate').value = new Date().toISOString().split('T')[0];
+                    }
+                } else {
+                    if (!_selectedFamille) { 
+                        resultEl.innerHTML = '<p style="color:var(--md-sys-color-on-surface-variant);">Recherchez et sélectionnez une famille.</p>'; 
+                        return; 
+                    }
+                    
+                    const parentId = _selectedFamille.parentId;
+                    const targetEnfantId = document.getElementById('adminFamilleTargetEnfant').value;
+
+                    if (targetEnfantId) {
+                        // Mode enfant spécifique
+                        const resp = await fetch(`${API_URL}/eleves/frais/${targetEnfantId}`, { headers: getHeaders() });
+                        if (!resp.ok) throw await resp.json();
+                        data = await resp.json();
+                        const eleve = data.eleve;
+                        const montantPaye = parseFloat(eleve.montantPaye || 0);
+                        const resteAPayer = Math.max(0, data.resteAPayer || 0);
+                        
+                        renderAdminFraisResult(resultEl, {
+                            total: eleve.fraisInscription || 0,
+                            montantPaye,
+                            resteAPayer,
+                            paiements: data.paiements || [],
+                            enfants: [{ ...eleve, montantPaye, paiements: data.paiements || [] }]
+                        });
+
+                        if (resteAPayer > 0) {
+                            paiementSection.style.display = 'block';
+                            document.getElementById('adminPaiementMontant').max = resteAPayer;
+                            document.getElementById('adminPaiementMontant').placeholder = `Max: ${resteAPayer.toFixed(2)}`;
+                            document.getElementById('adminPaiementDate').value = new Date().toISOString().split('T')[0];
+                        }
+                    } else {
+                        // Mode tous les enfants
+                        const resp = await fetch(`${API_URL}/eleves/frais/famille/${parentId}`, { headers: getHeaders() });
+                        if (!resp.ok) throw await resp.json();
+                        data = await resp.json();
+                        
+                        const totalMontantPaye = parseFloat(data.totalMontantPaye || 0);
+                        const resteAPayer = Math.max(0, data.resteAPayer || 0);
+                        
+                        renderAdminFraisResult(resultEl, {
+                            total: data.totalFrais || 0,
+                            montantPaye: totalMontantPaye,
+                            resteAPayer,
+                            paiements: (data.enfants || []).flatMap(e => (e.paiements || []).map(p => ({...p, eleveNom: `${e.prenom} ${e.nom}`}))),
+                            enfants: data.enfants || []
+                        });
+
+                        if (resteAPayer > 0) {
+                            paiementSection.style.display = 'block';
+                            document.getElementById('adminPaiementMontant').max = resteAPayer;
+                            document.getElementById('adminPaiementMontant').placeholder = `Max: ${resteAPayer.toFixed(2)}`;
+                            document.getElementById('adminPaiementDate').value = new Date().toISOString().split('T')[0];
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('adminLoadSelectedFrais error:', error);
+                resultEl.innerHTML = `<p style="color:var(--md-sys-color-on-surface-variant);">Erreur chargement: ${error && error.error ? error.error : 'Erreur'}</p>`;
+            }
+        }
+
+        function renderAdminFraisResult(container, { total, montantPaye, resteAPayer, paiements, enfants }) {
+            const progress = total > 0 ? Math.round((montantPaye / total) * 100) : 0;
+            const allPaiements = paiements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            let enfantsHtml = '';
+            if (enfants && enfants.length > 1) {
+                enfantsHtml = `<div style="margin-top:16px;"><strong>Détail par enfant</strong></div>` +
+                    enfants.map(e => {
+                        const ePaye = parseFloat(e.montantPaye || 0);
+                        const eReste = Math.max(0, (e.fraisInscription || 0) - ePaye);
+                        return `
+                        <div style="padding:10px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong>${e.prenom} ${e.nom}</strong>
+                                <span style="color:${e.fraisValide ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-error)'};">
+                                    ${e.fraisValide ? '✅ Validé' : '⏳ En cours'}
+                                </span>
+                            </div>
+                            <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant); margin-top:4px;">
+                                Total: ${formatCurrency(e.fraisInscription)} — Payé: ${formatCurrency(ePaye)} — Reste: ${formatCurrency(eReste)}
+                            </div>
+                        </div>`;
+                    }).join('');
+            }
+
+            container.innerHTML = `
+                <div style="padding:16px; background:var(--md-sys-color-surface-container-low); border-radius:12px;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:12px;">
+                        <div style="text-align:center; flex:1; min-width:120px;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Total</div>
+                            <div style="font-size:1.4rem; font-weight:700;">${formatCurrency(total)}</div>
+                        </div>
+                        <div style="text-align:center; flex:1; min-width:120px;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Payé</div>
+                            <div style="font-size:1.4rem; font-weight:700; color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
+                        </div>
+                        <div style="text-align:center; flex:1; min-width:120px;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Reste</div>
+                            <div style="font-size:1.4rem; font-weight:700; color:${resteAPayer > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">${formatCurrency(resteAPayer)}</div>
+                        </div>
+                    </div>
+                    <div style="height:10px; background:var(--md-sys-color-surface-container); border-radius:8px; overflow:hidden;">
+                        <div style="width:${progress}%; height:100%; background:linear-gradient(90deg,var(--md-sys-color-primary),var(--md-sys-color-secondary)); transition:width 0.5s ease;"></div>
+                    </div>
+                    <div style="text-align:center; font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); margin-top:6px;">${progress}% payé</div>
+
+                    ${enfantsHtml}
+
+                    <div style="margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong style="font-size:1rem;">Historique des paiements</strong>
+                            <span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant);">${allPaiements.length} transaction(s)</span>
+                        </div>
+                        ${allPaiements.length === 0 
+                            ? '<p style="text-align:center; padding:16px; color:var(--md-sys-color-on-surface-variant);">Aucun paiement enregistré</p>' 
+                            : allPaiements.map(p => `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:6px;">
+                                    <div style="display:flex; flex-direction:column; gap:2px;">
+                                        <div style="font-weight:600; font-size:1rem;">${formatCurrency(p.montant)}</div>
+                                        <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">
+                                            ${new Date(p.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}
+                                            ${p.eleveNom ? ` — ${p.eleveNom}` : ''}
+                                            ${p.note ? ` — <em>${p.note}</em>` : ''}
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <span style="padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:500; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
+                                            ${getMethodeLabel(p.methodePaiement)}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function adminEnregistrerPaiement() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            const montant = parseFloat(document.getElementById('adminPaiementMontant').value);
+            const methodePaiement = document.getElementById('adminPaiementMethode').value;
+            const date = document.getElementById('adminPaiementDate').value;
+            const note = document.getElementById('adminPaiementNote').value.trim();
+
+            if (!montant || montant <= 0) { showSnackbar('Montant invalide'); return; }
+            if (!methodePaiement) { showSnackbar('Choisissez une méthode de paiement'); return; }
+
+            try {
+                if (target === 'eleve') {
+                    const eleveId = document.getElementById('adminEleveList').value;
+                    if (!eleveId) { showSnackbar('Sélectionnez un élève'); return; }
+
+                    const resp = await fetch(`${API_URL}/eleves/${eleveId}/paiement`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify({ montant, methodePaiement, date: date || undefined, note: note || undefined })
+                    });
+
+                    if (!resp.ok) {
+                        const err = await resp.json();
+                        throw new Error(err.error || 'Erreur enregistrement');
+                    }
+
+                    showSnackbar(`Paiement de ${formatCurrency(montant)} enregistré (${getMethodeLabel(methodePaiement)})`);
+                } else {
+                    if (!_selectedFamille) { showSnackbar('Sélectionnez une famille'); return; }
+                    
+                    const parentId = _selectedFamille.parentId;
+                    const enfants = _selectedFamille.enfants || [];
+                    if (enfants.length === 0) { showSnackbar('Aucun enfant trouvé'); return; }
+                    
+                    const targetEnfantId = document.getElementById('adminFamilleTargetEnfant').value;
+                    const eleveIds = enfants.map(e => e.id);
+
+                    if (targetEnfantId) {
+                        // Paiement pour un enfant spécifique
+                        const resp = await fetch(`${API_URL}/eleves/${targetEnfantId}/paiement`, {
+                            method: 'POST',
+                            headers: getHeaders(),
+                            body: JSON.stringify({ montant, methodePaiement, date: date || undefined, note: note || undefined })
+                        });
+
+                        if (!resp.ok) {
+                            const err = await resp.json();
+                            throw new Error(err.error || 'Erreur enregistrement');
+                        }
+
+                        const enfant = enfants.find(e => e.id === targetEnfantId);
+                        showSnackbar(`Paiement de ${formatCurrency(montant)} pour ${enfant ? enfant.prenom + ' ' + enfant.nom : 'enfant'} enregistré`);
+                    } else {
+                        // Paiement réparti sur tous les enfants
+                        const resp = await fetch(`${API_URL}/eleves/paiement-famille`, {
+                            method: 'POST',
+                            headers: getHeaders(),
+                            body: JSON.stringify({ parentId, eleveIds, montant, methodePaiement, date: date || undefined, note: note || undefined })
+                        });
+
+                        if (!resp.ok) {
+                            const err = await resp.json();
+                            throw new Error(err.error || 'Erreur enregistrement famille');
+                        }
+
+                        showSnackbar(`Paiement famille de ${formatCurrency(montant)} enregistré (${getMethodeLabel(methodePaiement)})`);
+                    }
+
+                    // Rafraîchir les infos enfants de la famille sélectionnée
+                    try {
+                        const respSearch = await fetch(`${API_URL}/parents/search-familles?q=${encodeURIComponent(_selectedFamille.parentNom.split(' ')[0])}`, { headers: getHeaders() });
+                        if (respSearch.ok) {
+                            const results = await respSearch.json();
+                            const updated = results.find(p => p.id === _selectedFamille.parentId);
+                            if (updated) _selectedFamille.enfants = updated.enfants || [];
+                        }
+                    } catch(e) {}
+                }
+
+                document.getElementById('adminPaiementMontant').value = '';
+                document.getElementById('adminPaiementNote').value = '';
+                await adminLoadSelectedFrais();
+
+            } catch (error) {
+                console.error('adminEnregistrerPaiement error:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'enregistrement du paiement');
+            }
+        }
+
+        async function adminInitFrais() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            const total = parseFloat(document.getElementById('adminInitTotal').value);
+            const reduction = parseFloat(document.getElementById('adminInitReduction').value) || 0;
+
+            if (!total || total <= 0) { showSnackbar('Montant total invalide'); return; }
+
+            const payload = { total, reduction, type: target };
+            if (target === 'eleve') {
+                const eleveId = document.getElementById('adminEleveList').value;
+                if (!eleveId) { showSnackbar('Sélectionnez un élève'); return; }
+                payload.eleveId = eleveId;
+            } else {
+                if (!_selectedFamille) { showSnackbar('Sélectionnez une famille'); return; }
+                payload.parentId = _selectedFamille.parentId;
+            }
+
+            try {
+                const resp = await fetch(`${API_URL}/frais/init`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(payload)
+                });
+
+                if (resp.ok) {
+                    showSnackbar('Frais initialisés');
+                    adminLoadSelectedFrais();
+                } else {
+                    const err = await resp.json();
+                    throw new Error(err.error || 'Erreur initialisation');
+                }
+            } catch (error) {
+                console.error('adminInitFrais error:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'initialisation');
+            }
         }
 
         // Variable globale pour stocker les données des frais
@@ -5835,6 +6902,86 @@
         function logout() {
             localStorage.clear();
             window.location.href = 'login.html';
+        }
+
+        // ==================== MAINTENANCE ====================
+        async function loadMaintenanceStatus() {
+            try {
+                const data = await apiRequest('/maintenance/status');
+                const statusDiv = document.getElementById('maintenanceCurrentStatus');
+                const statusIcon = document.getElementById('maintenanceStatusIcon');
+                const statusText = document.getElementById('maintenanceStatusText');
+                const statusDates = document.getElementById('maintenanceStatusDates');
+                const btnActivate = document.getElementById('btnActivateMaintenance');
+                const btnDeactivate = document.getElementById('btnDeactivateMaintenance');
+
+                if (data.active) {
+                    statusDiv.style.background = 'linear-gradient(135deg, #fff3e0, #ffe0b2)';
+                    statusDiv.style.border = '1px solid #ff9800';
+                    statusIcon.textContent = 'warning';
+                    statusIcon.style.color = '#e65100';
+                    statusText.textContent = 'Maintenance ACTIVE';
+                    statusText.style.color = '#bf360c';
+
+                    const optionsDate = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    let datesHtml = 'Depuis le ' + new Date(data.dateDebut).toLocaleDateString('fr-FR', optionsDate);
+                    if (data.dateFin) {
+                        datesHtml += ' — Fin prévue : ' + new Date(data.dateFin).toLocaleDateString('fr-FR', optionsDate);
+                    }
+                    statusDates.textContent = datesHtml;
+
+                    if (data.message) {
+                        document.getElementById('maintenanceMsg').value = data.message;
+                    }
+                    if (data.dateFin) {
+                        // Convertir ISO en datetime-local format
+                        const df = new Date(data.dateFin);
+                        const pad = n => String(n).padStart(2, '0');
+                        document.getElementById('maintenanceDateFin').value =
+                            `${df.getFullYear()}-${pad(df.getMonth()+1)}-${pad(df.getDate())}T${pad(df.getHours())}:${pad(df.getMinutes())}`;
+                    }
+
+                    btnActivate.style.display = 'none';
+                    btnDeactivate.style.display = 'flex';
+                } else {
+                    statusDiv.style.background = 'linear-gradient(135deg, #e8f5e9, #c8e6c9)';
+                    statusDiv.style.border = '1px solid #4caf50';
+                    statusIcon.textContent = 'check_circle';
+                    statusIcon.style.color = '#2e7d32';
+                    statusText.textContent = 'Site en ligne — Aucune maintenance';
+                    statusText.style.color = '#1b5e20';
+                    statusDates.textContent = '';
+
+                    btnActivate.style.display = 'flex';
+                    btnDeactivate.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Erreur chargement maintenance:', err);
+            }
+        }
+
+        async function toggleMaintenance(activate) {
+            const msg = document.getElementById('maintenanceMsg').value.trim();
+            const dateFinVal = document.getElementById('maintenanceDateFin').value;
+
+            const body = {
+                active: activate,
+                message: msg || null,
+                dateFin: dateFinVal ? new Date(dateFinVal).toISOString() : null
+            };
+
+            try {
+                await apiRequest('/maintenance/toggle', {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                });
+
+                showSnackbar(activate ? '🔧 Maintenance activée' : '✅ Maintenance désactivée');
+                await loadMaintenanceStatus();
+            } catch (err) {
+                console.error('Erreur toggle maintenance:', err);
+                showSnackbar('Erreur : ' + err.message);
+            }
         }
     </script>
 

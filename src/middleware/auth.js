@@ -79,9 +79,40 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+// Middleware de vérification du mode maintenance
+// Bloque les utilisateurs non-staff si la maintenance est active
+async function checkMaintenance(req, res, next) {
+    try {
+        const maintenanceRow = await dbGet(db, 'SELECT * FROM maintenance WHERE id = 1 AND active = 1');
+        if (!maintenanceRow) {
+            return next(); // Pas de maintenance, on continue
+        }
+
+        // Vérifier si l'utilisateur est staff (admin, directeur, secretariat, secretaire)
+        const userRole = req.userRole || req.headers['x-user-role'];
+        const staffRoles = ['admin', 'directeur', 'secretariat', 'secretaire'];
+
+        if (staffRoles.includes(userRole)) {
+            return next(); // Les staff passent toujours
+        }
+
+        // Bloquer les non-staff
+        return res.status(503).json({
+            error: 'Le site est actuellement en maintenance.',
+            maintenance: true,
+            dateDebut: maintenanceRow.dateDebut,
+            dateFin: maintenanceRow.dateFin || null
+        });
+    } catch (err) {
+        console.error('Erreur middleware maintenance:', err);
+        next(); // En cas d'erreur, on laisse passer
+    }
+}
+
 module.exports = {
     hasPermission,
     checkPermission,
     requireAuth,
-    requireAdmin
+    requireAdmin,
+    checkMaintenance
 };

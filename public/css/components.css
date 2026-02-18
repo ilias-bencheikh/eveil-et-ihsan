@@ -703,3 +703,373 @@ body {
 .md-list-item-trailing {
     color: var(--md-sys-color-on-surface-variant);
 }
+
+/* ===== FORM GRID ===== */
+
+.md-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.md-form-grid .full-width,
+.md-form-grid > [style*="grid-column"] {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+    .md-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== STEPPER ===== */
+
+.md-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 16px 0 24px;
+    margin-bottom: 8px;
+}
+
+.md-stepper-step {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.md-stepper-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: var(--md-sys-shape-corner-full);
+    transition: all 0.3s ease;
+}
+
+.md-stepper-indicator:hover {
+    background: var(--md-sys-color-surface-container);
+}
+
+.md-stepper-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-on-surface-variant);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.md-stepper-step.active .md-stepper-number {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    box-shadow: 0 2px 8px rgba(var(--md-sys-color-primary-rgb, 0,0,0), 0.3);
+}
+
+.md-stepper-step.completed .md-stepper-number {
+    background: var(--md-sys-color-tertiary);
+    color: var(--md-sys-color-on-tertiary);
+}
+
+.md-stepper-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    transition: color 0.3s ease;
+}
+
+.md-stepper-step.active .md-stepper-label {
+    color: var(--md-sys-color-primary);
+    font-weight: 600;
+}
+
+.md-stepper-step.completed .md-stepper-label {
+    color: var(--md-sys-color-tertiary);
+}
+
+.md-stepper-connector {
+    width: 40px;
+    height: 2px;
+    background: var(--md-sys-color-outline-variant);
+    margin: 0 4px;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+}
+
+.md-stepper-step.completed + .md-stepper-connector,
+.md-stepper-connector.completed {
+    background: var(--md-sys-color-tertiary);
+}
+
+@media (max-width: 600px) {
+    .md-stepper-label {
+        display: none;
+    }
+    .md-stepper-indicator {
+        padding: 8px;
+    }
+}
+
+/* ===== INSCRIPTION FORM STYLES ===== */
+
+.inscription-step {
+    display: none;
+    animation: fadeInUp 0.3s ease;
+}
+
+.inscription-step.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.inscription-type-card {
+    flex: 1;
+    padding: 24px;
+    border: 2px solid var(--md-sys-color-outline-variant);
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--md-sys-color-surface);
+    position: relative;
+    overflow: hidden;
+}
+
+.inscription-type-card:hover {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-surface-container);
+    transform: translateY(-2px);
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+.inscription-type-card.selected {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary-container);
+}
+
+.inscription-type-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.parent-card {
+    background: var(--md-sys-color-surface-container);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    transition: all 0.3s ease;
+}
+
+.parent-card:hover {
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.enfant-card {
+    background: var(--md-sys-color-surface-container);
+    border-radius: 16px;
+    padding: 20px;
+    border: 2px solid var(--md-sys-color-outline-variant);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.enfant-card:hover {
+    border-color: var(--md-sys-color-primary);
+}
+
+.enfant-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.enfant-card-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.account-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px dashed var(--md-sys-color-outline-variant);
+    border-radius: 12px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 14px;
+}
+
+.account-toggle-btn:hover {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-primary);
+}
+
+.account-toggle-btn.active {
+    border-color: var(--md-sys-color-primary);
+    border-style: solid;
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* ===== FICHE ÉLÈVE ===== */
+
+.fiche-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--md-sys-color-surface-variant);
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.fiche-section {
+    margin-bottom: 24px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.fiche-section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--md-sys-color-surface-container);
+}
+
+.fiche-section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fiche-section-content {
+    padding: 20px 24px;
+}
+
+.fiche-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.fiche-info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--md-sys-color-surface);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.fiche-info-item:hover {
+    border-color: var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.fiche-info-icon {
+    font-size: 22px;
+    color: var(--md-sys-color-primary);
+}
+
+.fiche-info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 2px;
+}
+
+.fiche-info-value {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+}
+
+.family-member-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--md-sys-color-surface);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.family-member-card:hover {
+    border-color: var(--md-sys-color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+/* ===== FAMILLE EXISTANTE SECTION ===== */
+
+.famille-search-result {
+    padding: 16px;
+    border: 2px solid var(--md-sys-color-outline-variant);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+}
+
+.famille-search-result:hover {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-surface-container);
+}
+
+.famille-search-result.selected {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary-container);
+}

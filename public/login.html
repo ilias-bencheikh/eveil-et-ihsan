@@ -10,6 +10,127 @@
     <link rel="apple-touch-icon" href="logo.png">
     
     <link rel="stylesheet" href="css/login.css">
+    <style>
+        /* ===== MODAL MOT DE PASSE OUBLIÉ ===== */
+        .forgot-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 16px;
+            animation: forgotOverlayIn 0.2s ease-out;
+        }
+        .forgot-modal-overlay.show {
+            display: flex;
+        }
+        .forgot-modal {
+            background: var(--md-sys-color-surface-container-lowest, #fff);
+            border-radius: var(--md-sys-shape-corner-extra-large, 28px);
+            box-shadow: var(--md-sys-elevation-3, 0 4px 16px rgba(0,0,0,0.15));
+            width: 100%;
+            max-width: 440px;
+            padding: 32px;
+            animation: forgotModalIn 0.3s var(--md-sys-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
+        }
+        .forgot-modal-state {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .forgot-modal-state.active {
+            display: flex;
+        }
+        .forgot-modal-header {
+            text-align: center;
+        }
+        .forgot-modal-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary-container, #d4e3ff);
+            color: var(--md-sys-color-on-primary-container, #001c3a);
+        }
+        .forgot-modal-icon .material-icons {
+            font-size: 28px;
+        }
+        .forgot-modal-icon-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .forgot-modal-icon-maintenance {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .forgot-modal-header h3 {
+            font: var(--md-sys-typescale-headline-small, 600 24px/32px 'Roboto', sans-serif);
+            color: var(--md-sys-color-on-surface, #1c1b1f);
+            margin: 0 0 8px;
+        }
+        .forgot-modal-header p {
+            font: var(--md-sys-typescale-body-medium, 400 14px/20px 'Roboto', sans-serif);
+            color: var(--md-sys-color-on-surface-variant, #49454f);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .forgot-modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .forgot-modal-error {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--md-sys-color-error-container, #ffdad6);
+            color: var(--md-sys-color-on-error-container, #410002);
+            border-radius: var(--md-sys-shape-corner-medium, 12px);
+            font-size: 14px;
+        }
+        .forgot-modal-error.show {
+            display: flex;
+        }
+        .forgot-modal-error .material-icons {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .forgot-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .forgot-modal-loading {
+            align-items: center;
+            justify-content: center;
+            padding: 48px 0;
+        }
+        .forgot-modal-loading p {
+            font: var(--md-sys-typescale-body-medium, 400 14px/20px 'Roboto', sans-serif);
+            color: var(--md-sys-color-on-surface-variant, #49454f);
+            margin: 0;
+        }
+        @keyframes forgotOverlayIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes forgotModalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @media (max-width: 600px) {
+            .forgot-modal {
+                padding: 24px;
+                max-width: 100%;
+            }
+        }
+    </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
 </head>
@@ -25,6 +146,21 @@
         <!-- Section Formulaire centrée -->
         <div class="login-form-container-centered">
             <div class="login-card">
+                <!-- Bannière de maintenance -->
+                <div class="maintenance-banner" id="maintenanceBanner" style="display: none;">
+                    <div class="maintenance-icon">
+                        <span class="material-icons">engineering</span>
+                    </div>
+                    <div class="maintenance-text">
+                        <h3>Maintenance en cours</h3>
+                        <p id="maintenanceMessage">Le site est actuellement en maintenance. Veuillez réessayer ultérieurement.</p>
+                        <div class="maintenance-dates">
+                            <span id="maintenanceDateDebut"></span>
+                            <span id="maintenanceDateFin"></span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Loading Overlay -->
                 <div class="login-loading" id="loginLoading">
                     <div class="login-loading-spinner"></div>
@@ -92,6 +228,76 @@
         </div>
     </div>
 
+    <!-- Modal Mot de passe oublié -->
+    <div class="forgot-modal-overlay" id="forgotModal">
+        <div class="forgot-modal">
+            <!-- État : Formulaire -->
+            <div class="forgot-modal-state" id="forgotFormState">
+                <div class="forgot-modal-header">
+                    <div class="forgot-modal-icon">
+                        <span class="material-icons">lock_reset</span>
+                    </div>
+                    <h3>Mot de passe oublié</h3>
+                    <p>Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+                </div>
+                <form id="forgotForm" class="forgot-modal-body">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container with-icon">
+                            <span class="material-icons md-text-field-icon">email</span>
+                            <input type="email" id="forgotEmail" class="md-text-field-input" placeholder=" " required autocomplete="email">
+                            <label class="md-text-field-label" style="left: 48px;">Adresse email</label>
+                        </div>
+                    </div>
+                    <div class="forgot-modal-error" id="forgotError">
+                        <span class="material-icons">error_outline</span>
+                        <span id="forgotErrorMessage"></span>
+                    </div>
+                    <div class="forgot-modal-actions">
+                        <button type="button" class="md-btn md-btn-text" id="forgotCancelBtn">Annuler</button>
+                        <button type="submit" class="md-btn md-btn-filled" id="forgotSubmitBtn">
+                            <span class="material-icons">send</span>
+                            Envoyer
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- État : Chargement -->
+            <div class="forgot-modal-state forgot-modal-loading" id="forgotLoadingState">
+                <div class="login-loading-spinner"></div>
+                <p>Envoi en cours...</p>
+            </div>
+
+            <!-- État : Succès -->
+            <div class="forgot-modal-state" id="forgotSuccessState">
+                <div class="forgot-modal-header">
+                    <div class="forgot-modal-icon forgot-modal-icon-success">
+                        <span class="material-icons">mark_email_read</span>
+                    </div>
+                    <h3>Email envoyé !</h3>
+                    <p>Si cette adresse est associée à un compte, un email de réinitialisation a été envoyé. Vérifiez votre boîte de réception et vos spams.</p>
+                </div>
+                <div class="forgot-modal-actions">
+                    <button type="button" class="md-btn md-btn-filled" id="forgotCloseSuccessBtn">Compris</button>
+                </div>
+            </div>
+
+            <!-- État : Maintenance -->
+            <div class="forgot-modal-state" id="forgotMaintenanceState">
+                <div class="forgot-modal-header">
+                    <div class="forgot-modal-icon forgot-modal-icon-maintenance">
+                        <span class="material-icons">engineering</span>
+                    </div>
+                    <h3>Maintenance en cours</h3>
+                    <p>Cette fonctionnalité est temporairement indisponible en raison d'une maintenance. Veuillez réessayer ultérieurement.</p>
+                </div>
+                <div class="forgot-modal-actions">
+                    <button type="button" class="md-btn md-btn-filled" id="forgotCloseMaintenanceBtn">Compris</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Nettoyer les anciennes sessions au chargement
         localStorage.clear();
@@ -99,6 +305,51 @@
         // URL de base de l'API
         // Utiliser l'URL actuelle du site pour l'API
         const API_URL = `${window.location.origin}/api`;
+
+        // État maintenance
+        let isMaintenanceActive = false;
+
+        // Vérifier le statut maintenance au chargement
+        async function checkMaintenanceStatus() {
+            try {
+                const response = await fetch(`${API_URL}/maintenance/status`);
+                const data = await response.json();
+                const banner = document.getElementById('maintenanceBanner');
+
+                if (data.active) {
+                    isMaintenanceActive = true;
+                    banner.style.display = 'flex';
+
+                    // Message personnalisé
+                    if (data.message) {
+                        document.getElementById('maintenanceMessage').textContent = data.message;
+                    }
+
+                    // Formater les dates
+                    const dateDebut = new Date(data.dateDebut);
+                    const optionsDate = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    document.getElementById('maintenanceDateDebut').innerHTML =
+                        '<span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">schedule</span>Début : ' +
+                        dateDebut.toLocaleDateString('fr-FR', optionsDate);
+
+                    if (data.dateFin) {
+                        const dateFin = new Date(data.dateFin);
+                        document.getElementById('maintenanceDateFin').innerHTML =
+                            '<span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">event</span>Fin prévue : ' +
+                            dateFin.toLocaleDateString('fr-FR', optionsDate);
+                    }
+                } else {
+                    isMaintenanceActive = false;
+                    banner.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Erreur vérification maintenance:', err);
+            }
+        }
+
+        checkMaintenanceStatus();
+        // Rafraîchir toutes les 60 secondes
+        setInterval(checkMaintenanceStatus, 60000);
 
         // Éléments DOM
         const loginForm = document.getElementById('loginForm');
@@ -156,6 +407,31 @@
                             window.location.href = 'index.html';
                         }
                     }, 800);
+                } else if (data.maintenance) {
+                    // Maintenance renvoyée par le serveur lors du login
+                    isMaintenanceActive = true;
+                    const banner = document.getElementById('maintenanceBanner');
+                    banner.style.display = 'flex';
+                    if (data.message) {
+                        document.getElementById('maintenanceMessage').textContent = data.message;
+                    } else {
+                        document.getElementById('maintenanceMessage').textContent = data.error || 'Le site est actuellement en maintenance.';
+                    }
+                    if (data.dateDebut) {
+                        const dateDebut = new Date(data.dateDebut);
+                        const optionsDate = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                        document.getElementById('maintenanceDateDebut').innerHTML =
+                            '<span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">schedule</span>Début : ' +
+                            dateDebut.toLocaleDateString('fr-FR', optionsDate);
+                    }
+                    if (data.dateFin) {
+                        const dateFin = new Date(data.dateFin);
+                        const optionsDate = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                        document.getElementById('maintenanceDateFin').innerHTML =
+                            '<span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">event</span>Fin prévue : ' +
+                            dateFin.toLocaleDateString('fr-FR', optionsDate);
+                    }
+                    throw new Error('Le site est en maintenance. Veuillez réessayer plus tard');
                 } else {
                     throw new Error(data.message || 'Identifiants incorrects');
                 }
@@ -166,29 +442,91 @@
             }
         });
 
-        // Mot de passe oublié
-        document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
+        // ===== MODAL MOT DE PASSE OUBLIÉ =====
+        const forgotModal = document.getElementById('forgotModal');
+        const forgotForm = document.getElementById('forgotForm');
+        const forgotEmailInput = document.getElementById('forgotEmail');
+        const forgotError = document.getElementById('forgotError');
+        const forgotErrorMessage = document.getElementById('forgotErrorMessage');
+
+        const forgotStates = {
+            form: document.getElementById('forgotFormState'),
+            loading: document.getElementById('forgotLoadingState'),
+            success: document.getElementById('forgotSuccessState'),
+            maintenance: document.getElementById('forgotMaintenanceState')
+        };
+
+        function showForgotState(state) {
+            Object.values(forgotStates).forEach(el => el.classList.remove('active'));
+            forgotStates[state].classList.add('active');
+        }
+
+        function openForgotModal() {
+            // Si maintenance active, afficher directement l'état maintenance
+            if (isMaintenanceActive) {
+                showForgotState('maintenance');
+            } else {
+                forgotEmailInput.value = emailInput.value || '';
+                forgotError.classList.remove('show');
+                showForgotState('form');
+            }
+            forgotModal.classList.add('show');
+        }
+
+        function closeForgotModal() {
+            forgotModal.classList.remove('show');
+        }
+
+        // Ouvrir le modal
+        document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
             e.preventDefault();
-            
-            const email = prompt('Entrez votre adresse email pour réinitialiser votre mot de passe:');
-            if (!email) return;
-            
+            openForgotModal();
+        });
+
+        // Fermer avec les boutons
+        document.getElementById('forgotCancelBtn').addEventListener('click', closeForgotModal);
+        document.getElementById('forgotCloseSuccessBtn').addEventListener('click', closeForgotModal);
+        document.getElementById('forgotCloseMaintenanceBtn').addEventListener('click', closeForgotModal);
+
+        // Fermer en cliquant sur l'overlay
+        forgotModal.addEventListener('click', (e) => {
+            if (e.target === forgotModal) closeForgotModal();
+        });
+
+        // Fermer avec Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && forgotModal.classList.contains('show')) closeForgotModal();
+        });
+
+        // Soumission du formulaire
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            forgotError.classList.remove('show');
+            showForgotState('loading');
+
             try {
                 const response = await fetch(`${API_URL}/auth/forgot-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({ email: forgotEmailInput.value })
                 });
-                
+
                 const data = await response.json();
-                
-                if (response.ok) {
-                    alert('Un email de réinitialisation a été envoyé si cette adresse existe.');
+
+                if (data.maintenance) {
+                    isMaintenanceActive = true;
+                    showForgotState('maintenance');
+                } else if (response.ok) {
+                    showForgotState('success');
                 } else {
-                    alert(data.error || 'Erreur lors de l\'envoi de l\'email');
+                    forgotErrorMessage.textContent = data.error || 'Erreur lors de l\'envoi de l\'email';
+                    forgotError.classList.add('show');
+                    showForgotState('form');
                 }
             } catch (error) {
-                alert('Erreur de connexion au serveur');
+                forgotErrorMessage.textContent = 'Erreur de connexion au serveur';
+                forgotError.classList.add('show');
+                showForgotState('form');
             }
         });
     </script>

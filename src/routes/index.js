@@ -9,6 +9,7 @@ const staffRoutes = require('./staff.routes');
 const emailRoutes = require('./email.routes');
 const actualitesRoutes = require('./actualites.routes');
 const parentsRoutes = require('./parents.routes');
+const maintenanceRoutes = require('./maintenance.routes');
 
 module.exports = {
     authRoutes,
@@ -21,5 +22,6 @@ module.exports = {
     staffRoutes,
     emailRoutes,
     actualitesRoutes,
-    parentsRoutes
+    parentsRoutes,
+    maintenanceRoutes
 };

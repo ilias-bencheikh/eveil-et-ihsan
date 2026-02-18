@@ -27,7 +27,7 @@ router.get('/profil/me', requireAuth, async (req, res) => {
         // Récupérer les enfants
         const enfants = await dbAll(db, `
             SELECT e.id, e.nom, e.prenom, e.dateNaissance, e.classe, e.photo, e.status, 
-                   e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues,
+                   e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye,
                    ep.relation, ep.isPrimary
             FROM eleves e
             INNER JOIN eleve_parent ep ON e.id = ep.eleveId
@@ -284,6 +284,108 @@ router.post('/inscription', async (req, res) => {
     }
 });
 
+// Ajouter des enfants à une famille existante
+router.post('/inscription/famille-existante', checkPermission('update'), async (req, res) => {
+    const { parentId, enfants } = req.body;
+
+    if (!parentId) {
+        return res.status(400).json({ error: 'Parent ID requis' });
+    }
+    if (!enfants || enfants.length === 0) {
+        return res.status(400).json({ error: 'Au moins un enfant requis' });
+    }
+
+    try {
+        // Vérifier que le parent existe
+        const parent = await dbGet(db, 'SELECT id, nom, prenom, email FROM parents WHERE id = ?', [parentId]);
+        if (!parent) {
+            return res.status(404).json({ error: 'Parent non trouvé' });
+        }
+
+        // Récupérer les enfants existants de ce parent pour le familleLienId
+        const existingChildren = await dbAll(db, `
+            SELECT e.id, e.familleLienId FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [parentId]);
+
+        // Déterminer le familleLienId existant ou en créer un nouveau
+        let familleLienId = existingChildren.find(c => c.familleLienId)?.familleLienId || `FAM_${Date.now()}`;
+        const totalChildren = existingChildren.length + enfants.length;
+
+        // Vérifier les emails des nouveaux enfants
+        for (const enfant of enfants) {
+            if (enfant.email && enfant.email.trim()) {
+                const emailToCheck = enfant.email.trim();
+                const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [emailToCheck]);
+                if (existingEleve) return res.status(400).json({ error: `L'email ${emailToCheck} est déjà utilisé par un élève` });
+                const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [emailToCheck]);
+                if (existingParent) return res.status(400).json({ error: `L'email ${emailToCheck} est déjà utilisé` });
+            }
+        }
+
+        // Récupérer tous les parents liés à ces enfants pour les lier aussi aux nouveaux
+        const parentIds = await dbAll(db, `
+            SELECT DISTINCT parentId FROM eleve_parent WHERE eleveId IN (${existingChildren.map(() => '?').join(',')})
+        `, existingChildren.map(c => c.id));
+
+        const createdEnfants = [];
+
+        for (const enfant of enfants) {
+            const eleveId = generateId('eleve');
+            const frais = parseFloat(enfant.fraisInscription || 0) || 0;
+            const nbPaiements = parseInt(enfant.nbPaiements || 1, 10) || 1;
+
+            let eleveEmail = null;
+            let eleveActivationToken = null;
+            if (enfant.email && enfant.email.trim()) {
+                eleveEmail = enfant.email.trim();
+                eleveActivationToken = generateToken();
+            }
+
+            await dbRun(db, `
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues)
+                VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 1, ?, ?, ?, ?, 0, 0)
+            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, totalChildren, familleLienId, frais, nbPaiements]);
+
+            createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail });
+
+            // Lier le nouvel enfant à tous les parents existants de la famille
+            for (const p of parentIds) {
+                const isPrimary = p.parentId === parentId ? 1 : 0;
+                await dbRun(db, `
+                    INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+                    VALUES (?, ?, ?, 'parent', ?)
+                `, [generateId('ep'), eleveId, p.parentId, isPrimary]);
+            }
+            // Si le parent sélectionné n'était pas dans la liste (pas d'enfants existants), le lier directement
+            if (existingChildren.length === 0) {
+                await dbRun(db, `
+                    INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+                    VALUES (?, ?, ?, 'parent', 1)
+                `, [generateId('ep'), eleveId, parentId]);
+            }
+        }
+
+        // Mettre à jour enFamille et nombreFamille pour les enfants existants
+        for (const child of existingChildren) {
+            await dbRun(db, `
+                UPDATE eleves SET enFamille = 1, nombreFamille = ?, familleLienId = ? WHERE id = ?
+            `, [totalChildren, familleLienId, child.id]);
+        }
+
+        res.status(201).json({
+            success: true,
+            message: `${createdEnfants.length} enfant(s) ajouté(s) à la famille de ${parent.prenom} ${parent.nom}.`,
+            enfants: createdEnfants
+        });
+
+    } catch (err) {
+        console.error('Erreur ajout famille existante:', err);
+        res.status(500).json({ error: 'Erreur lors de l\'ajout à la famille existante' });
+    }
+});
+
 // ================== LIAISONS ÉLÈVE-PARENT ==================
 
 // Lier un élève à un parent
@@ -371,6 +473,46 @@ router.get('/eleve/:eleveId', requireAuth, async (req, res) => {
 // ====================================================================
 //  ROUTES ADMIN (avec paramètre :id)
 // ====================================================================
+
+// Recherche de familles par nom/prénom de parent ou d'enfant
+router.get('/search-familles', requireAuth, async (req, res) => {
+    const userRole = req.userRole;
+    if (!['admin', 'secretaire', 'directeur'].includes(userRole)) {
+        return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
+    const q = (req.query.q || '').trim().toLowerCase();
+    if (q.length < 2) {
+        return res.json([]);
+    }
+
+    try {
+        // Rechercher les parents dont nom/prénom/email matchent OU qui ont un enfant qui matche
+        const parents = await dbAll(db, `
+            SELECT DISTINCT p.id, p.nom, p.prenom, p.email, p.tel, p.activated
+            FROM parents p
+            LEFT JOIN eleve_parent ep ON p.id = ep.parentId
+            LEFT JOIN eleves e ON ep.eleveId = e.id
+            WHERE LOWER(p.nom) LIKE ? OR LOWER(p.prenom) LIKE ? OR LOWER(p.email) LIKE ?
+               OR LOWER(e.nom) LIKE ? OR LOWER(e.prenom) LIKE ?
+        `, [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`]);
+
+        // Pour chaque parent, récupérer ses enfants
+        for (const parent of parents) {
+            parent.enfants = await dbAll(db, `
+                SELECT e.id, e.nom, e.prenom, e.classe, e.fraisInscription, e.montantPaye, e.fraisValide
+                FROM eleves e
+                INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                WHERE ep.parentId = ?
+            `, [parent.id]);
+            parent.nbEnfants = parent.enfants.length;
+        }
+
+        res.json(parents);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Obtenir tous les parents
 router.get('/', requireAuth, async (req, res) => {

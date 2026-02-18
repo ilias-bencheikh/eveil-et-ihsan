@@ -12,6 +12,7 @@ require('dotenv').config();
 const { SERVER_CONFIG, SESSION_CONFIG } = require('./src/config/constants');
 const { initDatabase, closeDatabase } = require('./src/config/database');
 const { getLocalIpAddress } = require('./src/utils/helpers');
+const { checkMaintenance } = require('./src/middleware/auth');
 
 // Fonction de nettoyage automatique des actualités expirées
 function cleanupExpiredNews() {
@@ -53,7 +54,8 @@ const {
     staffRoutes,
     emailRoutes,
     actualitesRoutes,
-    parentsRoutes
+    parentsRoutes,
+    maintenanceRoutes
 } = require('./src/routes');
 
 // Initialisation de l'application
@@ -74,16 +76,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes API
 app.use('/api/auth', authRoutes);
-app.use('/api/eleves', elevesRoutes);
-app.use('/api/professeurs', professeursRoutes);
-app.use('/api/classes', classesRoutes);
-app.use('/api/absences', absencesRoutes);
-app.use('/api/appreciations', appreciationsRoutes);
-app.use('/api/messagerie', messagerieRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/eleves', checkMaintenance, elevesRoutes);
+app.use('/api/professeurs', checkMaintenance, professeursRoutes);
+app.use('/api/classes', checkMaintenance, classesRoutes);
+app.use('/api/absences', checkMaintenance, absencesRoutes);
+app.use('/api/appreciations', checkMaintenance, appreciationsRoutes);
+app.use('/api/messagerie', checkMaintenance, messagerieRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/email', emailRoutes);
-app.use('/api/actualites', actualitesRoutes);
-app.use('/api/parents', parentsRoutes);
+app.use('/api/actualites', checkMaintenance, actualitesRoutes);
+app.use('/api/parents', checkMaintenance, parentsRoutes);
 app.use('/api', emailRoutes);
 
 // Route principale

@@ -838,10 +838,9 @@
                     apiRequest(`/api/appreciations/eleve/${enfantId}`).catch(() => [])
                 ]);
 
-                const fraisParPaiement = enfant.fraisInscription / enfant.nbPaiements;
-                const paye = enfant.paiementsEffectues * fraisParPaiement;
-                const restant = enfant.fraisInscription - paye;
-                const progressPercent = (paye / enfant.fraisInscription) * 100 || 0;
+                const montantPaye = parseFloat(enfant.montantPaye || 0);
+                const restant = Math.max(0, (enfant.fraisInscription || 0) - montantPaye);
+                const progressPercent = enfant.fraisInscription > 0 ? (montantPaye / enfant.fraisInscription) * 100 : 0;
 
                 container.innerHTML = `
                     <div class="child-header">
@@ -879,18 +878,21 @@
 
                         <div class="info-card">
                             <h4><span class="material-icons">payments</span> Frais d'inscription</h4>
+                            <div style="display:flex; gap:12px; flex-wrap:wrap; margin:8px 0;">
+                                <div style="flex:1; min-width:80px;"><span style="font-size:0.85rem; color:#666;">Total</span><br><strong>${formatCurrency(enfant.fraisInscription)}</strong></div>
+                                <div style="flex:1; min-width:80px;"><span style="font-size:0.85rem; color:#666;">Payé</span><br><strong style="color:var(--md-sys-color-primary, #1976d2);">${formatCurrency(montantPaye)}</strong></div>
+                                <div style="flex:1; min-width:80px;"><span style="font-size:0.85rem; color:#666;">Reste</span><br><strong style="color:${restant > 0 ? 'var(--md-sys-color-error, #f44336)' : 'var(--md-sys-color-primary, #1976d2)'};">${formatCurrency(restant)}</strong></div>
+                            </div>
                             <div class="frais-progress">
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
                                 </div>
-                                <div class="frais-details">
-                                    <span>Payé: ${paye.toFixed(2)}€</span>
-                                    <span>Reste: ${restant.toFixed(2)}€</span>
-                                </div>
+                                <div style="text-align:center; font-size:0.8rem; color:#666; margin-top:4px;">${progressPercent.toFixed(0)}%</div>
                             </div>
-                            <p style="margin-top: 12px; font-size: 0.9rem;">
-                                Paiements: ${enfant.paiementsEffectues || 0}/${enfant.nbPaiements}
-                            </p>
+                            <div style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+                                <span class="material-icons" style="font-size:18px; color:${enfant.fraisValide ? 'var(--md-sys-color-primary, #1976d2)' : 'var(--md-sys-color-error, #f44336)'};">${enfant.fraisValide ? 'check_circle' : 'pending'}</span>
+                                <span style="font-size:0.85rem;">${enfant.fraisValide ? 'Frais validés' : 'Paiement en cours'} — ${enfant.paiementsEffectues || 0} transaction(s)</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -961,38 +963,100 @@
             }
         }
 
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount || 0);
+        }
+
+        function getMethodeLabel(methode) {
+            const labels = { carte: '💳 Carte', virement: '🏦 Virement', espece: '💵 Espèce' };
+            return labels[methode] || methode;
+        }
+
         // Charger les données des frais
         async function loadFraisData() {
             try {
                 const response = await apiRequest('/api/eleves/frais/famille/me');
                 
+                const totalFrais = response.totalFrais || 0;
+                const totalMontantPaye = parseFloat(response.totalMontantPaye || 0);
+                const resteAPayer = Math.max(0, response.resteAPayer || 0);
+                const progressGlobal = totalFrais > 0 ? Math.round((totalMontantPaye / totalFrais) * 100) : 0;
+
                 const summary = document.getElementById('fraisSummary');
                 summary.innerHTML = `
                     <h4><span class="material-icons">account_balance</span> Récapitulatif</h4>
-                    <ul class="info-list">
-                        <li><span>Total des frais</span><strong>${response.totalFrais.toFixed(2)}€</strong></li>
-                        <li><span>Reste à payer</span><strong>${response.resteAPayer.toFixed(2)}€</strong></li>
-                    </ul>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin:16px 0;">
+                        <div style="flex:1; min-width:120px; text-align:center;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant, #666); margin-bottom:4px;">Total</div>
+                            <div style="font-size:1.3rem; font-weight:700;">${formatCurrency(totalFrais)}</div>
+                        </div>
+                        <div style="flex:1; min-width:120px; text-align:center;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant, #666); margin-bottom:4px;">Payé</div>
+                            <div style="font-size:1.3rem; font-weight:700; color:var(--md-sys-color-primary, #1976d2);">${formatCurrency(totalMontantPaye)}</div>
+                        </div>
+                        <div style="flex:1; min-width:120px; text-align:center;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant, #666); margin-bottom:4px;">Reste</div>
+                            <div style="font-size:1.3rem; font-weight:700; color:${resteAPayer > 0 ? 'var(--md-sys-color-error, #f44336)' : 'var(--md-sys-color-primary, #1976d2)'};">${formatCurrency(resteAPayer)}</div>
+                        </div>
+                    </div>
+                    <div class="frais-progress">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width: ${progressGlobal}%"></div>
+                        </div>
+                        <div style="text-align:center; font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666); margin-top:6px;">${progressGlobal}% payé</div>
+                    </div>
                 `;
 
                 const detailsContainer = document.getElementById('fraisDetailsList');
-                detailsContainer.innerHTML = response.enfants.map(enfant => {
-                    const fraisParPaiement = enfant.fraisInscription / enfant.nbPaiements;
-                    const paye = enfant.paiementsEffectues * fraisParPaiement;
-                    const progressPercent = (paye / enfant.fraisInscription) * 100 || 0;
+                detailsContainer.innerHTML = (response.enfants || []).map(enfant => {
+                    const total = enfant.fraisInscription || 0;
+                    const montantPaye = parseFloat(enfant.montantPaye || 0);
+                    const reste = Math.max(0, total - montantPaye);
+                    const progressPercent = total > 0 ? Math.round((montantPaye / total) * 100) : 0;
+                    const paiements = enfant.paiements || [];
+
+                    let paiementsHtml = '';
+                    if (paiements.length > 0) {
+                        paiementsHtml = `
+                            <div style="margin-top:12px;">
+                                <div style="font-weight:600; margin-bottom:6px; font-size:0.9rem;">Historique des paiements</div>
+                                ${paiements.sort((a, b) => new Date(b.date) - new Date(a.date)).map(p => `
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--md-sys-color-surface-container, #f5f5f5); border-radius:8px; margin-bottom:4px; font-size:0.85rem;">
+                                        <div>
+                                            <strong>${formatCurrency(p.montant)}</strong>
+                                            <span style="color:var(--md-sys-color-on-surface-variant, #666); margin-left:8px;">
+                                                ${new Date(p.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}
+                                            </span>
+                                            ${p.note ? `<span style="color:var(--md-sys-color-on-surface-variant, #666);"> — <em>${p.note}</em></span>` : ''}
+                                        </div>
+                                        <span style="padding:3px 10px; border-radius:16px; font-size:0.75rem; font-weight:500; background:var(--md-sys-color-secondary-container, #e3f2fd); color:var(--md-sys-color-on-secondary-container, #1565c0);">
+                                            ${getMethodeLabel(p.methodePaiement)}
+                                        </span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
 
                     return `
                         <div class="info-card" style="margin-bottom: 16px;">
                             <h4><span class="material-icons">person</span> ${enfant.prenom} ${enfant.nom}</h4>
-                            <ul class="info-list">
-                                <li><span>Frais total</span><strong>${enfant.fraisInscription.toFixed(2)}€</strong></li>
-                                <li><span>Paiements effectués</span><strong>${enfant.paiementsEffectues}/${enfant.nbPaiements}</strong></li>
-                            </ul>
+                            <div style="display:flex; gap:12px; flex-wrap:wrap; margin:8px 0;">
+                                <div style="flex:1; min-width:100px;"><span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666);">Total</span><br><strong>${formatCurrency(total)}</strong></div>
+                                <div style="flex:1; min-width:100px;"><span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666);">Payé</span><br><strong style="color:var(--md-sys-color-primary, #1976d2);">${formatCurrency(montantPaye)}</strong></div>
+                                <div style="flex:1; min-width:100px;"><span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666);">Reste</span><br><strong style="color:${reste > 0 ? 'var(--md-sys-color-error, #f44336)' : 'var(--md-sys-color-primary, #1976d2)'};">${formatCurrency(reste)}</strong></div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px; margin:8px 0;">
+                                <span class="material-icons" style="font-size:18px; color:${enfant.fraisValide ? 'var(--md-sys-color-primary, #1976d2)' : 'var(--md-sys-color-error, #f44336)'};">${enfant.fraisValide ? 'check_circle' : 'pending'}</span>
+                                <span style="font-size:0.9rem; font-weight:500;">${enfant.fraisValide ? 'Frais validés' : 'Paiement en cours'}</span>
+                            </div>
                             <div class="frais-progress">
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
                                 </div>
+                                <div style="text-align:center; font-size:0.8rem; color:var(--md-sys-color-on-surface-variant, #666); margin-top:4px;">${progressPercent}%</div>
                             </div>
+                            ${paiementsHtml}
                         </div>
                     `;
                 }).join('');

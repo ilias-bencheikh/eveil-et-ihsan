@@ -1530,32 +1530,19 @@
                     </div>
                 </div>
 
-                <!-- Frais Tab (onglet dédié) -->
-                <div id="frais" class="tab-content">
-                    <div class="widget-card">
-                        <div class="widget-card-header">
-                            <h3 class="widget-card-title">Frais d'inscription - Détails</h3>
-                        </div>
-                        <div class="widget-card-content" id="fraisSectionContainer">
-                            <div class="loading-state" style="text-align: center; padding: 24px; color: var(--md-sys-color-on-surface-variant);">
-                                <span class="material-icons" style="font-size: 36px; margin-bottom: 8px; display: block;">payments</span>
-                                <p>Chargement des informations de frais...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
                 <!-- Frais Admin Tab -->
                 <div id="frais-admin" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
-                            <h3 class="widget-card-title">Administration �?" Gestion des frais</h3>
+                            <h3 class="widget-card-title">Administration — Gestion des frais</h3>
                         </div>
                         <div class="widget-card-content">
                             <div style="display:flex; flex-direction:column; gap:12px;">
                                 <div>
                                     <label class="form-label">Cible</label>
                                     <div style="display:flex; gap:12px; align-items:center;">
-                                        <label><input type="radio" name="adminFraisTarget" value="eleve" checked onchange="adminFraisTargetChanged()"> �?lève</label>
+                                        <label><input type="radio" name="adminFraisTarget" value="eleve" checked onchange="adminFraisTargetChanged()"> Élève</label>
                                         <label><input type="radio" name="adminFraisTarget" value="famille" onchange="adminFraisTargetChanged()"> Famille</label>
                                     </div>
                                 </div>
@@ -1568,25 +1555,82 @@
                                 </div>
 
                                 <div id="adminFraisFamille" style="display:none;">
-                                    <label class="form-label">Email parent / Identifiant famille</label>
-                                    <input id="adminFamilleEmail" class="form-input" placeholder="parent@exemple.com" />
-                                    <button class="md-btn md-btn-text" onclick="adminLoadSelectedFrais()">Charger la famille</button>
+                                    <label class="form-label">Rechercher une famille</label>
+                                    <input id="adminFamilleSearch" class="form-input" placeholder="Nom, prénom d'un parent ou enfant..." oninput="adminSearchFamilles()" />
+                                    <div id="adminFamilleSearchResults" style="max-height:250px; overflow-y:auto; margin-top:8px;"></div>
+                                    <div id="adminFamilleSelected" style="display:none; margin-top:12px; padding:12px; background:var(--md-sys-color-surface-container); border-radius:12px; border:2px solid var(--md-sys-color-primary);">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <strong id="adminFamilleSelectedName" style="font-size:1rem;"></strong>
+                                            <button class="md-btn md-btn-text" onclick="adminDeselectFamille()" style="padding:4px 8px; font-size:0.8rem;">Changer</button>
+                                        </div>
+                                        <div id="adminFamilleEnfantsList"></div>
+                                        <div style="margin-top:8px;">
+                                            <label class="form-label">Payer pour :</label>
+                                            <select id="adminFamilleTargetEnfant" class="form-input" onchange="adminLoadSelectedFrais()">
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div style="display:flex; gap:12px;">
-                                    <div style="flex:1;">
-                                        <label class="form-label">Montant total (�,�)</label>
-                                        <input id="adminInitTotal" type="number" class="form-input" placeholder="Ex: 300" />
+                                <!-- Section Initialisation des frais -->
+                                <details style="border:1px solid var(--md-sys-color-outline-variant); border-radius:12px; padding:12px;">
+                                    <summary style="cursor:pointer; font-weight:600; color:var(--md-sys-color-on-surface);">Initialiser les frais</summary>
+                                    <div style="display:flex; gap:12px; margin-top:12px;">
+                                        <div style="flex:1;">
+                                            <label class="form-label">Montant total (€)</label>
+                                            <input id="adminInitTotal" type="number" class="form-input" placeholder="Ex: 300" />
+                                        </div>
+                                        <div style="width:150px;">
+                                            <label class="form-label">Réduction (%)</label>
+                                            <input id="adminInitReduction" type="number" class="form-input" placeholder="0" />
+                                        </div>
                                     </div>
-                                    <div style="width:150px;">
-                                        <label class="form-label">Réduction (%)</label>
-                                        <input id="adminInitReduction" type="number" class="form-input" placeholder="0" />
+                                    <div style="margin-top:8px;">
+                                        <button class="md-btn md-btn-primary" onclick="adminInitFrais()">Initialiser les frais</button>
+                                    </div>
+                                </details>
+
+                                <!-- Section Enregistrer un paiement -->
+                                <div id="adminPaiementSection" style="display:none; border:1px solid var(--md-sys-color-primary); border-radius:12px; padding:16px; background:var(--md-sys-color-surface-container-low);">
+                                    <h4 style="margin:0 0 12px 0; color:var(--md-sys-color-primary);">
+                                        <span class="material-icons" style="vertical-align:middle; margin-right:4px;">payments</span>
+                                        Enregistrer un paiement
+                                    </h4>
+                                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                                        <div style="flex:1; min-width:150px;">
+                                            <label class="form-label">Montant (€)</label>
+                                            <input id="adminPaiementMontant" type="number" step="0.01" min="0.01" class="form-input" placeholder="Ex: 50" />
+                                        </div>
+                                        <div style="flex:1; min-width:150px;">
+                                            <label class="form-label">Méthode de paiement</label>
+                                            <select id="adminPaiementMethode" class="form-input">
+                                                <option value="espece">💵 Espèce</option>
+                                                <option value="carte">💳 Carte</option>
+                                                <option value="virement">🏦 Virement</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex:1; min-width:150px;">
+                                            <label class="form-label">Date</label>
+                                            <input id="adminPaiementDate" type="date" class="form-input" />
+                                        </div>
+                                    </div>
+                                    <div style="margin-top:8px;">
+                                        <label class="form-label">Note (optionnel)</label>
+                                        <input id="adminPaiementNote" type="text" class="form-input" placeholder="Ex: Paiement 1er trimestre" />
+                                    </div>
+                                    <div style="margin-top:12px; display:flex; gap:8px;">
+                                        <button class="md-btn md-btn-primary" onclick="adminEnregistrerPaiement()">
+                                            <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:4px;">check</span>
+                                            Enregistrer le paiement
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div style="display:flex; gap:8px;">
-                                    <button class="md-btn md-btn-primary" onclick="adminInitFrais()">Initialiser les frais</button>
-                                    <button class="md-btn md-btn-text" onclick="adminLoadSelectedFrais()">Charger les frais</button>
+                                    <button class="md-btn md-btn-text" onclick="adminLoadSelectedFrais()">
+                                        <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:4px;">refresh</span>
+                                        Actualiser
+                                    </button>
                                 </div>
 
                                 <div id="adminFraisResult" style="margin-top:12px;"></div>
@@ -2640,9 +2684,27 @@
                         
                         const eleve = fraisData.eleve;
                         const total = eleve.fraisInscription || 0;
-                        const paid = (eleve.paiementsEffectues || 0) * fraisData.fraisParPaiement;
+                        const montantPaye = parseFloat(eleve.montantPaye || 0);
                         const remaining = Math.max(0, fraisData.resteAPayer || 0);
-                        const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
+                        const progress = total > 0 ? Math.round((montantPaye / total) * 100) : 0;
+                        const paiements = fraisData.paiements || [];
+
+                        let paiementsHtml = '';
+                        if (paiements.length > 0) {
+                            paiementsHtml = `
+                                <div style="margin-top:12px;">
+                                    <div style="font-weight:600; margin-bottom:6px; font-size:0.9rem;">Derniers paiements</div>
+                                    ${paiements.slice(0, 5).map(p => `
+                                        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--md-sys-color-surface-container); border-radius:6px; margin-bottom:4px; font-size:0.85rem;">
+                                            <span><strong>${formatCurrency(p.montant)}</strong> — ${new Date(p.date).toLocaleDateString('fr-FR')}</span>
+                                            <span style="padding:2px 8px; border-radius:12px; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); font-size:0.75rem;">
+                                                ${p.methodePaiement === 'carte' ? '💳 Carte' : p.methodePaiement === 'virement' ? '🏦 Virement' : '💵 Espèce'}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        }
 
                         childFraisDiv.innerHTML = `
                             <h4 class="child-name">${child.prenom} ${child.nom}</h4>
@@ -2654,7 +2716,7 @@
                                     </div>
                                     <div style="flex:1; min-width:150px;">
                                         <div style="font-weight:600; margin-bottom:8px;">Payé</div>
-                                        <div style="font-size:1.1rem; color:var(--md-sys-color-primary);">${formatCurrency(paid)}</div>
+                                        <div style="font-size:1.1rem; color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
                                     </div>
                                     <div style="flex:1; min-width:150px;">
                                         <div style="font-weight:600; margin-bottom:8px;">Reste à payer</div>
@@ -2673,9 +2735,10 @@
                                         <span style="font-weight:600;">${eleve.fraisValide ? 'Frais validés' : 'Frais non validés'}</span>
                                     </div>
                                     <div style="margin-top:8px; font-size:0.9rem; color:var(--md-sys-color-on-surface-variant);">
-                                        ${eleve.paiementsEffectues || 0} paiement(s) effectué(s) sur ${eleve.nbPaiements || 1} prévu(s)
+                                        ${eleve.paiementsEffectues || 0} transaction(s) — ${formatCurrency(montantPaye)} payé sur ${formatCurrency(total)}
                                     </div>
                                 </div>
+                                ${paiementsHtml}
                             </div>
                         `;
                         fraisSection.appendChild(childFraisDiv);
@@ -3419,7 +3482,7 @@
 
         async function loadFraisData() {
             console.log('loadFraisData called');
-            const container = document.getElementById('fraisSectionContainer');
+            const container = document.getElementById('fraisSection');
             if (!container) return;
 
             container.innerHTML = `
@@ -3462,8 +3525,8 @@
                     return;
                 }
 
-                // Render into the dedicated tab (si présent)
-                renderFraisSection(feesData, 'fraisSectionContainer');
+                // Render into the frais tab
+                renderFraisSection(feesData, 'fraisSection');
             } catch (error) {
                 console.error('Erreur fetch frais:', error);
                 console.error('Error details:', error.message, error.stack);
@@ -3477,14 +3540,39 @@
             const container = document.getElementById(containerId);
             if (!container) return;
 
-            // Structure de l'API: { eleve: { fraisInscription, nbPaiements, fraisValide, paiementsEffectues }, fraisParPaiement, resteAPayer }
             const eleve = data.eleve;
             const total = eleve.fraisInscription || 0;
-            const paid = (eleve.paiementsEffectues || 0) * data.fraisParPaiement;
+            const montantPaye = parseFloat(eleve.montantPaye || 0);
             const remaining = Math.max(0, data.resteAPayer || 0);
-            const progress = total > 0 ? Math.round((paid / total) * 100) : 0;
+            const progress = total > 0 ? Math.round((montantPaye / total) * 100) : 0;
+            const paiements = data.paiements || [];
 
             const isAdminView = (user.role === 'secretaire' || user.role === 'directeur' || user.role === 'admin');
+
+            let historiqueHtml = '';
+            if (paiements.length > 0) {
+                historiqueHtml = `
+                    <div style="margin-top:16px;">
+                        <strong>Historique des paiements</strong>
+                        <div style="margin-top:8px;">
+                            ${paiements.map(p => `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:6px;">
+                                    <div>
+                                        <span style="font-weight:600;">${formatCurrency(p.montant)}</span>
+                                        <span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); margin-left:8px;">
+                                            ${new Date(p.date).toLocaleDateString('fr-FR')}
+                                        </span>
+                                        ${p.note ? `<span style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);"> — ${p.note}</span>` : ''}
+                                    </div>
+                                    <span style="padding:3px 8px; border-radius:16px; font-size:0.75rem; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
+                                        ${p.methodePaiement === 'carte' ? '💳 Carte' : p.methodePaiement === 'virement' ? '🏦 Virement' : '💵 Espèce'}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
 
             container.innerHTML = `
                 <div style="display:flex; gap:16px; flex-wrap:wrap;">
@@ -3494,7 +3582,7 @@
                     </div>
                     <div style="flex:1; min-width:220px;">
                         <div style="font-weight:600; margin-bottom:8px;">Payé</div>
-                        <div style="font-size:1.25rem; color:var(--md-sys-color-primary); margin-bottom:8px;">${formatCurrency(paid)}</div>
+                        <div style="font-size:1.25rem; color:var(--md-sys-color-primary); margin-bottom:8px;">${formatCurrency(montantPaye)}</div>
                         <div style="font-weight:600; margin-bottom:8px;">Reste à payer</div>
                         <div style="font-size:1.1rem; color:${remaining > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">${formatCurrency(remaining)}</div>
                     </div>
@@ -3516,10 +3604,12 @@
                             <span style="font-weight:600;">${eleve.fraisValide ? 'Frais validés' : 'Frais non validés'}</span>
                         </div>
                         <div style="margin-top:8px; font-size:0.9rem; color:var(--md-sys-color-on-surface-variant);">
-                            ${eleve.paiementsEffectues || 0} paiement(s) effectué(s) sur ${eleve.nbPaiements || 1} prévu(s)
+                            ${eleve.paiementsEffectues || 0} transaction(s) — ${formatCurrency(montantPaye)} payé sur ${formatCurrency(total)}
                         </div>
                     </div>
                 </div>
+
+                ${historiqueHtml}
             `;
         }
 
@@ -3600,13 +3690,115 @@
 
         /* ---------- ADMIN: gestion des frais (initialisation / chargement famille/élève) ---------- */
 
+        function getMethodeLabel(methode) {
+            const labels = { carte: '💳 Carte', virement: '🏦 Virement', espece: '💵 Espèce' };
+            return labels[methode] || methode;
+        }
+
+        // Variable globale pour la famille sélectionnée
+        let _selectedFamille = null;
+        let _searchFamilleTimeout = null;
+
         async function adminFraisTargetChanged() {
             const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
             document.getElementById('adminFraisEleveSelect').style.display = target === 'eleve' ? 'block' : 'none';
             document.getElementById('adminFraisFamille').style.display = target === 'famille' ? 'block' : 'none';
+            document.getElementById('adminPaiementSection').style.display = 'none';
+            document.getElementById('adminFraisResult').innerHTML = '';
             if (target === 'eleve') {
                 await loadAdminEleves();
+            } else {
+                _selectedFamille = null;
+                document.getElementById('adminFamilleSelected').style.display = 'none';
+                document.getElementById('adminFamilleSearch').value = '';
+                document.getElementById('adminFamilleSearchResults').innerHTML = '';
             }
+        }
+
+        async function adminSearchFamilles() {
+            clearTimeout(_searchFamilleTimeout);
+            const query = document.getElementById('adminFamilleSearch').value.trim();
+            const container = document.getElementById('adminFamilleSearchResults');
+
+            if (query.length < 2) {
+                container.innerHTML = '<p class="text-on-surface-variant" style="text-align:center; padding:12px; font-size:0.9rem;">Tapez au moins 2 caractères...</p>';
+                return;
+            }
+
+            _searchFamilleTimeout = setTimeout(async () => {
+                container.innerHTML = '<p class="text-on-surface-variant" style="text-align:center; padding:12px;">Recherche...</p>';
+                try {
+                    const resp = await fetch(`${API_URL}/parents/search-familles?q=${encodeURIComponent(query)}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!resp.ok) throw new Error('Erreur recherche');
+                    const parents = await resp.json();
+
+                    if (parents.length === 0) {
+                        container.innerHTML = '<p class="text-on-surface-variant" style="text-align:center; padding:12px;">Aucune famille trouvée</p>';
+                        return;
+                    }
+
+                    container.innerHTML = parents.map(p => `
+                        <div style="padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:10px; margin-bottom:6px; cursor:pointer; transition:background 0.2s;" 
+                             onmouseover="this.style.background='var(--md-sys-color-surface-container-high)'" 
+                             onmouseout="this.style.background='var(--md-sys-color-surface-container)'"
+                             onclick="adminSelectFamille('${p.id}', '${(p.prenom + ' ' + p.nom).replace(/'/g, "\\'")}', ${JSON.stringify(p.enfants || []).replace(/"/g, '&quot;')})">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:36px; height:36px; border-radius:50%; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.9rem;">
+                                    ${(p.prenom || 'P')[0].toUpperCase()}
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:600;">${p.prenom} ${p.nom}</div>
+                                    <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">${p.email} — ${p.nbEnfants || 0} enfant(s)</div>
+                                </div>
+                                ${(p.enfants || []).length > 0 ? `<div style="display:flex; gap:4px; flex-wrap:wrap;">
+                                    ${p.enfants.slice(0, 3).map(e => `<span style="padding:2px 8px; border-radius:12px; font-size:0.75rem; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">${e.prenom} ${e.nom}</span>`).join('')}
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    console.error('adminSearchFamilles error:', err);
+                    container.innerHTML = '<p style="color:var(--md-sys-color-error); padding:12px; text-align:center;">Erreur lors de la recherche</p>';
+                }
+            }, 300);
+        }
+
+        function adminSelectFamille(parentId, parentNom, enfants) {
+            _selectedFamille = { parentId, parentNom, enfants: typeof enfants === 'string' ? JSON.parse(enfants) : enfants };
+            
+            document.getElementById('adminFamilleSearch').value = '';
+            document.getElementById('adminFamilleSearchResults').innerHTML = '';
+            document.getElementById('adminFamilleSelected').style.display = 'block';
+            document.getElementById('adminFamilleSelectedName').textContent = `👨‍👩‍👧‍👦 Famille ${parentNom}`;
+
+            const enfantsEl = document.getElementById('adminFamilleEnfantsList');
+            enfantsEl.innerHTML = _selectedFamille.enfants.map(e => {
+                const ePaye = parseFloat(e.montantPaye || 0);
+                const eReste = Math.max(0, (e.fraisInscription || 0) - ePaye);
+                return `<div style="padding:6px 10px; background:var(--md-sys-color-surface-container-low); border-radius:8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:500;">${e.prenom} ${e.nom}</span>
+                    <span style="font-size:0.8rem; color:${eReste > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">Reste: ${formatCurrency(eReste)}</span>
+                </div>`;
+            }).join('');
+
+            const selectEl = document.getElementById('adminFamilleTargetEnfant');
+            let options = '<option value="">Tous les enfants (répartir)</option>';
+            _selectedFamille.enfants.forEach(e => {
+                const eReste = Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0));
+                if (eReste > 0) {
+                    options += `<option value="${e.id}">${e.prenom} ${e.nom} (reste: ${formatCurrency(eReste)})</option>`;
+                }
+            });
+            selectEl.innerHTML = options;
+
+            adminLoadSelectedFrais();
+        }
+
+        function adminDeselectFamille() {
+            _selectedFamille = null;
+            document.getElementById('adminFamilleSelected').style.display = 'none';
+            document.getElementById('adminFraisResult').innerHTML = '';
+            document.getElementById('adminPaiementSection').style.display = 'none';
         }
 
         async function loadAdminEleves() {
@@ -3618,7 +3810,7 @@
                 const resp = await fetch(`${API_URL}/eleves`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!resp.ok) throw new Error('Erreur chargement élèves');
                 const eleves = await resp.json();
-                select.innerHTML = '<option value="">-- Sélectionner --</option>' + eleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom} (${e.classe || '�?"'})</option>`).join('');
+                select.innerHTML = '<option value="">-- Sélectionner --</option>' + eleves.map(e => `<option value="${e.id}">${e.prenom} ${e.nom} (${e.classe || '—'})</option>`).join('');
             } catch (error) {
                 console.error('loadAdminEleves:', error);
                 select.innerHTML = '<option value="">Erreur chargement</option>';
@@ -3628,53 +3820,268 @@
         async function adminLoadSelectedFrais() {
             const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
             const resultEl = document.getElementById('adminFraisResult');
+            const paiementSection = document.getElementById('adminPaiementSection');
             resultEl.innerHTML = '<p class="text-on-surface-variant">Chargement...</p>';
+            paiementSection.style.display = 'none';
 
             try {
                 let data = null;
                 if (target === 'eleve') {
                     const eleveId = document.getElementById('adminEleveList').value;
                     if (!eleveId) { resultEl.innerHTML = '<p class="text-on-surface-variant">Veuillez sélectionner un élève.</p>'; return; }
-                    const resp = await fetch(`${API_URL}/frais/eleve/${eleveId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const resp = await fetch(`${API_URL}/eleves/frais/${eleveId}`, { 
+                        headers: { 'Authorization': `Bearer ${token}`, 'x-user-role': user.role, 'x-user-id': user.id } 
+                    });
                     if (!resp.ok) throw await resp.json();
                     data = await resp.json();
+                    const eleve = data.eleve;
+                    const montantPaye = parseFloat(eleve.montantPaye || 0);
+                    const resteAPayer = Math.max(0, data.resteAPayer || 0);
+                    
+                    renderAdminFraisResult(resultEl, {
+                        total: eleve.fraisInscription || 0,
+                        montantPaye,
+                        resteAPayer,
+                        paiements: data.paiements || [],
+                        enfants: [{ ...eleve, montantPaye, paiements: data.paiements || [] }]
+                    });
+
+                    if (resteAPayer > 0) {
+                        paiementSection.style.display = 'block';
+                        document.getElementById('adminPaiementMontant').max = resteAPayer;
+                        document.getElementById('adminPaiementMontant').placeholder = `Max: ${resteAPayer.toFixed(2)}`;
+                        document.getElementById('adminPaiementDate').value = new Date().toISOString().split('T')[0];
+                    }
                 } else {
-                    const email = document.getElementById('adminFamilleEmail').value.trim();
-                    if (!email) { resultEl.innerHTML = '<p class="text-on-surface-variant">Veuillez saisir un email de parent.</p>'; return; }
-                    const resp = await fetch(`${API_URL}/frais/famille/${encodeURIComponent(email)}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                    if (!resp.ok) throw await resp.json();
-                    data = await resp.json();
+                    if (!_selectedFamille) { 
+                        resultEl.innerHTML = '<p class="text-on-surface-variant">Recherchez et sélectionnez une famille.</p>'; 
+                        return; 
+                    }
+                    
+                    const parentId = _selectedFamille.parentId;
+                    const targetEnfantId = document.getElementById('adminFamilleTargetEnfant').value;
+
+                    if (targetEnfantId) {
+                        // Mode enfant spécifique
+                        const resp = await fetch(`${API_URL}/eleves/frais/${targetEnfantId}`, { 
+                            headers: { 'Authorization': `Bearer ${token}`, 'x-user-role': user.role, 'x-user-id': user.id } 
+                        });
+                        if (!resp.ok) throw await resp.json();
+                        data = await resp.json();
+                        const eleve = data.eleve;
+                        const montantPaye = parseFloat(eleve.montantPaye || 0);
+                        const resteAPayer = Math.max(0, data.resteAPayer || 0);
+                        
+                        renderAdminFraisResult(resultEl, {
+                            total: eleve.fraisInscription || 0,
+                            montantPaye,
+                            resteAPayer,
+                            paiements: data.paiements || [],
+                            enfants: [{ ...eleve, montantPaye, paiements: data.paiements || [] }]
+                        });
+
+                        if (resteAPayer > 0) {
+                            paiementSection.style.display = 'block';
+                            document.getElementById('adminPaiementMontant').max = resteAPayer;
+                            document.getElementById('adminPaiementMontant').placeholder = `Max: ${resteAPayer.toFixed(2)}`;
+                            document.getElementById('adminPaiementDate').value = new Date().toISOString().split('T')[0];
+                        }
+                    } else {
+                        // Mode tous les enfants
+                        const resp = await fetch(`${API_URL}/eleves/frais/famille/${parentId}`, { 
+                            headers: { 'Authorization': `Bearer ${token}`, 'x-user-role': user.role, 'x-user-id': user.id } 
+                        });
+                        if (!resp.ok) throw await resp.json();
+                        data = await resp.json();
+                        
+                        const totalMontantPaye = parseFloat(data.totalMontantPaye || 0);
+                        const resteAPayer = Math.max(0, data.resteAPayer || 0);
+                        
+                        renderAdminFraisResult(resultEl, {
+                            total: data.totalFrais || 0,
+                            montantPaye: totalMontantPaye,
+                            resteAPayer,
+                            paiements: (data.enfants || []).flatMap(e => (e.paiements || []).map(p => ({...p, eleveNom: `${e.prenom} ${e.nom}`}))),
+                            enfants: data.enfants || []
+                        });
+
+                        if (resteAPayer > 0) {
+                            paiementSection.style.display = 'block';
+                            document.getElementById('adminPaiementMontant').max = resteAPayer;
+                            document.getElementById('adminPaiementMontant').placeholder = `Max: ${resteAPayer.toFixed(2)}`;
+                            document.getElementById('adminPaiementDate').value = new Date().toISOString().split('T')[0];
+                        }
+                    }
                 }
-
-                // Afficher les infos et paiements
-                resultEl.innerHTML = '';
-                const total = data.total || 0;
-                const paid = data.paid || 0;
-                const remaining = Math.max(0, total - paid);
-                const reduction = data.reduction || 0;
-                const payments = data.payments || [];
-
-                resultEl.innerHTML = `
-                    <div>
-                        <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                            <div>Montant total: <strong>${formatCurrency(total)}</strong></div>
-                            <div>Payé: <strong>${formatCurrency(paid)}</strong></div>
-                            <div>Reste: <strong>${formatCurrency(remaining)}</strong></div>
-                            ${reduction ? `<div>Réduction: <strong>${reduction}%</strong></div>` : ''}
-                        </div>
-                        <div style="margin-top:12px;"><strong>Historique des paiements</strong></div>
-                        <div style="margin-top:8px;">${payments.length === 0 ? '<p class="text-on-surface-variant">Aucun paiement</p>' : payments.map(p => `
-                            <div style="display:flex; justify-content:space-between; padding:8px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:8px;">
-                                <div>${formatCurrency(p.montant)} �?" ${new Date(p.date).toLocaleDateString('fr-FR')}</div>
-                                <div>${p.valide ? '<span style="color:var(--md-sys-color-primary)">Validé</span>' : `<button class="md-btn md-btn-text" onclick="validatePayment('${p.id}')">Valider</button>`}</div>
-                            </div>
-                        `).join('')}</div>
-                    </div>
-                `;
-
             } catch (error) {
                 console.error('adminLoadSelectedFrais error:', error);
                 resultEl.innerHTML = `<p class="text-on-surface-variant">Erreur chargement: ${error && error.error ? error.error : 'Erreur'}</p>`;
+            }
+        }
+
+        function renderAdminFraisResult(container, { total, montantPaye, resteAPayer, paiements, enfants }) {
+            const progress = total > 0 ? Math.round((montantPaye / total) * 100) : 0;
+            const allPaiements = paiements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            let enfantsHtml = '';
+            if (enfants && enfants.length > 1) {
+                enfantsHtml = `<div style="margin-top:16px;"><strong>Détail par enfant</strong></div>` +
+                    enfants.map(e => {
+                        const ePaye = parseFloat(e.montantPaye || 0);
+                        const eReste = Math.max(0, (e.fraisInscription || 0) - ePaye);
+                        return `
+                        <div style="padding:10px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong>${e.prenom} ${e.nom}</strong>
+                                <span style="color:${e.fraisValide ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-error)'};">
+                                    ${e.fraisValide ? '✅ Validé' : '⏳ En cours'}
+                                </span>
+                            </div>
+                            <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant); margin-top:4px;">
+                                Total: ${formatCurrency(e.fraisInscription)} — Payé: ${formatCurrency(ePaye)} — Reste: ${formatCurrency(eReste)}
+                            </div>
+                        </div>`;
+                    }).join('');
+            }
+
+            container.innerHTML = `
+                <div style="padding:16px; background:var(--md-sys-color-surface-container-low); border-radius:12px;">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:12px;">
+                        <div style="text-align:center; flex:1; min-width:120px;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Total</div>
+                            <div style="font-size:1.4rem; font-weight:700;">${formatCurrency(total)}</div>
+                        </div>
+                        <div style="text-align:center; flex:1; min-width:120px;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Payé</div>
+                            <div style="font-size:1.4rem; font-weight:700; color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
+                        </div>
+                        <div style="text-align:center; flex:1; min-width:120px;">
+                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Reste</div>
+                            <div style="font-size:1.4rem; font-weight:700; color:${resteAPayer > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">${formatCurrency(resteAPayer)}</div>
+                        </div>
+                    </div>
+                    <div style="height:10px; background:var(--md-sys-color-surface-container); border-radius:8px; overflow:hidden;">
+                        <div style="width:${progress}%; height:100%; background:linear-gradient(90deg,var(--md-sys-color-primary),var(--md-sys-color-secondary)); transition:width 0.5s ease;"></div>
+                    </div>
+                    <div style="text-align:center; font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); margin-top:6px;">${progress}% payé</div>
+
+                    ${enfantsHtml}
+
+                    <div style="margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong style="font-size:1rem;">Historique des paiements</strong>
+                            <span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant);">${allPaiements.length} transaction(s)</span>
+                        </div>
+                        ${allPaiements.length === 0 
+                            ? '<p class="text-on-surface-variant" style="text-align:center; padding:16px;">Aucun paiement enregistré</p>' 
+                            : allPaiements.map(p => `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:6px;">
+                                    <div style="display:flex; flex-direction:column; gap:2px;">
+                                        <div style="font-weight:600; font-size:1rem;">${formatCurrency(p.montant)}</div>
+                                        <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">
+                                            ${new Date(p.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}
+                                            ${p.eleveNom ? ` — ${p.eleveNom}` : ''}
+                                            ${p.note ? ` — <em>${p.note}</em>` : ''}
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <span style="padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:500; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
+                                            ${getMethodeLabel(p.methodePaiement)}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function adminEnregistrerPaiement() {
+            const target = document.querySelector('input[name="adminFraisTarget"]:checked').value;
+            const montant = parseFloat(document.getElementById('adminPaiementMontant').value);
+            const methodePaiement = document.getElementById('adminPaiementMethode').value;
+            const date = document.getElementById('adminPaiementDate').value;
+            const note = document.getElementById('adminPaiementNote').value.trim();
+
+            if (!montant || montant <= 0) { showSnackbar('Montant invalide'); return; }
+            if (!methodePaiement) { showSnackbar('Choisissez une méthode de paiement'); return; }
+
+            try {
+                if (target === 'eleve') {
+                    const eleveId = document.getElementById('adminEleveList').value;
+                    if (!eleveId) { showSnackbar('Sélectionnez un élève'); return; }
+
+                    const resp = await fetch(`${API_URL}/eleves/${eleveId}/paiement`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ montant, methodePaiement, date: date || undefined, note: note || undefined })
+                    });
+
+                    if (!resp.ok) {
+                        const err = await resp.json();
+                        throw new Error(err.error || 'Erreur enregistrement');
+                    }
+
+                    showSnackbar(`Paiement de ${formatCurrency(montant)} enregistré (${getMethodeLabel(methodePaiement)})`);
+                } else {
+                    if (!_selectedFamille) { showSnackbar('Sélectionnez une famille'); return; }
+                    
+                    const parentId = _selectedFamille.parentId;
+                    const enfants = _selectedFamille.enfants || [];
+                    if (enfants.length === 0) { showSnackbar('Aucun enfant trouvé'); return; }
+                    
+                    const targetEnfantId = document.getElementById('adminFamilleTargetEnfant').value;
+                    const eleveIds = enfants.map(e => e.id);
+
+                    if (targetEnfantId) {
+                        // Paiement pour un enfant spécifique
+                        const resp = await fetch(`${API_URL}/eleves/${targetEnfantId}/paiement`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ montant, methodePaiement, date: date || undefined, note: note || undefined })
+                        });
+
+                        if (!resp.ok) {
+                            const err = await resp.json();
+                            throw new Error(err.error || 'Erreur enregistrement');
+                        }
+
+                        const enfant = enfants.find(e => e.id === targetEnfantId);
+                        showSnackbar(`Paiement de ${formatCurrency(montant)} pour ${enfant ? enfant.prenom + ' ' + enfant.nom : 'enfant'} enregistré`);
+                    } else {
+                        // Paiement réparti sur tous les enfants
+                        const resp = await fetch(`${API_URL}/eleves/paiement-famille`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ parentId, eleveIds, montant, methodePaiement, date: date || undefined, note: note || undefined })
+                        });
+
+                        if (!resp.ok) {
+                            const err = await resp.json();
+                            throw new Error(err.error || 'Erreur enregistrement famille');
+                        }
+
+                        showSnackbar(`Paiement famille de ${formatCurrency(montant)} enregistré (${getMethodeLabel(methodePaiement)})`);
+                    }
+
+                    // Rafraîchir les infos enfants
+                    try {
+                        const respSearch = await fetch(`${API_URL}/parents/search-familles?q=${encodeURIComponent(_selectedFamille.parentNom.split(' ')[0])}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (respSearch.ok) {
+                            const results = await respSearch.json();
+                            const updated = results.find(p => p.id === _selectedFamille.parentId);
+                            if (updated) _selectedFamille.enfants = updated.enfants || [];
+                        }
+                    } catch(e) {}
+                }
+
+                document.getElementById('adminPaiementMontant').value = '';
+                document.getElementById('adminPaiementNote').value = '';
+                await adminLoadSelectedFrais();
+
+            } catch (error) {
+                console.error('adminEnregistrerPaiement error:', error);
+                showSnackbar(error.message || 'Erreur lors de l\'enregistrement du paiement');
             }
         }
 
@@ -3691,9 +4098,8 @@
                 if (!eleveId) { showSnackbar('Sélectionnez un élève'); return; }
                 payload.eleveId = eleveId;
             } else {
-                const email = document.getElementById('adminFamilleEmail').value.trim();
-                if (!email) { showSnackbar('Saisissez un email de parent'); return; }
-                payload.familyEmail = email;
+                if (!_selectedFamille) { showSnackbar('Sélectionnez une famille'); return; }
+                payload.parentId = _selectedFamille.parentId;
             }
 
             try {

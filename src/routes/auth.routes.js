@@ -72,6 +72,18 @@ router.post('/login', async (req, res) => {
             return res.json({ user, token });
         }
 
+        // Vérifier le mode maintenance AVANT d'autoriser les non-staff
+        const maintenance = await dbGet(db, 'SELECT * FROM maintenance WHERE id = 1 AND active = 1');
+        if (maintenance) {
+            return res.status(503).json({
+                error: 'Le site est actuellement en maintenance.',
+                maintenance: true,
+                dateDebut: maintenance.dateDebut,
+                dateFin: maintenance.dateFin || null,
+                message: maintenance.message || null
+            });
+        }
+
         // Vérifier dans la table PARENTS
         row = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND password = ? AND activated = 1', [email, password]);
         
