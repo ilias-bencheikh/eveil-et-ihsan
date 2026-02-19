@@ -252,7 +252,7 @@ router.post('/inscription', async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, 0, 0)
             `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, enfants.length > 1 ? 1 : 0, enfants.length, familleLienId, frais, nbPaiements]);
             
-            createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail });
+            createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail, activationToken: eleveActivationToken });
             
             // Lier l'enfant au premier parent si présent
             if (parent1Id) {
@@ -271,11 +271,30 @@ router.post('/inscription', async (req, res) => {
             }
         }
         
+        // ---- Envoi automatique des emails d'activation ----
+        const host = req.headers.host;
+        // Emails aux parents créés
+        for (const parent of createdParents) {
+            if (parent.activationToken && parent.email) {
+                const activationLink = `http://${host}/activation.html?token=${parent.activationToken}&type=parent`;
+                sendEmail(parent.email, 'activation', `${parent.prenom} ${parent.nom}`, activationLink)
+                    .catch(e => console.error(`Erreur email parent ${parent.email}:`, e));
+            }
+        }
+        // Emails aux enfants qui ont un compte
+        for (const enfant of createdEnfants) {
+            if (enfant.activationToken && enfant.email) {
+                const activationLink = `http://${host}/activation.html?token=${enfant.activationToken}`;
+                sendEmail(enfant.email, 'activation', `${enfant.prenom} ${enfant.nom}`, activationLink)
+                    .catch(e => console.error(`Erreur email enfant ${enfant.email}:`, e));
+            }
+        }
+
         res.status(201).json({
             success: true,
-            message: `Inscription réussie. ${createdParents.length} parent(s) et ${createdEnfants.length} enfant(s) créé(s). En attente de validation.`,
+            message: `Inscription réussie. ${createdParents.length} parent(s) et ${createdEnfants.length} enfant(s) créé(s). Les emails d'activation ont été envoyés.`,
             parents: createdParents.map(p => ({ id: p.id, nom: p.nom, prenom: p.prenom, email: p.email })),
-            enfants: createdEnfants
+            enfants: createdEnfants.map(e => ({ id: e.id, nom: e.nom, prenom: e.prenom, email: e.email }))
         });
         
     } catch (err) {

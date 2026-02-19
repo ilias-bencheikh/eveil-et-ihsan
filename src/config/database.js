@@ -217,6 +217,9 @@ function initDatabase() {
             // Ajouter la colonne dateFin si elle n'existe pas (migration)
             db.run(`ALTER TABLE actualites ADD COLUMN dateFin TEXT`, () => {});
 
+            // Ajouter la colonne piecesJointes si elle n'existe pas (migration)
+            db.run(`ALTER TABLE actualites ADD COLUMN piecesJointes TEXT`, () => {});
+
             // Table tokens (pour la réinitialisation de mot de passe)
             db.run(`CREATE TABLE IF NOT EXISTS tokens (
                 id TEXT PRIMARY KEY,

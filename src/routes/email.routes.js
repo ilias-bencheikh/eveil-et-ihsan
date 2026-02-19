@@ -30,82 +30,95 @@ router.post('/send-activation-email', checkPermission('create'), async (req, res
 
         let selectFields;
         if (type === 'eleve') {
-            // Récupérer l'élève (sans champs parentNom désormais)
-            db.get(`SELECT activationToken, nom, prenom FROM eleves WHERE id = ?`, [userId], async (err, eleve) => {
+            // Récupérer l'élève + tous les parents liés en parallèle
+            db.get(`SELECT id, activationToken, nom, prenom, email FROM eleves WHERE id = ?`, [userId], async (err, eleve) => {
                 if (err) {
                     console.error('DB error fetching eleve:', err);
                     return res.status(500).json({ error: 'Erreur DB' });
                 }
 
-                // Si un email est fourni et qu'on a un token d'activation pour l'élève, envoyer directement
-                if (email && eleve && eleve.activationToken) {
-                    const activationLink = `http://${req.headers.host}/activation.html?token=${eleve.activationToken}`;
-                    const userName = `${eleve.prenom} ${eleve.nom}`;
-                    try {
-                        await sendEmail(email, 'activation', userName, activationLink);
-                        return res.json({ success: true, message: 'Email envoyé avec succès' });
-                    } catch (emailError) {
-                        console.error('Erreur envoi email:', emailError);
-                        return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email. Vérifiez la configuration.' });
-                    }
-                }
-
-                // Sinon, chercher les parents liés à cet élève
-                db.all(`SELECT p.id, p.email, p.nom, p.prenom, p.activationToken, ep.isPrimary FROM eleve_parent ep JOIN parents p ON ep.parentId = p.id WHERE ep.eleveId = ? ORDER BY ep.isPrimary DESC`, [userId], async (err2, parents) => {
+                db.all(`SELECT p.id, p.email, p.nom, p.prenom, p.activationToken, p.activated, ep.isPrimary
+                        FROM eleve_parent ep JOIN parents p ON ep.parentId = p.id
+                        WHERE ep.eleveId = ? ORDER BY ep.isPrimary DESC`, [userId], async (err2, parents) => {
                     if (err2) {
                         console.error('DB error fetching parents:', err2);
                         return res.status(500).json({ error: 'Erreur DB' });
                     }
 
-                    if (!parents || parents.length === 0) {
-                        return res.status(404).json({ error: 'Aucun parent trouvé et aucun email fourni' });
+                    const host = req.headers.host;
+                    const sendResults = [];
+
+                    // ---- Cas : email spécifique fourni (ex: renvoi manuel ciblé) ----
+                    if (email) {
+                        // Vérifier si cet email correspond à l'élève
+                        if (eleve && eleve.email === email && eleve.activationToken) {
+                            const activationLink = `http://${host}/activation.html?token=${eleve.activationToken}`;
+                            try {
+                                await sendEmail(eleve.email, 'activation', `${eleve.prenom} ${eleve.nom}`, activationLink);
+                                sendResults.push({ email: eleve.email, type: 'eleve', status: 'sent' });
+                            } catch (e) {
+                                sendResults.push({ email: eleve.email, type: 'eleve', status: 'error' });
+                            }
+                        }
+                        // Vérifier si cet email correspond à un parent non activé
+                        const matchParent = (parents || []).find(p => p.email === email);
+                        if (matchParent && !matchParent.activated && matchParent.activationToken) {
+                            const activationLink = `http://${host}/activation.html?token=${matchParent.activationToken}&type=parent`;
+                            try {
+                                await sendEmail(matchParent.email, 'activation', `${matchParent.prenom} ${matchParent.nom}`.trim() || 'Parent', activationLink);
+                                sendResults.push({ email: matchParent.email, type: 'parent', status: 'sent' });
+                            } catch (e) {
+                                sendResults.push({ email: matchParent.email, type: 'parent', status: 'error' });
+                            }
+                        }
+                        if (sendResults.length === 0) {
+                            return res.status(404).json({ error: 'Aucun compte en attente d\'activation pour cet email' });
+                        }
+                        const sentCount = sendResults.filter(r => r.status === 'sent').length;
+                        return res.json({ success: true, message: `${sentCount} email(s) envoyé(s)`, results: sendResults });
                     }
 
-                    // Si un email a été fourni mais l'utilisateur n'existe pas en tant qu'eleve activable,
-                    // essayer d'envoyer au parent correspondant à cet email (activation parent)
-                    if (email) {
-                        const matchParent = parents.find(p => p.email === email);
-                        if (matchParent) {
-                            if (!matchParent.activationToken) {
-                                return res.status(400).json({ error: 'Le parent n\'a pas de token d\'activation' });
-                            }
-                            const activationLink = `http://${req.headers.host}/activation.html?token=${matchParent.activationToken}&type=parent`;
-                            const userName = `${matchParent.prenom || ''} ${matchParent.nom || ''}`.trim();
-                            try {
-                                await sendEmail(email, 'activation', userName || 'Parent', activationLink);
-                                return res.json({ success: true, message: 'Email envoyé au parent' });
-                            } catch (emailError) {
-                                console.error('Erreur envoi email parent:', emailError);
-                                return res.status(500).json({ error: 'Erreur envoi email au parent' });
-                            }
+                    // ---- Cas : aucun email fourni → envoyer à TOUS (élève + parents non activés) ----
+
+                    // 1. Élève s'il a un email et un token
+                    if (eleve && eleve.email && eleve.activationToken) {
+                        const activationLink = `http://${host}/activation.html?token=${eleve.activationToken}`;
+                        try {
+                            await sendEmail(eleve.email, 'activation', `${eleve.prenom} ${eleve.nom}`, activationLink);
+                            sendResults.push({ email: eleve.email, type: 'eleve', status: 'sent' });
+                        } catch (e) {
+                            console.error('Erreur envoi email élève:', e);
+                            sendResults.push({ email: eleve.email, type: 'eleve', status: 'error' });
                         }
                     }
 
-                    // Sinon envoyer aux parents (priorité au parent primaire)
-                    const sendResults = [];
-                    for (const p of parents) {
-                        if (!p.email) continue;
-                        if (!p.activationToken) {
-                            // si parent sans token, on génère un token? ici on retourne erreur pour éviter modifications DB inattendues
-                            sendResults.push({ email: p.email, status: 'no-token' });
+                    // 2. Tous les parents non encore activés
+                    for (const p of (parents || [])) {
+                        if (!p.email || !p.activationToken) {
+                            if (p.email) sendResults.push({ email: p.email, type: 'parent', status: 'no-token' });
                             continue;
                         }
-                        const activationLink = `http://${req.headers.host}/activation.html?token=${p.activationToken}&type=parent`;
-                        const userName = `${p.prenom || ''} ${p.nom || ''}`.trim() || 'Parent';
+                        if (p.activated) continue; // déjà activé
+                        const activationLink = `http://${host}/activation.html?token=${p.activationToken}&type=parent`;
                         try {
-                            await sendEmail(p.email, 'activation', userName, activationLink);
-                            sendResults.push({ email: p.email, status: 'sent' });
+                            await sendEmail(p.email, 'activation', `${p.prenom} ${p.nom}`.trim() || 'Parent', activationLink);
+                            sendResults.push({ email: p.email, type: 'parent', status: 'sent' });
                         } catch (e) {
-                            console.error('Erreur envoi email parent:', e);
-                            sendResults.push({ email: p.email, status: 'error' });
+                            console.error(`Erreur envoi email parent ${p.email}:`, e);
+                            sendResults.push({ email: p.email, type: 'parent', status: 'error' });
                         }
                     }
 
                     if (sendResults.length === 0) {
-                        return res.status(400).json({ error: 'Aucun email parent valide trouvé' });
+                        return res.status(404).json({ error: 'Aucun compte en attente d\'activation trouvé (élève sans email ni parents)' });
                     }
 
-                    return res.json({ success: true, message: 'Emails envoyés aux parents', results: sendResults });
+                    const sentCount = sendResults.filter(r => r.status === 'sent').length;
+                    return res.json({
+                        success: true,
+                        message: `${sentCount} email(s) d'activation envoyé(s)`,
+                        results: sendResults
+                    });
                 });
             });
         } else {

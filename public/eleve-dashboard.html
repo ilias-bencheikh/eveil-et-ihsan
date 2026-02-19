@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -747,296 +747,129 @@
             margin: 0;
         }
 
-        .messagerie-filters {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-        }
-
-        .messages-container {
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .message-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: var(--md-sys-color-surface-container);
-            border-radius: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .message-card:hover {
-            background: var(--md-sys-color-surface-container-high);
-            transform: translateY(-1px);
-            box-shadow: var(--md-sys-elevation-2);
-        }
-
-        .message-card.unread {
-            background: var(--md-sys-color-primary-container);
-            border-left: 4px solid var(--md-sys-color-primary);
-        }
-
-        .message-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--md-sys-color-secondary-container);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--md-sys-color-on-secondary-container);
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-
-        .message-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .message-sender {
-            font: var(--md-sys-typescale-title-small);
-            color: var(--md-sys-color-on-surface);
-            font-weight: 500;
-        }
-
-        .message-date {
-            font: var(--md-sys-typescale-body-small);
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .message-preview {
-            font: var(--md-sys-typescale-body-medium);
-            color: var(--md-sys-color-on-surface-variant);
-            margin: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .message-unread-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--md-sys-color-primary);
-            flex-shrink: 0;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .empty-state .material-icons {
-            font-size: 64px;
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 16px;
-        }
-
-        .empty-state h4 {
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 8px;
-        }
-
-        .empty-state p {
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 20px;
-        }
-
-        /* Compose Message Styles */
-        .compose-message {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .child-selection-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .child-select {
-            padding: 12px;
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: 8px;
-            background: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            font: var(--md-sys-typescale-body-large);
-        }
-
-        .child-select:focus {
-            outline: none;
-            border-color: var(--md-sys-color-primary);
-        }
-
-        .destinataires-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .destinataires-label {
-            font: var(--md-sys-typescale-body-large);
-            color: var(--md-sys-color-on-surface);
-            font-weight: 500;
-        }
-
-        .destinataires-input {
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .selected-destinataires {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 12px;
-            min-height: 20px;
-        }
-
-        .destinataire-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            border-radius: 16px;
-            font-size: 14px;
-        }
-
-        .destinataire-chip button {
-            background: none;
-            border: none;
-            color: var(--md-sys-color-on-primary-container);
-            cursor: pointer;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .destinataires-dropdown {
-            border-top: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .destinataires-dropdown input {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            outline: none;
-            font: var(--md-sys-typescale-body-medium);
-        }
-
-        .destinataires-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .destinataire-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            transition: background 0.2s ease;
-        }
-
-        .destinataire-option:hover {
-            background: var(--md-sys-color-surface-container-high);
-        }
-
-        .destinataire-option:last-child {
-            border-bottom: none;
-        }
-
-        .destinataire-name {
-            font: var(--md-sys-typescale-body-medium);
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .destinataire-role {
-            font: var(--md-sys-typescale-body-small);
-            color: var(--md-sys-color-on-surface-variant);
-            text-transform: capitalize;
-        }
-
-        .message-content-section textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: 8px;
-            font: var(--md-sys-typescale-body-medium);
-            resize: vertical;
-            outline: none;
-        }
-
-        .message-content-section textarea:focus {
-            border-color: var(--md-sys-color-primary);
-        }
-
-        /* Message Detail Styles */
-        .message-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .message-detail-header {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 16px;
-            background: var(--md-sys-color-surface-container);
-            border-radius: 8px;
-        }
-
-        .message-detail-meta {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .message-detail-label {
-            font: var(--md-sys-typescale-body-small);
-            color: var(--md-sys-color-on-surface-variant);
-            font-weight: 500;
-        }
-
-        .message-detail-value {
-            font: var(--md-sys-typescale-body-medium);
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .message-detail-content {
-            padding: 20px;
-            background: var(--md-sys-color-surface-container);
-            border-radius: 8px;
-            line-height: 1.6;
-            white-space: pre-wrap;
+        /* ========== MESSAGERIE – design unifié ========== */
+        @keyframes msgFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes msgSpin   { to{transform:rotate(360deg)} }
+        @keyframes msgSendPop{ 0%{transform:scale(1)} 40%{transform:scale(.93)} 70%{transform:scale(1.06)} 100%{transform:scale(1)} }
+        @keyframes msgChipIn { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+        @keyframes msgItemIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+        .msg-layout{display:flex;height:calc(100vh - 200px);min-height:580px;border-radius:20px;overflow:hidden;border:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface);box-shadow:0 4px 24px rgba(0,0,0,.09)}
+        .msg-sidebar{width:340px;min-width:260px;max-width:380px;border-right:1px solid var(--md-sys-color-outline-variant);display:flex;flex-direction:column;background:var(--md-sys-color-surface-container-low);flex-shrink:0}
+        .msg-sidebar-header{padding:16px 14px 0}
+        .msg-compose-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 20px;background:linear-gradient(135deg,var(--md-sys-color-primary),color-mix(in srgb,var(--md-sys-color-primary) 80%,#000));color:var(--md-sys-color-on-primary);border:none;border-radius:28px;font-size:14px;font-weight:600;letter-spacing:.02em;cursor:pointer;transition:box-shadow .25s,filter .2s,transform .15s;box-shadow:0 2px 10px rgba(30,90,168,.35)}
+        .msg-compose-btn:hover{filter:brightness(1.08);box-shadow:0 5px 18px rgba(30,90,168,.45);transform:translateY(-1px)}
+        .msg-tabs{display:flex;gap:4px;margin:12px 0 10px;background:var(--md-sys-color-surface-variant);border-radius:22px;padding:4px}
+        .msg-tab{flex:1;padding:7px 8px;border:none;border-radius:18px;background:transparent;color:var(--md-sys-color-on-surface-variant);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s,color .2s,box-shadow .2s}
+        .msg-tab .material-icons{font-size:16px}
+        .msg-tab:hover{background:rgba(255,255,255,.5)}
+        .msg-tab.active{background:var(--md-sys-color-surface);color:var(--md-sys-color-primary);font-weight:700;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+        .msg-tab-count{background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);border-radius:10px;font-size:10px;font-weight:700;padding:1px 6px;min-width:18px;text-align:center}
+        .msg-tab.active .msg-tab-count{background:color-mix(in srgb,var(--md-sys-color-primary) 90%,#000)}
+        .msg-search-wrap{padding:8px 14px 12px;border-bottom:1px solid var(--md-sys-color-outline-variant)}
+        .msg-search-box{display:flex;align-items:center;background:var(--md-sys-color-surface);border:1.5px solid var(--md-sys-color-outline-variant);border-radius:24px;padding:0 14px;transition:border-color .2s,box-shadow .2s}
+        .msg-search-box:focus-within{border-color:var(--md-sys-color-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--md-sys-color-primary) 15%,transparent)}
+        .msg-search-icon{font-size:18px!important;color:var(--md-sys-color-on-surface-variant);flex-shrink:0}
+        .msg-search-box:focus-within .msg-search-icon{color:var(--md-sys-color-primary)}
+        .msg-search-input{flex:1;padding:9px 8px;border:none;background:transparent;color:var(--md-sys-color-on-surface);font-size:14px;outline:none}
+        .msg-list-scroll{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--md-sys-color-outline-variant) transparent}
+        .msg-list-loading,.msg-list-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:48px 20px;color:var(--md-sys-color-on-surface-variant);font-size:14px}
+        .msg-list-loading .material-icons,.msg-list-empty .material-icons{font-size:42px;opacity:.4}
+        .msg-list-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--md-sys-color-outline-variant);transition:background .15s;position:relative;animation:msgItemIn .25s ease both}
+        .msg-list-item:hover{background:rgba(30,90,168,.06)}
+        .msg-list-item.unread{background:color-mix(in srgb,var(--md-sys-color-primary-container) 60%,transparent);border-left:3px solid var(--md-sys-color-primary)}
+        .msg-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--md-sys-color-secondary-container),var(--md-sys-color-primary-container));color:var(--md-sys-color-on-secondary-container);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+        .msg-item-content{flex:1;min-width:0}
+        .msg-item-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:3px}
+        .msg-item-contact{font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .msg-item-date{font-size:11px;color:var(--md-sys-color-on-surface-variant);white-space:nowrap;flex-shrink:0}
+        .msg-item-preview{font-size:12px;color:var(--md-sys-color-on-surface-variant);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .msg-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--md-sys-color-primary);flex-shrink:0}
+        .msg-panel{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--md-sys-color-surface)}
+        .msg-panel-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--md-sys-color-on-surface-variant);padding:40px;text-align:center;animation:msgFadeIn .4s ease}
+        .msg-empty-illustration{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--md-sys-color-primary-container),var(--md-sys-color-secondary-container));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(30,90,168,.18)}
+        .msg-empty-illustration .material-icons{font-size:44px;color:var(--md-sys-color-primary)}
+        .msg-panel-empty h3{font-size:20px;font-weight:700;color:var(--md-sys-color-on-surface);margin:0}
+        .msg-panel-empty p{font-size:14px;margin:0;line-height:1.6;opacity:.75}
+        .msg-compose-btn-panel{display:flex;align-items:center;gap:8px;padding:11px 24px;background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);border:none;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;transition:filter .2s;margin-top:4px}
+        .msg-compose-btn-panel:hover{filter:brightness(.94)}
+        .msg-read-view{flex:1;display:flex;flex-direction:column;overflow:hidden;animation:msgFadeIn .25s ease}
+        .msg-read-header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--md-sys-color-outline-variant)}
+        .msg-read-meta{display:flex;align-items:center;gap:12px;flex:1}
+        .msg-read-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--md-sys-color-tertiary-container),var(--md-sys-color-primary-container));color:var(--md-sys-color-on-tertiary-container);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
+        .msg-read-contact{font-size:15px;font-weight:600;color:var(--md-sys-color-on-surface)}
+        .msg-read-date{font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px}
+        .msg-read-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+        .msg-back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--md-sys-color-on-surface-variant);transition:background .2s}
+        .msg-back-btn:hover{background:var(--md-sys-color-surface-variant)}
+        .msg-del-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--md-sys-color-error);transition:background .2s}
+        .msg-del-btn:hover{background:var(--md-sys-color-error-container)}
+        .msg-read-body{flex:1;overflow-y:auto;padding:28px 28px 16px;white-space:pre-wrap;font-size:15px;line-height:1.8;color:var(--md-sys-color-on-surface)}
+        .msg-read-attachments{padding:0 28px 20px}
+        .msg-attach-title{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em}
+        .msg-attach-list{display:flex;flex-direction:column;gap:8px}
+        .msg-attach-item{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;text-decoration:none;color:var(--md-sys-color-on-surface);transition:background .2s;font-size:14px}
+        .msg-attach-item:hover{background:var(--md-sys-color-primary-container)}
+        .msg-attach-item .material-icons{font-size:22px;color:var(--md-sys-color-primary)}
+        .msg-attach-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+        .msg-attach-size{font-size:11px;color:var(--md-sys-color-on-surface-variant);flex-shrink:0}
+        .msg-attach-dl{font-size:18px!important;color:var(--md-sys-color-primary);flex-shrink:0}
+        .msg-compose-view{flex:1;display:flex;flex-direction:column;overflow:hidden;animation:msgFadeIn .3s ease}
+        .msg-compose-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;background:linear-gradient(135deg,var(--md-sys-color-primary-container) 0%,var(--md-sys-color-surface-container-low) 100%);border-bottom:1px solid var(--md-sys-color-outline-variant)}
+        .msg-compose-header-left{display:flex;align-items:center;gap:14px}
+        .msg-compose-icon-wrap{width:42px;height:42px;border-radius:14px;background:var(--md-sys-color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .msg-compose-icon-wrap .material-icons{color:var(--md-sys-color-on-primary);font-size:22px}
+        .msg-compose-title{font-size:16px;font-weight:700;color:var(--md-sys-color-on-surface)}
+        .msg-compose-subtitle{font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:1px}
+        .msg-compose-form{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin}
+        .msg-compose-section{padding:16px 20px;border-bottom:1px solid var(--md-sys-color-outline-variant)}
+        .msg-compose-section-grow{flex:1;display:flex;flex-direction:column}
+        .msg-compose-section-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--md-sys-color-on-surface-variant);margin-bottom:10px}
+        .msg-compose-section-label .material-icons{font-size:15px;color:var(--md-sys-color-primary)}
+        .msg-attach-hint{margin-left:auto;font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--md-sys-color-on-surface-variant);opacity:.7}
+        .msg-compose-section-body{display:flex;flex-direction:column;gap:8px}
+        .msg-compose-section-body-grow{flex:1}
+        .msg-chips-wrap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:38px;padding:6px 10px;border:1.5px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container-low);cursor:text;transition:border-color .2s}
+        .msg-chips-wrap:focus-within,.msg-chips-wrap:hover{border-color:var(--md-sys-color-primary)}
+        .msg-chips-placeholder{font-size:13px;color:var(--md-sys-color-on-surface-variant);opacity:.75}
+        .msg-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px 4px 12px;background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);border-radius:20px;font-size:12px;font-weight:600;animation:msgChipIn .2s cubic-bezier(.34,1.56,.64,1) both}
+        .msg-chip button{background:rgba(255,255,255,.25);border:none;cursor:pointer;color:inherit;display:flex;align-items:center;padding:0;width:16px;height:16px;border-radius:50%;justify-content:center}
+        .msg-dest-search-wrap{display:flex;align-items:center;background:var(--md-sys-color-surface);border:1.5px solid var(--md-sys-color-outline-variant);border-radius:20px;padding:0 12px;transition:border-color .2s}
+        .msg-dest-search-wrap:focus-within{border-color:var(--md-sys-color-primary)}
+        .msg-dest-search-wrap .material-icons{font-size:16px;color:var(--md-sys-color-on-surface-variant);flex-shrink:0}
+        .msg-dest-search-input{flex:1;padding:8px 6px;border:none;background:transparent;color:var(--md-sys-color-on-surface);font-size:13px;outline:none}
+        .msg-dest-list{max-height:190px;overflow-y:auto;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface);scrollbar-width:thin}
+        .msg-dest-loading{display:flex;align-items:center;gap:10px;padding:16px 14px;color:var(--md-sys-color-on-surface-variant);font-size:13px}
+        .msg-spin{animation:msgSpin .8s linear infinite}
+        .msg-dest-group-label{padding:5px 14px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--md-sys-color-primary);background:color-mix(in srgb,var(--md-sys-color-primary-container) 50%,var(--md-sys-color-surface));border-bottom:1px solid var(--md-sys-color-outline-variant);position:sticky;top:0}
+        .msg-dest-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--md-sys-color-outline-variant);transition:background .12s;animation:msgItemIn .15s ease both}
+        .msg-dest-item:last-child{border-bottom:none}
+        .msg-dest-item:hover{background:rgba(30,90,168,.06)}
+        .msg-dest-item.selected{background:color-mix(in srgb,var(--md-sys-color-primary-container) 70%,transparent)}
+        .msg-dest-avatar{width:30px;height:30px;border-radius:50%;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+        .msg-dest-avatar.sel{background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary)}
+        .msg-dest-info{flex:1;min-width:0}
+        .msg-dest-name{font-size:13px;font-weight:600;color:var(--md-sys-color-on-surface)}
+        .msg-dest-role{font-size:11px;color:var(--md-sys-color-on-surface-variant)}
+        .msg-dest-check{font-size:17px!important;color:var(--md-sys-color-primary);flex-shrink:0;transition:opacity .15s}
+        .msg-textarea{width:100%;flex:1;min-height:110px;padding:14px;border:1.5px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container-low);color:var(--md-sys-color-on-surface);font-size:14px;font-family:inherit;resize:none;outline:none;box-sizing:border-box;line-height:1.7;transition:border-color .2s}
+        .msg-textarea:focus{border-color:var(--md-sys-color-primary);background:var(--md-sys-color-surface)}
+        .msg-attach-dropzone{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px dashed var(--md-sys-color-primary);border-radius:12px;background:color-mix(in srgb,var(--md-sys-color-primary-container) 35%,transparent);color:var(--md-sys-color-on-primary-container);font-size:13px;font-weight:500;cursor:pointer;transition:background .2s}
+        .msg-attach-dropzone:hover{background:color-mix(in srgb,var(--md-sys-color-primary-container) 60%,transparent)}
+        .msg-attach-dropzone .material-icons{font-size:22px;color:var(--md-sys-color-primary)}
+        .msg-attach-preview{display:flex;flex-wrap:wrap;gap:6px}
+        .msg-attach-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);border-radius:14px;font-size:12px;font-weight:500;animation:msgChipIn .2s cubic-bezier(.34,1.56,.64,1) both}
+        .msg-compose-footer{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low)}
+        .msg-cancel-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border:1.5px solid var(--md-sys-color-outline-variant);border-radius:20px;background:transparent;color:var(--md-sys-color-on-surface-variant);font-size:13px;font-weight:500;cursor:pointer;transition:background .2s}
+        .msg-cancel-btn:hover{background:var(--md-sys-color-surface-variant)}
+        .msg-send-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;background:linear-gradient(135deg,var(--md-sys-color-primary),color-mix(in srgb,var(--md-sys-color-primary) 75%,#003c8f));color:var(--md-sys-color-on-primary);border:none;border-radius:22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(30,90,168,.4);transition:box-shadow .25s,filter .2s,transform .15s}
+        .msg-send-btn:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(30,90,168,.5);transform:translateY(-1px)}
+        .msg-send-btn:active{transform:scale(.97)}
+        .msg-send-btn .material-icons{font-size:18px}
+        .msg-send-btn.sending{pointer-events:none;opacity:.8}
+        @media (max-width:768px){
+            .msg-layout{flex-direction:column;height:auto;min-height:80vh;border-radius:12px}
+            .msg-sidebar{width:100%;max-width:none;border-right:none;border-bottom:1px solid var(--md-sys-color-outline-variant);max-height:340px}
+            .msg-panel{min-height:380px}
         }
     </style>
 </head>
@@ -1479,52 +1312,144 @@
 
                 <!-- Messages Tab -->
                 <div id="messages" class="tab-content">
-                    <div class="widget-card">
-                        <div class="widget-card-header">
-                            <h3 class="widget-card-title">Messagerie</h3>
-                            <div class="widget-card-actions">
-                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()" style="min-height: 36px; padding: 0 16px; font-size: 14px;">
-                                    <span class="material-icons" style="font-size: 18px;">edit</span> Nouveau message
+                    <div class="msg-layout">
+                        <!-- ===== PANNEAU GAUCHE ===== -->
+                        <div class="msg-sidebar">
+                            <div class="msg-sidebar-header">
+                                <button class="msg-compose-btn" onclick="openEleveComposePanel()">
+                                    <span class="material-icons">edit_note</span>
+                                    <span>Nouveau message</span>
                                 </button>
-                            </div>
-                        </div>
-                        <div class="widget-card-content">
-                            <!-- Filtres et navigation -->
-                            <div class="messagerie-filters" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-                                <div class="filter-tabs" style="display: flex; gap: 8px;">
-                                    <button class="md-btn md-btn-tonal active" id="btn-received" onclick="switchMessageView('received')">
-                                        <span class="material-icons">inbox</span> Reçus (<span id="received-count">0</span>)
+                                <div class="msg-tabs">
+                                    <button class="msg-tab active" id="btn-received" onclick="switchMessageView('received')">
+                                        <span class="material-icons">move_to_inbox</span>
+                                        <span>Reçus</span>
+                                        <span class="msg-tab-count" id="received-count">0</span>
                                     </button>
-                                    <button class="md-btn md-btn-tonal" id="btn-sent" onclick="switchMessageView('sent')">
-                                        <span class="material-icons">send</span> Envoyés (<span id="sent-count">0</span>)
+                                    <button class="msg-tab" id="btn-sent" onclick="switchMessageView('sent')">
+                                        <span class="material-icons">send</span>
+                                        <span>Envoyés</span>
+                                        <span class="msg-tab-count" id="sent-count">0</span>
                                     </button>
                                 </div>
-                                <div class="search-container" style="flex: 1; min-width: 200px;">
-                                    <div class="md-text-field" style="margin: 0;">
-                                        <div class="md-text-field-container">
-                                            <input type="text" id="messageSearch" class="md-text-field-input" placeholder="Rechercher dans les messages..." oninput="filterMessages()">
-                                            <label class="md-text-field-label">Recherche</label>
+                            </div>
+                            <div class="msg-search-wrap">
+                                <div class="msg-search-box">
+                                    <span class="material-icons msg-search-icon">search</span>
+                                    <input type="text" id="messageSearch" class="msg-search-input" placeholder="Rechercher un message..." oninput="filterMessages()">
+                                </div>
+                            </div>
+                            <div id="messagesContainer" class="msg-list-scroll">
+                                <div class="msg-list-loading"><span class="material-icons">hourglass_empty</span><span>Chargement...</span></div>
+                            </div>
+                        </div>
+
+                        <!-- ===== PANNEAU DROIT ===== -->
+                        <div class="msg-panel" id="eleveMsgPanel">
+                            <!-- Etat vide -->
+                            <div class="msg-panel-empty" id="eleveMsgPanelEmpty">
+                                <div class="msg-empty-illustration">
+                                    <span class="material-icons">mark_email_unread</span>
+                                </div>
+                                <h3>Votre messagerie</h3>
+                                <p>Sélectionnez un message pour le lire<br>ou rédigez-en un nouveau</p>
+                                <button class="msg-compose-btn-panel" onclick="openEleveComposePanel()">
+                                    <span class="material-icons">edit_note</span> Rédiger un message
+                                </button>
+                            </div>
+
+                            <!-- Vue lecture -->
+                            <div class="msg-read-view" id="eleveMsgReadView" style="display:none;">
+                                <div class="msg-read-header">
+                                    <button class="msg-back-btn" onclick="closeEleveMsgPanel()" title="Retour">
+                                        <span class="material-icons">arrow_back</span>
+                                    </button>
+                                    <div class="msg-read-meta" id="eleveMsgReadMeta"></div>
+                                    <div class="msg-read-actions" id="eleveMsgReadActions"></div>
+                                </div>
+                                <div class="msg-read-body" id="eleveMsgReadBody"></div>
+                                <div class="msg-read-attachments" id="eleveMsgReadAttachments"></div>
+                            </div>
+
+                            <!-- Vue composition -->
+                            <div class="msg-compose-view" id="eleveMsgComposeView" style="display:none;">
+                                <div class="msg-compose-header">
+                                    <div class="msg-compose-header-left">
+                                        <div class="msg-compose-icon-wrap"><span class="material-icons">edit_note</span></div>
+                                        <div>
+                                            <div class="msg-compose-title">Nouveau message</div>
+                                            <div class="msg-compose-subtitle">Composez votre message ci-dessous</div>
+                                        </div>
+                                    </div>
+                                    <button class="msg-back-btn" onclick="closeEleveMsgPanel()" title="Fermer">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </div>
+                                <div class="msg-compose-form">
+                                    <!-- Enfant qui envoie -->
+                                    <div class="msg-compose-section">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">person</span> Envoyer en tant que
+                                        </div>
+                                        <div class="msg-compose-section-body">
+                                            <select id="selectedChildForMessage" class="msg-textarea" style="min-height:auto;resize:none;padding:10px 14px;"></select>
+                                        </div>
+                                    </div>
+                                    <!-- Destinataires -->
+                                    <div class="msg-compose-section">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">group</span> Destinataires
+                                        </div>
+                                        <div class="msg-compose-section-body">
+                                            <div id="eleveComposeSelectedChips" class="msg-chips-wrap" onclick="document.getElementById('eleveComposeSearchInput').focus()">
+                                                <span id="eleveComposeChipsPlaceholder" class="msg-chips-placeholder">Cliquez pour sélectionner des destinataires…</span>
+                                            </div>
+                                            <div class="msg-dest-search-wrap">
+                                                <span class="material-icons">search</span>
+                                                <input type="text" id="eleveComposeSearchInput" class="msg-dest-search-input" placeholder="Filtrer par nom ou rôle..." oninput="filterEleveComposeDestinataires()">
+                                            </div>
+                                            <div class="msg-dest-list" id="eleveComposeDestList">
+                                                <div class="msg-dest-loading"><span class="material-icons msg-spin">sync</span><span>Chargement des contacts…</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div class="msg-compose-section msg-compose-section-grow">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">chat_bubble_outline</span> Message
+                                        </div>
+                                        <div class="msg-compose-section-body msg-compose-section-body-grow">
+                                            <textarea id="eleveComposeMessage" class="msg-textarea" placeholder="Écrivez votre message…"></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- Pièces jointes -->
+                                    <div class="msg-compose-section">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">attach_file</span> Pièces jointes
+                                            <span class="msg-attach-hint">max 5 fichiers · 10 Mo chacun</span>
+                                        </div>
+                                        <div class="msg-compose-section-body">
+                                            <label class="msg-attach-dropzone" for="elevePiecesJointes">
+                                                <span class="material-icons">cloud_upload</span>
+                                                <span>Cliquez ou déposez vos fichiers ici</span>
+                                            </label>
+                                            <input type="file" id="elevePiecesJointes" multiple
+                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
+                                                onchange="updateEleveAttachmentPreview()" style="display:none;">
+                                            <div id="eleveAttachmentPreview" class="msg-attach-preview"></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Liste des messages -->
-                            <div id="messagesContainer" class="messages-container">
-                                <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
-                                    <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
-                                    <p>Chargement des messages...</p>
+                                <!-- Footer -->
+                                <div class="msg-compose-footer">
+                                    <button class="msg-cancel-btn" onclick="closeEleveMsgPanel()">
+                                        <span class="material-icons">close</span> Annuler
+                                    </button>
+                                    <button class="msg-send-btn" onclick="sendMessage()" id="eleveMsgSendBtn">
+                                        <span class="material-icons">send</span>
+                                        <span>Envoyer</span>
+                                    </button>
                                 </div>
-                            </div>
-
-                            <!-- �?tat vide -->
-                            <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
-                                <span class="material-icons" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; display: block;">mail</span>
-                                <h4 style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Aucun message</h4>
-                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">Vous n'avez pas encore de messages dans cette boîte.</p>
-                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()" style="min-height: 36px; padding: 0 16px; font-size: 14px;">
-                                    <span class="material-icons" style="font-size: 18px;">edit</span> �?crire un message
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -2926,536 +2851,393 @@
         let totalUnreadMessages = 0;
 
         async function loadMessages() {
+            const container = document.getElementById('messagesContainer');
+            if (!container) return;
+            container.innerHTML = '<div class="msg-list-loading"><span class="material-icons msg-spin">sync</span><span>Chargement...</span></div>';
+
             try {
-                const container = document.getElementById('messagesContainer');
-                if (!container) return;
-
-                container.innerHTML = `
-                    <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
-                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
-                        <p>Chargement des messages...</p>
-                    </div>
-                `;
-
-                // Charger les messages de tous les enfants de la famille
-                let allReceivedMessages = [];
-                let allSentMessages = [];
-
-                if (familyMembers && familyMembers.length > 0) {
-                    for (const child of familyMembers) {
-                        try {
-                            const response = await fetch(`${API_URL}/messagerie`, {
-                                headers: {
-                                    'Authorization': `Bearer ${token}`,
-                                    'x-user-id': child.id,
-                                    'x-user-role': 'eleve'
-                                }
-                            });
-
-                            if (response.ok) {
-                                const messages = await response.json();
-                                
-                                // Ajouter l'enfant à chaque message pour l'identification
-                                const received = messages.filter(m => m.destinataireId === child.id).map(m => ({ ...m, child: child }));
-                                const sent = messages.filter(m => m.expediteurId === child.id).map(m => ({ ...m, child: child }));
-                                
-                                allReceivedMessages = allReceivedMessages.concat(received);
-                                allSentMessages = allSentMessages.concat(sent);
-                            }
-                        } catch (childError) {
-                            console.error(`Erreur chargement messages pour ${child.prenom}:`, childError);
+                let allRec = [], allSent = [];
+                const members = (familyMembers && familyMembers.length > 0) ? familyMembers : [currentChild];
+                for (const child of members) {
+                    try {
+                        const resp = await fetch(`${API_URL}/messagerie`, {
+                            headers: { 'Authorization': `Bearer ${token}`, 'x-user-id': child.id, 'x-user-role': 'eleve' }
+                        });
+                        if (resp.ok) {
+                            const msgs = await resp.json();
+                            allRec  = allRec.concat(msgs.filter(m => m.destinataireId === child.id).map(m => ({ ...m, child })));
+                            allSent = allSent.concat(msgs.filter(m => m.expediteurId  === child.id).map(m => ({ ...m, child })));
                         }
-                    }
-                } else {
-                    // Fallback pour un seul enfant
-                    const response = await fetch(`${API_URL}/messagerie`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'x-user-id': currentChild.id,
-                            'x-user-role': 'eleve'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const messages = await response.json();
-                        allReceivedMessages = messages.filter(m => m.destinataireId === currentChild.id).map(m => ({ ...m, child: currentChild }));
-                        allSentMessages = messages.filter(m => m.expediteurId === currentChild.id).map(m => ({ ...m, child: currentChild }));
-                    }
+                    } catch(e) { console.error(`Msgs ${child.prenom}:`, e); }
                 }
+                allRec.sort( (a,b) => new Date(b.date) - new Date(a.date));
+                allSent.sort((a,b) => new Date(b.date) - new Date(a.date));
+                allMessages.received = allRec;
+                allMessages.sent     = allSent;
 
-                // Trier par date (plus récent en premier)
-                allReceivedMessages.sort((a, b) => new Date(b.date) - new Date(a.date));
-                allSentMessages.sort((a, b) => new Date(b.date) - new Date(a.date));
+                const rcEl = document.getElementById('received-count');
+                if (rcEl) rcEl.textContent = allRec.length;
+                const stEl = document.getElementById('sent-count');
+                if (stEl) stEl.textContent = allSent.length;
 
-                // Stocker globalement
-                allMessages.received = allReceivedMessages;
-                allMessages.sent = allSentMessages;
-
-                // Mettre à jour les compteurs
-                const receivedCountEl = document.getElementById('received-count');
-                if (receivedCountEl) {
-                    receivedCountEl.textContent = allMessages.received.length;
-                }
-                const sentCountEl = document.getElementById('sent-count');
-                if (sentCountEl) {
-                    sentCountEl.textContent = allMessages.sent.length;
-                }
-
-                // Mettre à jour le badge de messages non lus
                 updateMessageBadge();
-
-                // Afficher la vue actuelle
                 switchMessageView(currentMessageView);
-
-            } catch (error) {
-                console.error('Erreur chargement messages:', error);
-                if (container) {
-                    container.innerHTML = `
-                        <div class="error-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-error);">
-                            <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">error</span>
-                            <p>Erreur lors du chargement des messages</p>
-                            <button class="md-btn md-btn-filled" onclick="loadMessages()">Réessayer</button>
-                        </div>
-                    `;
-                }
+            } catch(err) {
+                console.error('loadMessages:', err);
+                container.innerHTML = `<div class="msg-list-loading" style="color:var(--md-sys-color-error)">
+                    <span class="material-icons">error</span><span>Erreur de chargement</span>
+                    <button class="md-btn md-btn-text" onclick="loadMessages()">Réessayer</button></div>`;
             }
         }
 
         function switchMessageView(view) {
             currentMessageView = view;
-
-            // Mettre à jour les boutons actifs
-            const btnReceived = document.getElementById('btn-received');
-            if (btnReceived) {
-                btnReceived.classList.toggle('active', view === 'received');
-            }
-            const btnSent = document.getElementById('btn-sent');
-            if (btnSent) {
-                btnSent.classList.toggle('active', view === 'sent');
-            }
-
-            // Afficher les messages
-            displayMessages(view);
+            document.getElementById('btn-received')?.classList.toggle('active', view === 'received');
+            document.getElementById('btn-sent')?.classList.toggle('active', view === 'sent');
+            renderEleveMsgList();
         }
 
-        function displayMessages(view) {
-            const messages = allMessages[view] || [];
+        function renderEleveMsgList() {
             const container = document.getElementById('messagesContainer');
-            const emptyState = document.getElementById('emptyState');
-
-            if (!container || !emptyState) return;
-
-            if (messages.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
+            if (!container) return;
+            const search = (document.getElementById('messageSearch')?.value || '').toLowerCase();
+            let msgs = allMessages[currentMessageView] || [];
+            if (search) msgs = msgs.filter(m => {
+                const other = currentMessageView === 'received' ? m.expediteurNom : m.destinataireNom;
+                return (other||'').toLowerCase().includes(search) || (m.contenu||'').toLowerCase().includes(search);
+            });
+            if (msgs.length === 0) {
+                container.innerHTML = `<div class="msg-panel-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--md-sys-color-on-surface-variant)">
+                    <span class="material-icons" style="font-size:48px;opacity:.4">mail_outline</span>
+                    <span>${search ? 'Aucun résultat' : 'Aucun message'}</span></div>`;
                 return;
             }
-
-            emptyState.style.display = 'none';
-
-            const messageCards = messages.map(m => createMessageCard(m, view)).join('');
-            container.innerHTML = messageCards;
+            container.innerHTML = msgs.map(m => createEleveMsgListItem(m, currentMessageView)).join('');
         }
 
-        function createMessageCard(message, view) {
-            const isReceived = view === 'received';
-            const otherName = isReceived ? message.expediteurNom : message.destinataireNom;
-            const otherInitial = otherName ? otherName[0].toUpperCase() : 'U';
-            const date = new Date(message.date).toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+        function filterMessages() { renderEleveMsgList(); }
 
-            // Badge pour l'enfant concerné
-            const childBadge = message.child ? `<div class="child-badges-inline"><span class="child-badge">${message.child.prenom}</span></div>` : '';
-
-            return `
-                <div class="message-card ${!message.lu && isReceived ? 'unread' : ''}" onclick="openMessage('${message.id}')">
-                    <div class="message-avatar">${otherInitial}</div>
-                    <div class="message-content">
-                        <div class="message-header">
-                            <span class="message-sender">${isReceived ? 'De: ' : '�?: '}${otherName || 'Inconnu'}</span>
-                            <span class="message-date">${date}</span>
-                        </div>
-                        ${childBadge}
-                        <p class="message-preview">${message.contenu.length > 100 ? message.contenu.substring(0, 100) + '...' : message.contenu}</p>
+        function createEleveMsgListItem(m, view) {
+            const isRec  = view === 'received';
+            const other  = isRec ? (m.expediteurNom || 'Inconnu') : (m.destinataireNom || 'Inconnu');
+            const initials= other.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+            const dateStr = new Date(m.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
+            const preview = (m.contenu||'').replace(/<[^>]+>/g,'').substring(0,80);
+            const unread  = isRec && !m.lu;
+            const childBadge = m.child ? `<span class="msg-item-badge" style="margin-left:4px;font-size:11px;background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);padding:1px 7px;border-radius:20px;">${m.child.prenom}</span>` : '';
+            return `<div class="msg-list-item${unread?' msg-list-item-unread':''}" onclick="openEleveMsgReadPanel('${m.id}')">
+                <div class="msg-list-avatar">${initials}</div>
+                <div class="msg-list-info">
+                    <div class="msg-list-top">
+                        <span class="msg-list-name">${other}${childBadge}</span>
+                        <span class="msg-list-date">${dateStr}</span>
                     </div>
-                    ${!message.lu && isReceived ? '<div class="message-unread-dot"></div>' : ''}
+                    <div class="msg-list-preview">${preview || '…'}</div>
                 </div>
-            `;
+                ${unread ? '<span class="msg-unread-dot"></span>' : ''}
+            </div>`;
         }
 
-        function filterMessages() {
-            const searchInput = document.getElementById('messageSearch');
-            if (!searchInput) return;
+        async function openEleveMsgReadPanel(id) {
+            const m = [...allMessages.received, ...allMessages.sent].find(x => x.id === id);
+            if (!m) return;
+            const isRec = m.destinataireId === m.child?.id;
 
-            const searchTerm = searchInput.value.toLowerCase();
-            const messages = allMessages[currentMessageView] || [];
-
-            if (!searchTerm) {
-                displayMessages(currentMessageView);
-                return;
-            }
-
-            const filteredMessages = messages.filter(m => {
-                const otherName = currentMessageView === 'received' ? m.expediteurNom : m.destinataireNom;
-                return (otherName || '').toLowerCase().includes(searchTerm) ||
-                       m.contenu.toLowerCase().includes(searchTerm);
-            });
-
-            const container = document.getElementById('messagesContainer');
-            const emptyState = document.getElementById('emptyState');
-
-            if (!container || !emptyState) return;
-
-            if (filteredMessages.length === 0) {
-                container.innerHTML = '<p class="text-on-surface-variant">Aucun message trouvé</p>';
-                emptyState.style.display = 'none';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            const messageCards = filteredMessages.map(m => createMessageCard(m, currentMessageView)).join('');
-            container.innerHTML = messageCards;
-        }
-
-        async function openMessage(id) {
-            const message = [...allMessages.received, ...allMessages.sent].find(m => m.id === id);
-            if (!message) return;
-
-            const isReceived = message.destinataireId === message.child.id;
-
-            // Marquer comme lu si c'est un message reçu non lu
-            if (isReceived && !message.lu) {
+            // Marquer lu
+            if (isRec && !m.lu) {
                 try {
                     await fetch(`${API_URL}/messagerie/${id}/lu`, {
                         method: 'PUT',
-                        headers: {
-                            'x-user-id': message.child.id,
-                            'x-user-role': 'eleve'
-                        }
+                        headers: { 'Authorization': `Bearer ${token}`, 'x-user-id': m.child.id, 'x-user-role': 'eleve' }
                     });
-                    message.lu = true;
+                    m.lu = true;
                     updateMessageBadge();
-                    displayMessages(currentMessageView);
-                } catch (error) {
-                    console.error('Erreur marquage lu:', error);
-                }
+                    renderEleveMsgList();
+                } catch(e) { console.error('Marquage lu:', e); }
             }
 
-            const otherName = isReceived ? message.expediteurNom : message.destinataireNom;
-            const date = new Date(message.date).toLocaleDateString('fr-FR', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const other   = isRec ? (m.expediteurNom||'Inconnu') : (m.destinataireNom||'Inconnu');
+            const initials= other.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+            const dateStr = new Date(m.date).toLocaleDateString('fr-FR', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+            const childInfo = m.child ? ` · <span style="font-size:12px;opacity:.7">concernant ${m.child.prenom} ${m.child.nom}</span>` : '';
 
-            // Afficher pour quel enfant est le message
-            const childInfo = message.child ? ` pour ${message.child.prenom} ${message.child.nom}` : '';
+            const metaEl = document.getElementById('eleveMsgReadMeta');
+            if (metaEl) metaEl.innerHTML = `
+                <div class="msg-read-avatar">${initials}</div>
+                <div class="msg-read-info">
+                    <div class="msg-read-name">${other}</div>
+                    <div class="msg-read-date">${isRec?'Reçu':'Envoyé'} le ${dateStr}${childInfo}</div>
+                </div>`;
 
-            showDialog(`Message ${isReceived ? 'reçu' : 'envoyé'}${childInfo}`, `
-                <div class="message-detail">
-                    <div class="message-detail-header">
-                        <div class="message-detail-meta">
-                            <span class="message-detail-label">${isReceived ? 'De:' : '�?:'}</span>
-                            <span class="message-detail-value">${otherName || 'Inconnu'}</span>
-                        </div>
-                        <div class="message-detail-meta">
-                            <span class="message-detail-label">Date:</span>
-                            <span class="message-detail-value">${date}</span>
-                        </div>
-                        ${message.child ? `
-                        <div class="message-detail-meta">
-                            <span class="message-detail-label">Concernant:</span>
-                            <span class="message-detail-value">${message.child.prenom} ${message.child.nom}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                    <div class="message-detail-content">
-                        ${message.contenu.replace(/\n/g, '<br>')}
-                    </div>
-                </div>
-            `);
+            const actEl = document.getElementById('eleveMsgReadActions');
+            if (actEl) actEl.innerHTML = isRec ? `
+                <button class="msg-action-btn" title="Répondre" onclick="openEleveComposePanel('${m.expediteurId}','${(m.expediteurNom||'').replace(/'/g,"\\'")}')">
+                    <span class="material-icons">reply</span></button>` : '';
+
+            const bodyEl = document.getElementById('eleveMsgReadBody');
+            if (bodyEl) bodyEl.innerHTML = `<div class="msg-read-text">${(m.contenu||'').replace(/\n/g,'<br>')}</div>`;
+
+            const attEl = document.getElementById('eleveMsgReadAttachments');
+            if (attEl && m.piecesJointes?.length) {
+                attEl.innerHTML = `<div class="msg-read-att-title"><span class="material-icons">attach_file</span> Pièces jointes</div>
+                    <div class="msg-att-grid">${m.piecesJointes.map(f => `
+                        <a href="/uploads/messagerie/${f.filename}" target="_blank" class="msg-att-chip">
+                            <span class="material-icons">${getEleveFileIcon(f.mimetype)}</span>
+                            <span>${f.originalname||f.filename}</span>
+                        </a>`).join('')}</div>`;
+            } else if (attEl) { attEl.innerHTML = ''; }
+
+            showEleveMsgPanel('read');
         }
 
-        function updateMessageBadge() {
-            const unreadCount = allMessages.received.filter(m => !m.lu).length;
-            
-            // Mettre à jour la variable globale
-            totalUnreadMessages = unreadCount;
-            
-            // Mettre à jour le badge dans la sidebar
-            const badge = document.getElementById('messageBadge');
-            if (badge) {
-                if (unreadCount > 0) {
-                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-            
-            // Mettre à jour le widget sur l'accueil
-            const unreadMessagesEl = document.getElementById('unreadMessages');
-            if (unreadMessagesEl) {
-                unreadMessagesEl.textContent = unreadCount;
-            }
-        }
-
-        async function showComposeMessage(destinataireId = '', destinataireNom = '') {
+        async function openEleveComposePanel(preselId = '', preselNom = '') {
+            showEleveMsgPanel('compose');
             selectedDestinatairesMessage = [];
 
+            // Populer le select enfant
+            const childSel = document.getElementById('selectedChildForMessage');
+            if (childSel) {
+                const members = (familyMembers && familyMembers.length > 0) ? familyMembers : [currentChild];
+                childSel.innerHTML = members.map(c => `<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');
+                childSel.onchange = async () => {
+                    selectedDestinatairesMessage = [];
+                    updateEleveComposeChips();
+                    await loadEleveComposeDestinataires(childSel.value);
+                };
+            }
+
+            await loadEleveComposeDestinataires(childSel?.value || currentChild.id, preselId, preselNom);
+
+            const msgEl = document.getElementById('eleveComposeMessage');
+            if (msgEl) msgEl.value = '';
+            const filesEl = document.getElementById('elevePiecesJointes');
+            if (filesEl) filesEl.value = '';
+            const prevEl = document.getElementById('eleveAttachmentPreview');
+            if (prevEl) prevEl.innerHTML = '';
+        }
+
+        async function loadEleveComposeDestinataires(childId, preselId = '', preselNom = '') {
+            const listEl = document.getElementById('eleveComposeDestList');
+            if (listEl) listEl.innerHTML = '<div class="msg-dest-loading"><span class="material-icons msg-spin">sync</span><span>Chargement…</span></div>';
             try {
-                const response = await fetch(`${API_URL}/messagerie/destinataires`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'x-user-id': currentChild.id,
-                        'x-user-role': 'eleve'
-                    }
+                const resp = await fetch(`${API_URL}/messagerie/destinataires`, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'x-user-id': childId, 'x-user-role': 'eleve' }
                 });
-                const destinataires = await response.json();
-
-                // Sauvegarder la liste complète disponible (id, role, type)
-                availableDestinataires = destinataires;
-
-                if (!response.ok) {
-                    showSnackbar(destinataires.error || 'Erreur chargement destinataires');
-                    return;
+                const data = await resp.json();
+                if (!resp.ok) { showSnackbar(data.error || 'Erreur destinataires'); return; }
+                availableDestinataires = data;
+                if (preselId) {
+                    const found = availableDestinataires.find(d => d.id === preselId);
+                    selectedDestinatairesMessage = [found || { id: preselId, nom: preselNom, type:'user' }];
+                    updateEleveComposeChips();
                 }
-
-                // Pré-sélectionner le destinataire si fourni (rechercher l'objet complet)
-                if (destinataireId) {
-                    const found = availableDestinataires.find(d => d.id === destinataireId);
-                    selectedDestinatairesMessage = [found || { id: destinataireId, nom: destinataireNom, type: 'user' }];
-                }
-
-                showDialog('Nouveau message', `
-                    <div class="compose-message">
-                        <div class="child-selection-section">
-                            <label class="destinataires-label">Envoyer en tant que:</label>
-                            <select id="selectedChildForMessage" class="child-select">
-                                ${familyMembers.map(child => `<option value="${child.id}">${child.prenom} ${child.nom}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="destinataires-section">
-                            <label class="destinataires-label">Destinataires:</label>
-                            <div class="destinataires-input">
-                                <div class="selected-destinataires" id="selectedDestinataires">
-                                    ${selectedDestinatairesMessage.map(d => `
-                                        <span class="destinataire-chip">
-                                            ${d.nom}
-                                            <button type="button" onclick="removeDestinataire('${d.id}')">
-                                                <span class="material-icons">close</span>
-                                            </button>
-                                        </span>
-                                    `).join('')}
-                                </div>
-                                <div class="destinataires-dropdown">
-                                    <input type="text" id="destinataireSearch" placeholder="Rechercher un destinataire..." oninput="filterDestinataires()">
-                                    <div class="destinataires-list" id="destinatairesList">
-                                        ${destinataires.map(d => `
-                                            <div class="destinataire-option" onclick="addDestinataire('${d.id}', '${d.nom.replace(/'/g, "\\'")}')">
-                                                <span class="destinataire-name">${d.nom}</span>
-                                                <span class="destinataire-role">${d.role}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="message-content-section">
-                            <textarea id="messageContent" placeholder="Écrivez votre message..." rows="8"></textarea>
-                        </div>
-                        <div class="attachment-section" style="padding:0 0 8px;">
-                            <label style="display:block;font-size:14px;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;font-weight:500;">
-                                <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">attach_file</span>
-                                Pièces jointes (max 5 fichiers, 10 Mo chacun)
-                            </label>
-                            <input type="file" id="elevePiecesJointes" multiple
-                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
-                                style="display:block;width:100%;padding:10px;border:1px dashed var(--md-sys-color-outline);border-radius:8px;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);cursor:pointer;font-size:14px;"
-                                onchange="updateEleveAttachmentPreview()">
-                            <div id="eleveAttachmentPreview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
-                        </div>
-                    </div>
-                `);
-
-                document.getElementById('dialogActions').innerHTML = `
-                    <button class="md-btn md-btn-text" onclick="closeDialog()">Annuler</button>
-                    <button class="md-btn md-btn-filled" onclick="sendMessage()">Envoyer</button>
-                `;
-
-                // Ajouter un event listener pour recharger les destinataires quand l'enfant change
-                const childSelect = document.getElementById('selectedChildForMessage');
-                if (childSelect) {
-                    childSelect.addEventListener('change', async () => {
-                        const selectedChildId = childSelect.value;
-                        try {
-                            const response = await fetch(`${API_URL}/messagerie/destinataires`, {
-                                headers: {
-                                    'Authorization': `Bearer ${token}`,
-                                    'x-user-id': selectedChildId,
-                                    'x-user-role': 'eleve'
-                                }
-                            });
-                            const newDestinataires = await response.json();
-                            if (response.ok) {
-                                availableDestinataires = newDestinataires;
-                                // Vider les destinataires sélectionnés
-                                selectedDestinatairesMessage = [];
-                                document.getElementById('selectedDestinataires').innerHTML = '';
-                                // Mettre à jour la liste des destinataires disponibles
-                                document.getElementById('destinatairesList').innerHTML = newDestinataires.map(d => `
-                                    <div class="destinataire-option" onclick="addDestinataire('${d.id}', '${d.nom.replace(/'/g, "\\'")}')">
-                                        <span class="destinataire-name">${d.nom}</span>
-                                        <span class="destinataire-role">${d.role}</span>
-                                    </div>
-                                `).join('');
-                            }
-                        } catch (error) {
-                            console.error('Erreur rechargement destinataires:', error);
-                        }
-                    });
-                }
-
-            } catch (error) {
-                console.error('Erreur chargement destinataires:', error);
-                showSnackbar('Erreur lors du chargement des destinataires');
+                renderEleveComposeDestList();
+            } catch(e) {
+                console.error('loadEleveComposeDestinataires:', e);
+                if (listEl) listEl.innerHTML = '<div class="msg-dest-loading" style="color:var(--md-sys-color-error)"><span class="material-icons">error</span><span>Erreur de chargement</span></div>';
             }
         }
 
-        function filterDestinataires() {
-            const searchInput = document.getElementById('destinataireSearch');
-            if (!searchInput) return;
-
-            const searchTerm = searchInput.value.toLowerCase();
-            const options = document.querySelectorAll('.destinataire-option');
-
-            options.forEach(option => {
-                const nameEl = option.querySelector('.destinataire-name');
-                const roleEl = option.querySelector('.destinataire-role');
-                if (!nameEl || !roleEl) return;
-
-                const name = nameEl.textContent.toLowerCase();
-                const role = roleEl.textContent.toLowerCase();
-                const isVisible = name.includes(searchTerm) || role.includes(searchTerm);
-                option.style.display = isVisible ? 'flex' : 'none';
+        function renderEleveComposeDestList() {
+            const listEl  = document.getElementById('eleveComposeDestList');
+            if (!listEl) return;
+            const search  = (document.getElementById('eleveComposeSearchInput')?.value||'').toLowerCase();
+            const groups  = {};
+            availableDestinataires.forEach(d => {
+                if (search && !(d.nom||'').toLowerCase().includes(search) && !(d.role||'').toLowerCase().includes(search)) return;
+                const g = d.role || 'Autres';
+                if (!groups[g]) groups[g] = [];
+                groups[g].push(d);
             });
-        }
-
-        function addDestinataire(id, nom) {
-            if (selectedDestinatairesMessage.some(d => d.id === id)) return;
-
-            // Chercher l'objet complet (contient role et type) dans la liste disponible
-            const found = availableDestinataires.find(d => d.id === id);
-            if (found) {
-                selectedDestinatairesMessage.push(found);
-            } else {
-                // Cas fallback : ajouter un objet minimal
-                selectedDestinatairesMessage.push({ id, nom, type: 'user' });
+            if (!Object.keys(groups).length) {
+                listEl.innerHTML = '<div class="msg-dest-loading"><span class="material-icons">person_off</span><span>Aucun contact trouvé</span></div>';
+                return;
             }
-
-            updateSelectedDestinataires();
+            listEl.innerHTML = Object.entries(groups).map(([group, items]) => `
+                <div class="msg-dest-group-label">${group}</div>
+                ${items.map(d => {
+                    const sel = selectedDestinatairesMessage.some(s => s.id === d.id);
+                    const init = (d.nom||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+                    return `<div class="msg-dest-item${sel?' msg-dest-item-selected':''}" onclick="toggleEleveComposeDest('${d.id}','${(d.nom||'').replace(/'/g,"\\'")}','${d.role||''}','${d.type||'user'}')">
+                        <div class="msg-dest-avatar">${init}</div>
+                        <div class="msg-dest-info">
+                            <div class="msg-dest-name">${d.nom}</div>
+                            <div class="msg-dest-role">${d.role||''}</div>
+                        </div>
+                        ${sel?'<span class="material-icons msg-dest-check">check_circle</span>':''}
+                    </div>`;
+                }).join('')}`).join('');
         }
 
-        function removeDestinataire(id) {
-            selectedDestinatairesMessage = selectedDestinatairesMessage.filter(d => d.id !== id);
-            updateSelectedDestinataires();
+        function filterEleveComposeDestinataires() { renderEleveComposeDestList(); }
+
+        function toggleEleveComposeDest(id, nom, role, type) {
+            const idx = selectedDestinatairesMessage.findIndex(d => d.id === id);
+            if (idx >= 0) { selectedDestinatairesMessage.splice(idx, 1); }
+            else {
+                const found = availableDestinataires.find(d => d.id === id);
+                selectedDestinatairesMessage.push(found || { id, nom, role, type });
+            }
+            updateEleveComposeChips();
+            renderEleveComposeDestList();
         }
 
-        function updateSelectedDestinataires() {
-            const container = document.getElementById('selectedDestinataires');
-            if (!container) return;
-
-            container.innerHTML = selectedDestinatairesMessage.map(d => `
-                <span class="destinataire-chip">
-                    ${d.nom}
-                    <button type="button" onclick="removeDestinataire('${d.id}')">
-                        <span class="material-icons">close</span>
-                    </button>
-                </span>
-            `).join('');
+        function updateEleveComposeChips() {
+            const wrap = document.getElementById('eleveComposeSelectedChips');
+            const ph   = document.getElementById('eleveComposeChipsPlaceholder');
+            if (!wrap) return;
+            Array.from(wrap.querySelectorAll('.msg-chip')).forEach(c => c.remove());
+            selectedDestinatairesMessage.forEach(d => {
+                const chip = document.createElement('span');
+                chip.className = 'msg-chip';
+                chip.innerHTML = `${d.nom}<button class="msg-chip-remove" onclick="toggleEleveComposeDest('${d.id}','${(d.nom||'').replace(/'/g,"\\'")}','${d.role||''}','${d.type||'user'}')"><span class="material-icons">close</span></button>`;
+                wrap.insertBefore(chip, ph);
+            });
+            if (ph) ph.style.display = selectedDestinatairesMessage.length > 0 ? 'none' : '';
         }
 
         async function sendMessage() {
-            const contentEl = document.getElementById('messageContent');
-            const childSelectEl = document.getElementById('selectedChildForMessage');
-            if (!contentEl || !childSelectEl) return;
+            const contenu  = (document.getElementById('eleveComposeMessage')?.value||'').trim();
+            const childSel = document.getElementById('selectedChildForMessage');
+            const childId  = childSel?.value || currentChild.id;
+            const btn      = document.getElementById('eleveMsgSendBtn');
 
-            const contenu = contentEl.value.trim();
-            const selectedChildId = childSelectEl.value;
-
-            if (selectedDestinatairesMessage.length === 0 || !contenu || !selectedChildId) {
-                showSnackbar('Veuillez sélectionner un enfant, au moins un destinataire et saisir un message');
+            if (!selectedDestinatairesMessage.length || !contenu) {
+                showSnackbar('Veuillez sélectionner au moins un destinataire et saisir un message');
                 return;
             }
 
+            if (btn) { btn.disabled = true; btn.classList.add('msg-send-btn-loading'); }
+
             const formData = new FormData();
-            formData.append('expediteurId', selectedChildId);
-            formData.append('destinataires', JSON.stringify(
-                selectedDestinatairesMessage.map(d => ({ id: d.id, type: d.type, role: d.role }))
-            ));
+            formData.append('expediteurId', childId);
+            formData.append('destinataires', JSON.stringify(selectedDestinatairesMessage.map(d => ({ id:d.id, type:d.type||'user', role:d.role||'' }))));
             formData.append('contenu', contenu);
 
             const filesInput = document.getElementById('elevePiecesJointes');
-            if (filesInput && filesInput.files.length > 0) {
-                if (filesInput.files.length > 5) {
-                    showSnackbar('Maximum 5 pièces jointes autorisées');
-                    return;
-                }
-                for (const file of filesInput.files) {
-                    formData.append('piecesJointes', file);
-                }
+            if (filesInput?.files.length) {
+                if (filesInput.files.length > 5) { showSnackbar('Maximum 5 pièces jointes'); if(btn){btn.disabled=false;btn.classList.remove('msg-send-btn-loading');} return; }
+                for (const f of filesInput.files) formData.append('piecesJointes', f);
             }
 
             try {
-                const response = await fetch(`${API_URL}/messagerie`, {
+                const resp = await fetch(`${API_URL}/messagerie`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'x-user-id': selectedChildId,
-                        'x-user-role': 'eleve'
-                    },
+                    headers: { 'Authorization': `Bearer ${token}`, 'x-user-id': childId, 'x-user-role': 'eleve' },
                     body: formData
                 });
-
-                if (response.ok) {
+                if (resp.ok) {
+                    if (btn) { btn.classList.add('msg-send-btn-pop'); setTimeout(()=>btn.classList.remove('msg-send-btn-pop'),600); }
                     showSnackbar('Message envoyé avec succès !');
-                    closeDialog();
-                    loadMessages();
+                    selectedDestinatairesMessage = [];
+                    closeEleveMsgPanel();
+                    await loadMessages();
                 } else {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Erreur envoi message');
+                    const err = await resp.json();
+                    throw new Error(err.error || 'Erreur envoi');
                 }
-            } catch (error) {
-                console.error('Erreur envoi message:', error);
-                showSnackbar(error.message || 'Erreur lors de l\'envoi du message');
+            } catch(e) {
+                console.error('sendMessage:', e);
+                showSnackbar(e.message || 'Erreur lors de l\'envoi');
+            } finally {
+                if (btn) { btn.disabled = false; btn.classList.remove('msg-send-btn-loading'); }
             }
         }
 
-        // Prévisualisation des pièces jointes (élève)
+        function showEleveMsgPanel(mode) {
+            const empty   = document.getElementById('eleveMsgPanelEmpty');
+            const readV   = document.getElementById('eleveMsgReadView');
+            const compV   = document.getElementById('eleveMsgComposeView');
+            if (empty)  empty.style.display   = 'none';
+            if (readV)  readV.style.display   = 'none';
+            if (compV)  compV.style.display   = 'none';
+            if (mode === 'read'    && readV) readV.style.display = 'flex';
+            if (mode === 'compose' && compV) compV.style.display = 'flex';
+        }
+
+        function closeEleveMsgPanel() {
+            const empty = document.getElementById('eleveMsgPanelEmpty');
+            const readV = document.getElementById('eleveMsgReadView');
+            const compV = document.getElementById('eleveMsgComposeView');
+            if (empty) empty.style.display = '';
+            if (readV) readV.style.display = 'none';
+            if (compV) compV.style.display = 'none';
+        }
+
+        function updateMessageBadge() {
+            totalUnreadMessages = allMessages.received.filter(m => !m.lu).length;
+            const badge = document.getElementById('messageBadge');
+            if (badge) {
+                if (totalUnreadMessages > 0) { badge.textContent = totalUnreadMessages > 99 ? '99+' : totalUnreadMessages; badge.style.display = 'flex'; }
+                else badge.style.display = 'none';
+            }
+            const unreadEl = document.getElementById('unreadMessages');
+            if (unreadEl) unreadEl.textContent = totalUnreadMessages;
+        }
+
         function updateEleveAttachmentPreview() {
             const preview = document.getElementById('eleveAttachmentPreview');
-            const input = document.getElementById('elevePiecesJointes');
+            const input   = document.getElementById('elevePiecesJointes');
             if (!preview || !input) return;
             preview.innerHTML = '';
             Array.from(input.files).forEach(file => {
                 const chip = document.createElement('div');
-                chip.style.cssText = 'display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--md-sys-color-secondary-container);border-radius:12px;font-size:13px;color:var(--md-sys-color-on-secondary-container);';
-                chip.innerHTML = `<span class="material-icons" style="font-size:14px;">attach_file</span>${file.name} <span style="opacity:.6">(${(file.size/1024).toFixed(0)} Ko)</span>`;
+                chip.className = 'msg-attach-chip';
+                chip.innerHTML = `<span class="material-icons">${getEleveFileIcon(file.type)}</span><span>${file.name}</span><span style="opacity:.6;font-size:11px">${(file.size/1024).toFixed(0)} Ko</span>`;
                 preview.appendChild(chip);
             });
         }
+
+        function getEleveFileIcon(mime) {
+            if (!mime) return 'attach_file';
+            if (mime.startsWith('image/')) return 'image';
+            if (mime === 'application/pdf') return 'picture_as_pdf';
+            if (mime.includes('word')) return 'description';
+            if (mime.includes('excel') || mime.includes('spreadsheet') || mime.includes('csv')) return 'table_chart';
+            if (mime.includes('powerpoint') || mime.includes('presentation')) return 'slideshow';
+            if (mime.includes('zip') || mime.includes('rar')) return 'folder_zip';
+            return 'attach_file';
+        }
+
+        // Alias compatibilité
+        function showComposeMessage(id='', nom='') { openEleveComposePanel(id, nom); }
+
 
         async function showActualiteDetails(id) {
             try {
                 const response = await fetch(`${API_URL}/actualites/${id}`);
                 if (response.ok) {
                     const actualite = await response.json();
+                    const pj = Array.isArray(actualite.piecesJointes) ? actualite.piecesJointes : [];
+
+                    const getFileIcon = (type, name) => {
+                        if (type && type.startsWith('image/')) return 'image';
+                        if (name && name.match(/\.pdf$/i)) return 'picture_as_pdf';
+                        if (name && name.match(/\.(doc|docx)$/i)) return 'description';
+                        if (name && name.match(/\.(xls|xlsx|csv)$/i)) return 'table_chart';
+                        if (name && name.match(/\.(zip|rar)$/i)) return 'folder_zip';
+                        return 'insert_drive_file';
+                    };
+
+                    const pjHtml = pj.length > 0 ? `
+                        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--md-sys-color-outline-variant);">
+                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+                                <span class="material-icons" style="font-size:15px;">attach_file</span>
+                                Pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
+                            </div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                ${pj.map(f => `
+                                    <a href="${f.url}" target="_blank" download="${f.nom}"
+                                       style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+                                              background:var(--md-sys-color-surface-container);
+                                              border-radius:20px;font-size:13px;color:var(--md-sys-color-on-surface);
+                                              text-decoration:none;border:1px solid var(--md-sys-color-outline-variant);">
+                                        <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-primary);">${getFileIcon(f.type, f.nom)}</span>
+                                        <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.nom}</span>
+                                    </a>`).join('')}
+                            </div>
+                        </div>` : '';
+
                     showDialog(actualite.titre, `
                         <div style="margin-bottom: 16px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -3474,6 +3256,7 @@
                             <div style="padding: 16px; background: var(--md-sys-color-surface-container); border-radius: 8px; line-height: 1.6;">
                                 ${actualite.description}
                             </div>
+                            ${pjHtml}
                         </div>
                     `);
                 }

@@ -194,6 +194,68 @@
             font-weight: 500;
         }
 
+        /* Zone de dépôt pièces jointes actualités */
+        .actu-pj-dropzone {
+            border: 2px dashed var(--md-sys-color-outline);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--md-sys-color-surface-container-lowest);
+        }
+        .actu-pj-dropzone:hover, .actu-pj-dropzone.drag-over {
+            border-color: var(--md-sys-color-primary);
+            background: var(--md-sys-color-primary-container);
+        }
+        .actu-pj-dropzone .material-icons {
+            font-size: 36px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+        }
+        .actu-pj-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .actu-pj-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--md-sys-color-secondary-container);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--md-sys-color-on-secondary-container);
+            max-width: 260px;
+        }
+        .actu-pj-chip .material-icons { font-size: 16px; }
+        .actu-pj-chip span.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .actu-pj-chip button {
+            background: none; border: none; cursor: pointer;
+            color: var(--md-sys-color-error); padding: 0; line-height: 1;
+            display: flex; align-items: center;
+        }
+        .actu-pj-chip button .material-icons { font-size: 16px; }
+        /* Affichage des pièces jointes en lecture */
+        .actu-pj-read-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .actu-pj-read-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px;
+            background: var(--md-sys-color-surface-container);
+            border-radius: 20px; font-size: 13px;
+            color: var(--md-sys-color-on-surface);
+            text-decoration: none;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s;
+        }
+        .actu-pj-read-chip:hover {
+            background: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary);
+        }
+        .actu-pj-read-chip .material-icons { font-size: 16px; color: var(--md-sys-color-primary); }
+
         .appel-save-btn:active {
             transform: translateY(0);
         }
@@ -979,6 +1041,21 @@
                                 <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 12px;">Ou sélectionnez des classes spécifiques :</p>
                                 <div id="cibleClassesContainer" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                             </div>
+
+                            <!-- Section pièces jointes -->
+                            <div class="actualite-form-section">
+                                <h4>
+                                    <span class="material-icons">attach_file</span>
+                                    Pièces jointes
+                                </h4>
+                                <div class="actu-pj-dropzone" id="actuPjDropzone" onclick="document.getElementById('actuPjInput').click()">
+                                    <span class="material-icons">cloud_upload</span>
+                                    <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Cliquez ou glissez-déposez vos fichiers ici</div>
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">PDF, Word, Excel, images… (max 10 Mo par fichier, 5 fichiers)</div>
+                                    <input type="file" id="actuPjInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv" style="display:none;" onchange="onActuPjSelected(this.files)">
+                                </div>
+                                <div class="actu-pj-list" id="actuPjList"></div>
+                            </div>
                             
                             <div style="display: flex; gap: 16px; margin-top: 24px;">
                                 <button class="md-btn md-btn-outlined" style="flex: 1;" onclick="hideActualiteForm()">
@@ -1468,35 +1545,6 @@
                         </div>
                         <div class="widget-card-content">
                             <div id="inscriptionsList" class="md-grid md-grid-auto"></div>
-                        </div>
-                    </div>
-                    <!-- ========== FRAIS D'INSCRIPTION (visible aux admins/directeur/secretariat) ========= -->
-                    <div class="widget-card" id="fraisInscriptionCard" style="display: none; margin-top: 16px;">
-                        <div class="widget-card-header">
-                            <h3 class="widget-card-title">Frais d'inscription</h3>
-                            <div class="widget-card-actions">
-                                <button class="md-btn md-btn-outlined" onclick="loadFraisInscriptions()">
-                                    <span class="material-icons">refresh</span> Rafraîchir
-                                </button>
-                            </div>
-                        </div>
-                        <div class="widget-card-content">
-                            <!-- Barre de recherche -->
-                            <div style="margin-bottom: 16px;">
-                                <div class="topbar-search" style="width: 100%;">
-                                    <span class="material-icons">search</span>
-                                    <input type="text" id="fraisSearchInput" placeholder="Rechercher par nom, prénom ou famille..." oninput="filterFraisInscriptions()">
-                                    <button type="button" id="clearFraisSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearFraisSearch()">
-                                        <span class="material-icons">clear</span>
-                                    </button>
-                                </div>
-                                <div id="fraisSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
-                                    <span id="filteredFraisCount">0</span> dossier(s) trouvé(s)
-                                </div>
-                            </div>
-                            <div id="fraisList" class="md-grid md-grid-auto">
-                                <p style="color: var(--md-sys-color-on-surface-variant);">Chargement des frais...</p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -5157,9 +5205,7 @@
             
             pendingEleves.forEach(e => {
                 if (e.enFamille && e.familleLienId) {
-                    if (!familles[e.familleLienId]) {
-                        familles[e.familleLienId] = [];
-                    }
+                    if (!familles[e.familleLienId]) familles[e.familleLienId] = [];
                     familles[e.familleLienId].push(e);
                 } else {
                     seuls.push(e);
@@ -5167,93 +5213,166 @@
             });
             
             let html = '';
+
+            // Helper - icône selon le type de fichier email
+            const emailBadge = (email, label) => email
+                ? `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--md-sys-color-surface-container);border-radius:8px;font-size:13px;margin-bottom:4px;">
+                       <span class="material-icons" style="font-size:15px;color:var(--md-sys-color-primary);">email</span>
+                       <span style="color:var(--md-sys-color-on-surface-variant);font-size:11px;">${label}</span>
+                       <span style="font-weight:500;color:var(--md-sys-color-on-surface);">${email}</span>
+                   </div>`
+                : '';
             
-            // Afficher les familles
+            // ---- Afficher les familles ----
             for (const familleId of Object.keys(familles)) {
                 const membres = familles[familleId];
                 
-                // Récupérer les parents du premier membre via l'API
-                let parentInfo = { nom: 'Non renseigné', prenom: '', email: 'Non renseigné' };
+                // Récupérer TOUS les parents du premier membre
+                let allParents = [];
                 try {
                     const resp = await fetch(`${API_URL}/eleves/${membres[0].id}`, { headers: getHeaders() });
                     if (resp.ok) {
                         const data = await resp.json();
-                        if (data.parents && data.parents.length > 0) {
-                            const primaryParent = data.parents.find(p => p.isPrimary) || data.parents[0];
-                            parentInfo = { nom: primaryParent.nom || '', prenom: primaryParent.prenom || '', email: primaryParent.email || 'Non renseigné' };
-                        }
+                        allParents = data.parents || [];
                     }
                 } catch (e) { /* ignore */ }
                 
+                const primaryParent = allParents.find(p => p.isPrimary) || allParents[0] || {};
+                const familyName = primaryParent.nom || 'Non renseignée';
+
+                const parentsHtml = allParents.length > 0
+                    ? `<div style="margin-bottom:12px;">
+                           <p style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;font-weight:500;">
+                               <span class="material-icons" style="font-size:14px;vertical-align:middle;">supervisor_account</span>
+                               ${allParents.length > 1 ? 'Parents :' : 'Parent :'}
+                           </p>
+                           ${allParents.map(p => `
+                               <div style="padding:8px;background:var(--md-sys-color-surface-container);border-radius:8px;margin-bottom:6px;">
+                                   <div style="font-weight:500;font-size:14px;">${p.prenom} ${p.nom}${p.isPrimary ? ' <span style="font-size:11px;color:var(--md-sys-color-tertiary);">(principal)</span>' : ''}</div>
+                                   ${p.activated
+                                       ? `<div style="font-size:12px;color:var(--md-sys-color-primary);display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:13px;">check_circle</span> Compte activé</div>`
+                                       : emailBadge(p.email, 'Email parent :')}
+                               </div>`).join('')}
+                       </div>`
+                    : `<p style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-bottom:12px;">Aucun compte parent</p>`;
+
+                const enfantsHtml = `
+                    <div style="background:var(--md-sys-color-surface-container);padding:12px;border-radius:8px;margin-bottom:12px;">
+                        <p style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;font-weight:500;">
+                            <span class="material-icons" style="font-size:14px;vertical-align:middle;">group</span>
+                            Enfants (${membres.length}) :
+                        </p>
+                        ${membres.map(m => `
+                            <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                                <span class="md-avatar" style="width:32px;height:32px;font-size:14px;flex-shrink:0;">${(m.prenom||'E')[0]}</span>
+                                <div style="flex:1;">
+                                    <div style="font-weight:500;">${m.prenom} ${m.nom}</div>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${m.classe || 'Classe non assignée'}</div>
+                                    ${m.email ? emailBadge(m.email, 'Email élève :') : '<div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);">Pas de compte élève</div>'}
+                                </div>
+                            </div>`).join('')}
+                    </div>`;
+
                 html += `
-                    <div class="md-card md-card-elevated" style="padding: 16px; border-left: 4px solid var(--md-sys-color-tertiary);">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <div class="md-avatar" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                    <div class="md-card md-card-elevated" style="padding:16px;border-left:4px solid var(--md-sys-color-tertiary);">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                            <div class="md-avatar" style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);">
                                 <span class="material-icons">groups</span>
                             </div>
-                            <div style="flex: 1;">
-                                <h4 style="font-weight: 500;">Famille ${parentInfo.nom || 'Non renseigné'}</h4>
-                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s)</p>
+                            <div style="flex:1;">
+                                <h4 style="font-weight:500;">Famille ${familyName}</h4>
+                                <p style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${membres.length} enfant(s) · ${allParents.length} parent(s)</p>
                             </div>
-                            <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-tertiary-container);">Famille</span>
+                            <span class="md-chip md-chip-filter" style="background:var(--md-sys-color-tertiary-container);">Famille</span>
                         </div>
-                        <p style="font-size: 14px; margin-bottom: 8px;"><strong>Parent:</strong> ${parentInfo.prenom} ${parentInfo.nom}</p>
-                        <p style="font-size: 14px; margin-bottom: 12px;"><strong>Email:</strong> ${parentInfo.email}</p>
-                        <div style="background: var(--md-sys-color-surface-container); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                            <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Enfants:</p>
-                            ${membres.map(m => `
-                                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
-                                    <span class="md-avatar" style="width: 32px; height: 32px; font-size: 14px;">${(m.prenom || 'E')[0]}</span>
-                                    <span style="flex: 1;">${m.prenom} ${m.nom}</span>
-                                    <span style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${m.classe || 'Non assigné'}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${membres[0].id}', '${parentInfo.email}', 'eleve')">
-                                <span class="material-icons">send</span> Envoyer l'email d'activation
+                        ${parentsHtml}
+                        ${enfantsHtml}
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="openEditInscription('${membres[0].id}')">
+                                <span class="material-icons">edit</span> Modifier le dossier
+                            </button>` : ''}
+                            <button class="md-btn md-btn-tonal" onclick="sendActivationEmailAll('${membres[0].id}')">
+                                <span class="material-icons">send</span> Renvoyer les emails d'activation
                             </button>
                         </div>
                     </div>
                 `;
             }
             
-            // Afficher les élèves seuls
-            seuls.forEach(e => {
+            // ---- Afficher les élèves seuls ----
+            for (const e of seuls) {
+                // Récupérer les parents s'il y en a
+                let parents = [];
+                try {
+                    const resp = await fetch(`${API_URL}/eleves/${e.id}`, { headers: getHeaders() });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        parents = data.parents || [];
+                    }
+                } catch (_) {}
+
+                const parentsHtml = parents.length > 0
+                    ? `<div style="margin-bottom:12px;">
+                           <p style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-bottom:6px;font-weight:500;">
+                               <span class="material-icons" style="font-size:14px;vertical-align:middle;">supervisor_account</span>
+                               ${parents.length > 1 ? 'Parents :' : 'Parent :'}
+                           </p>
+                           ${parents.map(p => `
+                               <div style="padding:8px;background:var(--md-sys-color-surface-container);border-radius:8px;margin-bottom:4px;">
+                                   <div style="font-weight:500;font-size:14px;">${p.prenom} ${p.nom}${p.isPrimary ? ' <span style="font-size:11px;color:var(--md-sys-color-tertiary);">(principal)</span>' : ''}</div>
+                                   ${p.activated
+                                       ? `<div style="font-size:12px;color:var(--md-sys-color-primary);display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:13px;">check_circle</span> Compte activé</div>`
+                                       : emailBadge(p.email, 'Email parent :')}
+                               </div>`).join('')}
+                       </div>`
+                    : '';
+
                 html += `
-                    <div class="md-card md-card-elevated" style="padding: 16px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <div class="md-avatar">${(e.prenom || 'E')[0].toUpperCase()}</div>
-                            <div style="flex: 1;">
-                                <h4 style="font-weight: 500;">${e.prenom} ${e.nom}</h4>
-                                <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
+                    <div class="md-card md-card-elevated" style="padding:16px;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                            <div class="md-avatar">${(e.prenom||'E')[0].toUpperCase()}</div>
+                            <div style="flex:1;">
+                                <h4 style="font-weight:500;">${e.prenom} ${e.nom}</h4>
+                                <p style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${e.classe || 'Non assigné'}</p>
                             </div>
-                            <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-secondary-container);">En attente</span>
+                            <span class="md-chip md-chip-filter" style="background:var(--md-sys-color-secondary-container);">En attente</span>
                         </div>
-                        ${e.parentNom ? `<p style="font-size: 14px;"><strong>Parent:</strong> ${e.parentPrenom || ''} ${e.parentNom}</p>` : ''}
-                        <p style="font-size: 14px;">Email : ${e.email || 'Non renseigné'}</p>
-                        <div style="margin-top: 12px; display: flex; gap: 8px;">
-                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editEleve('${e.id}')">
-                                <span class="material-icons">edit</span> Modifier
+                        ${parentsHtml}
+                        ${e.email ? emailBadge(e.email, 'Email élève :') : '<p style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-bottom:12px;">Pas de compte élève</p>'}
+                        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="openEditInscription('${e.id}')">
+                                <span class="material-icons">edit</span> Modifier le dossier
                             </button>` : ''}
-                            <button class="md-btn md-btn-filled" onclick="sendActivationEmail('${e.id}', '${e.email}', 'eleve')">
-                                <span class="material-icons">send</span> Envoyer activation
+                            <button class="md-btn md-btn-filled" onclick="sendActivationEmailAll('${e.id}')">
+                                <span class="material-icons">send</span> Envoyer les emails d'activation
                             </button>
                         </div>
                     </div>
                 `;
-            });
+            }
             
             document.getElementById('inscriptionsList').innerHTML = html || '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun dossier d\'inscription en attente</p>';
 
-            // Afficher la section frais d'inscription uniquement pour les rôles autorisés
-            if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
-                const fraisCard = document.getElementById('fraisInscriptionCard');
-                if (fraisCard) fraisCard.style.display = 'block';
-                loadFraisInscriptions();
-            } else {
-                const fraisCard = document.getElementById('fraisInscriptionCard');
-                if (fraisCard) fraisCard.style.display = 'none';
+        }
+
+        // Envoie les emails d'activation à l'élève ET à tous ses parents non activés
+        async function sendActivationEmailAll(eleveId) {
+            try {
+                const response = await fetch(`${API_URL}/email/send-activation-email`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ userId: eleveId, type: 'eleve' })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    const sentCount = (result.results || []).filter(r => r.status === 'sent').length;
+                    showSnackbar(`✅ ${sentCount} email(s) d'activation envoyé(s)`);
+                } else {
+                    showSnackbar(result.error || 'Erreur lors de l\'envoi');
+                }
+            } catch (error) {
+                console.error('Erreur sendActivationEmailAll:', error);
+                showSnackbar('Erreur de connexion');
             }
         }
 
@@ -5264,6 +5383,12 @@
             inscriptionType = 'seul';
             inscriptionEnfantCount = 1;
             selectedExistingFamily = null;
+            inscriptionEditMode = null;
+
+            // Reset titre et bouton valider
+            document.getElementById('inscriptionFormTitle').innerHTML = '<span class="material-icons" style="vertical-align: middle; margin-right: 8px;">edit_note</span>Nouveau dossier d\'inscription';
+            const submitBtn = document.querySelector('#inscriptionStep4 button.md-btn-filled[onclick="submitInscription()"]');
+            if (submitBtn) submitBtn.innerHTML = '<span class="material-icons">check_circle</span> Valider l\'inscription';
             
             // Reset form
             document.getElementById('insc_parentNom').value = '';
@@ -5309,6 +5434,7 @@
         // ========== STEPPER NAVIGATION ==========
         let currentInscriptionStep = 1;
         let selectedExistingFamily = null;
+        let inscriptionEditMode = null; // { eleveIds: [], parentIds: [] } si en mode édition
 
         function goToInscriptionStep(step) {
             if (step > currentInscriptionStep + 1) return; // Can't skip ahead
@@ -5811,6 +5937,12 @@
         }
 
         async function submitInscription() {
+            // Mode édition — mettre à jour les données existantes
+            if (inscriptionEditMode) {
+                await updateInscription();
+                return;
+            }
+
             // Mode "famille existante" — use dedicated endpoint
             if (inscriptionType === 'existante' && selectedExistingFamily) {
                 const enfantFields = document.querySelectorAll('.enfant-field');
@@ -5927,6 +6059,217 @@
 
         function showNewInscriptionForm() {
             showInscriptionForm();
+        }
+
+        // ========== ÉDITION D'UN DOSSIER D'INSCRIPTION ==========
+
+        async function openEditInscription(eleveId) {
+            try {
+                // Charger l'élève principal (avec ses parents)
+                const resp = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
+                if (!resp.ok) throw new Error('Erreur chargement');
+                const data = await resp.json();
+
+                // Charger TOUS les membres de la famille depuis l'API (données complètes)
+                let siblings = [data];
+                if (data.enFamille && data.familleLienId) {
+                    try {
+                        const famResp = await fetch(`${API_URL}/eleves/${eleveId}/famille`, { headers: getHeaders() });
+                        if (famResp.ok) {
+                            const famData = await famResp.json();
+                            if (Array.isArray(famData) && famData.length > 0) siblings = famData;
+                        }
+                    } catch (_) {}
+                }
+
+                const parents = data.parents || [];
+
+                // Reset et ouvrir le formulaire
+                showInscriptionForm();
+
+                // Marquer le mode édition
+                inscriptionEditMode = {
+                    eleveIds: siblings.map(s => s.id),
+                    parentIds: parents.map(p => p.id)
+                };
+
+                // Changer le titre et le bouton de validation
+                document.getElementById('inscriptionFormTitle').innerHTML =
+                    '<span class="material-icons" style="vertical-align:middle;margin-right:8px;">edit</span>Modifier le dossier d\'inscription';
+                const submitBtn = document.querySelector('#inscriptionStep4 button.md-btn-filled[onclick="submitInscription()"]');
+                if (submitBtn) submitBtn.innerHTML = '<span class="material-icons">save</span> Enregistrer les modifications';
+
+                // Sélectionner le type sans appeler renderEnfantFields (on va le faire manuellement)
+                const type = (data.enFamille && data.familleLienId) ? 'famille' : 'seul';
+                inscriptionType = type;
+                document.querySelectorAll('.inscription-type-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.type === type);
+                });
+                document.getElementById('existingFamilySearch').style.display = 'none';
+                if (type === 'famille') {
+                    document.getElementById('addEnfantBtn').style.display = 'inline-flex';
+                    document.getElementById('inscriptionEnfantsTitle').textContent = 'Informations des élèves';
+                }
+
+                // Remplir les parents
+                if (parents.length > 0) {
+                    const p1 = parents.find(p => p.isPrimary) || parents[0];
+                    const parentSection = document.querySelector('.parent-info-section');
+                    if (parentSection && parentSection.style.display === 'none') {
+                        toggleParentSection();
+                    }
+                    document.getElementById('insc_parentNom').value = p1.nom || '';
+                    document.getElementById('insc_parentPrenom').value = p1.prenom || '';
+                    document.getElementById('insc_parentEmail').value = p1.email || '';
+                    document.getElementById('insc_parentTel').value = p1.tel || '';
+                    document.getElementById('insc_parentAdresse').value = p1.adresse || '';
+
+                    const p2 = parents.filter(p => p.id !== p1.id)[0];
+                    if (p2) {
+                        const p2Section = document.getElementById('parent2Section');
+                        if (p2Section && (p2Section.style.display === 'none' || !p2Section.style.display)) {
+                            toggleParent2();
+                        }
+                        document.getElementById('insc_parent2Nom').value = p2.nom || '';
+                        document.getElementById('insc_parent2Prenom').value = p2.prenom || '';
+                        document.getElementById('insc_parent2Email').value = p2.email || '';
+                        document.getElementById('insc_parent2Tel').value = p2.tel || '';
+                        document.getElementById('insc_parent2Adresse').value = p2.adresse || '';
+                    }
+                }
+
+                // Construire les champs enfants
+                inscriptionEnfantCount = siblings.length;
+                const container = document.getElementById('inscriptionEnfantsContainer');
+                let html = '';
+                for (let i = 0; i < siblings.length; i++) html += createEnfantFieldHTML(i);
+                container.innerHTML = html;
+                updateParentFieldsVisibility();
+
+                // Remplir chaque champ enfant en ciblant directement dans le container
+                siblings.forEach((s, i) => {
+                    const field = container.querySelector(`.enfant-field[data-index="${i}"]`);
+                    if (!field) return;
+
+                    const nomInput = field.querySelector('.enfant-nom');
+                    const prenomInput = field.querySelector('.enfant-prenom');
+                    const dateInput = field.querySelector('.enfant-date');
+                    const classeSelect = field.querySelector('.enfant-classe');
+
+                    if (nomInput) nomInput.value = s.nom || '';
+                    if (prenomInput) prenomInput.value = s.prenom || '';
+                    if (dateInput && s.dateNaissance) dateInput.value = s.dateNaissance.split('T')[0];
+                    if (classeSelect && s.classe) classeSelect.value = s.classe;
+
+                    // Frais d'inscription
+                    const fraisInput = field.querySelector('.enfant-frais');
+                    if (fraisInput && s.fraisInscription != null) fraisInput.value = s.fraisInscription;
+                    const nbPaiementsSelect = field.querySelector('.enfant-nbPaiements');
+                    if (nbPaiementsSelect && s.nbPaiements) nbPaiementsSelect.value = s.nbPaiements;
+
+                    if (s.email) {
+                        const emailSection = field.querySelector('.enfant-email-section');
+                        const toggleBtn = field.querySelector('.toggle-account-btn');
+                        const toggleIcon = field.querySelector('.toggle-icon');
+                        if (emailSection) {
+                            emailSection.style.display = 'block';
+                            if (toggleBtn) {
+                                toggleBtn.classList.add('active');
+                                const label = toggleBtn.querySelector('span:nth-child(2)');
+                                if (label) label.textContent = 'Compte élève activé';
+                            }
+                            if (toggleIcon) toggleIcon.textContent = 'expand_less';
+                        }
+                        const emailInput = field.querySelector('.enfant-email');
+                        if (emailInput) emailInput.value = s.email;
+                        const telInput = field.querySelector('.enfant-tel');
+                        if (telInput) telInput.value = s.tel || '';
+                    }
+                });
+
+                // Aller à l'étape 2 (parents) pour que l'utilisateur commence par là
+                currentInscriptionStep = 2;
+                updateStepperUI();
+
+            } catch (err) {
+                console.error('openEditInscription:', err);
+                showSnackbar('Erreur lors du chargement du dossier');
+            }
+        }
+
+        async function updateInscription() {
+            const editMode = inscriptionEditMode;
+            if (!editMode) return;
+            const errors = [];
+
+            // Mise à jour parents
+            const parentSection = document.querySelector('.parent-info-section');
+            const isParentVisible = parentSection && parentSection.style.display !== 'none';
+
+            if (isParentVisible && editMode.parentIds.length > 0) {
+                const nom = document.getElementById('insc_parentNom').value.trim();
+                const prenom = document.getElementById('insc_parentPrenom').value.trim();
+                const email = document.getElementById('insc_parentEmail').value.trim();
+                const tel = document.getElementById('insc_parentTel').value.trim();
+                const adresse = document.getElementById('insc_parentAdresse').value.trim();
+                if (nom && prenom && email) {
+                    const r = await fetch(`${API_URL}/parents/${editMode.parentIds[0]}`, {
+                        method: 'PUT', headers: getHeaders(),
+                        body: JSON.stringify({ nom, prenom, email, tel, adresse })
+                    });
+                    if (!r.ok) { const d = await r.json(); errors.push(d.error || 'Erreur parent 1'); }
+                }
+
+                const p2Section = document.getElementById('parent2Section');
+                if (editMode.parentIds.length > 1 && p2Section && p2Section.style.display !== 'none') {
+                    const p2nom = document.getElementById('insc_parent2Nom').value.trim();
+                    const p2prenom = document.getElementById('insc_parent2Prenom').value.trim();
+                    const p2email = document.getElementById('insc_parent2Email').value.trim();
+                    const p2tel = document.getElementById('insc_parent2Tel').value.trim();
+                    const p2adresse = document.getElementById('insc_parent2Adresse').value.trim();
+                    if (p2nom && p2prenom && p2email) {
+                        const r = await fetch(`${API_URL}/parents/${editMode.parentIds[1]}`, {
+                            method: 'PUT', headers: getHeaders(),
+                            body: JSON.stringify({ nom: p2nom, prenom: p2prenom, email: p2email, tel: p2tel, adresse: p2adresse })
+                        });
+                        if (!r.ok) { const d = await r.json(); errors.push(d.error || 'Erreur parent 2'); }
+                    }
+                }
+            }
+
+            // Mise à jour élèves
+            const enfantFields = document.querySelectorAll('.enfant-field');
+            for (let i = 0; i < enfantFields.length; i++) {
+                const eleveId = editMode.eleveIds[i];
+                if (!eleveId) continue;
+                const field = enfantFields[i];
+                const nom = field.querySelector('.enfant-nom').value.trim();
+                const prenom = field.querySelector('.enfant-prenom').value.trim();
+                if (!nom || !prenom) continue;
+                const dateNaissance = field.querySelector('.enfant-date').value || null;
+                const classe = field.querySelector('.enfant-classe').value || null;
+                const emailSection = field.querySelector('.enfant-email-section');
+                const emailVisible = emailSection && emailSection.style.display !== 'none';
+                const email = emailVisible ? (field.querySelector('.enfant-email')?.value.trim() || null) : null;
+                const tel = emailVisible ? (field.querySelector('.enfant-tel')?.value.trim() || null) : null;
+
+                const r = await fetch(`${API_URL}/eleves/${eleveId}`, {
+                    method: 'PUT', headers: getHeaders(),
+                    body: JSON.stringify({ nom, prenom, dateNaissance, classe, email, tel })
+                });
+                if (!r.ok) { const d = await r.json(); errors.push(d.error || `Erreur élève ${prenom}`); }
+            }
+
+            if (errors.length > 0) {
+                showSnackbar('Erreur : ' + errors[0]);
+                return;
+            }
+
+            showSnackbar('✅ Dossier mis à jour avec succès !');
+            inscriptionEditMode = null;
+            hideInscriptionForm();
+            await loadAllData();
+            loadInscriptions();
         }
 
         // ==================== GESTION DES FRAIS (Admin) ====================
@@ -6526,7 +6869,6 @@
             // Rafraîchir l'affichage
             await loadAllData();
             loadInscriptions();
-            loadFraisInscriptions();
         }
 
         async function validateFraisFamille(familleId) {
@@ -6547,7 +6889,6 @@
             }
             await loadAllData();
             loadInscriptions();
-            loadFraisInscriptions();
         }
 
         // ==================== ACTUALITÉS ====================
@@ -6593,17 +6934,42 @@
         
         function renderActualites() {
             const isAdmin = ['admin', 'directeur', 'secretariat'].includes(user.role);
+
+            const getFileIcon = (type, name) => {
+                if (type && type.startsWith('image/')) return 'image';
+                if (name && name.match(/\.pdf$/i)) return 'picture_as_pdf';
+                if (name && name.match(/\.(doc|docx)$/i)) return 'description';
+                if (name && name.match(/\.(xls|xlsx|csv)$/i)) return 'table_chart';
+                if (name && name.match(/\.(zip|rar)$/i)) return 'folder_zip';
+                return 'insert_drive_file';
+            };
             
             const html = allActualites.length ? allActualites.map(actu => {
                 let cibleLabel = 'Tous';
                 if (actu.cible && actu.cible !== 'tous') {
                     try {
                         const cibles = JSON.parse(actu.cible);
-                        if (Array.isArray(cibles)) {
-                            cibleLabel = cibles.join(', ');
-                        }
+                        if (Array.isArray(cibles)) cibleLabel = cibles.join(', ');
                     } catch { cibleLabel = actu.cible; }
                 }
+
+                // Pièces jointes
+                const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
+                const pjHtml = pj.length > 0 ? `
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+                            <span class="material-icons" style="font-size: 15px;">attach_file</span>
+                            ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
+                        </div>
+                        <div class="actu-pj-read-list">
+                            ${pj.map(f => `
+                                <a href="${f.url}" target="_blank" class="actu-pj-read-chip" download="${f.nom}">
+                                    <span class="material-icons">${getFileIcon(f.type, f.nom)}</span>
+                                    <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.nom}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>` : '';
                 
                 return `
                     <div class="md-card md-card-elevated" style="padding: 0; overflow: hidden;">
@@ -6618,6 +6984,7 @@
                         </div>
                         <div style="padding: 20px;">
                             <p style="color: var(--md-sys-color-on-surface); line-height: 1.6; white-space: pre-wrap;">${actu.description}</p>
+                            ${pjHtml}
                             ${isAdmin ? `
                                 <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
                                     <span class="md-chip" style="font-size: 11px; background: var(--md-sys-color-surface-variant);">
@@ -6640,6 +7007,79 @@
             document.getElementById('actualitesList').innerHTML = html;
         }
         
+        // --- Gestion pièces jointes actualités ---
+        // Fichiers en attente d'upload (File objects)
+        let actuPjNewFiles = [];
+        // Fichiers existants conservés (objets {nom, url, taille, type})
+        let actuPjExistingFiles = [];
+
+        function onActuPjSelected(files) {
+            const arr = Array.from(files);
+            arr.forEach(f => {
+                if (actuPjNewFiles.length + actuPjExistingFiles.length >= 5) {
+                    showToast('Maximum 5 pièces jointes', 'warning'); return;
+                }
+                if (f.size > 10 * 1024 * 1024) {
+                    showToast(`Fichier trop lourd : ${f.name}`, 'warning'); return;
+                }
+                actuPjNewFiles.push(f);
+            });
+            document.getElementById('actuPjInput').value = '';
+            renderActuPjList();
+        }
+
+        function renderActuPjList() {
+            const list = document.getElementById('actuPjList');
+            const getIcon = (type, name) => {
+                if (type && type.startsWith('image/')) return 'image';
+                if (name.match(/\.pdf$/i)) return 'picture_as_pdf';
+                if (name.match(/\.(doc|docx)$/i)) return 'description';
+                if (name.match(/\.(xls|xlsx|csv)$/i)) return 'table_chart';
+                if (name.match(/\.(zip|rar)$/i)) return 'folder_zip';
+                return 'insert_drive_file';
+            };
+            const formatSize = s => s < 1024 ? s + ' o' : s < 1048576 ? (s/1024).toFixed(1) + ' Ko' : (s/1048576).toFixed(1) + ' Mo';
+
+            const existingHtml = actuPjExistingFiles.map((f, i) => `
+                <div class="actu-pj-chip">
+                    <span class="material-icons">${getIcon(f.type, f.nom)}</span>
+                    <span class="name" title="${f.nom}">${f.nom}</span>
+                    <small style="margin-left:4px;color:var(--md-sys-color-on-surface-variant)">${formatSize(f.taille || 0)}</small>
+                    <button onclick="removeActuPjExisting(${i})" title="Supprimer"><span class="material-icons">close</span></button>
+                </div>`);
+
+            const newHtml = actuPjNewFiles.map((f, i) => `
+                <div class="actu-pj-chip">
+                    <span class="material-icons">${getIcon(f.type, f.name)}</span>
+                    <span class="name" title="${f.name}">${f.name}</span>
+                    <small style="margin-left:4px;color:var(--md-sys-color-on-surface-variant)">${formatSize(f.size)}</small>
+                    <button onclick="removeActuPjNew(${i})" title="Supprimer"><span class="material-icons">close</span></button>
+                </div>`);
+
+            list.innerHTML = existingHtml.join('') + newHtml.join('');
+        }
+
+        function removeActuPjExisting(i) {
+            actuPjExistingFiles.splice(i, 1);
+            renderActuPjList();
+        }
+        function removeActuPjNew(i) {
+            actuPjNewFiles.splice(i, 1);
+            renderActuPjList();
+        }
+
+        // Drag & drop
+        document.addEventListener('DOMContentLoaded', () => {
+            const zone = document.getElementById('actuPjDropzone');
+            if (!zone) return;
+            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+            zone.addEventListener('drop', e => {
+                e.preventDefault(); zone.classList.remove('drag-over');
+                onActuPjSelected(e.dataTransfer.files);
+            });
+        });
+
         function showActualiteForm(editMode = false) {
             document.getElementById('actualiteFormCard').style.display = 'block';
             document.getElementById('actualitesListCard').style.display = 'none';
@@ -6650,14 +7090,21 @@
                 document.getElementById('actualite_titre').value = '';
                 document.getElementById('actualite_description').value = '';
                 document.getElementById('actualite_date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('actualite_dateFin').value = '';
                 document.getElementById('cible_tous').checked = true;
                 document.querySelectorAll('.cible-specific').forEach(cb => cb.checked = false);
+                actuPjNewFiles = [];
+                actuPjExistingFiles = [];
+                renderActuPjList();
             }
         }
         
         function hideActualiteForm() {
             document.getElementById('actualiteFormCard').style.display = 'none';
             document.getElementById('actualitesListCard').style.display = 'block';
+            actuPjNewFiles = [];
+            actuPjExistingFiles = [];
+            renderActuPjList();
         }
         
         function toggleCibleTous(checkbox) {
@@ -6694,28 +7141,34 @@
                 document.querySelectorAll('.cible-classe:checked').forEach(cb => {
                     selectedCibles.push(cb.value);
                 });
-                if (selectedCibles.length > 0) {
-                    cible = selectedCibles;
-                }
+                if (selectedCibles.length > 0) cible = selectedCibles;
             }
             
             try {
                 const url = editId ? `${API_URL}/actualites/${editId}` : `${API_URL}/actualites`;
                 const method = editId ? 'PUT' : 'POST';
                 
-                const response = await fetch(url, {
-                    method,
-                    headers: getHeaders(),
-                    body: JSON.stringify({
-                        titre,
-                        description,
-                        date,
-                        dateFin: dateFin || null,
-                        auteurId: user.id,
-                        auteurNom: `${user.prenom || ''} ${user.nom || user.email.split('@')[0]}`.trim(),
-                        cible
-                    })
-                });
+                // Utiliser FormData pour supporter les fichiers
+                const formData = new FormData();
+                formData.append('titre', titre);
+                formData.append('description', description);
+                formData.append('date', date);
+                if (dateFin) formData.append('dateFin', dateFin);
+                formData.append('auteurId', user.id || '');
+                formData.append('auteurNom', `${user.prenom || ''} ${user.nom || user.email.split('@')[0]}`.trim());
+                formData.append('cible', Array.isArray(cible) ? JSON.stringify(cible) : cible);
+
+                // Pièces jointes existantes conservées (mode édition)
+                if (editId) {
+                    formData.append('piecesJointesExistantes', JSON.stringify(actuPjExistingFiles));
+                }
+                // Nouveaux fichiers
+                actuPjNewFiles.forEach(f => formData.append('piecesJointes', f));
+
+                // Supprimer Content-Type pour laisser le navigateur gérer le multipart
+                const headers = getHeadersFormData();
+
+                const response = await fetch(url, { method, headers, body: formData });
                 
                 if (response.ok) {
                     showToast(editId ? 'Actualité modifiée avec succès' : 'Actualité publiée avec succès', 'success');
@@ -6741,7 +7194,12 @@
             document.getElementById('actualite_description').value = actu.description;
             document.getElementById('actualite_date').value = actu.date || '';
             document.getElementById('actualite_dateFin').value = actu.dateFin || '';
-            
+
+            // Restaurer les pièces jointes existantes
+            actuPjNewFiles = [];
+            actuPjExistingFiles = Array.isArray(actu.piecesJointes) ? [...actu.piecesJointes] : [];
+            renderActuPjList();
+
             // Restaurer les cibles
             document.getElementById('cible_tous').checked = !actu.cible || actu.cible === 'tous';
             document.querySelectorAll('.cible-specific').forEach(cb => cb.checked = false);
