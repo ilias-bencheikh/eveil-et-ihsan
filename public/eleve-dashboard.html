@@ -3268,7 +3268,18 @@
                             </div>
                         </div>
                         <div class="message-content-section">
-                            <textarea id="messageContent" placeholder="�?crivez votre message..." rows="8"></textarea>
+                            <textarea id="messageContent" placeholder="Écrivez votre message..." rows="8"></textarea>
+                        </div>
+                        <div class="attachment-section" style="padding:0 0 8px;">
+                            <label style="display:block;font-size:14px;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;font-weight:500;">
+                                <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">attach_file</span>
+                                Pièces jointes (max 5 fichiers, 10 Mo chacun)
+                            </label>
+                            <input type="file" id="elevePiecesJointes" multiple
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
+                                style="display:block;width:100%;padding:10px;border:1px dashed var(--md-sys-color-outline);border-radius:8px;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);cursor:pointer;font-size:14px;"
+                                onchange="updateEleveAttachmentPreview()">
+                            <div id="eleveAttachmentPreview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
                         </div>
                     </div>
                 `);
@@ -3383,20 +3394,33 @@
                 return;
             }
 
+            const formData = new FormData();
+            formData.append('expediteurId', selectedChildId);
+            formData.append('destinataires', JSON.stringify(
+                selectedDestinatairesMessage.map(d => ({ id: d.id, type: d.type, role: d.role }))
+            ));
+            formData.append('contenu', contenu);
+
+            const filesInput = document.getElementById('elevePiecesJointes');
+            if (filesInput && filesInput.files.length > 0) {
+                if (filesInput.files.length > 5) {
+                    showSnackbar('Maximum 5 pièces jointes autorisées');
+                    return;
+                }
+                for (const file of filesInput.files) {
+                    formData.append('piecesJointes', file);
+                }
+            }
+
             try {
                 const response = await fetch(`${API_URL}/messagerie`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
                         'x-user-id': selectedChildId,
                         'x-user-role': 'eleve'
                     },
-                    body: JSON.stringify({
-                        expediteurId: selectedChildId,
-                        destinataires: selectedDestinatairesMessage.map(d => ({ id: d.id, type: d.type, role: d.role })),
-                        contenu
-                    })
+                    body: formData
                 });
 
                 if (response.ok) {
@@ -3411,6 +3435,20 @@
                 console.error('Erreur envoi message:', error);
                 showSnackbar(error.message || 'Erreur lors de l\'envoi du message');
             }
+        }
+
+        // Prévisualisation des pièces jointes (élève)
+        function updateEleveAttachmentPreview() {
+            const preview = document.getElementById('eleveAttachmentPreview');
+            const input = document.getElementById('elevePiecesJointes');
+            if (!preview || !input) return;
+            preview.innerHTML = '';
+            Array.from(input.files).forEach(file => {
+                const chip = document.createElement('div');
+                chip.style.cssText = 'display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--md-sys-color-secondary-container);border-radius:12px;font-size:13px;color:var(--md-sys-color-on-secondary-container);';
+                chip.innerHTML = `<span class="material-icons" style="font-size:14px;">attach_file</span>${file.name} <span style="opacity:.6">(${(file.size/1024).toFixed(0)} Ko)</span>`;
+                preview.appendChild(chip);
+            });
         }
 
         async function showActualiteDetails(id) {

@@ -171,11 +171,18 @@ function initDatabase() {
                 contenu TEXT NOT NULL,
                 date TEXT NOT NULL,
                 lu INTEGER DEFAULT 0,
-                enfantId TEXT
+                enfantId TEXT,
+                deleted_by_sender INTEGER DEFAULT 0,
+                deleted_by_receiver INTEGER DEFAULT 0
             )`);
 
             // Migration : ajouter enfantId aux messages (pour contexte "Parent de enfant")
             db.run(`ALTER TABLE messages ADD COLUMN enfantId TEXT`, () => {});
+            // Migration : soft delete par utilisateur (boîte de réception indépendante)
+            db.run(`ALTER TABLE messages ADD COLUMN deleted_by_sender INTEGER DEFAULT 0`, () => {});
+            db.run(`ALTER TABLE messages ADD COLUMN deleted_by_receiver INTEGER DEFAULT 0`, () => {});
+            // Migration : pièces jointes (JSON array des métadonnées de fichiers)
+            db.run(`ALTER TABLE messages ADD COLUMN piecesJointes TEXT`, () => {});
 
             // Table staff (directeur, secretariat)
             db.run(`CREATE TABLE IF NOT EXISTS staff (

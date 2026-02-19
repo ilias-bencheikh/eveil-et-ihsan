@@ -633,6 +633,19 @@
                                 </div>
                             </div>
 
+                            <!-- Pièces jointes -->
+                            <div>
+                                <label style="display:block;font-size:14px;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;font-weight:500;">
+                                    <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">attach_file</span>
+                                    Pièces jointes (max 5 fichiers, 10 Mo chacun)
+                                </label>
+                                <input type="file" id="parentPiecesJointes" multiple
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
+                                    style="display:block;width:100%;padding:10px;border:1px dashed var(--md-sys-color-outline);border-radius:8px;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);cursor:pointer;font-size:14px;"
+                                    onchange="updateParentAttachmentPreview()">
+                                <div id="parentAttachmentPreview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+                            </div>
+
                             <button type="submit" class="md-btn md-btn-filled" style="width: 100%; justify-content: center;">
                                 <span class="material-icons">send</span> Envoyer
                             </button>
@@ -1399,6 +1412,11 @@
                     <div class="message-content" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.4;">
                         ${message.contenu.length > 150 ? message.contenu.substring(0, 150) + '...' : message.contenu}
                     </div>
+                    ${message.piecesJointes && message.piecesJointes.length > 0 ? `
+                    <div style="margin-top:8px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-on-surface-variant);">attach_file</span>
+                        <span style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${message.piecesJointes.length} pièce(s) jointe(s)</span>
+                    </div>` : ''}
                 </div>
             `;
         }
@@ -1465,6 +1483,26 @@
                     <div class="message-full-content" style="background: var(--md-sys-color-surface); padding: 16px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline); min-height: 100px; white-space: pre-wrap; line-height: 1.6;">
                         ${message.contenu}
                     </div>
+                    ${message.piecesJointes && message.piecesJointes.length > 0 ? `
+                    <div style="background:var(--md-sys-color-surface-variant);padding:16px;border-radius:8px;">
+                        <div style="font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                            <span class="material-icons" style="font-size:18px;">attach_file</span>
+                            Pièces jointes (${message.piecesJointes.length})
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            ${message.piecesJointes.map(pj => `
+                                <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}"
+                                   download="${pj.originalname}"
+                                   target="_blank"
+                                   style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--md-sys-color-surface);border:1px solid var(--md-sys-color-outline);border-radius:8px;text-decoration:none;color:var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="font-size:22px;color:var(--md-sys-color-primary);">${getParentFileIcon(pj.mimetype)}</span>
+                                    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pj.originalname}</span>
+                                    <span style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${(pj.size/1024).toFixed(0)} Ko</span>
+                                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">download</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
                         ${isReceived ? `<button class="md-btn md-btn-filled" onclick="replyToParentMessage('${message.expediteurId}', '${(contactName || '').replace(/'/g, "\\\\'")}')">
                             <span class="material-icons">reply</span> Répondre
@@ -1490,11 +1528,16 @@
 
         // Supprimer un message
         async function deleteParentMessage(messageId) {
-            if (!confirm('Supprimer ce message ?')) return;
+            if (!confirm('Supprimer ce message de votre messagerie ?')) return;
             try {
-                await apiRequest(`/api/messagerie/${messageId}`, { method: 'DELETE' });
+                const data = await apiRequest(`/api/messagerie/${messageId}`, { method: 'DELETE' });
                 document.getElementById('messageDetailOverlay').classList.remove('show');
-                showNotification('Message supprimé', 'success');
+                showNotification(
+                    data && data.purged
+                        ? 'Message supprimé définitivement'
+                        : 'Message supprimé de votre messagerie',
+                    'success'
+                );
                 loadParentMessages();
             } catch (error) {
                 showNotification('Erreur lors de la suppression', 'error');
@@ -1622,17 +1665,27 @@
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const enfantId = document.getElementById('composeEnfant').value;
 
-            const data = {
-                expediteurId: user.id,
-                destinataires: selectedParentDest,
-                contenu: contenu,
-                enfantId: enfantId
-            };
+            const formData = new FormData();
+            formData.append('expediteurId', user.id);
+            formData.append('destinataires', JSON.stringify(selectedParentDest));
+            formData.append('contenu', contenu);
+            if (enfantId) formData.append('enfantId', enfantId);
+
+            const filesInput = document.getElementById('parentPiecesJointes');
+            if (filesInput && filesInput.files.length > 0) {
+                if (filesInput.files.length > 5) {
+                    showNotification('Maximum 5 pièces jointes autorisées', 'error');
+                    return;
+                }
+                for (const file of filesInput.files) {
+                    formData.append('piecesJointes', file);
+                }
+            }
 
             try {
                 const result = await apiRequest('/api/messagerie', {
                     method: 'POST',
-                    body: JSON.stringify(data)
+                    body: formData
                 });
 
                 showNotification(`${Array.isArray(result) ? result.length : 1} message(s) envoyé(s)`, 'success');
@@ -1641,6 +1694,31 @@
             } catch (error) {
                 showNotification('Erreur lors de l\'envoi', 'error');
             }
+        }
+
+        // Prévisualisation des pièces jointes (parent)
+        function updateParentAttachmentPreview() {
+            const preview = document.getElementById('parentAttachmentPreview');
+            const input = document.getElementById('parentPiecesJointes');
+            if (!preview || !input) return;
+            preview.innerHTML = '';
+            Array.from(input.files).forEach(file => {
+                const chip = document.createElement('div');
+                chip.style.cssText = 'display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--md-sys-color-secondary-container);border-radius:12px;font-size:13px;color:var(--md-sys-color-on-secondary-container);';
+                chip.innerHTML = `<span class="material-icons" style="font-size:14px;">attach_file</span>${file.name} <span style="opacity:.6">(${(file.size/1024).toFixed(0)} Ko)</span>`;
+                preview.appendChild(chip);
+            });
+        }
+
+        // Icône selon le type MIME (parent dashboard)
+        function getParentFileIcon(mimetype) {
+            if (!mimetype) return 'insert_drive_file';
+            if (mimetype.startsWith('image/')) return 'image';
+            if (mimetype === 'application/pdf') return 'picture_as_pdf';
+            if (mimetype.includes('spreadsheet') || mimetype.includes('excel') || mimetype.includes('csv')) return 'table_chart';
+            if (mimetype.includes('word') || mimetype.includes('document')) return 'description';
+            if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('compressed')) return 'folder_zip';
+            return 'insert_drive_file';
         }
     </script>
 </body>

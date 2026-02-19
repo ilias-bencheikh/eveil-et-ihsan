@@ -1009,54 +1009,157 @@
 
                 <!-- ========== MESSAGERIE TAB ========== -->
                 <div id="messagerie" class="tab-content">
-                    <div class="widget-card">
-                        <div class="widget-card-header">
-                            <h3 class="widget-card-title">Messagerie</h3>
-                            <div class="widget-card-actions">
-                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()">
-                                    <span class="material-icons">edit</span> Nouveau message
+                    <div class="msg-layout">
+
+                        <!-- ===== PANNEAU GAUCHE ===== -->
+                        <div class="msg-sidebar">
+                            <div class="msg-sidebar-header">
+                                <button class="msg-compose-btn" onclick="openComposePanel()">
+                                    <span class="material-icons">edit_note</span>
+                                    <span>Nouveau message</span>
                                 </button>
-                            </div>
-                        </div>
-                        <div class="widget-card-content">
-                            <!-- Filtres et navigation -->
-                            <div class="messagerie-filters" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-                                <div class="filter-tabs" style="display: flex; gap: 8px;">
-                                    <button class="md-btn md-btn-tonal active" id="btn-received" onclick="switchMessageView('received')">
-                                        <span class="material-icons">inbox</span> Reçus (<span id="received-count">0</span>)
+                                <div class="msg-tabs">
+                                    <button class="msg-tab active" id="btn-received" onclick="switchMessageView('received')">
+                                        <span class="material-icons">move_to_inbox</span>
+                                        <span>Reçus</span>
+                                        <span class="msg-tab-count" id="received-count">0</span>
                                     </button>
-                                    <button class="md-btn md-btn-tonal" id="btn-sent" onclick="switchMessageView('sent')">
-                                        <span class="material-icons">send</span> Envoyés (<span id="sent-count">0</span>)
+                                    <button class="msg-tab" id="btn-sent" onclick="switchMessageView('sent')">
+                                        <span class="material-icons">send</span>
+                                        <span>Envoyés</span>
+                                        <span class="msg-tab-count" id="sent-count">0</span>
                                     </button>
                                 </div>
-                                <div class="search-container" style="flex: 1; min-width: 200px;">
-                                    <div class="md-text-field" style="margin: 0;">
-                                        <div class="md-text-field-container">
-                                            <input type="text" id="messageSearch" class="md-text-field-input" placeholder="Rechercher dans les messages..." oninput="filterMessages()">
-                                            <label class="md-text-field-label">Recherche</label>
-                                        </div>
-                                    </div>
+                            </div>
+
+                            <!-- Barre de recherche thématisée -->
+                            <div class="msg-search-wrap">
+                                <div class="msg-search-box">
+                                    <span class="material-icons msg-search-icon">search</span>
+                                    <input type="text" id="messageSearch" class="msg-search-input" placeholder="Rechercher un message..." oninput="filterMessages()">
                                 </div>
                             </div>
 
                             <!-- Liste des messages -->
-                            <div id="messagesContainer" class="messages-container">
-                                <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
-                                    <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
-                                    <p>Chargement des messages...</p>
-                                </div>
-                            </div>
+                            <div id="messagesContainer" class="msg-list-scroll"></div>
+                        </div>
+
+                        <!-- ===== PANNEAU DROIT ===== -->
+                        <div class="msg-panel" id="msgPanel">
 
                             <!-- État vide -->
-                            <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
-                                <span class="material-icons" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; display: block;">mail</span>
-                                <h4 style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px;">Aucun message</h4>
-                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">Vous n'avez pas encore de messages dans cette boîte.</p>
-                                <button class="md-btn md-btn-filled" onclick="showComposeMessage()">
-                                    <span class="material-icons">edit</span> Écrire un message
+                            <div class="msg-panel-empty" id="msgPanelEmpty">
+                                <div class="msg-empty-illustration">
+                                    <span class="material-icons">mark_email_unread</span>
+                                </div>
+                                <h3>Votre messagerie</h3>
+                                <p>Sélectionnez un message pour le lire<br>ou rédigez-en un nouveau</p>
+                                <button class="msg-compose-btn-panel" onclick="openComposePanel()">
+                                    <span class="material-icons">edit_note</span> Rédiger un message
                                 </button>
                             </div>
+
+                            <!-- Vue lecture -->
+                            <div class="msg-read-view" id="msgReadView" style="display:none;">
+                                <div class="msg-read-header">
+                                    <button class="msg-back-btn" onclick="closeMsgPanel()" title="Retour">
+                                        <span class="material-icons">arrow_back</span>
+                                    </button>
+                                    <div class="msg-read-meta" id="msgReadMeta"></div>
+                                    <div class="msg-read-actions" id="msgReadActions"></div>
+                                </div>
+                                <div class="msg-read-body" id="msgReadBody"></div>
+                                <div class="msg-read-attachments" id="msgReadAttachments"></div>
+                            </div>
+
+                            <!-- Vue composition -->
+                            <div class="msg-compose-view" id="msgComposeView" style="display:none;">
+
+                                <!-- En-tête composition -->
+                                <div class="msg-compose-header">
+                                    <div class="msg-compose-header-left">
+                                        <div class="msg-compose-icon-wrap"><span class="material-icons">edit_note</span></div>
+                                        <div>
+                                            <div class="msg-compose-title">Nouveau message</div>
+                                            <div class="msg-compose-subtitle">Composez votre message ci-dessous</div>
+                                        </div>
+                                    </div>
+                                    <button class="msg-back-btn" onclick="closeMsgPanel()" title="Fermer">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </div>
+
+                                <div class="msg-compose-form">
+
+                                    <!-- Bloc destinataires -->
+                                    <div class="msg-compose-section">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">group</span> Destinataires
+                                        </div>
+                                        <div class="msg-compose-section-body">
+                                            <!-- Chips sélectionnés -->
+                                            <div id="composeSelectedChips" class="msg-chips-wrap" onclick="document.getElementById('composeSearchInput').focus()">
+                                                <span id="composeChipsPlaceholder" class="msg-chips-placeholder">Cliquez pour sélectionner des destinataires…</span>
+                                            </div>
+                                            <!-- Barre filtre destinataires -->
+                                            <div class="msg-dest-search-wrap">
+                                                <span class="material-icons">search</span>
+                                                <input type="text" id="composeSearchInput" class="msg-dest-search-input" placeholder="Filtrer par nom ou rôle..." oninput="filterComposeDestinataires()">
+                                            </div>
+                                            <!-- Liste destinataires -->
+                                            <div class="msg-dest-list" id="composeDestList">
+                                                <div class="msg-dest-loading">
+                                                    <span class="material-icons msg-spin">sync</span>
+                                                    <span>Chargement des contacts…</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bloc message -->
+                                    <div class="msg-compose-section msg-compose-section-grow">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">chat_bubble_outline</span> Message
+                                        </div>
+                                        <div class="msg-compose-section-body msg-compose-section-body-grow">
+                                            <textarea id="composeContenu" class="msg-textarea" placeholder="Écrivez votre message…"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bloc pièces jointes -->
+                                    <div class="msg-compose-section">
+                                        <div class="msg-compose-section-label">
+                                            <span class="material-icons">attach_file</span> Pièces jointes
+                                            <span class="msg-attach-hint">max 5 fichiers · 10 Mo chacun</span>
+                                        </div>
+                                        <div class="msg-compose-section-body">
+                                            <label class="msg-attach-dropzone" for="composePiecesJointes">
+                                                <span class="material-icons">cloud_upload</span>
+                                                <span>Cliquez ou déposez vos fichiers ici</span>
+                                            </label>
+                                            <input type="file" id="composePiecesJointes" multiple
+                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
+                                                onchange="updateComposeAttachPreview()" style="display:none;">
+                                            <div id="composeAttachPreview" class="msg-attach-preview"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Footer actions -->
+                                <div class="msg-compose-footer">
+                                    <button class="msg-cancel-btn" onclick="closeMsgPanel()">
+                                        <span class="material-icons">close</span> Annuler
+                                    </button>
+                                    <button class="msg-send-btn" onclick="sendComposeMessage()" id="msgSendBtn">
+                                        <span class="material-icons">send</span>
+                                        <span>Envoyer</span>
+                                    </button>
+                                </div>
+
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -1692,6 +1795,15 @@
         function getHeaders() {
             return {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'x-user-role': user.role,
+                'x-user-id': user.id
+            };
+        }
+
+        // Headers sans Content-Type (pour FormData avec pièces jointes)
+        function getHeadersFormData() {
+            return {
                 'Authorization': `Bearer ${token}`,
                 'x-user-role': user.role,
                 'x-user-id': user.id
@@ -4397,418 +4509,365 @@
         let currentMessageView = 'received';
         let allMessages = { received: [], sent: [] };
         let selectedDestinatairesMessage = [];
+        let allDestinataires = [];
 
         async function loadMessages() {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = `<div class="msg-list-loading"><span class="material-icons">hourglass_empty</span><span>Chargement...</span></div>`;
             try {
-                const container = document.getElementById('messagesContainer');
-                container.innerHTML = `
-                    <div class="loading-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">
-                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">email</span>
-                        <p>Chargement des messages...</p>
-                    </div>
-                `;
-
-
                 const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
                 const messages = await response.json();
+                if (!response.ok) { showSnackbar(messages.error || 'Erreur chargement messages'); return; }
 
-                if (!response.ok) {
-                    showSnackbar(messages.error || 'Erreur chargement messages');
-                    return;
-                }
-
-                // Séparer reçus et envoyés
                 allMessages.received = messages.filter(m => m.destinataireId === user.id);
                 allMessages.sent = messages.filter(m => m.expediteurId === user.id);
 
-                // Mettre à jour les compteurs
                 document.getElementById('received-count').textContent = allMessages.received.length;
                 document.getElementById('sent-count').textContent = allMessages.sent.length;
-
-                // Mettre à jour le badge de messages non lus
                 updateMessageBadge();
-
-                // Afficher la vue actuelle
                 switchMessageView(currentMessageView);
-
-            } catch (error) {
-                console.error('Erreur chargement messages:', error);
-                document.getElementById('messagesContainer').innerHTML = `
-                    <div class="error-state" style="text-align: center; padding: 40px; color: var(--md-sys-color-error);">
-                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px; display: block;">error</span>
-                        <p>Erreur lors du chargement des messages</p>
-                        <button class="md-btn md-btn-filled" onclick="loadMessages()">Réessayer</button>
-                    </div>
-                `;
+            } catch (e) {
+                container.innerHTML = `<div class="msg-list-empty"><span class="material-icons">error</span><p>Erreur de chargement</p><button class="md-btn md-btn-tonal" onclick="loadMessages()">Réessayer</button></div>`;
             }
         }
 
         function switchMessageView(view) {
             currentMessageView = view;
-
-            // Mettre à jour les boutons actifs
             document.getElementById('btn-received').classList.toggle('active', view === 'received');
             document.getElementById('btn-sent').classList.toggle('active', view === 'sent');
-
-            // Afficher les messages
             displayMessages(view);
         }
 
         function displayMessages(view) {
             const messages = allMessages[view] || [];
             const container = document.getElementById('messagesContainer');
-            const emptyState = document.getElementById('emptyState');
-
             if (messages.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
+                container.innerHTML = `<div class="msg-list-empty"><span class="material-icons">mail_outline</span><p>Aucun message</p></div>`;
                 return;
             }
-
-            emptyState.style.display = 'none';
-
-            const messageCards = messages.map(m => createMessageCard(m, view)).join('');
-            container.innerHTML = `
-                <div class="messages-list" style="display: flex; flex-direction: column; gap: 12px;">
-                    ${messageCards}
-                </div>
-            `;
-
-            // Appliquer le filtre de recherche si présent
+            container.innerHTML = messages.map(m => createMsgListItem(m, view)).join('');
             filterMessages();
         }
 
-        function createMessageCard(message, view) {
+        function createMsgListItem(message, view) {
             const isReceived = view === 'received';
             const isUnread = isReceived && !message.lu;
             const contactName = isReceived ? message.expediteurNom : message.destinataireNom;
-            const contactLabel = isReceived ? 'De' : 'À';
-            const formattedDate = new Date(message.date).toLocaleString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const d = new Date(message.date);
+            const now = new Date();
+            const sameDay = d.toDateString() === now.toDateString();
+            const dateStr = sameDay
+                ? d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+            const preview = message.contenu.replace(/\n/g,' ').substring(0, 80);
+            const initials = (contactName || 'S').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+            const hasAttachments = message.piecesJointes && message.piecesJointes.length > 0;
 
             return `
-                <div class="message-card md-card md-card-outlined ${isUnread ? 'unread' : ''}"
-                     style="padding: 16px; cursor: pointer; transition: all 0.2s; ${isUnread ? 'border-left: 4px solid var(--md-sys-color-primary); background: var(--md-sys-color-primary-container);' : ''}"
-                     onclick="openMessage('${message.id}')">
-                    <div class="message-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <div class="contact-info" style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="material-icons" style="font-size: 20px; color: var(--md-sys-color-on-surface-variant);">
-                                    ${isReceived ? 'inbox' : 'send'}
-                                </span>
-                                <span style="font-weight: 500; color: var(--md-sys-color-on-surface);">
-                                    ${contactLabel} : ${contactName || 'Système'}
-                                </span>
-                                ${isUnread ? '<span class="md-badge" style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">Nouveau</span>' : ''}
-                            </div>
-                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 2px;">
-                                ${formattedDate}
-                            </div>
+                <div class="msg-list-item ${isUnread ? 'unread' : ''}" onclick="openMsgReadPanel('${message.id}', '${view}')">
+                    <div class="msg-avatar">${initials}</div>
+                    <div class="msg-item-content">
+                        <div class="msg-item-top">
+                            <span class="msg-item-contact">${contactName || 'Système'}</span>
+                            <span class="msg-item-date">${dateStr}</span>
                         </div>
-                        <div class="message-actions" style="display: flex; gap: 4px;">
-                            <button class="md-btn md-btn-text" style="padding: 8px;" onclick="event.stopPropagation(); replyToMessage('${isReceived ? message.expediteurId : ''}', '${contactName}')" title="Répondre">
-                                <span class="material-icons">reply</span>
-                            </button>
-                            <button class="md-btn md-btn-text" style="padding: 8px; color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteMessage('${message.id}')" title="Supprimer">
-                                <span class="material-icons">delete</span>
-                            </button>
+                        <div class="msg-item-preview">
+                            ${hasAttachments ? '<span class="material-icons" style="font-size:13px;vertical-align:middle;margin-right:2px;">attach_file</span>' : ''}
+                            ${preview || '(message vide)'}
                         </div>
                     </div>
-                    <div class="message-content" style="color: var(--md-sys-color-on-surface-variant); line-height: 1.4;">
-                        ${message.contenu.length > 150 ? message.contenu.substring(0, 150) + '...' : message.contenu}
-                    </div>
-                </div>
-            `;
+                    ${isUnread ? '<span class="msg-unread-dot"></span>' : ''}
+                </div>`;
         }
 
         function filterMessages() {
-            const searchTerm = document.getElementById('messageSearch').value.toLowerCase();
-            const cards = document.querySelectorAll('.message-card');
-
-            cards.forEach(card => {
-                const content = card.querySelector('.message-content').textContent.toLowerCase();
-                const contact = card.querySelector('.contact-info span').textContent.toLowerCase();
-                const visible = !searchTerm || content.includes(searchTerm) || contact.includes(searchTerm);
-                card.style.display = visible ? 'block' : 'none';
+            const search = document.getElementById('messageSearch').value.toLowerCase();
+            document.querySelectorAll('.msg-list-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = !search || text.includes(search) ? '' : 'none';
             });
         }
 
-        async function openMessage(messageId) {
+        // ---- Lecture d'un message ----
+        async function openMsgReadPanel(messageId, view) {
             const message = [...allMessages.received, ...allMessages.sent].find(m => m.id === messageId);
             if (!message) return;
 
-            // Marquer comme lu si c'est un message reçu non lu
+            // Marquer comme lu
             if (message.destinataireId === user.id && !message.lu) {
                 try {
-                    await fetch(`${API_URL}/messagerie/${messageId}/lu`, {
-                        method: 'PUT',
-                        headers: getHeaders()
-                    });
+                    await fetch(`${API_URL}/messagerie/${messageId}/lu`, { method: 'PUT', headers: getHeaders() });
                     message.lu = true;
-                    // Mettre à jour le badge
                     updateMessageBadge();
-                    // Mettre à jour l'affichage
-                    loadMessages();
-                } catch (error) {
-                    console.error('Erreur marquage lu:', error);
-                }
+                    displayMessages(currentMessageView);
+                } catch(e) {}
             }
 
-            // Afficher le message complet
             const isReceived = message.destinataireId === user.id;
             const contactName = isReceived ? message.expediteurNom : message.destinataireNom;
             const formattedDate = new Date(message.date).toLocaleString('fr-FR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
             });
 
-            showDialog(`Message ${isReceived ? 'reçu' : 'envoyé'}`, `
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="message-details" style="background: var(--md-sys-color-surface-variant); padding: 16px; border-radius: 8px;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                            <span class="material-icons">${isReceived ? 'inbox' : 'send'}</span>
-                            <span style="font-weight: 500;">${isReceived ? 'De' : 'À'} : ${contactName || 'Système'}</span>
+            // Header
+            const initials = (contactName || 'S').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+            document.getElementById('msgReadMeta').innerHTML = `
+                <div class="msg-read-avatar">${initials}</div>
+                <div>
+                    <div class="msg-read-contact">${isReceived ? 'De' : 'À'} : <strong>${contactName || 'Système'}</strong></div>
+                    <div class="msg-read-date">${formattedDate}</div>
+                </div>`;
+
+            // Actions
+            document.getElementById('msgReadActions').innerHTML = `
+                ${isReceived ? `<button class="md-btn md-btn-tonal" onclick="openComposePanel('${message.expediteurId}', '${(contactName||'').replace(/'/g,"\\'")}')"><span class="material-icons">reply</span> Répondre</button>` : ''}
+                <button class="msg-del-btn" onclick="deleteMessage('${message.id}')" title="Supprimer"><span class="material-icons">delete</span></button>`;
+
+            // Corps
+            document.getElementById('msgReadBody').textContent = message.contenu;
+
+            // Pièces jointes
+            const attachEl = document.getElementById('msgReadAttachments');
+            if (message.piecesJointes && message.piecesJointes.length > 0) {
+                attachEl.innerHTML = `
+                    <div class="msg-attach-title"><span class="material-icons">attach_file</span> Pièces jointes (${message.piecesJointes.length})</div>
+                    <div class="msg-attach-list">
+                        ${message.piecesJointes.map(pj => `
+                            <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}" download="${pj.originalname}" target="_blank" class="msg-attach-item">
+                                <span class="material-icons">${getFileIcon(pj.mimetype)}</span>
+                                <span class="msg-attach-name">${pj.originalname}</span>
+                                <span class="msg-attach-size">${(pj.size/1024).toFixed(0)} Ko</span>
+                                <span class="material-icons msg-attach-dl">download</span>
+                            </a>
+                        `).join('')}
+                    </div>`;
+            } else {
+                attachEl.innerHTML = '';
+            }
+
+            showMsgPanel('read');
+        }
+
+        // ---- Composition ----
+        async function openComposePanel(preselId = '', preselNom = '') {
+            selectedDestinatairesMessage = [];
+            document.getElementById('composeContenu').value = '';
+            document.getElementById('composePiecesJointes').value = '';
+            document.getElementById('composeAttachPreview').innerHTML = '';
+
+            showMsgPanel('compose');
+
+            // Charger destinataires
+            const listEl = document.getElementById('composeDestList');
+            listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size:32px;display:block;margin-bottom:8px;">hourglass_empty</span>Chargement...</div>`;
+
+            try {
+                const response = await fetch(`${API_URL}/messagerie/destinataires`, { headers: getHeaders() });
+                allDestinataires = await response.json();
+                if (!response.ok) { showSnackbar('Erreur chargement des destinataires'); return; }
+
+                if (preselId) {
+                    const dest = allDestinataires.find(d => d.id === preselId);
+                    if (dest) selectedDestinatairesMessage = [dest];
+                    else if (preselNom) selectedDestinatairesMessage = [{ id: preselId, nom: preselNom, type: 'user', role: '' }];
+                }
+                renderComposeDestList();
+                updateComposeChips();
+            } catch(e) {
+                listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--md-sys-color-error);">Erreur de chargement</div>`;
+            }
+        }
+
+        function renderComposeDestList() {
+            const search = (document.getElementById('composeSearchInput')?.value || '').toLowerCase();
+            const listEl = document.getElementById('composeDestList');
+            const filtered = allDestinataires.filter(d =>
+                !search || d.nom.toLowerCase().includes(search) || (d.role||'').toLowerCase().includes(search)
+            );
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
+                return;
+            }
+            // Grouper par rôle
+            const groups = {};
+            filtered.forEach(d => {
+                const g = d.role || 'Autre';
+                if (!groups[g]) groups[g] = [];
+                groups[g].push(d);
+            });
+            listEl.innerHTML = Object.entries(groups).map(([role, items]) => `
+                <div class="msg-dest-group-label">${role}</div>
+                ${items.map(d => {
+                    const isSelected = selectedDestinatairesMessage.some(s => s.id === d.id);
+                    const initials = d.nom.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+                    return `<div class="msg-dest-item ${isSelected ? 'selected' : ''}" onclick="toggleComposeDest('${d.id}','${d.nom.replace(/'/g,"\\'")}','${d.role||''}','${d.type||'user'}')">
+                        <div class="msg-dest-avatar ${isSelected ? 'sel' : ''}">${initials}</div>
+                        <div class="msg-dest-info">
+                            <div class="msg-dest-name">${d.nom}</div>
+                            <div class="msg-dest-role">${d.type === 'class' ? '🏫 Classe entière' : d.role}</div>
                         </div>
-                        <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">
-                            ${formattedDate}
-                        </div>
-                    </div>
-                    <div class="message-full-content" style="background: var(--md-sys-color-surface); padding: 16px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline); min-height: 100px; white-space: pre-wrap;">
-                        ${message.contenu}
-                    </div>
-                </div>
-            `, () => {}, false, [
-                { text: 'Répondre', action: () => replyToMessage(isReceived ? message.expediteurId : '', contactName), primary: true },
-                { text: 'Fermer', action: () => {} }
-            ]);
+                        <span class="material-icons msg-dest-check" style="opacity:${isSelected?1:0}">check_circle</span>
+                    </div>`;
+                }).join('')}
+            `).join('');
+        }
+
+        function filterComposeDestinataires() {
+            renderComposeDestList();
+        }
+
+        function toggleComposeDest(id, nom, role, type) {
+            const idx = selectedDestinatairesMessage.findIndex(d => d.id === id);
+            if (idx > -1) selectedDestinatairesMessage.splice(idx, 1);
+            else selectedDestinatairesMessage.push({ id, nom, role, type });
+            updateComposeChips();
+            renderComposeDestList();
+        }
+
+        function updateComposeChips() {
+            const wrap = document.getElementById('composeSelectedChips');
+            const placeholder = document.getElementById('composeChipsPlaceholder');
+            if (!wrap) return;
+            // Supprimer les chips existants (garder le placeholder)
+            wrap.querySelectorAll('.msg-chip').forEach(c => c.remove());
+            if (selectedDestinatairesMessage.length === 0) {
+                if (placeholder) placeholder.style.display = '';
+                return;
+            }
+            if (placeholder) placeholder.style.display = 'none';
+            selectedDestinatairesMessage.forEach(d => {
+                const chip = document.createElement('span');
+                chip.className = 'msg-chip';
+                chip.innerHTML = `${d.nom} <button type="button" onclick="toggleComposeDest('${d.id}','${d.nom.replace(/'/g,"\\'")}','${d.role||''}','${d.type||'user'}')"><span class="material-icons" style="font-size:14px;">close</span></button>`;
+                wrap.appendChild(chip);
+            });
+        }
+
+        function updateComposeAttachPreview() {
+            const preview = document.getElementById('composeAttachPreview');
+            const input = document.getElementById('composePiecesJointes');
+            if (!preview || !input) return;
+            preview.innerHTML = '';
+            Array.from(input.files).forEach(file => {
+                const chip = document.createElement('div');
+                chip.className = 'msg-attach-chip';
+                chip.innerHTML = `<span class="material-icons" style="font-size:14px;">attach_file</span>${file.name}<span style="opacity:.6;margin-left:4px;">(${(file.size/1024).toFixed(0)} Ko)</span>`;
+                preview.appendChild(chip);
+            });
+        }
+
+        async function sendComposeMessage() {
+            if (selectedDestinatairesMessage.length === 0) { showSnackbar('Veuillez sélectionner au moins un destinataire'); return; }
+            const contenu = document.getElementById('composeContenu').value.trim();
+            if (!contenu) { showSnackbar('Le message ne peut pas être vide'); return; }
+
+            const formData = new FormData();
+            formData.append('expediteurId', user.id);
+            formData.append('destinataires', JSON.stringify(selectedDestinatairesMessage));
+            formData.append('contenu', contenu);
+            const filesInput = document.getElementById('composePiecesJointes');
+            if (filesInput && filesInput.files.length > 0) {
+                if (filesInput.files.length > 5) { showSnackbar('Maximum 5 pièces jointes'); return; }
+                for (const f of filesInput.files) formData.append('piecesJointes', f);
+            }
+
+            // Animation bouton envoyer
+            const sendBtn = document.getElementById('msgSendBtn');
+            if (sendBtn) {
+                sendBtn.classList.add('sending');
+                sendBtn.innerHTML = '<span class="material-icons msg-spin">sync</span><span>Envoi en cours…</span>';
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/messagerie`, { method: 'POST', headers: getHeadersFormData(), body: formData });
+                if (response.ok) {
+                    const result = await response.json();
+                    // Animation succès
+                    if (sendBtn) {
+                        sendBtn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+                        sendBtn.innerHTML = '<span class="material-icons">check_circle</span><span>Envoyé !</span>';
+                        setTimeout(() => { closeMsgPanel(); loadMessages(); }, 700);
+                    } else {
+                        closeMsgPanel(); loadMessages();
+                    }
+                    showSnackbar(`${result.length} message(s) envoyé(s)`);
+                } else {
+                    const err = await response.json();
+                    showSnackbar(err.error || "Erreur d'envoi");
+                    if (sendBtn) {
+                        sendBtn.classList.remove('sending');
+                        sendBtn.innerHTML = '<span class="material-icons">send</span><span>Envoyer</span>';
+                    }
+                }
+            } catch(e) {
+                showSnackbar("Erreur d'envoi");
+                if (sendBtn) {
+                    sendBtn.classList.remove('sending');
+                    sendBtn.innerHTML = '<span class="material-icons">send</span><span>Envoyer</span>';
+                }
+            }
         }
 
         async function deleteMessage(messageId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) return;
-
+            if (!confirm('Supprimer ce message de votre messagerie ?')) return;
             try {
-                const response = await fetch(`${API_URL}/messagerie/${messageId}`, {
-                    method: 'DELETE',
-                    headers: getHeaders()
-                });
-
-                if (response.ok) {
-                    showSnackbar('Message supprimé');
+                const r = await fetch(`${API_URL}/messagerie/${messageId}`, { method: 'DELETE', headers: getHeaders() });
+                const data = await r.json();
+                if (r.ok) {
+                    closeMsgPanel();
                     loadMessages();
+                    showSnackbar(data.purged
+                        ? 'Message supprimé de votre messagerie'
+                        : 'Message supprimé de votre messagerie');
                 } else {
-                    showSnackbar('Erreur lors de la suppression');
+                    showSnackbar(data.error || 'Erreur lors de la suppression');
                 }
-            } catch (error) {
-                showSnackbar('Erreur lors de la suppression');
+            } catch(e) { showSnackbar('Erreur lors de la suppression'); }
+        }
+
+        // ---- Helpers panneaux ----
+        function showMsgPanel(mode) {
+            document.getElementById('msgPanelEmpty').style.display = 'none';
+            document.getElementById('msgReadView').style.display = mode === 'read' ? 'flex' : 'none';
+            document.getElementById('msgComposeView').style.display = mode === 'compose' ? 'flex' : 'none';
+        }
+
+        function closeMsgPanel() {
+            document.getElementById('msgPanelEmpty').style.display = '';
+            document.getElementById('msgReadView').style.display = 'none';
+            document.getElementById('msgComposeView').style.display = 'none';
+            // Réinitialiser le bouton d'envoi
+            const sendBtn = document.getElementById('msgSendBtn');
+            if (sendBtn) {
+                sendBtn.classList.remove('sending');
+                sendBtn.style.background = '';
+                sendBtn.innerHTML = '<span class="material-icons">send</span><span>Envoyer</span>';
             }
+        }
+
+        function replyToMessage(destinataireId, destinataireNom) {
+            openComposePanel(destinataireId, destinataireNom);
         }
 
         function updateMessageBadge() {
             const unreadCount = allMessages.received.filter(m => !m.lu).length;
             const badge = document.getElementById('messageBadge');
-            
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
+            if (unreadCount > 0) { badge.textContent = unreadCount > 99 ? '99+' : unreadCount; badge.style.display = 'flex'; }
+            else badge.style.display = 'none';
         }
 
-        async function showComposeMessage(destinataireId = '', destinataireNom = '') {
-            selectedDestinatairesMessage = [];
+        // Alias conservé pour compatibilité (boutons rapides du dashboard)
+        function showComposeMessage(id = '', nom = '') { openComposePanel(id, nom); }
 
-            try {
-                const response = await fetch(`${API_URL}/messagerie/destinataires`, { headers: getHeaders() });
-                const destinataires = await response.json();
-
-                if (!response.ok) {
-                    showSnackbar(destinataires.error || 'Erreur chargement destinataires');
-                    return;
-                }
-
-                // Pré-sélectionner le destinataire si fourni
-                if (destinataireId) {
-                    const dest = destinataires.find(d => d.id === destinataireId);
-                    if (dest) selectedDestinatairesMessage = [dest];
-                }
-
-                showDialog('Nouveau message', `
-                    <form id="composeForm" style="display: flex; flex-direction: column; gap: 20px;">
-                        <!-- Sélection des destinataires -->
-                        <div class="destinataires-section">
-                            <div class="md-text-field">
-                                <div class="md-text-field-container">
-                                    <input type="text" id="destinataireSearch" class="md-text-field-input" placeholder="Rechercher destinataires..." oninput="filterDestinataires()">
-                                    <label class="md-text-field-label">Destinataires *</label>
-                                </div>
-                            </div>
-
-                            <!-- Destinataires sélectionnés -->
-                            <div id="selectedDestinataires" class="selected-chips" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; padding: 8px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; background: var(--md-sys-color-surface);">
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 14px;">${selectedDestinatairesMessage.length ? '' : 'Aucun destinataire sélectionné'}</span>
-                            </div>
-
-                            <!-- Liste des destinataires disponibles -->
-                            <div id="destinatairesList" class="destinataires-list" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; margin-top: 12px;">
-                                ${destinataires.map(d => `
-                                    <div class="destinataire-option" data-id="${d.id}" data-type="${d.type || 'user'}" data-nom="${d.nom}" data-role="${d.role}"
-                                         style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--md-sys-color-outline); display: flex; align-items: center; gap: 12px; transition: background 0.2s;"
-                                         onclick="toggleDestinataire('${d.id}', '${d.nom.replace(/'/g, "\\'")}', '${d.role}', '${d.type || 'user'}')">
-                                        <span class="material-icons" style="font-size: 24px; color: var(--md-sys-color-on-surface-variant);">
-                                            ${d.type === 'class' ? 'groups' : 'person'}
-                                        </span>
-                                        <div style="flex: 1;">
-                                            <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${d.nom}</div>
-                                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${d.role}</div>
-                                        </div>
-                                        <span class="selection-indicator material-icons" style="font-size: 20px; color: var(--md-sys-color-primary); opacity: 0;">check_circle</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <!-- Contenu du message -->
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <textarea id="messageContenu" class="md-text-field-input" rows="6" placeholder="Écrivez votre message ici..." required></textarea>
-                                <label class="md-text-field-label">Message *</label>
-                            </div>
-                        </div>
-                    </form>
-                `, async () => {
-                    const form = document.getElementById('composeForm');
-                    if (!form.checkValidity()) {
-                        form.reportValidity();
-                        return;
-                    }
-
-                    if (selectedDestinatairesMessage.length === 0) {
-                        showSnackbar('Veuillez sélectionner au moins un destinataire');
-                        return;
-                    }
-
-                    const contenu = document.getElementById('messageContenu').value.trim();
-                    if (!contenu) {
-                        showSnackbar('Le message ne peut pas être vide');
-                        return;
-                    }
-
-                    const data = {
-                        expediteurId: user.id,
-                        destinataires: selectedDestinatairesMessage,
-                        contenu: contenu
-                    };
-
-                    try {
-                        const response = await fetch(`${API_URL}/messagerie`, {
-                            method: 'POST',
-                            headers: getHeaders(),
-                            body: JSON.stringify(data)
-                        });
-
-                        if (response.ok) {
-                            const result = await response.json();
-                            showSnackbar(`${result.length} message(s) envoyé(s) avec succès`);
-                            loadMessages();
-                        } else {
-                            const error = await response.json();
-                            showSnackbar(error.error || 'Erreur lors de l\'envoi du message');
-                        }
-                    } catch (error) {
-                        console.error('Erreur envoi message:', error);
-                        showSnackbar('Erreur lors de l\'envoi du message');
-                    }
-                });
-
-                // Mettre à jour l'affichage initial
-                updateSelectedDestinataires();
-
-            } catch (error) {
-                console.error('Erreur chargement destinataires:', error);
-                showSnackbar('Erreur lors du chargement des destinataires');
-            }
-        }
-
-        function replyToMessage(destinataireId, destinataireNom) {
-            if (destinataireId) {
-                showComposeMessage(destinataireId, destinataireNom);
-            } else {
-                showSnackbar('Impossible de répondre à ce message');
-            }
-        }
-
-        function toggleDestinataire(id, nom, role, type) {
-            const index = selectedDestinatairesMessage.findIndex(d => d.id === id);
-            if (index > -1) {
-                selectedDestinatairesMessage.splice(index, 1);
-            } else {
-                selectedDestinatairesMessage.push({ id, nom, role, type });
-            }
-            updateSelectedDestinataires();
-            updateDestinatairesList();
-        }
-
-        function updateSelectedDestinataires() {
-            const container = document.getElementById('selectedDestinataires');
-            if (!container) return;
-
-            if (selectedDestinatairesMessage.length === 0) {
-                container.innerHTML = '<span style="color: var(--md-sys-color-on-surface-variant); font-size: 14px;">Aucun destinataire sélectionné</span>';
-                return;
-            }
-
-            container.innerHTML = selectedDestinatairesMessage.map(d => `
-                <span class="md-chip md-chip-assist selected-chip" style="display: inline-flex; align-items: center; gap: 6px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">
-                    <span class="material-icons" style="font-size: 16px;">${d.type === 'class' ? 'groups' : 'person'}</span>
-                    ${d.nom} (${d.role})
-                    <button type="button" onclick="removeDestinataire('${d.id}')" style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; color: inherit;">
-                        <span class="material-icons" style="font-size: 16px;">close</span>
-                    </button>
-                </span>
-            `).join('');
-        }
-
-        function removeDestinataire(id) {
-            selectedDestinatairesMessage = selectedDestinatairesMessage.filter(d => d.id !== id);
-            updateSelectedDestinataires();
-            updateDestinatairesList();
-        }
-
-        function updateDestinatairesList() {
-            const options = document.querySelectorAll('.destinataire-option');
-            options.forEach(option => {
-                const id = option.dataset.id;
-                const isSelected = selectedDestinatairesMessage.some(d => d.id === id);
-                const indicator = option.querySelector('.selection-indicator');
-
-                option.style.background = isSelected ? 'var(--md-sys-color-primary-container)' : 'transparent';
-                option.style.borderLeft = isSelected ? '4px solid var(--md-sys-color-primary)' : '4px solid transparent';
-                if (indicator) {
-                    indicator.style.opacity = isSelected ? '1' : '0';
-                }
-            });
-        }
-
-        function filterDestinataires() {
-            const search = document.getElementById('destinataireSearch').value.toLowerCase();
-            const options = document.querySelectorAll('.destinataire-option');
-
-            options.forEach(option => {
-                const nom = option.dataset.nom.toLowerCase();
-                const role = option.dataset.role.toLowerCase();
-                const visible = !search || nom.includes(search) || role.includes(search);
-                option.style.display = visible ? 'flex' : 'none';
-            });
+        // Renvoie l'icône Material selon le type MIME
+        function getFileIcon(mimetype) {
+            if (!mimetype) return 'insert_drive_file';
+            if (mimetype.startsWith('image/')) return 'image';
+            if (mimetype === 'application/pdf') return 'picture_as_pdf';
+            if (mimetype.includes('spreadsheet') || mimetype.includes('excel') || mimetype.includes('csv')) return 'table_chart';
+            if (mimetype.includes('word') || mimetype.includes('document')) return 'description';
+            if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('compressed')) return 'folder_zip';
+            return 'insert_drive_file';
         }
 
         // ==================== BUREAU (STAFF) ====================
@@ -7108,6 +7167,641 @@
                 right: 12px;
                 max-width: none;
             }
+        }
+
+        /* ==================== MESSAGERIE LAYOUT ==================== */
+        @keyframes msgFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes msgSlideRight {
+            from { opacity: 0; transform: translateX(-12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes msgSpin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes msgSendPop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(.93); }
+            70%  { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+        @keyframes msgChipIn {
+            from { opacity:0; transform: scale(.7); }
+            to   { opacity:1; transform: scale(1); }
+        }
+        @keyframes msgItemIn {
+            from { opacity:0; transform: translateX(-8px); }
+            to   { opacity:1; transform: translateX(0); }
+        }
+
+        .msg-layout {
+            display: flex;
+            height: calc(100vh - 200px);
+            min-height: 580px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            background: var(--md-sys-color-surface);
+            box-shadow: 0 4px 24px rgba(0,0,0,.09);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .msg-sidebar {
+            width: 340px;
+            min-width: 260px;
+            max-width: 380px;
+            border-right: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            flex-direction: column;
+            background: var(--md-sys-color-surface-container-low);
+            flex-shrink: 0;
+        }
+        .msg-sidebar-header {
+            padding: 16px 14px 0;
+        }
+        .msg-compose-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 20px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), color-mix(in srgb, var(--md-sys-color-primary) 80%, #000));
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            border-radius: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: .02em;
+            cursor: pointer;
+            transition: box-shadow .25s, filter .2s, transform .15s;
+            box-shadow: 0 2px 10px rgba(30,90,168,.35);
+        }
+        .msg-compose-btn:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 5px 18px rgba(30,90,168,.45);
+            transform: translateY(-1px);
+        }
+        .msg-compose-btn:active { transform: scale(.97); }
+
+        .msg-tabs {
+            display: flex;
+            gap: 4px;
+            margin: 12px 0 10px;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 22px;
+            padding: 4px;
+        }
+        .msg-tab {
+            flex: 1;
+            padding: 7px 8px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: background .2s, color .2s, box-shadow .2s;
+        }
+        .msg-tab .material-icons { font-size: 16px; }
+        .msg-tab:hover { background: rgba(255,255,255,.5); }
+        .msg-tab.active {
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-primary);
+            font-weight: 700;
+            box-shadow: 0 1px 6px rgba(0,0,0,.1);
+        }
+        .msg-tab-count {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            min-width: 18px;
+            text-align: center;
+            transition: background .2s;
+        }
+        .msg-tab.active .msg-tab-count {
+            background: color-mix(in srgb, var(--md-sys-color-primary) 90%, #000);
+        }
+
+        /* Barre de recherche thématisée */
+        .msg-search-wrap {
+            padding: 8px 14px 12px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .msg-search-box {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: var(--md-sys-color-surface);
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            border-radius: 24px;
+            padding: 0 14px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .msg-search-box:focus-within {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
+        }
+        .msg-search-icon {
+            font-size: 18px !important;
+            color: var(--md-sys-color-on-surface-variant);
+            flex-shrink: 0;
+            transition: color .2s;
+        }
+        .msg-search-box:focus-within .msg-search-icon { color: var(--md-sys-color-primary); }
+        .msg-search-input {
+            flex: 1;
+            padding: 9px 8px;
+            border: none;
+            background: transparent;
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            outline: none;
+            width: 100%;
+        }
+        .msg-search-input::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: .7; }
+
+        .msg-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+        }
+        .msg-list-loading,
+        .msg-list-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 48px 20px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+        .msg-list-loading .material-icons,
+        .msg-list-empty .material-icons { font-size: 42px; opacity: .4; }
+
+        /* Items liste */
+        .msg-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background .15s;
+            position: relative;
+            animation: msgItemIn .25s ease both;
+        }
+        .msg-list-item:hover { background: rgba(30,90,168,.06); }
+        .msg-list-item.unread {
+            background: color-mix(in srgb, var(--md-sys-color-primary-container) 60%, transparent);
+            border-left: 3px solid var(--md-sys-color-primary);
+        }
+        .msg-list-item.unread:hover { filter: brightness(.97); }
+        .msg-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--md-sys-color-secondary-container), var(--md-sys-color-primary-container));
+            color: var(--md-sys-color-on-secondary-container);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.12);
+        }
+        .msg-item-content { flex: 1; min-width: 0; }
+        .msg-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-bottom: 3px; }
+        .msg-item-contact {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .msg-item-date { font-size: 11px; color: var(--md-sys-color-on-surface-variant); white-space: nowrap; flex-shrink: 0; }
+        .msg-item-preview {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .msg-unread-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            flex-shrink: 0;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
+        }
+
+        /* ===== PANNEAU DROIT ===== */
+        .msg-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: var(--md-sys-color-surface);
+        }
+
+        /* État vide */
+        .msg-panel-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 40px;
+            text-align: center;
+            animation: msgFadeIn .4s ease;
+        }
+        .msg-empty-illustration {
+            width: 88px; height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-secondary-container));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(30,90,168,.18);
+        }
+        .msg-empty-illustration .material-icons { font-size: 44px; color: var(--md-sys-color-primary); }
+        .msg-panel-empty h3 { font-size: 20px; font-weight: 700; color: var(--md-sys-color-on-surface); margin: 0; }
+        .msg-panel-empty p { font-size: 14px; margin: 0; line-height: 1.6; opacity: .75; }
+        .msg-compose-btn-panel {
+            display: flex; align-items: center; gap: 8px;
+            padding: 11px 24px;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none; border-radius: 24px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            box-shadow: 0 1px 6px rgba(0,0,0,.1);
+            margin-top: 4px;
+        }
+        .msg-compose-btn-panel:hover { filter: brightness(.94); box-shadow: 0 3px 12px rgba(0,0,0,.15); }
+
+        /* Vue lecture */
+        .msg-read-view {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+            animation: msgFadeIn .25s ease;
+        }
+        .msg-read-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            background: var(--md-sys-color-surface);
+        }
+        .msg-read-meta { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .msg-read-avatar {
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--md-sys-color-tertiary-container), var(--md-sys-color-primary-container));
+            color: var(--md-sys-color-on-tertiary-container);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px; flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,.12);
+        }
+        .msg-read-contact { font-size: 15px; font-weight: 600; color: var(--md-sys-color-on-surface); }
+        .msg-read-date { font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 2px; }
+        .msg-read-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .msg-back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 50%; border: none;
+            background: transparent; cursor: pointer;
+            color: var(--md-sys-color-on-surface-variant);
+            transition: background .2s, transform .15s;
+        }
+        .msg-back-btn:hover { background: var(--md-sys-color-surface-variant); transform: scale(1.1); }
+        .msg-del-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 50%; border: none;
+            background: transparent; cursor: pointer;
+            color: var(--md-sys-color-error);
+            transition: background .2s, transform .15s;
+        }
+        .msg-del-btn:hover { background: var(--md-sys-color-error-container); transform: scale(1.1); }
+        .msg-read-body {
+            flex: 1; overflow-y: auto;
+            padding: 28px 28px 16px;
+            white-space: pre-wrap;
+            font-size: 15px; line-height: 1.8;
+            color: var(--md-sys-color-on-surface);
+        }
+        .msg-read-attachments { padding: 0 28px 20px; }
+        .msg-attach-title {
+            display: flex; align-items: center; gap: 6px;
+            font-weight: 600; font-size: 13px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 10px;
+            text-transform: uppercase; letter-spacing: .04em;
+        }
+        .msg-attach-list { display: flex; flex-direction: column; gap: 8px; }
+        .msg-attach-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 16px;
+            background: var(--md-sys-color-surface-container-low);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--md-sys-color-on-surface);
+            transition: background .2s, transform .15s, box-shadow .2s;
+            font-size: 14px;
+        }
+        .msg-attach-item:hover {
+            background: var(--md-sys-color-primary-container);
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(30,90,168,.12);
+        }
+        .msg-attach-item .material-icons { font-size: 22px; color: var(--md-sys-color-primary); }
+        .msg-attach-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+        .msg-attach-size { font-size: 11px; color: var(--md-sys-color-on-surface-variant); flex-shrink: 0; }
+        .msg-attach-dl { font-size: 18px !important; color: var(--md-sys-color-primary); flex-shrink: 0; }
+
+        /* ===== VUE COMPOSITION ===== */
+        .msg-compose-view {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+            animation: msgFadeIn .3s ease;
+        }
+        .msg-compose-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px 14px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-surface-container-low) 100%);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .msg-compose-header-left { display: flex; align-items: center; gap: 14px; }
+        .msg-compose-icon-wrap {
+            width: 42px; height: 42px;
+            border-radius: 14px;
+            background: var(--md-sys-color-primary);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(30,90,168,.3);
+            flex-shrink: 0;
+        }
+        .msg-compose-icon-wrap .material-icons { color: var(--md-sys-color-on-primary); font-size: 22px; }
+        .msg-compose-title { font-size: 16px; font-weight: 700; color: var(--md-sys-color-on-surface); }
+        .msg-compose-subtitle { font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 1px; }
+
+        /* Sections du formulaire */
+        .msg-compose-form {
+            flex: 1; overflow-y: auto;
+            display: flex; flex-direction: column;
+            gap: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+        }
+        .msg-compose-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .msg-compose-section-grow { flex: 1; display: flex; flex-direction: column; }
+        .msg-compose-section-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 10px;
+        }
+        .msg-compose-section-label .material-icons { font-size: 15px; color: var(--md-sys-color-primary); }
+        .msg-attach-hint {
+            margin-left: auto;
+            font-size: 11px; font-weight: 400;
+            letter-spacing: 0;
+            text-transform: none;
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: .7;
+        }
+        .msg-compose-section-body { display: flex; flex-direction: column; gap: 8px; }
+        .msg-compose-section-body-grow { flex: 1; }
+
+        /* Chips destinataires */
+        .msg-chips-wrap {
+            display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+            min-height: 38px;
+            padding: 6px 10px;
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px;
+            background: var(--md-sys-color-surface-container-low);
+            cursor: text;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .msg-chips-wrap:focus-within,
+        .msg-chips-wrap:hover {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+        }
+        .msg-chips-placeholder { font-size: 13px; color: var(--md-sys-color-on-surface-variant); opacity: .75; }
+        .msg-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 8px 4px 12px;
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+            animation: msgChipIn .2s cubic-bezier(.34,1.56,.64,1) both;
+            box-shadow: 0 1px 4px rgba(30,90,168,.2);
+        }
+        .msg-chip button {
+            background: rgba(255,255,255,.25); border: none; cursor: pointer;
+            color: inherit; display: flex; align-items: center;
+            padding: 0; border-radius: 50; width: 16px; height: 16px;
+            border-radius: 50%;
+            justify-content: center;
+            transition: background .15s;
+        }
+        .msg-chip button:hover { background: rgba(255,255,255,.45); }
+
+        /* Filtre destinataires */
+        .msg-dest-search-wrap {
+            display: flex; align-items: center; gap: 0;
+            background: var(--md-sys-color-surface);
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            border-radius: 20px;
+            padding: 0 12px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .msg-dest-search-wrap:focus-within {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+        }
+        .msg-dest-search-wrap .material-icons { font-size: 16px; color: var(--md-sys-color-on-surface-variant); flex-shrink: 0; }
+        .msg-dest-search-input {
+            flex: 1; padding: 8px 6px;
+            border: none; background: transparent;
+            color: var(--md-sys-color-on-surface); font-size: 13px; outline: none;
+        }
+        .msg-dest-search-input::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: .7; }
+
+        /* Liste destinataires */
+        .msg-dest-list {
+            max-height: 190px; overflow-y: auto;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px;
+            background: var(--md-sys-color-surface);
+            scrollbar-width: thin;
+        }
+        .msg-dest-loading {
+            display: flex; align-items: center; gap: 10px;
+            padding: 16px 14px;
+            color: var(--md-sys-color-on-surface-variant); font-size: 13px;
+        }
+        .msg-spin { animation: msgSpin .8s linear infinite; }
+        .msg-dest-group-label {
+            padding: 5px 14px;
+            font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: .08em;
+            color: var(--md-sys-color-primary);
+            background: color-mix(in srgb, var(--md-sys-color-primary-container) 50%, var(--md-sys-color-surface));
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            position: sticky; top: 0; z-index: 1;
+        }
+        .msg-dest-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px; cursor: pointer;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background .12s;
+            animation: msgItemIn .15s ease both;
+        }
+        .msg-dest-item:last-child { border-bottom: none; }
+        .msg-dest-item:hover { background: rgba(30,90,168,.06); }
+        .msg-dest-item.selected {
+            background: color-mix(in srgb, var(--md-sys-color-primary-container) 70%, transparent);
+        }
+        .msg-dest-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800;
+            flex-shrink: 0;
+            transition: background .2s, color .2s;
+        }
+        .msg-dest-avatar.sel {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: 0 1px 4px rgba(30,90,168,.25);
+        }
+        .msg-dest-info { flex: 1; min-width: 0; }
+        .msg-dest-name { font-size: 13px; font-weight: 600; color: var(--md-sys-color-on-surface); }
+        .msg-dest-role { font-size: 11px; color: var(--md-sys-color-on-surface-variant); }
+        .msg-dest-check { font-size: 17px !important; color: var(--md-sys-color-primary); flex-shrink: 0; transition: opacity .15s; }
+
+        /* Textarea */
+        .msg-textarea {
+            width: 100%; flex: 1;
+            min-height: 110px;
+            padding: 14px;
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px;
+            background: var(--md-sys-color-surface-container-low);
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px; font-family: inherit;
+            resize: none; outline: none;
+            box-sizing: border-box; line-height: 1.7;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .msg-textarea:focus {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+            background: var(--md-sys-color-surface);
+        }
+        .msg-textarea::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: .6; }
+
+        /* Dropzone pièces jointes */
+        .msg-attach-dropzone {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px;
+            border: 1.5px dashed var(--md-sys-color-primary);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--md-sys-color-primary-container) 35%, transparent);
+            color: var(--md-sys-color-on-primary-container);
+            font-size: 13px; font-weight: 500;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+        .msg-attach-dropzone:hover {
+            background: color-mix(in srgb, var(--md-sys-color-primary-container) 60%, transparent);
+        }
+        .msg-attach-dropzone .material-icons { font-size: 22px; color: var(--md-sys-color-primary); }
+        .msg-attach-preview { display: flex; flex-wrap: wrap; gap: 6px; }
+        .msg-attach-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px;
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            border-radius: 14px; font-size: 12px; font-weight: 500;
+            animation: msgChipIn .2s cubic-bezier(.34,1.56,.64,1) both;
+        }
+
+        /* Footer actions */
+        .msg-compose-footer {
+            display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+            padding: 14px 20px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            background: var(--md-sys-color-surface-container-low);
+        }
+        .msg-cancel-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 9px 18px;
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            border-radius: 20px; background: transparent;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            transition: background .2s, color .2s;
+        }
+        .msg-cancel-btn:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface); }
+        .msg-send-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, color-mix(in srgb, var(--md-sys-color-primary) 75%, #003c8f) 100%);
+            color: var(--md-sys-color-on-primary);
+            border: none; border-radius: 22px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 3px 12px rgba(30,90,168,.4);
+            transition: box-shadow .25s, filter .2s, transform .15s;
+            position: relative; overflow: hidden;
+        }
+        .msg-send-btn::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.18) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform .4s ease;
+        }
+        .msg-send-btn:hover::after { transform: translateX(100%); }
+        .msg-send-btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 6px 20px rgba(30,90,168,.5);
+            transform: translateY(-1px);
+        }
+        .msg-send-btn:active {
+            animation: msgSendPop .3s ease;
+            transform: scale(.97);
+        }
+        .msg-send-btn .material-icons { font-size: 18px; }
+        .msg-send-btn.sending { pointer-events: none; opacity: .8; }
+
+        /* Responsive messagerie */
+        @media (max-width: 768px) {
+            .msg-layout { flex-direction: column; height: auto; min-height: 80vh; border-radius: 12px; }
+            .msg-sidebar { width: 100%; max-width: none; border-right: none; border-bottom: 1px solid var(--md-sys-color-outline-variant); max-height: 340px; }
+            .msg-panel { min-height: 380px; }
         }
     </style>
 

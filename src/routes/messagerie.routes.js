@@ -1,7 +1,37 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const { db } = require('../config/database');
 const { generateId, formatDate } = require('../utils/helpers');
+
+// Configuration de multer pour les pièces jointes des messages
+const uploadDir = path.join(__dirname, '../../public/uploads/messagerie');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        // Conserver l'extension d'origine
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 Mo max par fichier
+    fileFilter: (req, file, cb) => {
+        const allowedExts = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|webp|txt|zip|rar|csv)$/i;
+        if (allowedExts.test(path.extname(file.originalname))) {
+            cb(null, true);
+        } else {
+            cb(new Error('Type de fichier non autorisé'));
+        }
+    }
+});
 
 // Helper promisifié
 const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
@@ -129,7 +159,7 @@ router.get('/destinataires', async (req, res) => {
 router.get('/', (req, res) => {
     const userId = req.headers['x-user-id'];
 
-    // Récupérer tous les messages où l'utilisateur est expéditeur ou destinataire
+    // Récupérer tous les messages de la boîte de l'utilisateur (non supprimés de son côté)
     db.all(`
         SELECT m.*,
                e.prenom as expPrenom, e.nom as expNomEleve,
@@ -151,7 +181,8 @@ router.get('/', (req, res) => {
         LEFT JOIN staff ds ON m.destinataireId = ds.id
         LEFT JOIN parents dpa ON m.destinataireId = dpa.id
         LEFT JOIN eleves enf ON m.enfantId = enf.id
-        WHERE m.destinataireId = ? OR m.expediteurId = ?
+        WHERE (m.destinataireId = ? AND m.deleted_by_receiver = 0)
+           OR (m.expediteurId = ? AND m.deleted_by_sender = 0)
         ORDER BY m.date DESC
     `, [userId, userId], (err, messages) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -195,7 +226,8 @@ router.get('/', (req, res) => {
                 lu: m.lu === 1,
                 expediteurNom: expediteurNom,
                 destinataireNom: destinataireNom,
-                enfantId: m.enfantId || null
+                enfantId: m.enfantId || null,
+                piecesJointes: m.piecesJointes ? JSON.parse(m.piecesJointes) : []
             };
         });
 
@@ -203,10 +235,30 @@ router.get('/', (req, res) => {
     });
 });
 
-// Envoyer un message
-router.post('/', (req, res) => {
-    const { expediteurId, destinataires, contenu, enfantId } = req.body;
+// Envoyer un message (supporte multipart/form-data pour les pièces jointes)
+router.post('/', (req, res, next) => {
+    upload.array('piecesJointes', 5)(req, res, (err) => {
+        if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({ error: 'Fichier trop volumineux (max 10 Mo par fichier)' });
+            }
+            return res.status(400).json({ error: err.message || 'Erreur lors de l\'upload' });
+        }
+        next();
+    });
+}, (req, res) => {
+    const { expediteurId, contenu, enfantId } = req.body;
     const userRole = req.headers['x-user-role'];
+
+    // destinataires peut arriver en JSON string (multipart) ou objet (JSON body)
+    let destinataires;
+    try {
+        destinataires = typeof req.body.destinataires === 'string'
+            ? JSON.parse(req.body.destinataires)
+            : req.body.destinataires;
+    } catch (e) {
+        return res.status(400).json({ error: 'Format des destinataires invalide' });
+    }
 
     if (!contenu || !contenu.trim()) {
         return res.status(400).json({ error: 'Le contenu du message est requis' });
@@ -221,54 +273,79 @@ router.post('/', (req, res) => {
         return res.status(403).json({ error: 'Vous n\'avez pas les droits pour envoyer à ces destinataires' });
     }
 
+    // Construire les métadonnées des pièces jointes
+    const piecesJointesMeta = req.files && req.files.length > 0
+        ? req.files.map(f => ({
+            filename: f.filename,
+            originalname: f.originalname,
+            size: f.size,
+            mimetype: f.mimetype
+          }))
+        : [];
+
+    const piecesJointesJson = piecesJointesMeta.length > 0
+        ? JSON.stringify(piecesJointesMeta)
+        : null;
+
     const date = formatDate();
     const sentMessages = [];
     let completed = 0;
     const total = destinataires.length;
-    // enfantId est utilisé uniquement pour les parents (contexte "Parent de enfant")
     const msgEnfantId = (userRole === 'parent' && enfantId) ? enfantId : null;
 
     destinataires.forEach(dest => {
         if (dest.type === 'class') {
-            // Envoyer à tous les élèves de la classe
+            // Envoyer à tous les élèves ET à leurs parents
             const className = dest.id.replace('class_', '');
-            db.all('SELECT id FROM eleves WHERE classe = ?', [className], (err, eleves) => {
+
+            // Récupérer les élèves ET les parents distincts de cette classe
+            db.all(`
+                SELECT e.id as eleveId, pa.id as parentId
+                FROM eleves e
+                LEFT JOIN eleve_parent ep ON ep.eleveId = e.id
+                LEFT JOIN parents pa ON pa.id = ep.parentId
+                WHERE e.classe = ?
+            `, [className], (err, rows) => {
                 if (err) {
                     completed++;
                     if (completed === total) res.status(500).json({ error: err.message });
                     return;
                 }
 
-                let classCompleted = 0;
-                const classTotal = eleves.length;
-                if (classTotal === 0) {
+                if (rows.length === 0) {
                     completed++;
                     if (completed === total) res.status(201).json(sentMessages);
                     return;
                 }
 
-                eleves.forEach(eleve => {
+                // Construire la liste dédupliquée des destinataires (élèves + parents)
+                const destIds = new Set();
+                rows.forEach(r => {
+                    destIds.add(r.eleveId);
+                    if (r.parentId) destIds.add(r.parentId);
+                });
+                const classDestIds = [...destIds];
+                const classTotal = classDestIds.length;
+                let classCompleted = 0;
+
+                classDestIds.forEach(destId => {
                     const msgId = generateId();
-                    db.run('INSERT INTO messages (id, expediteurId, destinataireId, contenu, date, lu, enfantId) VALUES (?, ?, ?, ?, ?, 0, ?)',
-                        [msgId, expediteurId, eleve.id, contenu, date, msgEnfantId],
+                    db.run('INSERT INTO messages (id, expediteurId, destinataireId, contenu, date, lu, enfantId, piecesJointes) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+                        [msgId, expediteurId, destId, contenu, date, msgEnfantId, piecesJointesJson],
                         function(err) {
                             if (err) {
-                                console.error('Erreur insertion message:', err);
-                                classCompleted++;
-                                if (classCompleted === classTotal) {
-                                    completed++;
-                                    if (completed === total) res.status(201).json(sentMessages);
-                                }
-                                return;
+                                console.error('Erreur insertion message classe:', err);
+                            } else {
+                                sentMessages.push({
+                                    id: msgId,
+                                    expediteurId,
+                                    destinataireId: destId,
+                                    contenu,
+                                    date,
+                                    lu: false,
+                                    piecesJointes: piecesJointesMeta
+                                });
                             }
-                            sentMessages.push({
-                                id: msgId,
-                                expediteurId,
-                                destinataireId: eleve.id,
-                                contenu,
-                                date,
-                                lu: false
-                            });
                             classCompleted++;
                             if (classCompleted === classTotal) {
                                 completed++;
@@ -281,8 +358,8 @@ router.post('/', (req, res) => {
         } else {
             // Message individuel
             const msgId = generateId();
-            db.run('INSERT INTO messages (id, expediteurId, destinataireId, contenu, date, lu, enfantId) VALUES (?, ?, ?, ?, ?, 0, ?)',
-                [msgId, expediteurId, dest.id, contenu, date, msgEnfantId],
+            db.run('INSERT INTO messages (id, expediteurId, destinataireId, contenu, date, lu, enfantId, piecesJointes) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+                [msgId, expediteurId, dest.id, contenu, date, msgEnfantId, piecesJointesJson],
                 function(err) {
                     if (err) {
                         console.error('Erreur insertion message:', err);
@@ -296,7 +373,8 @@ router.post('/', (req, res) => {
                         destinataireId: dest.id,
                         contenu,
                         date,
-                        lu: false
+                        lu: false,
+                        piecesJointes: piecesJointesMeta
                     });
                     completed++;
                     if (completed === total) res.status(201).json(sentMessages);
@@ -304,7 +382,7 @@ router.post('/', (req, res) => {
             );
         }
     });
-});
+}); // fin router.post '/'
 
 // Vérifier si l'utilisateur peut envoyer aux destinataires spécifiés
 function canSendToDestinataires(userRole, destinataires) {
@@ -346,16 +424,77 @@ router.put('/:id/lu', (req, res) => {
     });
 });
 
-// Supprimer un message
+// Supprimer un message (soft-delete, puis hard-delete si les deux parties ont supprimé)
 router.delete('/:id', (req, res) => {
     const userId = req.headers['x-user-id'];
+    const messageId = req.params.id;
 
-    db.run('DELETE FROM messages WHERE id = ? AND (expediteurId = ? OR destinataireId = ?)',
-        [req.params.id, userId, userId], function(err) {
+    // Récupérer le message pour vérifier les droits
+    db.get('SELECT * FROM messages WHERE id = ?', [messageId], (err, message) => {
         if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ message: 'Message non trouvé ou non autorisé' });
-        res.json({ message: 'Message supprimé' });
+        if (!message) return res.status(404).json({ error: 'Message non trouvé' });
+
+        const isExpéditeur = message.expediteurId === userId;
+        const isDestinataire = message.destinataireId === userId;
+
+        if (!isExpéditeur && !isDestinataire) {
+            return res.status(403).json({ error: 'Non autorisé à supprimer ce message' });
+        }
+
+        // Colonne à mettre à jour selon le rôle
+        const column = isExpéditeur ? 'deleted_by_sender' : 'deleted_by_receiver';
+
+        db.run(`UPDATE messages SET ${column} = 1 WHERE id = ?`, [messageId], function(updateErr) {
+            if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+            // Recharger pour voir si les deux côtés ont supprimé
+            db.get('SELECT * FROM messages WHERE id = ?', [messageId], (err2, updated) => {
+                if (err2) return res.status(500).json({ error: err2.message });
+                if (!updated) return res.json({ deleted: true, purged: false }); // déjà supprimé
+
+                const bothDeleted = updated.deleted_by_sender === 1 && updated.deleted_by_receiver === 1;
+
+                if (bothDeleted) {
+                    // Supprimer les fichiers physiques attachés
+                    if (updated.piecesJointes) {
+                        try {
+                            const pieces = JSON.parse(updated.piecesJointes);
+                            if (Array.isArray(pieces)) {
+                                pieces.forEach(pj => {
+                                    const filePath = path.join(uploadDir, pj.filename);
+                                    if (fs.existsSync(filePath)) {
+                                        fs.unlinkSync(filePath);
+                                        console.log(`[Messagerie] Fichier supprimé : ${pj.filename}`);
+                                    }
+                                });
+                            }
+                        } catch (parseErr) {
+                            console.error('[Messagerie] Erreur parsing piecesJointes pour suppression:', parseErr);
+                        }
+                    }
+
+                    // Supprimer la ligne en base
+                    db.run('DELETE FROM messages WHERE id = ?', [messageId], (delErr) => {
+                        if (delErr) return res.status(500).json({ error: delErr.message });
+                        res.json({ deleted: true, purged: true, message: 'Message supprimé définitivement' });
+                    });
+                } else {
+                    // Soft-delete seulement de ce côté
+                    res.json({ deleted: true, purged: false, message: 'Message masqué de votre côté' });
+                }
+            });
+        });
     });
+});
+
+// Servir une pièce jointe de la messagerie
+router.get('/pieces-jointes/:filename', (req, res) => {
+    const filePath = path.join(uploadDir, req.params.filename);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).json({ error: 'Fichier non trouvé' });
+    }
 });
 
 module.exports = router;

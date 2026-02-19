@@ -29,6 +29,12 @@ async function apiRequest(endpoint, options = {}) {
             ...options.headers
         }
     };
+
+    // Si le body est un FormData, supprimer Content-Type pour laisser
+    // le navigateur définir le bon boundary multipart
+    if (options.body instanceof FormData) {
+        delete config.headers['Content-Type'];
+    }
     
     try {
         // Construire l'URL de façon robuste :

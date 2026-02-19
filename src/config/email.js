@@ -351,18 +351,34 @@ const emailTemplates = {
 };
 
 // Fonction d'envoi d'email
+// Signature : sendEmail(to, template, arg1, arg2, ..., [{ attachments: [...] }])
+// Le dernier argument peut optionnellement être un objet { attachments: [...] }
+// chaque attachment : { filename, path } ou { filename, content (Buffer) }
 async function sendEmail(to, template, ...args) {
-    const emailContent = emailTemplates[template](...args);
+    // Détecter si le dernier argument est un objet d'options (pièces jointes)
+    let attachments = [];
+    let templateArgs = args;
+    const lastArg = args[args.length - 1];
+    if (lastArg && typeof lastArg === 'object' && !Array.isArray(lastArg) && lastArg.attachments) {
+        attachments = lastArg.attachments;
+        templateArgs = args.slice(0, -1);
+    }
+
+    const emailContent = emailTemplates[template](...templateArgs);
     
     const mailOptions = {
         from: `Eveil et Ihsan <${process.env.EMAIL_USER || 'no.reply.eveil.et.ihsan@gmail.com'}>`,
         to,
         subject: emailContent.subject,
-        html: emailContent.html
+        html: emailContent.html,
+        attachments
     };
 
     console.log('Tentative d\'envoi d\'email à:', to);
     console.log('Sujet:', emailContent.subject);
+    if (attachments.length > 0) {
+        console.log('Pièces jointes:', attachments.map(a => a.filename).join(', '));
+    }
     
     try {
         const result = await transporter.sendMail(mailOptions);
