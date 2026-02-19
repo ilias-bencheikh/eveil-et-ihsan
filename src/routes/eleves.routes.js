@@ -789,7 +789,7 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
 router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
     const { parentId } = req.params;
     
-    if (!['admin', 'secretaire', 'directeur'].includes(req.userRole)) {
+    if (!['admin', 'secretaire', 'secretariat', 'directeur'].includes(req.userRole)) {
         return res.status(403).json({ message: 'Accès non autorisé' });
     }
     

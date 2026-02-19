@@ -57,10 +57,24 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        // Vérifier le mode maintenance en premier
+        const maintenance = await dbGet(db, 'SELECT * FROM maintenance WHERE id = 1 AND active = 1');
+
         // Vérifier dans la table STAFF
         let row = await dbGet(db, 'SELECT * FROM staff WHERE email = ? AND password = ? AND activated = 1', [email, password]);
         
         if (row) {
+            // En maintenance, seuls les admins et directeurs peuvent se connecter
+            const adminRoles = ['admin'];
+            if (maintenance && !adminRoles.includes(row.role)) {
+                return res.status(503).json({
+                    error: 'Le site est actuellement en maintenance.',
+                    maintenance: true,
+                    dateDebut: maintenance.dateDebut,
+                    dateFin: maintenance.dateFin || null,
+                    message: maintenance.message || null
+                });
+            }
             const user = {
                 id: row.id,
                 email: row.email,
@@ -72,8 +86,7 @@ router.post('/login', async (req, res) => {
             return res.json({ user, token });
         }
 
-        // Vérifier le mode maintenance AVANT d'autoriser les non-staff
-        const maintenance = await dbGet(db, 'SELECT * FROM maintenance WHERE id = 1 AND active = 1');
+        // Bloquer tous les autres utilisateurs en maintenance
         if (maintenance) {
             return res.status(503).json({
                 error: 'Le site est actuellement en maintenance.',

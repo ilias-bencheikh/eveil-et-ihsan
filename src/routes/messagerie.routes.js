@@ -59,14 +59,19 @@ router.get('/destinataires', async (req, res) => {
 
         } else if (userRole === 'professeur') {
             // Professeurs peuvent envoyer à élèves de leurs classes, autres profs, staff, classes, ET parents de leurs élèves
+            // Seuls les élèves avec un compte activé apparaissent
             const eleves = await dbAll(`
                 SELECT DISTINCT e.id, e.nom, e.prenom FROM eleves e
                 INNER JOIN classes c ON e.classe = c.nom
-                WHERE c.professeurId = ?
+                WHERE c.professeurId = ? AND e.activated = 1
             `, [userId]);
 
-            const profs = await dbAll('SELECT id, nom, prenom FROM professeurs WHERE id != ?', [userId]);
-            const staffs = await dbAll('SELECT id, nom, role FROM staff');
+            const profs = await dbAll(`
+                SELECT id, nom, prenom FROM professeurs WHERE id != ?
+                UNION
+                SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur' AND id != ?
+            `, [userId, userId]);
+            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) != \'professeur\'');
             const classes = await dbAll('SELECT nom FROM classes');
 
             // Parents des élèves de ses classes
@@ -81,7 +86,7 @@ router.get('/destinataires', async (req, res) => {
 
             res.json([
                 ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
-                ...staffs.map(s => ({ id: s.id, nom: s.nom, role: s.role, type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' })),
                 ...parents.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom} (parent de ${p.enfantPrenom} ${p.enfantNom})`, role: 'Parent', type: 'user' })),
                 ...eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })),
                 ...classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' }))
@@ -89,9 +94,10 @@ router.get('/destinataires', async (req, res) => {
 
         } else if (userRole && ['directeur', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
             // Staff peut envoyer à tous (y compris parents)
-            const eleves = await dbAll('SELECT id, nom, prenom FROM eleves');
+            // Seuls les élèves avec un compte activé apparaissent
+            const eleves = await dbAll('SELECT id, nom, prenom FROM eleves WHERE activated = 1');
             const profs = await dbAll('SELECT id, nom, prenom FROM professeurs');
-            const staffs = await dbAll('SELECT id, nom, role FROM staff WHERE id != ?', [userId]);
+            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE id != ?', [userId]);
             const classes = await dbAll('SELECT nom FROM classes');
             const parents = await dbAll(`
                 SELECT DISTINCT pa.id, pa.nom, pa.prenom,
@@ -105,7 +111,7 @@ router.get('/destinataires', async (req, res) => {
             res.json([
                 ...eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })),
                 ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
-                ...staffs.map(s => ({ id: s.id, nom: s.nom, role: s.role, type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' })),
                 ...parents.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom} (parent de ${p.enfantsNoms})`, role: 'Parent', type: 'user' })),
                 ...classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' }))
             ]);
