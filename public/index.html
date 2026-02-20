@@ -2131,6 +2131,25 @@
 
         // ==================== ÉLÈVES ====================
         async function loadEleves() {
+            // Si on est en train d'afficher une fiche depuis un autre onglet, ne pas écraser
+            if (window._skipLoadElevesOnce) {
+                window._skipLoadElevesOnce = false;
+                return;
+            }
+            // Si on est sur une fiche (elevesGrid absent), restaurer d'abord la structure de liste
+            if (!document.getElementById('elevesGrid')) {
+                const widgetCardContent = document.querySelector('#eleves .widget-card-content');
+                if (widgetCardContent) {
+                    widgetCardContent.innerHTML = `
+                        <div class="topbar-search" style="width: 100%; margin-bottom: 16px;">
+                            <span class="material-icons">search</span>
+                            <input type="text" placeholder="Rechercher un élève..." id="searchEleve" oninput="filterEleves()">
+                        </div>
+                        <div id="elevesGrid" class="md-grid md-grid-auto"></div>
+                    `;
+                }
+                window.eleveDetailsBackup = null;
+            }
             try {
                 const response = await fetch(`${API_URL}/eleves`, { headers: getHeaders() });
                 allEleves = await response.json();
@@ -2210,40 +2229,74 @@
                 };
             }
 
+            const fraisTotal = parseFloat(eleve.fraisInscription) || 0;
+            const nbPaie = parseInt(eleve.nbPaiements) || 1;
+            const nbPaieEffectues = parseInt(eleve.paiementsEffectues) || 0;
+
             const widgetCardContent = document.querySelector('#eleves .widget-card-content');
             widgetCardContent.innerHTML = `
-                <!-- Header de navigation -->
+
+                <!-- ── Barre de navigation ── -->
                 <div class="fiche-header">
-                    <button class="md-btn md-btn-text" onclick="backToElevesList()">
-                        <span class="material-icons">arrow_back</span>
-                        Retour
+                    <button class="md-btn md-btn-tonal" onclick="backToElevesList()">
+                        <span class="material-icons">arrow_back</span> Retour à la liste
                     </button>
-                    <div style="flex: 1;"></div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">Fiche famille / élève</div>
-                        <div style="font-weight: 500; color: var(--md-sys-color-on-surface);">${familyMembers.length} membre${familyMembers.length > 1 ? 's' : ''}</div>
-                    </div>
+                    <div style="flex:1;"></div>
+                    ${canModifyData() ? `
+                    <button class="md-btn md-btn-filled" onclick="enterEditMode('${eleveId}')">
+                        <span class="material-icons">edit_note</span> Modifier la fiche
+                    </button>` : ''}
                 </div>
 
-                <!-- SECTION : Fiche élève -->
-                <div class="fiche-section" style="margin-bottom: 24px; border-color: var(--md-sys-color-primary);">
-                    <div class="fiche-section-header" style="background: var(--md-sys-color-primary-container);">
-                        <div class="md-avatar" style="width: 64px; height: 64px; background: var(--md-sys-color-primary); color: white; font-size: 28px; flex-shrink: 0;">
-                            ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
+                <!-- ── Profil élève ── -->
+                <div class="fiche-section" style="margin-bottom:20px; border-color:var(--md-sys-color-primary);">
+
+                    <!-- En-tête avec avatar + nom + badges -->
+                    <div style="display:flex; align-items:center; gap:24px; padding:28px 28px 20px;
+                                background:linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-surface-container) 100%);">
+                        <div class="md-avatar" style="width:80px; height:80px; font-size:36px; font-weight:700;
+                                    background:var(--md-sys-color-primary); color:white; flex-shrink:0; box-shadow:var(--md-sys-elevation-2);">
+                            ${eleve.photo
+                                ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
+                                : (eleve.prenom || 'E')[0].toUpperCase()}
                         </div>
-                        <div style="flex: 1;">
-                            <h4 style="margin: 0; color: var(--md-sys-color-on-primary-container); font-size: 22px;">${eleve.prenom} ${eleve.nom}</h4>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                                <span class="md-chip md-chip-filter" style="background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); height: 26px; font-size: 12px; padding: 0 10px;">${eleve.classe || 'Sans classe'}</span>
-                                ${parents.length > 0 ? (parents.some(p => p.activated) ? '<span class="md-chip md-chip-filter" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); height: 26px; font-size: 12px; padding: 0 10px;">✓ Compte parent activé</span>' : '<span class="md-chip md-chip-filter" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); height: 26px; font-size: 12px; padding: 0 10px;">⏳ Compte parent non activé</span>') : ''}
+                        <div style="flex:1;">
+                            <h3 style="margin:0 0 10px 0; font-size:26px; color:var(--md-sys-color-on-primary-container);">
+                                ${eleve.prenom} ${eleve.nom}
+                            </h3>
+                            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                                <span class="md-chip md-chip-filter"
+                                      style="background:var(--md-sys-color-primary); color:white; display:flex; align-items:center; gap:4px;">
+                                    <span class="material-icons" style="font-size:15px;">class</span> ${eleve.classe || 'Sans classe'}
+                                </span>
+                                ${eleve.fraisValide
+                                    ? `<span class="md-chip md-chip-filter"
+                                              style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; gap:4px;">
+                                           <span class="material-icons" style="font-size:15px;">check_circle</span> Frais réglés
+                                       </span>`
+                                    : `<span class="md-chip md-chip-filter"
+                                              style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); display:flex; align-items:center; gap:4px;">
+                                           <span class="material-icons" style="font-size:15px;">payments</span> ${nbPaieEffectues}/${nbPaie} versements
+                                       </span>`}
+                                ${parents.length === 0
+                                    ? `<span class="md-chip md-chip-filter"
+                                              style="background:var(--md-sys-color-surface-variant); color:var(--md-sys-color-on-surface-variant); display:flex; align-items:center; gap:4px;">
+                                           <span class="material-icons" style="font-size:15px;">person_off</span> Sans parent
+                                       </span>`
+                                    : parents.some(p => p.activated)
+                                        ? `<span class="md-chip md-chip-filter"
+                                                  style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; gap:4px;">
+                                               <span class="material-icons" style="font-size:15px;">how_to_reg</span> Compte parent actif
+                                           </span>`
+                                        : `<span class="md-chip md-chip-filter"
+                                                  style="background:#fff8e1; color:#7c5800; display:flex; align-items:center; gap:4px;">
+                                               <span class="material-icons" style="font-size:15px;">schedule</span> Compte à activer
+                                           </span>`}
                             </div>
                         </div>
-                        ${canModifyData() ? `
-                        <button class="md-btn md-btn-filled" onclick="editEleve('${eleveId}')">
-                            <span class="material-icons">edit</span> Modifier
-                        </button>
-                        ` : ''}
                     </div>
+
+                    <!-- Informations personnelles de l'élève -->
                     <div class="fiche-section-content">
                         <div class="fiche-info-grid">
                             ${eleve.dateNaissance ? `
@@ -2251,15 +2304,15 @@
                                 <span class="material-icons fiche-info-icon">cake</span>
                                 <div>
                                     <div class="fiche-info-label">Date de naissance</div>
-                                    <div class="fiche-info-value">${new Date(eleve.dateNaissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                                    <div class="fiche-info-value">${new Date(eleve.dateNaissance).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}</div>
                                 </div>
                             </div>` : ''}
                             ${eleve.email ? `
                             <div class="fiche-info-item">
                                 <span class="material-icons fiche-info-icon">email</span>
                                 <div>
-                                    <div class="fiche-info-label">Email</div>
-                                    <div class="fiche-info-value">${eleve.email}</div>
+                                    <div class="fiche-info-label">Email élève</div>
+                                    <div class="fiche-info-value" style="word-break:break-all;">${eleve.email}</div>
                                 </div>
                             </div>` : ''}
                             ${eleve.tel ? `
@@ -2270,137 +2323,162 @@
                                     <div class="fiche-info-value">${eleve.tel}</div>
                                 </div>
                             </div>` : ''}
-                            <div class="fiche-info-item" style="border-left: 3px solid ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
-                                <span class="material-icons fiche-info-icon" style="color: ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">payments</span>
+                            <div class="fiche-info-item"
+                                 style="border-left:3px solid ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
+                                <span class="material-icons fiche-info-icon"
+                                      style="color:${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">payments</span>
                                 <div>
                                     <div class="fiche-info-label">Frais d'inscription</div>
-                                    <div class="fiche-info-value">${eleve.fraisValide ? '✓ Payé intégralement' : `${eleve.paiementsEffectues || 0}/${eleve.nbPaiements || 1} paiements`}</div>
+                                    <div class="fiche-info-value">${fraisTotal > 0 ? fraisTotal.toFixed(2) + ' €' : 'Non renseigné'}</div>
+                                    <div style="font-size:12px; margin-top:2px;
+                                                color:${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
+                                        ${eleve.fraisValide ? '✓ Intégralement réglé' : nbPaieEffectues + ' / ' + nbPaie + ' versements effectués'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- SECTION : Parents -->
-                ${parents.length > 0 ? `
-                <div class="fiche-section" style="margin-bottom: 24px;">
+                <!-- ── Parents / Responsables ── -->
+                <div class="fiche-section" style="margin-bottom:20px;">
                     <div class="fiche-section-header">
-                        <div class="fiche-section-icon" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">
+                        <div class="fiche-section-icon"
+                             style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
                             <span class="material-icons">family_restroom</span>
                         </div>
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; font-size: 18px;">Parent${parents.length > 1 ? 's' : ''} / Responsable${parents.length > 1 ? 's' : ''}</h5>
-                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${parents.length} enregistré${parents.length > 1 ? 's' : ''}</p>
+                        <div style="flex:1;">
+                            <h4 style="margin:0; font-size:18px;">
+                                Parent${parents.length > 1 ? 's' : ''} / Responsable${parents.length > 1 ? 's' : ''}
+                            </h4>
+                            <p style="margin:2px 0 0; font-size:13px; color:var(--md-sys-color-on-surface-variant);">
+                                ${parents.length === 0 ? 'Aucun parent associé' : parents.length + ' enregistré' + (parents.length > 1 ? 's' : '')}
+                            </p>
                         </div>
-                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editParentInfo('${eleveId}')"><span class="material-icons">edit</span> Modifier</button>` : ''}
                     </div>
                     <div class="fiche-section-content">
-                        ${parents.map((parent, idx) => `
-                        <div style="${idx > 0 ? 'margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--md-sys-color-outline-variant);' : ''}">
-                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                                <div class="md-avatar" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 18px; font-weight: 600;">
+                        ${parents.length === 0 ? `
+                        <div style="text-align:center; padding:28px 16px; color:var(--md-sys-color-on-surface-variant);">
+                            <span class="material-icons" style="font-size:52px; opacity:0.35; display:block; margin-bottom:10px;">person_off</span>
+                            <p style="margin:0; font-size:15px;">Aucun parent enregistré pour cet élève</p>
+                        </div>` : parents.map((parent, idx) => `
+                        <div style="${idx > 0 ? 'margin-top:24px; padding-top:24px; border-top:1px solid var(--md-sys-color-outline-variant);' : ''}">
+
+                            <!-- En-tête du parent -->
+                            <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; padding:14px 16px;
+                                        background:var(--md-sys-color-surface-container-low); border-radius:12px;">
+                                <div class="md-avatar"
+                                     style="width:50px; height:50px; font-size:20px; font-weight:700; flex-shrink:0;
+                                            background:${parent.isPrimary ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-secondary-container)'};
+                                            color:${parent.isPrimary ? 'white' : 'var(--md-sys-color-on-secondary-container)'};">
                                     ${(parent.prenom || 'P')[0].toUpperCase()}
                                 </div>
-                                <div>
-                                    <div style="font-weight: 600; font-size: 16px;">${parent.prenom || ''} ${parent.nom || ''}</div>
-                                    <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); display: flex; align-items: center; gap: 8px;">
-                                        ${parent.isPrimary ? '⭐ Principal' : 'Secondaire'}
-                                        ${parent.activated ? '<span style="color: var(--md-sys-color-tertiary);">✓ Activé</span>' : '<span style="color: var(--md-sys-color-error);">⏳ Non activé</span>'}
+                                <div style="flex:1;">
+                                    <div style="font-weight:700; font-size:17px; color:var(--md-sys-color-on-surface);">
+                                        ${parent.prenom || ''} ${parent.nom || ''}
+                                    </div>
+                                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; align-items:center;">
+                                        ${parent.isPrimary
+                                            ? `<span class="md-chip md-chip-filter"
+                                                      style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);
+                                                             display:flex; align-items:center; gap:4px; font-size:12px; height:24px;">
+                                                   <span class="material-icons" style="font-size:14px;">star</span> Principal
+                                               </span>`
+                                            : `<span style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">2ᵉ parent</span>`}
+                                        ${parent.activated
+                                            ? `<span class="md-chip md-chip-filter"
+                                                      style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container);
+                                                             display:flex; align-items:center; gap:4px; font-size:12px; height:24px;">
+                                                   <span class="material-icons" style="font-size:14px;">verified</span> Compte activé
+                                               </span>`
+                                            : `<span class="md-chip md-chip-filter"
+                                                      style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container);
+                                                             display:flex; align-items:center; gap:4px; font-size:12px; height:24px;">
+                                                   <span class="material-icons" style="font-size:14px;">schedule</span> Non activé
+                                               </span>`}
+                                        ${parent.relation ? `<span style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">${parent.relation}</span>` : ''}
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Coordonnées du parent -->
                             <div class="fiche-info-grid">
                                 <div class="fiche-info-item">
                                     <span class="material-icons fiche-info-icon">email</span>
                                     <div>
                                         <div class="fiche-info-label">Email</div>
-                                        <div class="fiche-info-value">${parent.email || '-'}</div>
+                                        <div class="fiche-info-value" style="word-break:break-all;">${parent.email || '—'}</div>
                                     </div>
                                 </div>
                                 <div class="fiche-info-item">
                                     <span class="material-icons fiche-info-icon">phone</span>
                                     <div>
                                         <div class="fiche-info-label">Téléphone</div>
-                                        <div class="fiche-info-value">${parent.tel || '-'}</div>
+                                        <div class="fiche-info-value">${parent.tel || '—'}</div>
                                     </div>
                                 </div>
                                 <div class="fiche-info-item">
                                     <span class="material-icons fiche-info-icon">home</span>
                                     <div>
                                         <div class="fiche-info-label">Adresse</div>
-                                        <div class="fiche-info-value">${parent.adresse || '-'}</div>
+                                        <div class="fiche-info-value">${parent.adresse || '—'}</div>
                                     </div>
                                 </div>
-                                ${parent.profession ? `
-                                <div class="fiche-info-item">
-                                    <span class="material-icons fiche-info-icon">work</span>
-                                    <div>
-                                        <div class="fiche-info-label">Profession</div>
-                                        <div class="fiche-info-value">${parent.profession}</div>
-                                    </div>
-                                </div>` : ''}
                             </div>
-                        </div>
-                        `).join('')}
+                        </div>`).join('')}
                     </div>
                 </div>
-                ` : `
-                <div class="fiche-section" style="margin-bottom: 24px; border-color: var(--md-sys-color-error);">
-                    <div class="fiche-section-header" style="background: var(--md-sys-color-error-container);">
-                        <div class="fiche-section-icon" style="background: var(--md-sys-color-error); color: var(--md-sys-color-on-error);">
-                            <span class="material-icons">warning</span>
-                        </div>
-                        <div>
-                            <h5 style="margin: 0; color: var(--md-sys-color-on-error-container);">Aucun parent enregistré</h5>
-                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--md-sys-color-on-error-container);">Cet élève n'a pas encore de parent associé.</p>
-                        </div>
-                    </div>
-                </div>
-                `}
 
-                <!-- SECTION : Autres enfants -->
+                <!-- ── Fratrie ── -->
                 ${otherChildren.length > 0 ? `
-                <div class="fiche-section" style="margin-bottom: 24px;">
+                <div class="fiche-section" style="margin-bottom:20px;">
                     <div class="fiche-section-header">
-                        <div class="fiche-section-icon" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                        <div class="fiche-section-icon"
+                             style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container);">
                             <span class="material-icons">group</span>
                         </div>
                         <div>
-                            <h5 style="margin: 0; font-size: 18px;">Autres enfants de la famille (${otherChildren.length})</h5>
-                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Cliquez pour voir la fiche</p>
+                            <h4 style="margin:0; font-size:18px;">Famille (${otherChildren.length} autre${otherChildren.length > 1 ? 's' : ''})</h4>
+                            <p style="margin:2px 0 0; font-size:13px; color:var(--md-sys-color-on-surface-variant);">
+                                Cliquez sur un élève pour voir sa fiche
+                            </p>
                         </div>
                     </div>
                     <div class="fiche-section-content">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px;">
                             ${otherChildren.map(child => `
                             <div class="family-member-card" onclick="showEleveDetails('${child.id}')">
-                                <div class="md-avatar" style="width: 44px; height: 44px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 18px;">
-                                    ${child.photo ? `<img src="${child.photo}" alt="${child.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (child.prenom || 'E')[0].toUpperCase()}
+                                <div class="md-avatar"
+                                     style="width:44px; height:44px; font-size:18px;
+                                            background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
+                                    ${child.photo
+                                        ? `<img src="${child.photo}" alt="${child.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
+                                        : (child.prenom || 'E')[0].toUpperCase()}
                                 </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">${child.prenom} ${child.nom}</div>
-                                    <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">${child.classe || 'Sans classe'}</div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:600; color:var(--md-sys-color-on-surface);">${child.prenom} ${child.nom}</div>
+                                    <div style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">${child.classe || 'Sans classe'}</div>
                                 </div>
-                                <span class="material-icons" style="color: var(--md-sys-color-primary);">chevron_right</span>
-                            </div>
-                            `).join('')}
+                                <span class="material-icons" style="color:var(--md-sys-color-primary);">chevron_right</span>
+                            </div>`).join('')}
                         </div>
                     </div>
-                </div>
-                ` : ''}
+                </div>` : ''}
 
-                <!-- Boutons d'action -->
-                <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-                    ${canModifyData() && parents.length > 0 && !parents.some(p => p.activated) ? parents.filter(p => p.email).map(p => `
-                    <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${p.id}', '${p.email}', 'parent')">
-                        <span class="material-icons">email</span> Activer compte de ${p.prenom}
-                    </button>
-                    `).join('') : ''}
+                <!-- ── Actions ── -->
+                <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-end; padding:4px 0 8px;">
+                    ${canModifyData() && parents.length > 0 && !parents.some(p => p.activated)
+                        ? parents.filter(p => p.email).map(p => `
+                          <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${p.id}','${p.email}','parent')">
+                              <span class="material-icons">mark_email_read</span> Activer compte : ${p.prenom}
+                          </button>`).join('')
+                        : ''}
                     ${canModifyData() ? `
-                    <button class="md-btn md-btn-outlined" style="color: var(--md-sys-color-error); border-color: var(--md-sys-color-error);" onclick="deleteEleve('${eleve.id}')">
+                    <button class="md-btn md-btn-outlined"
+                            style="color:var(--md-sys-color-error); border-color:var(--md-sys-color-error);"
+                            onclick="deleteEleve('${eleve.id}')">
                         <span class="material-icons">delete</span> Supprimer l'élève
-                    </button>
-                    ` : ''}
+                    </button>` : ''}
                 </div>
             `;
         }
@@ -2408,16 +2486,242 @@
         // Fonction pour revenir à la liste des élèves
         function backToElevesList() {
             if (window.eleveDetailsBackup) {
+                const needsReload = window.eleveDetailsBackup.needsReload;
                 const widgetCardContent = document.querySelector('#eleves .widget-card-content');
                 widgetCardContent.innerHTML = `
                     <div class="topbar-search" style="width: 100%; margin-bottom: 16px;">
                         <span class="material-icons">search</span>
                         <input type="text" placeholder="Rechercher un élève..." id="searchEleve" oninput="filterEleves()" value="${window.eleveDetailsBackup.searchValue}">
                     </div>
-                    <div id="elevesGrid" class="md-grid md-grid-auto">${window.eleveDetailsBackup.gridContent}</div>
+                    <div id="elevesGrid" class="md-grid md-grid-auto">${needsReload ? '' : window.eleveDetailsBackup.gridContent}</div>
                 `;
                 window.eleveDetailsBackup = null;
+                if (needsReload) loadEleves();
             }
+        }
+
+        // Naviguer vers la fiche d'un élève depuis un autre onglet (ex: classes)
+        function goToEleveFiche(eleveId) {
+            window._skipLoadElevesOnce = true;
+            window.eleveDetailsBackup = { searchValue: '', gridContent: '', needsReload: true };
+            switchTab('eleves');
+            showEleveDetails(eleveId);
+        }
+
+        // ─── MODE ÉDITION INLINE ─────────────────────────────────────────────
+        async function enterEditMode(eleveId) {
+            let eleve;
+            try {
+                const r = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
+                if (r.ok) eleve = await r.json();
+            } catch(e) {}
+            if (!eleve) eleve = allEleves.find(e => e.id === eleveId);
+            if (!eleve) return;
+
+            const parents = eleve.parents || [];
+
+            if (!window.eleveDetailsBackup) {
+                window.eleveDetailsBackup = {
+                    searchValue: document.getElementById('searchEleve')?.value || '',
+                    gridContent: document.getElementById('elevesGrid')?.innerHTML || ''
+                };
+            }
+
+            const widgetCardContent = document.querySelector('#eleves .widget-card-content');
+            widgetCardContent.innerHTML = `
+
+                <!-- Bandeau mode édition -->
+                <div class="fiche-header fiche-header--edit">
+                    <span class="material-icons" style="color:var(--md-sys-color-secondary);font-size:24px;flex-shrink:0;">edit_note</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-surface);">Mode édition — ${eleve.prenom} ${eleve.nom}</div>
+                        <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">Modifiez les champs ci-dessous puis cliquez sur <strong>Sauvegarder</strong></div>
+                    </div>
+                    <button class="md-btn md-btn-text" onclick="showEleveDetails('${eleveId}')">
+                        <span class="material-icons">close</span> Annuler
+                    </button>
+                </div>
+
+                <!-- Section élève -->
+                <div class="fiche-section" style="margin-bottom:20px;border-color:var(--md-sys-color-primary);">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-primary-container);">
+                        <div class="md-avatar" style="width:56px;height:56px;font-size:24px;font-weight:700;flex-shrink:0;background:var(--md-sys-color-primary);color:white;">
+                            ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (eleve.prenom||'E')[0].toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 style="margin:0;color:var(--md-sys-color-on-primary-container);font-size:18px;">Informations de l'élève</h4>
+                            <p style="margin:2px 0 0;font-size:13px;color:var(--md-sys-color-on-primary-container);opacity:0.8;">Tous les champs sont modifiables</p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <div class="fiche-edit-grid">
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom *</label>
+                                <input type="text" id="edit_eleveNom" class="fiche-edit-input" value="${eleve.nom||''}" placeholder="Nom de famille">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom *</label>
+                                <input type="text" id="edit_elevePrenom" class="fiche-edit-input" value="${eleve.prenom||''}" placeholder="Prénom">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">cake</span>Date de naissance</label>
+                                <input type="date" id="edit_eleveDateNaissance" class="fiche-edit-input" value="${eleve.dateNaissance ? eleve.dateNaissance.split('T')[0] : ''}">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">class</span>Classe</label>
+                                <select id="edit_eleveClasse" class="fiche-edit-input">
+                                    <option value="">— Sans classe —</option>
+                                    ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email élève</label>
+                                <input type="email" id="edit_eleveEmail" class="fiche-edit-input" value="${eleve.email||''}" placeholder="email@exemple.com">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
+                                <input type="tel" id="edit_eleveTel" class="fiche-edit-input" value="${eleve.tel||''}" placeholder="06 00 00 00 00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sections parents -->
+                ${parents.length === 0 ? `
+                <div class="fiche-section" style="margin-bottom:20px;">
+                    <div class="fiche-section-header">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);">
+                            <span class="material-icons">person_off</span>
+                        </div>
+                        <div>
+                            <h4 style="margin:0;">Aucun parent associé</h4>
+                            <p style="margin:2px 0 0;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun parent à modifier</p>
+                        </div>
+                    </div>
+                </div>` : parents.map((parent) => `
+                <div class="fiche-section" style="margin-bottom:20px;border-color:${parent.isPrimary ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-outline-variant)'};">
+                    <div class="fiche-section-header" style="background:${parent.isPrimary ? 'var(--md-sys-color-secondary-container)' : 'var(--md-sys-color-surface-container)'};">
+                        <div class="md-avatar" style="width:52px;height:52px;font-size:20px;font-weight:700;flex-shrink:0;
+                                    background:${parent.isPrimary ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-secondary-container)'};
+                                    color:${parent.isPrimary ? 'white' : 'var(--md-sys-color-on-secondary-container)'};">
+                            ${(parent.prenom||'P')[0].toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 style="margin:0;font-size:17px;color:${parent.isPrimary ? 'var(--md-sys-color-on-secondary-container)' : 'var(--md-sys-color-on-surface)'};">
+                                ${parent.isPrimary ? '★ Parent principal' : '2ᵉ parent / tuteur'}
+                            </h4>
+                            <p style="margin:2px 0 0;font-size:13px;opacity:0.75;">${parent.prenom||''} ${parent.nom||''}</p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <div class="fiche-edit-grid">
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom *</label>
+                                <input type="text" id="edit_parentNom_${parent.id}" class="fiche-edit-input" value="${parent.nom||''}" placeholder="Nom">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom *</label>
+                                <input type="text" id="edit_parentPrenom_${parent.id}" class="fiche-edit-input" value="${parent.prenom||''}" placeholder="Prénom">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label>
+                                <input type="email" id="edit_parentEmail_${parent.id}" class="fiche-edit-input" value="${parent.email||''}" placeholder="email@exemple.com">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
+                                <input type="tel" id="edit_parentTel_${parent.id}" class="fiche-edit-input" value="${parent.tel||''}" placeholder="06 00 00 00 00">
+                            </div>
+                            <div class="fiche-edit-item fiche-edit-item--full">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
+                                <input type="text" id="edit_parentAdresse_${parent.id}" class="fiche-edit-input" value="${parent.adresse||''}" placeholder="Adresse complète">
+                            </div>
+                        </div>
+                    </div>
+                </div>`).join('')}
+
+                <!-- Barre Sauvegarder / Annuler -->
+                <div class="fiche-edit-actions">
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:900px;margin:0 auto;width:100%;">
+                        <span class="material-icons" style="color:var(--md-sys-color-on-surface-variant);font-size:20px;">info</span>
+                        <span style="flex:1;font-size:14px;color:var(--md-sys-color-on-surface-variant);">
+                            Toutes les modifications seront enregistrées en une seule fois
+                        </span>
+                        <button class="md-btn md-btn-outlined" onclick="showEleveDetails('${eleveId}')" style="min-width:120px;">
+                            <span class="material-icons">close</span> Annuler
+                        </button>
+                        <button class="md-btn md-btn-filled" id="saveFicheBtn" onclick="saveEditMode('${eleveId}')" style="min-width:170px;">
+                            <span class="material-icons">save</span> Sauvegarder
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveEditMode(eleveId) {
+            const saveBtn = document.getElementById('saveFicheBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;">sync</span> Sauvegarde...';
+            }
+
+            const errors = [];
+            let parentsOk = 0;
+            let parentsTotal = 0;
+
+            // -- Élève --
+            const eleveNom    = document.getElementById('edit_eleveNom')?.value?.trim();
+            const elevePrenom = document.getElementById('edit_elevePrenom')?.value?.trim();
+            if (!eleveNom || !elevePrenom) {
+                showSnackbar('Le nom et le prénom de l\'élève sont obligatoires');
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<span class="material-icons">save</span> Sauvegarder'; }
+                return;
+            }
+            const eleveData = {
+                nom:           eleveNom,
+                prenom:        elevePrenom,
+                classe:        document.getElementById('edit_eleveClasse')?.value || null,
+                dateNaissance: document.getElementById('edit_eleveDateNaissance')?.value || null,
+                email:         document.getElementById('edit_eleveEmail')?.value?.trim() || null,
+                tel:           document.getElementById('edit_eleveTel')?.value?.trim()   || null
+            };
+            try {
+                const r = await fetch(`${API_URL}/eleves/${eleveId}`, {
+                    method: 'PUT', headers: getHeaders(), body: JSON.stringify(eleveData)
+                });
+                if (!r.ok) errors.push('élève');
+            } catch(e) { errors.push('élève'); }
+
+            // -- Parents --
+            const parentInputs = document.querySelectorAll('[id^="edit_parentNom_"]');
+            for (const input of parentInputs) {
+                const pid = input.id.replace('edit_parentNom_', '');
+                parentsTotal++;
+                const pData = {
+                    nom:        document.getElementById(`edit_parentNom_${pid}`)?.value?.trim()        || '',
+                    prenom:     document.getElementById(`edit_parentPrenom_${pid}`)?.value?.trim()     || '',
+                    email:      document.getElementById(`edit_parentEmail_${pid}`)?.value?.trim()      || null,
+                    tel:        document.getElementById(`edit_parentTel_${pid}`)?.value?.trim()        || null,
+                    adresse:    document.getElementById(`edit_parentAdresse_${pid}`)?.value?.trim()    || null,
+                    profession: document.getElementById(`edit_parentProfession_${pid}`)?.value?.trim() || null
+                };
+                try {
+                    const r = await fetch(`${API_URL}/parents/${pid}`, {
+                        method: 'PUT', headers: getHeaders(), body: JSON.stringify(pData)
+                    });
+                    if (r.ok) parentsOk++; else errors.push('parent');
+                } catch(e) { errors.push('parent'); }
+            }
+
+            await loadEleves();
+
+            if (errors.length === 0) {
+                showSnackbar(parentsTotal > 0
+                    ? `Élève et ${parentsOk} parent(s) mis à jour avec succès`
+                    : 'Élève mis à jour avec succès');
+            } else {
+                showSnackbar('Certaines modifications n\'ont pas pu être enregistrées');
+            }
+            showEleveDetails(eleveId);
         }
 
         // Fonction pour éditer les informations du parent
@@ -2635,109 +2939,8 @@
         }
 
         async function editEleve(id) {
-            const eleve = allEleves.find(e => e.id === id);
-            if (!eleve) return;
-
-            const formHTML = `
-                <form id="eleveForm" style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- Identité -->
-                    <div class="fiche-section" style="margin: 0;">
-                        <div class="fiche-section-header" style="padding: 12px 16px;">
-                            <div class="fiche-section-icon" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
-                                <span class="material-icons" style="font-size: 18px;">person</span>
-                            </div>
-                            <h5 style="margin: 0; font-size: 15px;">Identité</h5>
-                        </div>
-                        <div class="fiche-section-content" style="padding: 16px;">
-                            <div class="md-form-grid">
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="text" id="eleveNom" class="md-text-field-input" value="${eleve.nom}" required>
-                                        <label class="md-text-field-label">Nom *</label>
-                                    </div>
-                                </div>
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="text" id="elevePrenom" class="md-text-field-input" value="${eleve.prenom}" required>
-                                        <label class="md-text-field-label">Prénom *</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md-form-grid" style="margin-top: 12px;">
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="date" id="eleveDateNaissance" class="md-text-field-input" value="${eleve.dateNaissance || ''}">
-                                        <label class="md-text-field-label">Date de naissance</label>
-                                    </div>
-                                </div>
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <select id="eleveClasse" class="md-text-field-input">
-                                            <option value="">-- Sélectionner --</option>
-                                            ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
-                                        </select>
-                                        <label class="md-text-field-label">Classe</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Contact -->
-                    <div class="fiche-section" style="margin: 0;">
-                        <div class="fiche-section-header" style="padding: 12px 16px;">
-                            <div class="fiche-section-icon" style="width: 32px; height: 32px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">
-                                <span class="material-icons" style="font-size: 18px;">contact_mail</span>
-                            </div>
-                            <h5 style="margin: 0; font-size: 15px;">Contact</h5>
-                        </div>
-                        <div class="fiche-section-content" style="padding: 16px;">
-                            <div class="md-form-grid">
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="email" id="eleveEmail" class="md-text-field-input" value="${eleve.email || ''}">
-                                        <label class="md-text-field-label">Email</label>
-                                    </div>
-                                </div>
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="tel" id="eleveTelephone" class="md-text-field-input" value="${eleve.tel || ''}">
-                                        <label class="md-text-field-label">Téléphone</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>`;
-
-            showDialog('Modifier l\'élève — ' + eleve.prenom + ' ' + eleve.nom, formHTML, async () => {
-                const data = {
-                    nom: document.getElementById('eleveNom').value,
-                    prenom: document.getElementById('elevePrenom').value,
-                    classe: document.getElementById('eleveClasse').value,
-                    dateNaissance: document.getElementById('eleveDateNaissance').value,
-                    email: document.getElementById('eleveEmail').value,
-                    tel: document.getElementById('eleveTelephone').value,
-                    photo: eleve.photo || null
-                };
-
-                try {
-                    const response = await fetch(`${API_URL}/eleves/${id}`, {
-                        method: 'PUT',
-                        headers: getHeaders(),
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) {
-                        showSnackbar('Élève modifié avec succès');
-                        await loadEleves();
-                        showEleveDetails(id);
-                    } else {
-                        showSnackbar('Erreur lors de la modification');
-                    }
-                } catch (error) {
-                    showSnackbar('Erreur de connexion');
-                }
-            });
+            // Redirige vers le mode édition inline
+            enterEditMode(id);
         }
 
         async function deleteEleve(id) {
@@ -2759,6 +2962,8 @@
                             ? 'Dossier d\'inscription supprimé'
                             : 'Élève supprimé';
                         showSnackbar(successMessage);
+                        window.eleveDetailsBackup = null;
+                        window._skipLoadElevesOnce = false;
                         loadEleves();
                         loadDashboardData();
                     } else {
@@ -2771,7 +2976,174 @@
         }
 
         // ==================== CLASSES ====================
+
+        // Afficher les détails d'une classe inline
+        function showClasseDetails(classeId) {
+            const classe = allClasses.find(c => c.id === classeId);
+            if (!classe) return;
+
+            const professeur = allStaffMembers.find(p => p.id === classe.professeurId);
+            const elevesClasse = allEleves.filter(e => e.classe === classe.nom);
+
+            if (!window.classeDetailsBackup) {
+                window.classeDetailsBackup = {
+                    searchValue: document.getElementById('classesSearchInput')?.value || '',
+                    gridContent: document.getElementById('classesGrid')?.innerHTML || ''
+                };
+            }
+
+            const professeurDisplay = professeur
+                ? ((professeur.prenom || '') + ' ' + (professeur.nom || '')).trim() || professeur.displayName
+                : '—';
+
+            const widgetCardContent = document.querySelector('#classes .widget-card-content');
+            widgetCardContent.innerHTML = `
+                <!-- Navigation -->
+                <div class="fiche-header">
+                    <button class="md-btn md-btn-tonal" onclick="backToClassesList()">
+                        <span class="material-icons">arrow_back</span> Retour à la liste
+                    </button>
+                    <div style="flex:1;"></div>
+                    ${canModifyData() ? `
+                    <button class="md-btn md-btn-filled" onclick="enterClasseEditMode('${classeId}')">
+                        <span class="material-icons">edit_note</span> Modifier la classe
+                    </button>` : ''}
+                </div>
+
+                <!-- En-tête de la classe -->
+                <div class="fiche-section" style="margin-bottom:20px; border-color:var(--md-sys-color-secondary);">
+                    <div style="display:flex; align-items:center; gap:24px; padding:28px 28px 20px;
+                                background:linear-gradient(135deg, var(--md-sys-color-secondary-container) 0%, var(--md-sys-color-surface-container) 100%);">
+                        <div class="stat-widget-icon secondary" style="width:72px;height:72px;flex-shrink:0;box-shadow:var(--md-sys-elevation-2);border-radius:16px;">
+                            <span class="material-icons" style="font-size:36px;">class</span>
+                        </div>
+                        <div style="flex:1;">
+                            <h3 style="margin:0 0 10px 0;font-size:26px;color:var(--md-sys-color-on-secondary-container);">${classe.nom}</h3>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                                ${classe.niveau ? `<span style="background:var(--md-sys-color-secondary);color:white;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;">${classe.niveau}</span>` : ''}
+                                <span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:3px 12px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:4px;">
+                                    <span class="material-icons" style="font-size:14px;">group</span> ${elevesClasse.length} élève${elevesClasse.length !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <div class="fiche-info-grid">
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">person</span>
+                                <div>
+                                    <div class="fiche-info-label">Professeur</div>
+                                    <div class="fiche-info-value">${professeurDisplay}</div>
+                                </div>
+                            </div>
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">school</span>
+                                <div>
+                                    <div class="fiche-info-label">Niveau</div>
+                                    <div class="fiche-info-value">${classe.niveau || '—'}</div>
+                                </div>
+                            </div>
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">group</span>
+                                <div>
+                                    <div class="fiche-info-label">Effectif</div>
+                                    <div class="fiche-info-value">${elevesClasse.length} élève${elevesClasse.length !== 1 ? 's' : ''}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des élèves -->
+                <div class="fiche-section" style="margin-bottom:20px;">
+                    <div class="fiche-section-header">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);">
+                            <span class="material-icons">group</span>
+                        </div>
+                        <div style="flex:1;">
+                            <h4 class="fiche-section-title">Élèves de la classe</h4>
+                            <p class="fiche-section-subtitle">${elevesClasse.length} élève${elevesClasse.length !== 1 ? 's' : ''} inscrit${elevesClasse.length !== 1 ? 's' : ''} </p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        ${elevesClasse.length === 0
+                            ? `<div style="text-align:center;padding:28px 16px;color:var(--md-sys-color-on-surface-variant);">
+                                <span class="material-icons" style="font-size:40px;opacity:.4;">group_off</span>
+                                <p style="margin:8px 0 0;">Aucun élève dans cette classe</p>
+                               </div>`
+                            : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+                                ${elevesClasse.map(e => `
+                                <div onclick="goToEleveFiche('${e.id}')"
+                                     style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
+                                            border:1px solid var(--md-sys-color-outline-variant);cursor:pointer;transition:all .2s;
+                                            background:var(--md-sys-color-surface-container-low);"
+                                     onmouseover="this.style.background='var(--md-sys-color-primary-container)';this.style.borderColor='var(--md-sys-color-primary)';"
+                                     onmouseout="this.style.background='var(--md-sys-color-surface-container-low)';this.style.borderColor='var(--md-sys-color-outline-variant)';">
+                                    <div class="md-avatar" style="width:40px;height:40px;font-size:16px;font-weight:700;flex-shrink:0;
+                                                background:var(--md-sys-color-primary);color:white;">
+                                        ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (e.prenom || 'E')[0].toUpperCase()}
+                                    </div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.prenom} ${e.nom}</div>
+                                        <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;">
+                                            ${e.nbParents > 0 && !e.parentsActivated ? '<span style="color:var(--md-sys-color-error);">⏳ Parent non activé</span>' : (e.nbParents === 0 ? 'Aucun parent' : '✓ Parent actif')}
+                                        </div>
+                                    </div>
+                                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);flex-shrink:0;">chevron_right</span>
+                                </div>`).join('')}
+                               </div>`
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        // Revenir à la liste des classes
+        function backToClassesList() {
+            if (window.classeDetailsBackup) {
+                const widgetCardContent = document.querySelector('#classes .widget-card-content');
+                widgetCardContent.innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <div class="topbar-search" style="width: 100%;">
+                            <span class="material-icons">search</span>
+                            <input type="text" id="classesSearchInput" placeholder="Rechercher une classe..." oninput="filterClassesGrid()" value="${window.classeDetailsBackup.searchValue}">
+                            <button type="button" id="clearClassesSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearClassesSearch()">
+                                <span class="material-icons">clear</span>
+                            </button>
+                        </div>
+                        <div id="classesSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                            <span id="classesFilteredCount">0</span> classe(s) trouvée(s)
+                        </div>
+                    </div>
+                    <div id="classesGrid" class="md-grid md-grid-auto">${window.classeDetailsBackup.gridContent}</div>
+                `;
+                window.classeDetailsBackup = null;
+            }
+        }
+
         async function loadClasses() {
+            // Si classesGrid absent (on est sur une vue détail), restaurer la structure
+            if (!document.getElementById('classesGrid')) {
+                const wcc = document.querySelector('#classes .widget-card-content');
+                if (wcc) {
+                    wcc.innerHTML = `
+                        <div style="margin-bottom: 16px;">
+                            <div class="topbar-search" style="width: 100%;">
+                                <span class="material-icons">search</span>
+                                <input type="text" id="classesSearchInput" placeholder="Rechercher une classe..." oninput="filterClassesGrid()">
+                                <button type="button" id="clearClassesSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearClassesSearch()">
+                                    <span class="material-icons">clear</span>
+                                </button>
+                            </div>
+                            <div id="classesSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
+                                <span id="classesFilteredCount">0</span> classe(s) trouvée(s)
+                            </div>
+                        </div>
+                        <div id="classesGrid" class="md-grid md-grid-auto"></div>
+                    `;
+                }
+                window.classeDetailsBackup = null;
+            }
             try {
                 console.log('loadClasses: Début du chargement');
                 // S'assurer que toutes les données nécessaires sont chargées
@@ -2848,8 +3220,10 @@
             document.getElementById('classesGrid').innerHTML = classesToShow.length ? classesToShow.map(c => {
                 const professeur = allStaffMembers.find(p => p.id === c.professeurId);
                 const professeurName = professeur ? professeur.displayName : 'Non assigné';
+                const nbEleves = allEleves.filter(e => e.classe === c.nom).length;
                 return `
-                <div class="md-card md-card-elevated" style="padding: 16px;">
+                <div class="md-card md-card-elevated" style="padding: 16px; cursor: pointer; transition: all .2s ease;"
+                     onclick="showClasseDetails('${c.id}')">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                         <div class="stat-widget-icon secondary" style="width: 48px; height: 48px;">
                             <span class="material-icons">class</span>
@@ -2863,11 +3237,14 @@
                             </p>
                         </div>
                     </div>
-                    <p style="margin-bottom: 12px; font-size: 14px;">${allEleves.filter(e => e.classe === c.nom).length} élève(s)</p>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="md-btn md-btn-tonal" onclick="viewClasse('${c.id}')"><span class="material-icons">visibility</span></button>
-                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="editClasse('${c.id}')"><span class="material-icons">edit</span></button>` : ''}
-                        ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>` : ''}
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px;">
+                        <p style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); display:flex; align-items:center; gap:4px;">
+                            <span class="material-icons" style="font-size:16px;">group</span> ${nbEleves} élève${nbEleves !== 1 ? 's' : ''}
+                        </p>
+                        <div style="display: flex; gap: 8px;">
+                            ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="event.stopPropagation(); enterClasseEditMode('${c.id}')"><span class="material-icons">edit</span></button>` : ''}
+                            ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>` : ''}
+                        </div>
                     </div>
                 </div>
                 `;
@@ -2907,14 +3284,391 @@
         }
 
         async function editClasse(id) {
-            const classe = allClasses.find(c => c.id === id);
-            if (!classe) return;
+            enterClasseEditMode(id);
+        }
 
-            // S'assurer que les données des professeurs sont chargées
-            if (allStaffMembers.length === 0) {
-                await loadAllData();
+        // ─── MODE ÉDITION INLINE CLASSE ─────────────────────────────────────
+        async function enterClasseEditMode(classeId) {
+            let classe = allClasses.find(c => c.id === classeId);
+            if (!classe) return;
+            if (allStaffMembers.length === 0 || allEleves.length === 0) await loadAllData();
+
+            if (!window.classeDetailsBackup) {
+                window.classeDetailsBackup = {
+                    searchValue: document.getElementById('classesSearchInput')?.value || '',
+                    gridContent: document.getElementById('classesGrid')?.innerHTML || ''
+                };
             }
-            showClasseForm(classe);
+
+            // Snapshot des élèves actuels de cette classe
+            window._classeEditOriginalIds = allEleves.filter(e => e.classe === classe.nom).map(e => e.id);
+            window._classeEditIds = [...window._classeEditOriginalIds];
+            window._classeEditId = classeId;
+            window._classeEditProfesseurId = classe.professeurId || null;
+
+            const widgetCardContent = document.querySelector('#classes .widget-card-content');
+            widgetCardContent.innerHTML = `
+
+                <!-- Bandeau mode édition -->
+                <div class="fiche-header fiche-header--edit">
+                    <span class="material-icons" style="color:var(--md-sys-color-secondary);font-size:24px;flex-shrink:0;">edit_note</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-surface);">Mode édition — ${classe.nom}</div>
+                        <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">Modifiez les champs puis cliquez sur <strong>Sauvegarder</strong></div>
+                    </div>
+                    <button class="md-btn md-btn-text" onclick="showClasseDetails('${classeId}')">
+                        <span class="material-icons">close</span> Annuler
+                    </button>
+                </div>
+
+                <!-- Informations de la classe -->
+                <div class="fiche-section" style="margin-bottom:20px;border-color:var(--md-sys-color-secondary);">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-secondary-container);">
+                        <div class="stat-widget-icon secondary" style="width:52px;height:52px;flex-shrink:0;border-radius:14px;">
+                            <span class="material-icons" style="font-size:26px;">class</span>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <div class="fiche-edit-grid">
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons">badge</span> Nom de la classe *</label>
+                                <input id="edit_classeNom" class="fiche-edit-input" type="text" value="${classe.nom}" placeholder="ex: CE1-A" required>
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons">school</span> Niveau</label>
+                                <select id="edit_classeNiveau" class="fiche-edit-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
+                                        `<option value="${n}" ${n === classe.niveau ? 'selected' : ''}>${n}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                            <div class="fiche-edit-item fiche-edit-item--full" style="position:relative;">
+                                <label class="fiche-edit-label"><span class="material-icons">person</span> Professeur référent</label>
+                                ${(() => {
+                                    const currentProf = allStaffMembers.find(p => p.id === classe.professeurId);
+                                    const currentProfName = currentProf ? currentProf.displayName : null;
+                                    return `
+                                    <div>
+                                        <input id="profSearchInput" class="fiche-edit-input" type="text"
+                                               placeholder="Rechercher un professeur..."
+                                               value=""
+                                               oninput="classeProfSearchUpdate()"
+                                               autocomplete="off"
+                                               style="${currentProfName ? 'display:none;' : ''}">
+                                        <div id="profSearchResults"
+                                             style="display:none;
+                                                    background:var(--md-sys-color-surface-container-highest);
+                                                    border:1px solid var(--md-sys-color-outline);border-radius:10px;
+                                                    box-shadow:var(--md-sys-elevation-2);margin-top:4px;
+                                                    overflow:hidden;"></div>
+                                        <div id="profSelectedBadge"
+                                             style="display:${currentProfName ? 'flex' : 'none'}; align-items:center;gap:10px;
+                                                    background:var(--md-sys-color-secondary-container);border-radius:10px;padding:10px 14px;">
+                                            <span class="material-icons" style="color:var(--md-sys-color-secondary);flex-shrink:0;">person</span>
+                                            <span id="profSelectedName" style="flex:1;font-weight:600;color:var(--md-sys-color-on-secondary-container);">${currentProfName || ''}</span>
+                                            <button type="button" class="md-btn md-btn-text" style="padding:2px 6px;min-width:0;" onclick="classeProfClear()">
+                                                <span class="material-icons" style="font-size:18px;">close</span>
+                                            </button>
+                                        </div>
+                                    `;
+                                })()}
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestion des élèves -->
+                <div class="fiche-section" style="margin-bottom:20px;">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-primary-container);">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-primary);color:white;">
+                            <span class="material-icons">group</span>
+                        </div>
+                        <div style="flex:1;">
+                            <h4 class="fiche-section-title">Élèves de la classe</h4>
+                            <p class="fiche-section-subtitle">Ajoutez ou retirez des élèves</p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+
+                        <!-- Ajouter un élève -->
+                        <div style="margin-bottom:20px;padding:14px;background:var(--md-sys-color-surface-container-low);border-radius:12px;border:1px solid var(--md-sys-color-outline-variant);">
+                            <div style="font-size:13px;font-weight:600;color:var(--md-sys-color-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                                <span class="material-icons" style="font-size:18px;">person_add</span> Ajouter un élève
+                            </div>
+                            <div style="position:relative;">
+                                <input id="eleveSearchInput" class="fiche-edit-input" type="text"
+                                       placeholder="Rechercher un élève à ajouter..."
+                                       oninput="classeEleveSearchUpdate()"
+                                       autocomplete="off">
+                                <div id="eleveSearchResults"
+                                     style="display:none;
+                                            background:var(--md-sys-color-surface-container-highest);
+                                            border:1px solid var(--md-sys-color-outline);border-radius:10px;
+                                            box-shadow:var(--md-sys-elevation-2);margin-top:4px;
+                                            overflow:hidden;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Liste des élèves éditables -->
+                        <div id="classeEditElevesList"></div>
+                    </div>
+                </div>
+
+                <!-- Barre Sauvegarder / Annuler -->
+                <div class="fiche-edit-actions">
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:900px;margin:0 auto;width:100%;">
+                        <span style="flex:1;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Toutes les modifications seront appliquées en cliquant sur Sauvegarder</span>
+                        <button class="md-btn md-btn-text" onclick="showClasseDetails('${classeId}')">
+                            <span class="material-icons">close</span> Annuler
+                        </button>
+                        <button id="saveClasseBtn" class="md-btn md-btn-filled" onclick="saveClasseEditMode('${classeId}')">
+                            <span class="material-icons">save</span> Sauvegarder
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            renderClasseEditList();
+        }
+
+        function renderClasseEditList() {
+            const container = document.getElementById('classeEditElevesList');
+            if (!container) return;
+            const ids = window._classeEditIds || [];
+            const eleves = ids.map(id => allEleves.find(e => e.id === id)).filter(Boolean);
+
+            if (eleves.length === 0) {
+                container.innerHTML = `<div style="text-align:center;padding:20px 16px;color:var(--md-sys-color-on-surface-variant);">
+                    <span class="material-icons" style="font-size:36px;opacity:.4;">group_off</span>
+                    <p style="margin:6px 0 0;font-size:14px;">Aucun élève dans cette classe</p>
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;">
+                ${eleves.map(e => `
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+                             border:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);">
+                    <div class="md-avatar" style="width:38px;height:38px;font-size:15px;font-weight:700;flex-shrink:0;
+                                background:var(--md-sys-color-primary);color:white;">
+                        ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (e.prenom||'E')[0].toUpperCase()}
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.prenom} ${e.nom}</div>
+                        <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);">
+                            ${!window._classeEditOriginalIds.includes(e.id)
+                                ? '<span style="color:var(--md-sys-color-primary);font-weight:600;">+ Ajout</span>'
+                                : 'Déjà inscrit'}
+                        </div>
+                    </div>
+                    <button class="md-btn md-btn-text" style="color:var(--md-sys-color-error);padding:4px;min-width:0;flex-shrink:0;"
+                            onclick="classeEditRemoveEleve('${e.id}')" title="Retirer de la classe">
+                        <span class="material-icons" style="font-size:20px;">person_remove</span>
+                    </button>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        // ─── Recherche Professeur ────────────────────────────────────────────
+        function classeProfSearchUpdate() {
+            const input = document.getElementById('profSearchInput');
+            const results = document.getElementById('profSearchResults');
+            if (!input || !results) return;
+            const q = input.value.toLowerCase().trim();
+            if (q.length < 2) {
+                results.style.display = 'none';
+                return;
+            }
+            const filtered = allStaffMembers.filter(p =>
+                p.displayName.toLowerCase().includes(q)
+            ).slice(0, 8);
+            if (filtered.length === 0) {
+                results.style.display = 'block';
+                results.innerHTML = `<div style="padding:12px 14px;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
+                return;
+            }
+            results.style.display = 'block';
+            results.innerHTML = filtered.map(p => `
+                <div onmousedown="event.preventDefault(); classeProfSelect('${p.id}', '${p.displayName.replace(/'/g, "\\'")}')"
+                     style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                            border-bottom:1px solid var(--md-sys-color-outline-variant);"
+                     onmouseover="this.style.background='var(--md-sys-color-primary-container)'"
+                     onmouseout="this.style.background=''">
+                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-secondary);">person</span>
+                    <span style="font-size:13px;">${p.displayName}</span>
+                </div>`).join('');
+        }
+
+        function classeProfSelect(id, name) {
+            window._classeEditProfesseurId = id;
+            document.getElementById('profSearchInput').style.display = 'none';
+            document.getElementById('profSearchResults').style.display = 'none';
+            document.getElementById('profSelectedName').textContent = name;
+            document.getElementById('profSelectedBadge').style.display = 'flex';
+        }
+
+        function classeProfClear() {
+            window._classeEditProfesseurId = null;
+            const input = document.getElementById('profSearchInput');
+            input.value = '';
+            input.style.display = '';
+            input.focus();
+            document.getElementById('profSelectedBadge').style.display = 'none';
+            document.getElementById('profSearchResults').style.display = 'none';
+        }
+
+        // ─── Recherche Élève ────────────────────────────────────────────────
+        function classeEleveSearchUpdate() {
+            const input = document.getElementById('eleveSearchInput');
+            const results = document.getElementById('eleveSearchResults');
+            if (!input || !results) return;
+            const q = input.value.toLowerCase().trim();
+            // N'afficher le dropdown qu'à partir de 2 caractères
+            if (q.length < 2) {
+                results.style.display = 'none';
+                return;
+            }
+            const filtered = allEleves
+                .filter(e => !window._classeEditIds.includes(e.id))
+                .filter(e => (e.prenom + ' ' + e.nom).toLowerCase().includes(q) || e.nom.toLowerCase().includes(q))
+                .sort((a,b) => (a.nom+a.prenom).localeCompare(b.nom+b.prenom))
+                .slice(0, 10);
+            if (filtered.length === 0) {
+                results.style.display = 'block';
+                results.innerHTML = `<div style="padding:12px 14px;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
+                return;
+            }
+            results.style.display = 'block';
+            results.innerHTML = filtered.map(e => `
+                <div onmousedown="event.preventDefault(); classeEleveSelect('${e.id}')"
+                     style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                            border-bottom:1px solid var(--md-sys-color-outline-variant);"
+                     onmouseover="this.style.background='var(--md-sys-color-primary-container)'"
+                     onmouseout="this.style.background=''">
+                    <div class="md-avatar" style="width:32px;height:32px;font-size:13px;font-weight:700;flex-shrink:0;
+                                background:var(--md-sys-color-primary);color:white;">
+                        ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (e.prenom||'E')[0].toUpperCase()}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-size:13px;font-weight:600;">${e.prenom} ${e.nom}</div>
+                        <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);">${e.classe ? e.classe : 'Sans classe'}</div>
+                    </div>
+                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">add_circle</span>
+                </div>`).join('');
+        }
+
+        function classeEleveSelect(eleveId) {
+            if (!window._classeEditIds.includes(eleveId)) {
+                window._classeEditIds.push(eleveId);
+            }
+            const input = document.getElementById('eleveSearchInput');
+            if (input) input.value = '';
+            document.getElementById('eleveSearchResults').style.display = 'none';
+            renderClasseEditList();
+        }
+
+        function classeEditRemoveEleve(eleveId) {
+            window._classeEditIds = window._classeEditIds.filter(id => id !== eleveId);
+            renderClasseEditList();
+            // Ne pas rouvrir le dropdown — seulement mettre à jour silencieusement si déjà ouvert
+            const results = document.getElementById('eleveSearchResults');
+            if (results && results.style.display === 'block') {
+                classeEleveSearchUpdate();
+            }
+        }
+
+        async function saveClasseEditMode(classeId) {
+            const saveBtn = document.getElementById('saveClasseBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;">sync</span> Sauvegarde...';
+            }
+
+            const nom = document.getElementById('edit_classeNom')?.value?.trim();
+            if (!nom) {
+                showSnackbar('Le nom de la classe est obligatoire');
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<span class="material-icons">save</span> Sauvegarder'; }
+                return;
+            }
+
+            const niveau       = document.getElementById('edit_classeNiveau')?.value || null;
+            const professeurId = window._classeEditProfesseurId || null;
+
+            const errors = [];
+
+            // 1. Mettre à jour la classe
+            try {
+                const r = await fetch(`${API_URL}/classes/${classeId}`, {
+                    method: 'PUT', headers: getHeaders(),
+                    body: JSON.stringify({ nom, niveau, professeurId })
+                });
+                if (!r.ok) errors.push('classe');
+            } catch(e) { errors.push('classe'); }
+
+            // 2. Mettre à jour les élèves (ajoutés / retirés)
+            const originalIds = window._classeEditOriginalIds || [];
+            const newIds      = window._classeEditIds || [];
+
+            // Ajoutés : ceux dans newIds pas dans originalIds
+            const added = newIds.filter(id => !originalIds.includes(id));
+            // Retirés : ceux dans originalIds pas dans newIds
+            const removed = originalIds.filter(id => !newIds.includes(id));
+
+            for (const id of added) {
+                const eleve = allEleves.find(e => e.id === id);
+                if (!eleve) continue;
+                try {
+                    const r = await fetch(`${API_URL}/eleves/${id}`, {
+                        method: 'PUT', headers: getHeaders(),
+                        body: JSON.stringify({
+                            nom: eleve.nom,
+                            prenom: eleve.prenom,
+                            dateNaissance: eleve.dateNaissance || null,
+                            email: eleve.email || null,
+                            tel: eleve.tel || null,
+                            photo: eleve.photo || null,
+                            classe: nom
+                        })
+                    });
+                    if (!r.ok) errors.push('eleve_add');
+                } catch(e) { errors.push('eleve_add'); }
+            }
+            for (const id of removed) {
+                const eleve = allEleves.find(e => e.id === id);
+                if (!eleve) continue;
+                try {
+                    const r = await fetch(`${API_URL}/eleves/${id}`, {
+                        method: 'PUT', headers: getHeaders(),
+                        body: JSON.stringify({
+                            nom: eleve.nom,
+                            prenom: eleve.prenom,
+                            dateNaissance: eleve.dateNaissance || null,
+                            email: eleve.email || null,
+                            tel: eleve.tel || null,
+                            photo: eleve.photo || null,
+                            classe: null
+                        })
+                    });
+                    if (!r.ok) errors.push('eleve_remove');
+                } catch(e) { errors.push('eleve_remove'); }
+            }
+
+            // 3. Rafraîchir les données
+            await loadAllData();
+
+            if (errors.length === 0) {
+                const details = [];
+                if (added.length > 0) details.push(`${added.length} ajouté(s)`);
+                if (removed.length > 0) details.push(`${removed.length} retiré(s)`);
+                showSnackbar('Classe mise à jour' + (details.length ? ' — ' + details.join(', ') : ''));
+            } else {
+                showSnackbar('Certaines modifications n\'ont pas pu être enregistrées');
+            }
+
+            // Revenir à la vue détail de la classe
+            showClasseDetails(classeId);
         }
 
         async function deleteClasse(id) {

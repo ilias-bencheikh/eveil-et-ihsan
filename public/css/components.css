@@ -959,17 +959,19 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px;
-    background: var(--md-sys-color-surface-variant);
-    border-radius: 12px;
-    margin-bottom: 24px;
+    padding: 14px 16px;
+    background: var(--md-sys-color-surface-container-low);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .fiche-section {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     border-radius: 20px;
     overflow: hidden;
     border: 1px solid var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-sys-elevation-1);
 }
 
 .fiche-section-header {
@@ -978,6 +980,7 @@ body {
     gap: 16px;
     padding: 20px 24px;
     background: var(--md-sys-color-surface-container);
+    flex-wrap: wrap;
 }
 
 .fiche-section-icon {
@@ -996,29 +999,32 @@ body {
 
 .fiche-info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
 }
 
 .fiche-info-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     padding: 14px 16px;
     background: var(--md-sys-color-surface);
     border-radius: 12px;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
+    border: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .fiche-info-item:hover {
-    border-color: var(--md-sys-color-outline-variant);
+    border-color: var(--md-sys-color-primary);
     box-shadow: var(--md-sys-elevation-1);
+    transform: translateY(-1px);
 }
 
 .fiche-info-icon {
     font-size: 22px;
     color: var(--md-sys-color-primary);
+    margin-top: 1px;
+    flex-shrink: 0;
 }
 
 .fiche-info-label {
@@ -1026,31 +1032,128 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--md-sys-color-on-surface-variant);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 .fiche-info-value {
     font-weight: 600;
     font-size: 14px;
     color: var(--md-sys-color-on-surface);
+    line-height: 1.4;
 }
 
 .family-member-card {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px;
+    padding: 14px 16px;
     background: var(--md-sys-color-surface);
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
+    transition: all 0.25s ease;
+    border: 2px solid var(--md-sys-color-outline-variant);
 }
 
 .family-member-card:hover {
     border-color: var(--md-sys-color-primary);
     transform: translateY(-2px);
     box-shadow: var(--md-sys-elevation-2);
+    background: var(--md-sys-color-primary-container);
+}
+
+@media (max-width: 600px) {
+    .fiche-section-content { padding: 16px; }
+    .fiche-section-header { padding: 16px; }
+    .fiche-info-grid { grid-template-columns: 1fr; }
+    .fiche-header { flex-wrap: wrap; gap: 10px; }
+}
+
+/* ===== MODE ÉDITION INLINE ===== */
+
+.fiche-header--edit {
+    background: linear-gradient(135deg, var(--md-sys-color-secondary-container) 0%, var(--md-sys-color-surface-container) 100%);
+    border: 2px solid var(--md-sys-color-secondary);
+}
+
+.fiche-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.fiche-edit-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fiche-edit-item--full {
+    grid-column: 1 / -1;
+}
+
+.fiche-edit-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 600;
+}
+
+.fiche-edit-label .fiche-info-icon {
+    font-size: 16px;
+}
+
+.fiche-edit-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: 10px;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.fiche-edit-input:focus {
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--md-sys-color-primary-rgb, 103,80,164), 0.12);
+    background: var(--md-sys-color-surface-container-lowest);
+}
+
+.fiche-edit-input:hover:not(:focus) {
+    border-color: var(--md-sys-color-on-surface-variant);
+}
+
+select.fiche-edit-input {
+    cursor: pointer;
+    appearance: auto;
+}
+
+/* Barre d'actions fixe en bas */
+.fiche-edit-actions {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--md-sys-color-surface-container-high);
+    border-top: 2px solid var(--md-sys-color-outline-variant);
+    padding: 16px 20px;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin: 0 -24px -20px;
+}
+
+@media (max-width: 600px) {
+    .fiche-edit-grid { grid-template-columns: 1fr; }
+    .fiche-edit-actions { margin: 0 -16px -16px; padding: 12px 16px; border-radius: 0; }
 }
 
 /* ===== FAMILLE EXISTANTE SECTION ===== */
