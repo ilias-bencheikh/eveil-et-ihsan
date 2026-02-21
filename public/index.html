@@ -284,6 +284,15 @@
             min-height: 120px;
         }
 
+        #staffList .md-card-elevated:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        #staffList .staff-card {
+            min-height: 120px;
+        }
+
         /* Styles pour la modal */
         .modal-overlay {
             position: fixed;
@@ -1091,20 +1100,23 @@
                         <!-- ===== PANNEAU GAUCHE ===== -->
                         <div class="msg-sidebar">
                             <div class="msg-sidebar-header">
-                                <button class="msg-compose-btn" onclick="openComposePanel()">
-                                    <span class="material-icons">edit_note</span>
-                                    <span>Nouveau message</span>
-                                </button>
+                                <div class="msg-header-row">
+                                    <button class="msg-compose-btn" onclick="openComposePanel()">
+                                        <span class="material-icons">edit_note</span>
+                                        <span>Nouveau message</span>
+                                    </button>
+                                    <button class="msg-select-toggle" id="msgSelectToggle" onclick="toggleSelectionMode()" title="Sélectionner des messages">
+                                        <span class="material-icons">checklist</span>
+                                    </button>
+                                </div>
                                 <div class="msg-tabs">
                                     <button class="msg-tab active" id="btn-received" onclick="switchMessageView('received')">
                                         <span class="material-icons">move_to_inbox</span>
                                         <span>Reçus</span>
-                                        <span class="msg-tab-count" id="received-count">0</span>
                                     </button>
                                     <button class="msg-tab" id="btn-sent" onclick="switchMessageView('sent')">
                                         <span class="material-icons">send</span>
                                         <span>Envoyés</span>
-                                        <span class="msg-tab-count" id="sent-count">0</span>
                                     </button>
                                 </div>
                             </div>
@@ -1119,6 +1131,20 @@
 
                             <!-- Liste des messages -->
                             <div id="messagesContainer" class="msg-list-scroll"></div>
+
+                            <!-- Barre sélection multiple -->
+                            <div class="msg-bulk-bar" id="msgBulkBar" style="display:none;">
+                                <div class="msg-bulk-left">
+                                    <button class="msg-bulk-selectall" id="msgBulkSelectAll" onclick="toggleSelectAll()" title="Tout sélectionner">
+                                        <span class="material-icons">done_all</span>
+                                    </button>
+                                    <span class="msg-bulk-count" id="msgSelCount">0 sélectionné</span>
+                                </div>
+                                <button class="msg-bulk-delete" onclick="deleteSelectedMessages()" disabled>
+                                    <span class="material-icons">delete</span>
+                                    <span>Supprimer</span>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- ===== PANNEAU DROIT ===== -->
@@ -1604,7 +1630,7 @@
                                             <input id="adminPaiementDate" type="date" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" />
                                         </div>
                                     </div>
-                                    <div style="margin-top:8px;">
+                                    <div style="margin-top:27px;">
                                         <label style="font-weight:500; margin-bottom:4px; display:block;">Note (optionnel)</label>
                                         <input id="adminPaiementNote" type="text" class="md-text-field-input" style="width:100%; padding:10px; border:1px solid var(--md-sys-color-outline); border-radius:8px;" placeholder="Ex: Paiement 1er trimestre" />
                                     </div>
@@ -2023,7 +2049,7 @@
                 if (!response.ok) throw new Error('Erreur chargement messages');
                 
                 const messages = await response.json();
-                const recentMessages = messages.slice(0, 3); // Prendre les 3 premiers (déjà triés par date DESC)
+                const recentMessages = messages.filter(msg => msg.expediteurNom != user.nom).slice(0, 3); 
                 
                 const messagesList = document.getElementById('recentMessagesList');
                 const messagesWidget = document.getElementById('messagesWidget');
@@ -2036,7 +2062,7 @@
                             </div>
                             <div class="activity-content">
                                 <p class="activity-text">
-                                    <strong>${msg.expediteurNom}</strong>: ${msg.contenu.length > 50 ? msg.contenu.substring(0, 50) + '...' : msg.contenu}
+                                    <strong> ${msg.expediteurNom}</strong>: ${msg.contenu.length > 50 ? msg.contenu.substring(0, 50) + '...' : msg.contenu}
                                 </p>
                                 <span class="activity-time">${formatMessageDate(msg.date)}</span>
                             </div>
@@ -5312,6 +5338,8 @@
         let allMessages = { received: [], sent: [] };
         let selectedDestinatairesMessage = [];
         let allDestinataires = [];
+        let isSelectionMode = false;
+        let selectedMessageIds = new Set();
 
         async function loadMessages() {
             const container = document.getElementById('messagesContainer');
@@ -5324,8 +5352,6 @@
                 allMessages.received = messages.filter(m => m.destinataireId === user.id);
                 allMessages.sent = messages.filter(m => m.expediteurId === user.id);
 
-                document.getElementById('received-count').textContent = allMessages.received.length;
-                document.getElementById('sent-count').textContent = allMessages.sent.length;
                 updateMessageBadge();
                 switchMessageView(currentMessageView);
             } catch (e) {
@@ -5337,7 +5363,9 @@
             currentMessageView = view;
             document.getElementById('btn-received').classList.toggle('active', view === 'received');
             document.getElementById('btn-sent').classList.toggle('active', view === 'sent');
+            selectedMessageIds.clear();
             displayMessages(view);
+            updateBulkBar();
         }
 
         function displayMessages(view) {
@@ -5365,9 +5393,17 @@
             const initials = (contactName || 'S').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
             const hasAttachments = message.piecesJointes && message.piecesJointes.length > 0;
 
+            const isSelected = selectedMessageIds.has(message.id);
+            const clickHandler = isSelectionMode
+                ? `onclick="toggleMessageSelection('${message.id}')"`
+                : `onclick="openMsgReadPanel('${message.id}', '${view}')"`;
+
             return `
-                <div class="msg-list-item ${isUnread ? 'unread' : ''}" onclick="openMsgReadPanel('${message.id}', '${view}')">
-                    <div class="msg-avatar">${initials}</div>
+                <div class="msg-list-item ${isUnread ? 'unread' : ''} ${isSelectionMode && isSelected ? 'selected' : ''}" data-msg-id="${message.id}" ${clickHandler}>
+                    ${isSelectionMode
+                        ? `<div class="msg-cb-wrap"><span class="material-icons msg-cb-icon">${isSelected ? 'check_circle' : 'radio_button_unchecked'}</span></div>`
+                        : `<div class="msg-avatar">${initials}</div>`
+                    }
                     <div class="msg-item-content">
                         <div class="msg-item-top">
                             <span class="msg-item-contact">${contactName || 'Système'}</span>
@@ -5378,7 +5414,7 @@
                             ${preview || '(message vide)'}
                         </div>
                     </div>
-                    ${isUnread ? '<span class="msg-unread-dot"></span>' : ''}
+                    ${isUnread && !isSelectionMode ? '<span class="msg-unread-dot"></span>' : ''}
                 </div>`;
         }
 
@@ -5618,13 +5654,92 @@
                 if (r.ok) {
                     closeMsgPanel();
                     loadMessages();
-                    showSnackbar(data.purged
-                        ? 'Message supprimé de votre messagerie'
-                        : 'Message supprimé de votre messagerie');
+                    showSnackbar('Message supprimé de votre messagerie');
                 } else {
                     showSnackbar(data.error || 'Erreur lors de la suppression');
                 }
             } catch(e) { showSnackbar('Erreur lors de la suppression'); }
+        }
+
+        // ---- Sélection multiple ----
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            selectedMessageIds.clear();
+            const btn = document.getElementById('msgSelectToggle');
+            const bulkBar = document.getElementById('msgBulkBar');
+            if (btn) btn.classList.toggle('active', isSelectionMode);
+            if (bulkBar) bulkBar.style.display = isSelectionMode ? 'flex' : 'none';
+            if (isSelectionMode) closeMsgPanel();
+            displayMessages(currentMessageView);
+            updateBulkBar();
+        }
+
+        function toggleMessageSelection(id) {
+            if (selectedMessageIds.has(id)) {
+                selectedMessageIds.delete(id);
+            } else {
+                selectedMessageIds.add(id);
+            }
+            // Mise à jour visuelle de l'item sans re-render complet
+            const item = document.querySelector(`.msg-list-item[data-msg-id="${id}"]`);
+            if (item) {
+                const sel = selectedMessageIds.has(id);
+                item.classList.toggle('selected', sel);
+                const icon = item.querySelector('.msg-cb-icon');
+                if (icon) icon.textContent = sel ? 'check_circle' : 'radio_button_unchecked';
+            }
+            updateBulkBar();
+        }
+
+        function toggleSelectAll() {
+            const msgs = allMessages[currentMessageView] || [];
+            const allSel = msgs.length > 0 && msgs.every(m => selectedMessageIds.has(m.id));
+            if (allSel) {
+                selectedMessageIds.clear();
+            } else {
+                msgs.forEach(m => selectedMessageIds.add(m.id));
+            }
+            displayMessages(currentMessageView);
+            updateBulkBar();
+        }
+
+        function updateBulkBar() {
+            const count = selectedMessageIds.size;
+            const countEl = document.getElementById('msgSelCount');
+            if (countEl) countEl.textContent = `${count} sélectionné${count > 1 ? 's' : ''}`;
+            const delBtn = document.querySelector('#msgBulkBar .msg-bulk-delete');
+            if (delBtn) delBtn.disabled = count === 0;
+            const msgs = allMessages[currentMessageView] || [];
+            const allSel = msgs.length > 0 && msgs.every(m => selectedMessageIds.has(m.id));
+            const selAllBtn = document.getElementById('msgBulkSelectAll');
+            if (selAllBtn) {
+                const icon = selAllBtn.querySelector('.material-icons');
+                if (icon) icon.textContent = allSel ? 'remove_done' : 'done_all';
+                selAllBtn.title = allSel ? 'Tout désélectionner' : 'Tout sélectionner';
+            }
+        }
+
+        async function deleteSelectedMessages() {
+            if (selectedMessageIds.size === 0) return;
+            const count = selectedMessageIds.size;
+            showDialog(
+                'Supprimer les messages sélectionnés',
+                `<p>Voulez-vous vraiment supprimer <strong>${count}</strong> message${count > 1 ? 's' : ''} de votre messagerie ?<br><small style="color:var(--md-sys-color-on-surface-variant)">Cette action est irréversible.</small></p>`,
+                async () => {
+                    let successCount = 0;
+                    const ids = [...selectedMessageIds];
+                    for (const id of ids) {
+                        try {
+                            const r = await fetch(`${API_URL}/messagerie/${id}`, { method: 'DELETE', headers: getHeaders() });
+                            if (r.ok) successCount++;
+                        } catch(e) {}
+                    }
+                    showSnackbar(`${successCount} message${successCount > 1 ? 's' : ''} supprimé${successCount > 1 ? 's' : ''}`);
+                    toggleSelectionMode();
+                    await loadMessages();
+                },
+                'Supprimer'
+            );
         }
 
         // ---- Helpers panneaux ----
@@ -5679,7 +5794,7 @@
                 allStaff = await response.json();
                 
                 document.getElementById('staffList').innerHTML = allStaff.length ? allStaff.map(s => `
-                    <div class="md-card md-card-elevated" style="padding: 16px;">
+                    <div class="md-card md-card-elevated staff-card" style="padding: 16px; transition: all 0.3s ease; position: relative; min-height: 120px; display: flex; flex-direction: column;">
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                             <div class="md-avatar" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
                                 ${(s.prenom || 'S')[0].toUpperCase()}
@@ -5690,11 +5805,13 @@
                             </div>
                             <span class="md-chip md-chip-filter">${getRoleName(s.role)}</span>
                         </div>
-                        <p style="font-size: 14px; margin-bottom: 12px;">${s.activated ? '✅ Compte activé' : '⏳ En attente d\'activation'}</p>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            ${!s.activated && s.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${s.id}', '${s.email}', 'staff')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
-                            <button class="md-btn md-btn-tonal" onclick="editStaff('${s.id}')"><span class="material-icons">edit</span></button>
-                            ${user.id !== s.id ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')" title="Supprimer"><span class="material-icons">delete</span></button>` : ''}
+                        <div style="flex: 1; display: flex; align-items: flex-end; justify-content: space-between;">
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${s.activated ? '✅ Compte activ\u00e9' : '\u23f3 En attente d\'activation'}</div>
+                            <div style="display: flex; gap: 4px;">
+                                ${!s.activated && s.email ? `<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${s.id}', '${s.email}', 'staff')" title="Envoyer email d'activation"><span class="material-icons">email</span></button>` : ''}
+                                <button class="md-btn md-btn-tonal" onclick="editStaff('${s.id}')" title="Modifier"><span class="material-icons">edit</span></button>
+                                ${user.id !== s.id ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteStaff('${s.id}')" title="Supprimer"><span class="material-icons">delete</span></button>` : ''}
+                            </div>
                         </div>
                     </div>
                 `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun membre du bureau</p>';
@@ -5703,48 +5820,96 @@
             }
         }
         function showAddStaffForm() {
-    // 1. On retire la balise <script> du HTML
     showDialog('Nouveau membre du bureau', `
-        <form style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div class="md-text-field">
-                    <div class="md-text-field-container">
-                        <input type="text" id="staffNom" class="md-text-field-input" placeholder=" " required>
-                        <label class="md-text-field-label">Nom *</label>
+                <div style="display:flex;flex-direction:column;gap:0;">
+
+                    <!-- Profil header -->
+                    <div style="display:flex;align-items:center;gap:16px;padding:16px 0 20px;border-bottom:1px solid var(--md-sys-color-outline-variant);margin-bottom:20px;">
+                        <div class="md-avatar" id="newStaffAvatar" style="width:56px;height:56px;font-size:22px;background:var(--md-sys-color-surface-container-highest);color:var(--md-sys-color-on-surface-variant);flex-shrink:0;">
+                            <span class="material-icons" style="font-size:26px;">person_add</span>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div id="newStaffPreview" style="font:var(--md-sys-typescale-title-medium);color:var(--md-sys-color-on-surface-variant);font-style:italic;">Nouveau membre</div>
+                            <div id="newStaffEmailPreview" style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;">Remplissez les champs ci-dessous</div>
+                        </div>
+                        <div style="flex-shrink:0;">
+                            <span class="md-chip md-chip-filter" id="newStaffRoleChip" style="font-size:11px;opacity:.5;">Aucun rôle</span>
+                        </div>
                     </div>
-                </div>
-                <div class="md-text-field">
-                    <div class="md-text-field-container">
-                        <input type="text" id="staffPrenom" class="md-text-field-input" placeholder=" " required>
-                        <label class="md-text-field-label">Prénom *</label>
+
+                    <!-- Section : Identité -->
+                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:15px;">badge</span> Identité
                     </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+                        <div class="md-text-field md-text-field-outlined">
+                            <div class="md-text-field-container" style="display:flex;align-items:center;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">person</span>
+                                <div style="flex:1;position:relative;">
+                                    <input type="text" id="staffPrenom" class="md-text-field-input" placeholder=" " required oninput="updateNewStaffPreview()">
+                                    <label class="md-text-field-label">Prénom *</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md-text-field md-text-field-outlined">
+                            <div class="md-text-field-container" style="display:flex;align-items:center;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">family_restroom</span>
+                                <div style="flex:1;position:relative;">
+                                    <input type="text" id="staffNom" class="md-text-field-input" placeholder=" " required oninput="updateNewStaffPreview()">
+                                    <label class="md-text-field-label">Nom *</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Contact -->
+                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:15px;">contact_mail</span> Contact
+                    </div>
+                    <div class="md-text-field md-text-field-outlined" style="margin-bottom:20px;">
+                        <div class="md-text-field-container" style="display:flex;align-items:center;">
+                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">email</span>
+                            <div style="flex:1;position:relative;">
+                                <input type="email" id="staffEmail" class="md-text-field-input" placeholder=" " required oninput="updateNewStaffPreview()">
+                                <label class="md-text-field-label">Adresse email *</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section : Accès -->
+                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:15px;">manage_accounts</span> Accès
+                    </div>
+                    <div class="md-text-field md-text-field-outlined" style="margin-bottom:12px;">
+                        <div class="md-text-field-container" style="display:flex;align-items:center;">
+                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">security</span>
+                            <div style="flex:1;position:relative;">
+                                <select id="staffRole" class="md-text-field-input" required>
+                                    <option value="">-- Sélectionner un rôle --</option>
+                                    ${user.role === 'admin' ? '<option value="admin">Administrateur</option>' : ''}
+                                    <option value="directeur">Directeur</option>
+                                    <option value="secretariat">Secrétariat</option>
+                                    <option value="professeur">Professeur</option>
+                                </select>
+                                <label class="md-text-field-label">Rôle *</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md-text-field md-text-field-outlined" id="staffMatiereField" style="display:none;margin-bottom:12px;">
+                        <div class="md-text-field-container" style="display:flex;align-items:center;">
+                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">school</span>
+                            <div style="flex:1;position:relative;">
+                                <input type="text" id="staffMatiere" class="md-text-field-input" placeholder=" ">
+                                <label class="md-text-field-label">Matière enseignée</label>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size:11px;color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:4px;margin-top:4px;">
+                        <span class="material-icons" style="font-size:13px;">info</span>
+                        Un lien d'activation sera généré pour ce compte.
+                    </p>
+
                 </div>
-            </div>
-            <div class="md-text-field">
-                <div class="md-text-field-container">
-                    <input type="email" id="staffEmail" class="md-text-field-input" placeholder=" " required>
-                    <label class="md-text-field-label">Email *</label>
-                </div>
-            </div>
-            <div class="md-text-field">
-                <div class="md-text-field-container">
-                    <select id="staffRole" class="md-text-field-input" required>
-                        <option value="">-- Sélectionner un rôle --</option>
-                        ${user.role === 'admin' ? '<option value="admin">Administrateur</option>' : ''}
-                        <option value="directeur">Directeur</option>
-                        <option value="secretariat">Secrétariat</option>
-                        <option value="professeur">Professeur</option>
-                    </select>
-                    <label class="md-text-field-label">Rôle *</label>
-                </div>
-            </div>
-            <div class="md-text-field" id="staffMatiereField" style="display: none;">
-                <div class="md-text-field-container">
-                    <input type="text" id="staffMatiere" class="md-text-field-input" placeholder=" ">
-                    <label class="md-text-field-label">Matière enseignée</label>
-                </div>
-            </div>
-        </form>
     `, async () => {
         const data = {
             nom: document.getElementById('staffNom').value,
@@ -5783,9 +5948,9 @@
         } catch (error) {
             showSnackbar('Erreur de connexion');
         }
-    });
+    }, 'Ajouter le membre');
 
-    // 2. On ajoute l'écouteur d'événement ICI, en JavaScript pur, juste après avoir ouvert le dialogue
+    // Écouteurs dynamiques après insertion dans le DOM
     setTimeout(() => {
         const roleSelect = document.getElementById('staffRole');
         if (roleSelect) {
@@ -5794,49 +5959,159 @@
                 if (matiereField) {
                     matiereField.style.display = this.value === 'professeur' ? 'block' : 'none';
                 }
+                updateNewStaffPreview();
             });
         }
-    }, 100); // Petit délai pour s'assurer que le HTML est bien inséré dans le DOM
+    }, 100);
 }
+
+        function updateNewStaffPreview() {
+            const prenom = (document.getElementById('staffPrenom')?.value || '').trim();
+            const nom = (document.getElementById('staffNom')?.value || '').trim();
+            const email = (document.getElementById('staffEmail')?.value || '').trim();
+            const role = document.getElementById('staffRole')?.value || '';
+
+            const previewEl = document.getElementById('newStaffPreview');
+            const emailPreviewEl = document.getElementById('newStaffEmailPreview');
+            const avatarEl = document.getElementById('newStaffAvatar');
+            const chipEl = document.getElementById('newStaffRoleChip');
+
+            if (previewEl) {
+                if (prenom || nom) {
+                    previewEl.textContent = [prenom, nom].filter(Boolean).join(' ');
+                    previewEl.style.fontStyle = 'normal';
+                    previewEl.style.color = 'var(--md-sys-color-on-surface)';
+                } else {
+                    previewEl.textContent = 'Nouveau membre';
+                    previewEl.style.fontStyle = 'italic';
+                    previewEl.style.color = 'var(--md-sys-color-on-surface-variant)';
+                }
+            }
+            if (emailPreviewEl) {
+                emailPreviewEl.textContent = email || 'Remplissez les champs ci-dessous';
+            }
+            if (avatarEl) {
+                if (prenom || nom) {
+                    const letter = (prenom || nom)[0].toUpperCase();
+                    const roleColors = {
+                        admin:      { bg: 'var(--md-sys-color-error-container)',     fg: 'var(--md-sys-color-on-error-container)' },
+                        directeur:  { bg: 'var(--md-sys-color-primary-container)',   fg: 'var(--md-sys-color-on-primary-container)' },
+                        professeur: { bg: 'var(--md-sys-color-secondary-container)', fg: 'var(--md-sys-color-on-secondary-container)' },
+                        default:    { bg: 'var(--md-sys-color-tertiary-container)',  fg: 'var(--md-sys-color-on-tertiary-container)' }
+                    };
+                    const c = roleColors[role] || roleColors.default;
+                    avatarEl.style.background = c.bg;
+                    avatarEl.style.color = c.fg;
+                    avatarEl.style.fontSize = '22px';
+                    avatarEl.innerHTML = letter;
+                } else {
+                    avatarEl.style.background = 'var(--md-sys-color-surface-container-highest)';
+                    avatarEl.style.color = 'var(--md-sys-color-on-surface-variant)';
+                    avatarEl.style.fontSize = '14px';
+                    avatarEl.innerHTML = '<span class="material-icons" style="font-size:26px;">person_add</span>';
+                }
+            }
+            if (chipEl) {
+                const roleNames = { admin: 'Administrateur', directeur: 'Directeur', secretariat: 'Secrétariat', professeur: 'Professeur' };
+                chipEl.textContent = roleNames[role] || 'Aucun rôle';
+                chipEl.style.opacity = role ? '1' : '.5';
+            }
+        }
 
         async function editStaff(id) {
             const staff = allStaff.find(s => s.id === id);
             if (!staff) return;
 
+            const avatarBg = staff.role === 'admin' ? 'var(--md-sys-color-error-container)' :
+                             staff.role === 'directeur' ? 'var(--md-sys-color-primary-container)' :
+                             staff.role === 'professeur' ? 'var(--md-sys-color-secondary-container)' :
+                             'var(--md-sys-color-tertiary-container)';
+            const avatarColor = staff.role === 'admin' ? 'var(--md-sys-color-on-error-container)' :
+                                staff.role === 'directeur' ? 'var(--md-sys-color-on-primary-container)' :
+                                staff.role === 'professeur' ? 'var(--md-sys-color-on-secondary-container)' :
+                                'var(--md-sys-color-on-tertiary-container)';
+
             showDialog('Modifier le membre', `
-                <form style="display: flex; flex-direction: column; gap: 16px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="staffNom" class="md-text-field-input" value="${staff.nom}" required>
-                                <label class="md-text-field-label">Nom *</label>
+                <div style="display:flex;flex-direction:column;gap:0;">
+
+                    <!-- Profil header -->
+                    <div style="display:flex;align-items:center;gap:16px;padding:16px 0 20px;border-bottom:1px solid var(--md-sys-color-outline-variant);margin-bottom:20px;">
+                        <div class="md-avatar" style="width:56px;height:56px;font-size:22px;background:${avatarBg};color:${avatarColor};flex-shrink:0;">
+                            ${(staff.prenom || 'S')[0].toUpperCase()}
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font:var(--md-sys-typescale-title-medium);color:var(--md-sys-color-on-surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${staff.prenom} ${staff.nom}</div>
+                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${staff.email || 'Aucun email'}</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+                            <span class="md-chip md-chip-filter" style="font-size:11px;">${getRoleName(staff.role)}</span>
+                            <span style="font-size:11px;display:flex;align-items:center;gap:4px;color:${staff.activated ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-on-surface-variant)'};">
+                                <span class="material-icons" style="font-size:13px;">${staff.activated ? 'check_circle' : 'hourglass_empty'}</span>
+                                ${staff.activated ? 'Compte actif' : 'En attente'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Section : Identité -->
+                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:15px;">badge</span> Identité
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+                        <div class="md-text-field md-text-field-outlined">
+                            <div class="md-text-field-container" style="display:flex;align-items:center;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">person</span>
+                                <div style="flex:1;position:relative;">
+                                    <input type="text" id="staffPrenom" class="md-text-field-input" value="${staff.prenom}" placeholder=" " required>
+                                    <label class="md-text-field-label">Prénom *</label>
+                                </div>
                             </div>
                         </div>
-                        <div class="md-text-field">
-                            <div class="md-text-field-container">
-                                <input type="text" id="staffPrenom" class="md-text-field-input" value="${staff.prenom}" required>
-                                <label class="md-text-field-label">Prénom *</label>
+                        <div class="md-text-field md-text-field-outlined">
+                            <div class="md-text-field-container" style="display:flex;align-items:center;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">family_restroom</span>
+                                <div style="flex:1;position:relative;">
+                                    <input type="text" id="staffNom" class="md-text-field-input" value="${staff.nom}" placeholder=" " required>
+                                    <label class="md-text-field-label">Nom *</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="email" id="staffEmail" class="md-text-field-input" value="${staff.email || ''}" required>
-                            <label class="md-text-field-label">Email *</label>
+
+                    <!-- Section : Contact -->
+                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:15px;">contact_mail</span> Contact
+                    </div>
+                    <div class="md-text-field md-text-field-outlined" style="margin-bottom:20px;">
+                        <div class="md-text-field-container" style="display:flex;align-items:center;">
+                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">email</span>
+                            <div style="flex:1;position:relative;">
+                                <input type="email" id="staffEmail" class="md-text-field-input" value="${staff.email || ''}" placeholder=" " required>
+                                <label class="md-text-field-label">Adresse email *</label>
+                            </div>
                         </div>
                     </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="staffRole" class="md-text-field-input" ${user.id === id ? 'disabled' : ''} required>
-                                ${user.role === 'admin' ? '<option value="admin" ' + (staff.role === 'admin' ? 'selected' : '') + '>Administrateur</option>' : ''}
-                                <option value="directeur" ${staff.role === 'directeur' ? 'selected' : ''}>Directeur</option>
-                                <option value="secretariat" ${staff.role === 'secretariat' ? 'selected' : ''}>Secrétariat</option>
-                                <option value="professeur" ${staff.role === 'professeur' ? 'selected' : ''}>Professeur</option>
-                            </select>
-                            <label class="md-text-field-label">Rôle ${user.id === id ? '(non modifiable)' : ''} *</label>
+
+                    <!-- Section : Accès -->
+                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <span class="material-icons" style="font-size:15px;">manage_accounts</span> Accès
+                    </div>
+                    <div class="md-text-field md-text-field-outlined" style="${user.id === id ? 'opacity:.6;' : ''}">
+                        <div class="md-text-field-container" style="display:flex;align-items:center;">
+                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">security</span>
+                            <div style="flex:1;position:relative;">
+                                <select id="staffRole" class="md-text-field-input" ${user.id === id ? 'disabled' : ''} required style="cursor:${user.id === id ? 'not-allowed' : 'pointer'};">
+                                    ${user.role === 'admin' ? `<option value="admin" ${staff.role === 'admin' ? 'selected' : ''}>Administrateur</option>` : ''}
+                                    <option value="directeur" ${staff.role === 'directeur' ? 'selected' : ''}>Directeur</option>
+                                    <option value="secretariat" ${staff.role === 'secretariat' ? 'selected' : ''}>Secrétariat</option>
+                                    <option value="professeur" ${staff.role === 'professeur' ? 'selected' : ''}>Professeur</option>
+                                </select>
+                                <label class="md-text-field-label">Rôle ${user.id === id ? '(non modifiable)' : ''} *</label>
+                            </div>
                         </div>
                     </div>
-                </form>
+                    ${user.id === id ? '<p style="font-size:11px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:13px;">info</span> Vous ne pouvez pas modifier votre propre rôle.</p>' : ''}
+
+                </div>
             `, async () => {
                 const data = {
                     nom: document.getElementById('staffNom').value,
@@ -5875,7 +6150,7 @@
                 } catch (error) {
                     showSnackbar('Erreur de connexion');
                 }
-            });
+            }, 'Enregistrer les modifications');
         }
 
         async function deleteStaff(id) {
@@ -8053,12 +8328,13 @@
             document.getElementById('snackbar').classList.remove('show');
         }
 
-        function showDialog(title, content, onConfirm) {
+        function showDialog(title, content, onConfirm, confirmLabel = 'Confirmer') {
             document.getElementById('dialogTitle').textContent = title;
             document.getElementById('dialogContent').innerHTML = content;
             document.getElementById('dialogOverlay').classList.add('show');
             
             const confirmBtn = document.getElementById('dialogConfirm');
+            confirmBtn.textContent = confirmLabel;
             confirmBtn.onclick = () => {
                 if (onConfirm) onConfirm();
                 closeDialog();
@@ -8620,6 +8896,118 @@
             flex-shrink: 0;
             box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
         }
+
+        /* ===== Mode sélection multiple ===== */
+        .msg-header-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .msg-header-row .msg-compose-btn { flex: 1; }
+        .msg-select-toggle {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background .2s, color .2s, border-color .2s, box-shadow .2s;
+        }
+        .msg-select-toggle .material-icons { font-size: 20px; }
+        .msg-select-toggle:hover {
+            background: var(--md-sys-color-surface-variant);
+            border-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-primary);
+        }
+        .msg-select-toggle.active {
+            background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent);
+            border-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-error);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-error) 15%, transparent);
+        }
+        .msg-list-item.selected {
+            background: color-mix(in srgb, var(--md-sys-color-primary-container) 85%, transparent) !important;
+            border-left: 3px solid var(--md-sys-color-primary);
+        }
+        .msg-list-item.selected:hover { filter: brightness(.97); }
+        .msg-cb-wrap {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .msg-cb-icon {
+            font-size: 22px !important;
+            color: var(--md-sys-color-outline);
+            transition: color .15s, transform .15s;
+        }
+        .msg-list-item.selected .msg-cb-icon {
+            color: var(--md-sys-color-primary);
+            transform: scale(1.1);
+        }
+        .msg-bulk-bar {
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--md-sys-color-surface-container);
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            animation: msgItemIn .2s ease;
+        }
+        .msg-bulk-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+        }
+        .msg-bulk-selectall {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s, color .15s;
+            flex-shrink: 0;
+        }
+        .msg-bulk-selectall:hover { background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-primary); }
+        .msg-bulk-selectall .material-icons { font-size: 20px; }
+        .msg-bulk-count {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            white-space: nowrap;
+        }
+        .msg-bulk-delete {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            border: none;
+            border-radius: 20px;
+            background: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter .15s, box-shadow .15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .msg-bulk-delete:hover:not(:disabled) { filter: brightness(.9); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+        .msg-bulk-delete:disabled { opacity: .4; cursor: not-allowed; }
+        .msg-bulk-delete .material-icons { font-size: 17px; }
 
         /* ===== PANNEAU DROIT ===== */
         .msg-panel {

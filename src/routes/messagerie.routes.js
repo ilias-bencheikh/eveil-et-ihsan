@@ -51,11 +51,11 @@ router.get('/destinataires', async (req, res) => {
                 UNION
                 SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur'
             `);
-            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) = ?', ['secretariat']);
+            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) IN (?, ?, ?)', ['secretariat', 'directeur', 'admin']);
 
             res.json([
                 ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
-                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: 'Secrétariat', type: 'user' }))
+                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' }))
             ]);
 
         } else if (userRole === 'parent') {
@@ -164,11 +164,11 @@ router.get('/', (req, res) => {
         SELECT m.*,
                e.prenom as expPrenom, e.nom as expNomEleve,
                p.prenom as expPrenomProf, p.nom as expNomProf,
-               es.nom as expNomStaff,
+               es.prenom as expPrenomStaff, es.nom as expNomStaff,
                ep.prenom as expPrenomParent, ep.nom as expNomParent,
                de.prenom as destPrenom, de.nom as destNomEleve,
                dp.prenom as destPrenomProf, dp.nom as destNomProf,
-               ds.nom as destNomStaff,
+               ds.prenom as destPrenomStaff, ds.nom as destNomStaff,
                dpa.prenom as destPrenomParent, dpa.nom as destNomParent,
                enf.prenom as enfantPrenom, enf.nom as enfantNom
         FROM messages m
@@ -201,7 +201,7 @@ router.get('/', (req, res) => {
             } else if (m.expPrenomProf && m.expNomProf) {
                 expediteurNom = `${m.expPrenomProf} ${m.expNomProf}`;
             } else if (m.expNomStaff) {
-                expediteurNom = m.expNomStaff;
+                expediteurNom = `${m.expPrenomStaff || ''} ${m.expNomStaff}`.trim();
             }
 
             let destinataireNom = 'Utilisateur';
@@ -214,7 +214,7 @@ router.get('/', (req, res) => {
             } else if (m.destPrenomProf && m.destNomProf) {
                 destinataireNom = `${m.destPrenomProf} ${m.destNomProf}`;
             } else if (m.destNomStaff) {
-                destinataireNom = m.destNomStaff;
+                destinataireNom = `${m.destPrenomStaff || ''} ${m.destNomStaff}`.trim();
             }
 
             return {

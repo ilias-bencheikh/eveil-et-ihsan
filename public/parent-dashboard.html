@@ -275,6 +275,26 @@
         .msg-item-date{font-size:11px;color:var(--md-sys-color-on-surface-variant);white-space:nowrap;flex-shrink:0}
         .msg-item-preview{font-size:12px;color:var(--md-sys-color-on-surface-variant);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .msg-unread-dot{width:8px;height:8px;border-radius:50%;background:var(--md-sys-color-primary);flex-shrink:0}
+        .msg-header-row{display:flex;gap:8px;align-items:center}
+        .msg-header-row .msg-compose-btn{flex:1}
+        .msg-select-toggle{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface);color:var(--md-sys-color-on-surface-variant);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s,color .2s,border-color .2s,box-shadow .2s}
+        .msg-select-toggle .material-icons{font-size:20px}
+        .msg-select-toggle:hover{background:var(--md-sys-color-surface-variant);border-color:var(--md-sys-color-primary);color:var(--md-sys-color-primary)}
+        .msg-select-toggle.active{background:color-mix(in srgb,var(--md-sys-color-error) 12%,transparent);border-color:var(--md-sys-color-error);color:var(--md-sys-color-error);box-shadow:0 0 0 3px color-mix(in srgb,var(--md-sys-color-error) 15%,transparent)}
+        .msg-list-item.selected{background:color-mix(in srgb,var(--md-sys-color-primary-container) 85%,transparent)!important;border-left:3px solid var(--md-sys-color-primary)}
+        .msg-cb-wrap{width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .msg-cb-icon{font-size:22px!important;color:var(--md-sys-color-outline);transition:color .15s,transform .15s}
+        .msg-list-item.selected .msg-cb-icon{color:var(--md-sys-color-primary);transform:scale(1.1)}
+        .msg-bulk-bar{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--md-sys-color-surface-container);border-top:1px solid var(--md-sys-color-outline-variant)}
+        .msg-bulk-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+        .msg-bulk-selectall{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--md-sys-color-on-surface-variant);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;flex-shrink:0}
+        .msg-bulk-selectall:hover{background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-primary)}
+        .msg-bulk-selectall .material-icons{font-size:20px}
+        .msg-bulk-count{font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface-variant);white-space:nowrap}
+        .msg-bulk-delete{display:flex;align-items:center;gap:5px;padding:7px 14px;border:none;border-radius:20px;background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);font-size:13px;font-weight:600;cursor:pointer;transition:filter .15s,box-shadow .15s;white-space:nowrap;flex-shrink:0}
+        .msg-bulk-delete:hover:not(:disabled){filter:brightness(.9);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+        .msg-bulk-delete:disabled{opacity:.4;cursor:not-allowed}
+        .msg-bulk-delete .material-icons{font-size:17px}
         .msg-panel{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--md-sys-color-surface)}
         .msg-panel-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--md-sys-color-on-surface-variant);padding:40px;text-align:center;animation:msgFadeIn .4s ease}
         .msg-empty-illustration{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--md-sys-color-primary-container),var(--md-sys-color-secondary-container));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(30,90,168,.18)}
@@ -533,10 +553,15 @@
                         <!-- ===== PANNEAU GAUCHE ===== -->
                         <div class="msg-sidebar">
                             <div class="msg-sidebar-header">
-                                <button class="msg-compose-btn" onclick="openParentComposePanel()">
-                                    <span class="material-icons">edit_note</span>
-                                    <span>Nouveau message</span>
-                                </button>
+                                <div class="msg-header-row">
+                                    <button class="msg-compose-btn" onclick="openParentComposePanel()">
+                                        <span class="material-icons">edit_note</span>
+                                        <span>Nouveau message</span>
+                                    </button>
+                                    <button class="msg-select-toggle" id="parentMsgSelectToggle" onclick="toggleParentSelectionMode()" title="Sélectionner des messages">
+                                        <span class="material-icons">checklist</span>
+                                    </button>
+                                </div>
                                 <div class="msg-tabs">
                                     <button class="msg-tab active" id="btn-received" onclick="switchParentMessageView('received')">
                                         <span class="material-icons">move_to_inbox</span>
@@ -558,6 +583,19 @@
                             </div>
                             <div id="parentMessagesContainer" class="msg-list-scroll">
                                 <div class="msg-list-loading"><span class="material-icons">hourglass_empty</span><span>Chargement...</span></div>
+                            </div>
+                            <!-- Barre sélection multiple -->
+                            <div class="msg-bulk-bar" id="parentMsgBulkBar" style="display:none;">
+                                <div class="msg-bulk-left">
+                                    <button class="msg-bulk-selectall" id="parentMsgBulkSelectAll" onclick="toggleParentSelectAll()" title="Tout sélectionner">
+                                        <span class="material-icons">done_all</span>
+                                    </button>
+                                    <span class="msg-bulk-count" id="parentMsgSelCount">0 sélectionné</span>
+                                </div>
+                                <button class="msg-bulk-delete" onclick="deleteParentSelectedMessages()" disabled>
+                                    <span class="material-icons">delete</span>
+                                    <span>Supprimer</span>
+                                </button>
                             </div>
                         </div>
 
@@ -1312,6 +1350,8 @@
         let parentDestinataires = [];
         let selectedParentDest = [];
         let currentParentMessageView = 'received';
+        let isParentSelectionMode = false;
+        let parentSelectedIds = new Set();
 
         async function loadParentMessages() {
             const container = document.getElementById('parentMessagesContainer');
@@ -1345,7 +1385,9 @@
             currentParentMessageView = view;
             document.getElementById('btn-received').classList.toggle('active', view === 'received');
             document.getElementById('btn-sent').classList.toggle('active', view === 'sent');
+            parentSelectedIds.clear();
             displayParentMessages(view);
+            updateParentBulkBar();
         }
 
         function displayParentMessages(view) {
@@ -1372,9 +1414,16 @@
             const preview = (message.contenu || '').replace(/\n/g, ' ').substring(0, 80);
             const initials = (contactName || 'S').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
             const hasAttachments = message.piecesJointes && message.piecesJointes.length > 0;
+            const isSelected = parentSelectedIds.has(message.id);
+            const clickHandler = isParentSelectionMode
+                ? `onclick="toggleParentMessageSelection('${message.id}')"`
+                : `onclick="openParentMsgReadPanel('${message.id}', '${view}')"`;
             return `
-                <div class="msg-list-item ${isUnread ? 'unread' : ''}" onclick="openParentMsgReadPanel('${message.id}', '${view}')">
-                    <div class="msg-avatar">${initials}</div>
+                <div class="msg-list-item ${isUnread ? 'unread' : ''} ${isParentSelectionMode && isSelected ? 'selected' : ''}" data-msg-id="${message.id}" ${clickHandler}>
+                    ${isParentSelectionMode
+                        ? `<div class="msg-cb-wrap"><span class="material-icons msg-cb-icon">${isSelected ? 'check_circle' : 'radio_button_unchecked'}</span></div>`
+                        : `<div class="msg-avatar">${initials}</div>`
+                    }
                     <div class="msg-item-content">
                         <div class="msg-item-top">
                             <span class="msg-item-contact">${contactName || 'Système'}</span>
@@ -1385,7 +1434,7 @@
                             ${preview || '(message vide)'}
                         </div>
                     </div>
-                    ${isUnread ? '<span class="msg-unread-dot"></span>' : ''}
+                    ${isUnread && !isParentSelectionMode ? '<span class="msg-unread-dot"></span>' : ''}
                 </div>`;
         }
 
@@ -1577,11 +1626,78 @@
             try {
                 const data = await apiRequest(`/api/messagerie/${messageId}`, { method: 'DELETE' });
                 closeParentMsgPanel();
-                showNotification(data && data.purged ? 'Message supprimé définitivement' : 'Message supprimé de votre messagerie', 'success');
+                showNotification('Message supprimé de votre messagerie', 'success');
                 loadParentMessages();
             } catch (error) {
                 showNotification('Erreur lors de la suppression', 'error');
             }
+        }
+
+        // ---- Sélection multiple ----
+        function toggleParentSelectionMode() {
+            isParentSelectionMode = !isParentSelectionMode;
+            parentSelectedIds.clear();
+            const btn = document.getElementById('parentMsgSelectToggle');
+            const bulkBar = document.getElementById('parentMsgBulkBar');
+            if (btn) btn.classList.toggle('active', isParentSelectionMode);
+            if (bulkBar) bulkBar.style.display = isParentSelectionMode ? 'flex' : 'none';
+            if (isParentSelectionMode) closeParentMsgPanel();
+            displayParentMessages(currentParentMessageView);
+            updateParentBulkBar();
+        }
+
+        function toggleParentMessageSelection(id) {
+            if (parentSelectedIds.has(id)) parentSelectedIds.delete(id);
+            else parentSelectedIds.add(id);
+            const item = document.querySelector(`#parentMessagesContainer .msg-list-item[data-msg-id="${id}"]`);
+            if (item) {
+                const sel = parentSelectedIds.has(id);
+                item.classList.toggle('selected', sel);
+                const icon = item.querySelector('.msg-cb-icon');
+                if (icon) icon.textContent = sel ? 'check_circle' : 'radio_button_unchecked';
+            }
+            updateParentBulkBar();
+        }
+
+        function toggleParentSelectAll() {
+            const msgs = allParentMessages[currentParentMessageView] || [];
+            const allSel = msgs.length > 0 && msgs.every(m => parentSelectedIds.has(m.id));
+            if (allSel) parentSelectedIds.clear();
+            else msgs.forEach(m => parentSelectedIds.add(m.id));
+            displayParentMessages(currentParentMessageView);
+            updateParentBulkBar();
+        }
+
+        function updateParentBulkBar() {
+            const count = parentSelectedIds.size;
+            const countEl = document.getElementById('parentMsgSelCount');
+            if (countEl) countEl.textContent = `${count} sélectionné${count > 1 ? 's' : ''}`;
+            const delBtn = document.querySelector('#parentMsgBulkBar .msg-bulk-delete');
+            if (delBtn) delBtn.disabled = count === 0;
+            const msgs = allParentMessages[currentParentMessageView] || [];
+            const allSel = msgs.length > 0 && msgs.every(m => parentSelectedIds.has(m.id));
+            const selAllBtn = document.getElementById('parentMsgBulkSelectAll');
+            if (selAllBtn) {
+                const icon = selAllBtn.querySelector('.material-icons');
+                if (icon) icon.textContent = allSel ? 'remove_done' : 'done_all';
+                selAllBtn.title = allSel ? 'Tout désélectionner' : 'Tout sélectionner';
+            }
+        }
+
+        async function deleteParentSelectedMessages() {
+            if (parentSelectedIds.size === 0) return;
+            const count = parentSelectedIds.size;
+            if (!confirm(`Supprimer les ${count} message${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''} de votre messagerie ?`)) return;
+            let successCount = 0;
+            for (const id of [...parentSelectedIds]) {
+                try {
+                    await apiRequest(`/api/messagerie/${id}`, { method: 'DELETE' });
+                    successCount++;
+                } catch(e) {}
+            }
+            showNotification(`${successCount} message${successCount > 1 ? 's' : ''} supprimé${successCount > 1 ? 's' : ''}`, 'success');
+            toggleParentSelectionMode();
+            loadParentMessages();
         }
 
         function showParentMsgPanel(mode) {
