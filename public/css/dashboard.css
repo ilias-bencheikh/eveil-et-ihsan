@@ -242,6 +242,7 @@
 .sidebar-user-info h3 {
     font: var(--md-sys-typescale-title-small);
     color: white;
+    text-align: center;
 }
 
 .sidebar-user-info span {

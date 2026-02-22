@@ -5820,7 +5820,7 @@
             }
         }
         function showAddStaffForm() {
-    showDialog('Nouveau membre du bureau', `
+            showDialog('Nouveau membre du bureau', `
                 <div style="display:flex;flex-direction:column;gap:0;">
 
                     <!-- Profil header -->
@@ -5838,13 +5838,9 @@
                     </div>
 
                     <!-- Section : Identité -->
-                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                        <span class="material-icons" style="font-size:15px;">badge</span> Identité
-                    </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
                         <div class="md-text-field md-text-field-outlined">
                             <div class="md-text-field-container" style="display:flex;align-items:center;">
-                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">person</span>
                                 <div style="flex:1;position:relative;">
                                     <input type="text" id="staffPrenom" class="md-text-field-input" placeholder=" " required oninput="updateNewStaffPreview()">
                                     <label class="md-text-field-label">Prénom *</label>
@@ -5853,7 +5849,6 @@
                         </div>
                         <div class="md-text-field md-text-field-outlined">
                             <div class="md-text-field-container" style="display:flex;align-items:center;">
-                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">family_restroom</span>
                                 <div style="flex:1;position:relative;">
                                     <input type="text" id="staffNom" class="md-text-field-input" placeholder=" " required oninput="updateNewStaffPreview()">
                                     <label class="md-text-field-label">Nom *</label>
@@ -5863,12 +5858,8 @@
                     </div>
 
                     <!-- Section : Contact -->
-                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                        <span class="material-icons" style="font-size:15px;">contact_mail</span> Contact
-                    </div>
                     <div class="md-text-field md-text-field-outlined" style="margin-bottom:20px;">
                         <div class="md-text-field-container" style="display:flex;align-items:center;">
-                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">email</span>
                             <div style="flex:1;position:relative;">
                                 <input type="email" id="staffEmail" class="md-text-field-input" placeholder=" " required oninput="updateNewStaffPreview()">
                                 <label class="md-text-field-label">Adresse email *</label>
@@ -5877,23 +5868,27 @@
                     </div>
 
                     <!-- Section : Accès -->
-                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                        <span class="material-icons" style="font-size:15px;">manage_accounts</span> Accès
-                    </div>
-                    <div class="md-text-field md-text-field-outlined" style="margin-bottom:12px;">
-                        <div class="md-text-field-container" style="display:flex;align-items:center;">
-                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">security</span>
-                            <div style="flex:1;position:relative;">
-                                <select id="staffRole" class="md-text-field-input" required>
-                                    <option value="">-- Sélectionner un rôle --</option>
-                                    ${user.role === 'admin' ? '<option value="admin">Administrateur</option>' : ''}
-                                    <option value="directeur">Directeur</option>
-                                    <option value="secretariat">Secrétariat</option>
-                                    <option value="professeur">Professeur</option>
-                                </select>
-                                <label class="md-text-field-label">Rôle *</label>
-                            </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;" id="staffRoleChips">
+                            ${user.role === 'admin' ? `
+                            <button type="button" class="role-chip" data-role="admin" onclick="selectNewStaffRole('admin')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container);cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-error);">admin_panel_settings</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Administrateur</span>
+                            </button>` : ''}
+                            <button type="button" class="role-chip" data-role="directeur" onclick="selectNewStaffRole('directeur')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container);cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);">stars</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Directeur</span>
+                            </button>
+                            <button type="button" class="role-chip" data-role="secretariat" onclick="selectNewStaffRole('secretariat')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container);cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-tertiary);">assignment_ind</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Secrétariat</span>
+                            </button>
+                            <button type="button" class="role-chip" data-role="professeur" onclick="selectNewStaffRole('professeur')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container);cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-secondary);">school</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Professeur</span>
+                            </button>
                         </div>
+                        <input type="hidden" id="staffRole" required>
                     </div>
                     <div class="md-text-field md-text-field-outlined" id="staffMatiereField" style="display:none;margin-bottom:12px;">
                         <div class="md-text-field-container" style="display:flex;align-items:center;">
@@ -5955,17 +5950,57 @@
         const roleSelect = document.getElementById('staffRole');
         if (roleSelect) {
             roleSelect.addEventListener('change', function() {
-                const matiereField = document.getElementById('staffMatiereField');
-                if (matiereField) {
-                    matiereField.style.display = this.value === 'professeur' ? 'block' : 'none';
-                }
                 updateNewStaffPreview();
             });
         }
     }, 100);
-}
 
-        function updateNewStaffPreview() {
+}
+        // Couleurs par rôle pour les chips
+        const ROLE_CHIP_COLORS = {
+            admin:      { border: 'var(--md-sys-color-error)',     bg: 'var(--md-sys-color-error-container)',     icon: 'var(--md-sys-color-error)' },
+            directeur:  { border: 'var(--md-sys-color-primary)',   bg: 'var(--md-sys-color-primary-container)',   icon: 'var(--md-sys-color-primary)' },
+            secretariat:{ border: 'var(--md-sys-color-tertiary)',  bg: 'var(--md-sys-color-tertiary-container)',  icon: 'var(--md-sys-color-tertiary)' },
+            professeur: { border: 'var(--md-sys-color-secondary)', bg: 'var(--md-sys-color-secondary-container)', icon: 'var(--md-sys-color-secondary)' },
+        };
+
+        function applyRoleChipSelection(selectedRole, inputId) {
+            document.querySelectorAll('#staffRoleChips .role-chip').forEach(btn => {
+                const r = btn.dataset.role;
+                const c = ROLE_CHIP_COLORS[r] || {};
+                const isSelected = r === selectedRole;
+                btn.style.border = `2px solid ${isSelected ? c.border : 'var(--md-sys-color-outline-variant)'}`;
+                btn.style.background = isSelected ? c.bg : 'var(--md-sys-color-surface-container)';
+                // check icon
+                let check = btn.querySelector('.role-check');
+                if (isSelected) {
+                    if (!check) {
+                        check = document.createElement('span');
+                        check.className = 'material-icons role-check';
+                        check.style.cssText = `font-size:16px;margin-left:auto;color:${c.icon};`;
+                        check.textContent = 'check_circle';
+                        btn.appendChild(check);
+                    }
+                } else {
+                    if (check) check.remove();
+                }
+            });
+            const input = document.getElementById(inputId || 'staffRole');
+            if (input) input.value = selectedRole;
+        }
+
+        function selectNewStaffRole(role) {
+            applyRoleChipSelection(role, 'staffRole');
+            const matiereField = document.getElementById('staffMatiereField');
+            if (matiereField) matiereField.style.display = role === 'professeur' ? 'block' : 'none';
+            updateNewStaffPreview();
+        }
+
+        function selectEditStaffRole(role) {
+            applyRoleChipSelection(role, 'staffRole');
+        }
+
+          function updateNewStaffPreview() {
             const prenom = (document.getElementById('staffPrenom')?.value || '').trim();
             const nom = (document.getElementById('staffNom')?.value || '').trim();
             const email = (document.getElementById('staffEmail')?.value || '').trim();
@@ -6018,6 +6053,7 @@
             }
         }
 
+
         async function editStaff(id) {
             const staff = allStaff.find(s => s.id === id);
             if (!staff) return;
@@ -6053,9 +6089,6 @@
                     </div>
 
                     <!-- Section : Identité -->
-                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                        <span class="material-icons" style="font-size:15px;">badge</span> Identité
-                    </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
                         <div class="md-text-field md-text-field-outlined">
                             <div class="md-text-field-container" style="display:flex;align-items:center;">
@@ -6078,9 +6111,6 @@
                     </div>
 
                     <!-- Section : Contact -->
-                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                        <span class="material-icons" style="font-size:15px;">contact_mail</span> Contact
-                    </div>
                     <div class="md-text-field md-text-field-outlined" style="margin-bottom:20px;">
                         <div class="md-text-field-container" style="display:flex;align-items:center;">
                             <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">email</span>
@@ -6092,22 +6122,31 @@
                     </div>
 
                     <!-- Section : Accès -->
-                    <div style="font:var(--md-sys-typescale-label-medium);color:var(--md-sys-color-primary);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                        <span class="material-icons" style="font-size:15px;">manage_accounts</span> Accès
-                    </div>
-                    <div class="md-text-field md-text-field-outlined" style="${user.id === id ? 'opacity:.6;' : ''}">
-                        <div class="md-text-field-container" style="display:flex;align-items:center;">
-                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);margin-right:6px;flex-shrink:0;">security</span>
-                            <div style="flex:1;position:relative;">
-                                <select id="staffRole" class="md-text-field-input" ${user.id === id ? 'disabled' : ''} required style="cursor:${user.id === id ? 'not-allowed' : 'pointer'};">
-                                    ${user.role === 'admin' ? `<option value="admin" ${staff.role === 'admin' ? 'selected' : ''}>Administrateur</option>` : ''}
-                                    <option value="directeur" ${staff.role === 'directeur' ? 'selected' : ''}>Directeur</option>
-                                    <option value="secretariat" ${staff.role === 'secretariat' ? 'selected' : ''}>Secrétariat</option>
-                                    <option value="professeur" ${staff.role === 'professeur' ? 'selected' : ''}>Professeur</option>
-                                </select>
-                                <label class="md-text-field-label">Rôle ${user.id === id ? '(non modifiable)' : ''} *</label>
-                            </div>
+                    <div style="${user.id === id ? 'opacity:.55;pointer-events:none;' : ''}margin-bottom:4px;">
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;" id="staffRoleChips">
+                            ${user.role === 'admin' ? `
+                            <button type="button" class="role-chip" data-role="admin" onclick="selectEditStaffRole('admin')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid ${staff.role==='admin'?'var(--md-sys-color-error)':'var(--md-sys-color-outline-variant)'};border-radius:12px;background:${staff.role==='admin'?'var(--md-sys-color-error-container)':'var(--md-sys-color-surface-container)'};cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-error);">admin_panel_settings</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Administrateur</span>
+                                ${staff.role==='admin'?'<span class="material-icons" style="font-size:16px;margin-left:auto;color:var(--md-sys-color-error);">check_circle</span>':''}
+                            </button>` : ''}
+                            <button type="button" class="role-chip" data-role="directeur" onclick="selectEditStaffRole('directeur')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid ${staff.role==='directeur'?'var(--md-sys-color-primary)':'var(--md-sys-color-outline-variant)'};border-radius:12px;background:${staff.role==='directeur'?'var(--md-sys-color-primary-container)':'var(--md-sys-color-surface-container)'};cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);">stars</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Directeur</span>
+                                ${staff.role==='directeur'?'<span class="material-icons" style="font-size:16px;margin-left:auto;color:var(--md-sys-color-primary);">check_circle</span>':''}
+                            </button>
+                            <button type="button" class="role-chip" data-role="secretariat" onclick="selectEditStaffRole('secretariat')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid ${staff.role==='secretariat'?'var(--md-sys-color-tertiary)':'var(--md-sys-color-outline-variant)'};border-radius:12px;background:${staff.role==='secretariat'?'var(--md-sys-color-tertiary-container)':'var(--md-sys-color-surface-container)'};cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-tertiary);">assignment_ind</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Secrétariat</span>
+                                ${staff.role==='secretariat'?'<span class="material-icons" style="font-size:16px;margin-left:auto;color:var(--md-sys-color-tertiary);">check_circle</span>':''}
+                            </button>
+                            <button type="button" class="role-chip" data-role="professeur" onclick="selectEditStaffRole('professeur')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid ${staff.role==='professeur'?'var(--md-sys-color-secondary)':'var(--md-sys-color-outline-variant)'};border-radius:12px;background:${staff.role==='professeur'?'var(--md-sys-color-secondary-container)':'var(--md-sys-color-surface-container)'};cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-secondary);">school</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Professeur</span>
+                                ${staff.role==='professeur'?'<span class="material-icons" style="font-size:16px;margin-left:auto;color:var(--md-sys-color-secondary);">check_circle</span>':''}
+                            </button>
                         </div>
+                        <input type="hidden" id="staffRole" value="${staff.role}">
                     </div>
                     ${user.id === id ? '<p style="font-size:11px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:13px;">info</span> Vous ne pouvez pas modifier votre propre rôle.</p>' : ''}
 
