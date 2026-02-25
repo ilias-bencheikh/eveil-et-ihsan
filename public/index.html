@@ -334,6 +334,210 @@
             background: var(--md-sys-color-surface-variant);
             border-radius: 8px;
         }
+
+        /* =====================================================
+           DASHBOARD v2 - TABLEAU DE BORD BUREAU
+           ===================================================== */
+
+        /* Bannière de bienvenue */
+        .db-welcome-banner {
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, #2563b0 55%, #3b4a68 100%);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(30, 90, 168, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .db-welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: -60%; right: 2%;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            pointer-events: none;
+        }
+        .db-welcome-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -40%; right: 18%;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+            pointer-events: none;
+        }
+        .db-welcome-left  { position: relative; z-index: 1; }
+        .db-welcome-greeting {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .db-welcome-date { font-size: 14px; opacity: 0.88; }
+        .db-welcome-chips {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .db-welcome-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.22);
+            padding: 10px 18px;
+            border-radius: 50px;
+            transition: background 0.2s, transform 0.2s;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+        }
+        .db-welcome-chip:hover { background: rgba(255,255,255,0.26); transform: translateY(-2px); }
+        .db-welcome-chip .material-icons { font-size: 22px; }
+        .db-welcome-chip-value { font-size: 20px; font-weight: 700; line-height: 1; }
+        .db-welcome-chip-label { font-size: 11px; opacity: 0.9; margin-top: 2px; }
+
+        /* Grille de contenu 2 colonnes */
+        .db-content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        .db-col-full { grid-column: 1 / -1; }
+
+        /* Icônes de carte */
+        .db-card-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .db-card-icon .material-icons { font-size: 20px; }
+        .db-icon-news     { background: var(--md-sys-color-primary-container);   color: var(--md-sys-color-on-primary-container); }
+        .db-icon-actions  { background: var(--md-sys-color-tertiary-container);  color: var(--md-sys-color-on-tertiary-container); }
+        .db-icon-messages { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+
+        /* Bouton texte compact */
+        .db-btn-sm {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 13px; padding: 6px 10px;
+            border-radius: 8px; border: none;
+            background: none; color: var(--md-sys-color-primary);
+            cursor: pointer; font-weight: 500;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+        .db-btn-sm:hover { background: var(--md-sys-color-primary-container); }
+
+        /* Items d'actualités */
+        .db-news-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background 0.15s; cursor: pointer;
+        }
+        .db-news-item:last-child { border-bottom: none; }
+        .db-news-item:hover { background: var(--md-sys-color-surface-container-low); }
+        .db-news-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .db-news-icon .material-icons { font-size: 22px; }
+        .db-news-body { flex: 1; min-width: 0; }
+        .db-news-title {
+            font-weight: 500; font-size: 14px;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 4px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .db-news-desc {
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .db-news-time { font-size: 11px; color: var(--md-sys-color-on-surface-variant); margin-top: 5px; }
+
+        /* Actions rapides v2 */
+        .db-quick-actions-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .db-qa-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 14px 8px; border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; text-align: center;
+            font-family: inherit;
+        }
+        .db-qa-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .db-qa-btn .material-icons { font-size: 26px; }
+        .db-qa-btn span:last-child { font-size: 11px; font-weight: 500; line-height: 1.2; }
+        .db-qa-btn-blue   { background: #e3f2fd; color: #1565c0; } .db-qa-btn-blue:hover   { background: #bbdefb; }
+        .db-qa-btn-green  { background: #e8f5e9; color: #2e7d32; } .db-qa-btn-green:hover  { background: #c8e6c9; }
+        .db-qa-btn-purple { background: #f3e5f5; color: #6a1b9a; } .db-qa-btn-purple:hover { background: #e1bee7; }
+        .db-qa-btn-orange { background: #fff3e0; color: #e65100; } .db-qa-btn-orange:hover { background: #ffe0b2; }
+        .db-qa-btn-teal   { background: #e0f7fa; color: #006064; } .db-qa-btn-teal:hover   { background: #b2ebf2; }
+        .db-qa-btn-red    { background: #fce4ec; color: #b71c1c; } .db-qa-btn-red:hover    { background: #f8bbd0; }
+
+        /* Badge non lus */
+        .db-unread-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 20px; height: 20px; padding: 0 6px;
+            background: var(--md-sys-color-error); color: white;
+            border-radius: 50px; font-size: 11px; font-weight: 600;
+        }
+
+        /* Grille de messages (3 colonnes) */
+        .db-messages-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+        .db-msg-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 16px 18px;
+            border-right: 1px solid var(--md-sys-color-outline-variant);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background 0.15s; cursor: pointer;
+        }
+        .db-msg-item:nth-child(3n) { border-right: none; }
+        .db-msg-item:last-child,
+        .db-msg-item:nth-last-child(-n+3):nth-child(3n+1) ~ .db-msg-item { border-bottom: none; }
+        .db-msg-item:hover { background: var(--md-sys-color-surface-container-low); }
+        .db-msg-item.unread { background: rgba(30, 90, 168, 0.06); }
+        .db-msg-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 16px; flex-shrink: 0;
+        }
+        .db-msg-body { flex: 1; min-width: 0; }
+        .db-msg-sender { font-weight: 600; font-size: 13px; color: var(--md-sys-color-on-surface); margin-bottom: 3px; }
+        .db-msg-preview { font-size: 12px; color: var(--md-sys-color-on-surface-variant); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .db-msg-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+        .db-msg-time { font-size: 11px; color: var(--md-sys-color-on-surface-variant); white-space: nowrap; }
+        .db-msg-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--md-sys-color-primary); }
+
+        /* Responsive dashboard v2 */
+        @media (max-width: 1200px) {
+            .db-content-grid { grid-template-columns: 1fr; }
+            .db-col-full { grid-column: 1; }
+            .db-messages-grid { grid-template-columns: repeat(2, 1fr); }
+            .db-msg-item:nth-child(3n) { border-right: 1px solid var(--md-sys-color-outline-variant); }
+            .db-msg-item:nth-child(2n) { border-right: none; }
+        }
+        @media (max-width: 768px) {
+            .db-welcome-banner { padding: 20px; }
+            .db-quick-actions-v2 { grid-template-columns: repeat(3, 1fr); }
+            .db-messages-grid { grid-template-columns: 1fr; }
+            .db-msg-item { border-right: none; }
+        }
     </style>
 </head>
 <body>
@@ -467,98 +671,137 @@
                 
                 <!-- ========== DASHBOARD TAB ========== -->
                 <div id="dashboard" class="tab-content active">
-                    <div class="stats-grid">
-                        <div class="stat-widget">
-                            <div class="stat-widget-icon primary"><span class="material-icons">school</span></div>
-                            <div class="stat-widget-content">
-                                <div class="stat-widget-value" id="totalEleves">0</div>
-                                <div class="stat-widget-label">Élèves inscrits</div>
-                            </div>
+
+                    <!-- ✦ Bannière de bienvenue ✦ -->
+                    <div class="db-welcome-banner">
+                        <div class="db-welcome-left">
+                            <div class="db-welcome-greeting" id="dashboardGreeting">Salam Aleykoum!</div>
+                            <div class="db-welcome-date" id="dashboardDate">Bienvenue sur votre tableau de bord</div>
                         </div>
-                        <div class="stat-widget">
-                            <div class="stat-widget-icon secondary"><span class="material-icons">class</span></div>
-                            <div class="stat-widget-content">
-                                <div class="stat-widget-value" id="totalClasses">0</div>
-                                <div class="stat-widget-label">Classes actives</div>
+                        <div class="db-welcome-chips">
+                            <div class="db-welcome-chip" onclick="switchTab('eleves')">
+                                <span class="material-icons">school</span>
+                                <div>
+                                    <div class="db-welcome-chip-value" id="wc-eleves">0</div>
+                                    <div class="db-welcome-chip-label">Élèves</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="stat-widget">
-                            <div class="stat-widget-icon tertiary"><span class="material-icons">person</span></div>
-                            <div class="stat-widget-content">
-                                <div class="stat-widget-value" id="totalProfesseurs">0</div>
-                                <div class="stat-widget-label">Professeurs</div>
+                            <div class="db-welcome-chip" onclick="switchTab('classes')">
+                                <span class="material-icons">class</span>
+                                <div>
+                                    <div class="db-welcome-chip-value" id="wc-classes">0</div>
+                                    <div class="db-welcome-chip-label">Classes</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="stat-widget">
-                            <div class="stat-widget-icon error"><span class="material-icons">event_busy</span></div>
-                            <div class="stat-widget-content">
-                                <div class="stat-widget-value" id="absencesToday">0</div>
-                                <div class="stat-widget-label">Absences aujourd'hui</div>
+                            <div class="db-welcome-chip" onclick="switchTab('absences')">
+                                <span class="material-icons">event_busy</span>
+                                <div>
+                                    <div class="db-welcome-chip-value" id="wc-absences">0</div>
+                                    <div class="db-welcome-chip-label">Absences auj.</div>
+                                </div>
+                            </div>
+                            <div class="db-welcome-chip" onclick="switchTab('messagerie')" id="wc-msg-chip" style="display:none;">
+                                <span class="material-icons">mark_email_unread</span>
+                                <div>
+                                    <div class="db-welcome-chip-value" id="wc-messages">0</div>
+                                    <div class="db-welcome-chip-label">Non lus</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="content-grid">
-                        <div class="widget-card" id="messagesWidget" style="display: none;">
-                            <div class="widget-card-header">
-                                <h3 class="widget-card-title">Derniers messages</h3>
-                                <div class="widget-card-actions">
-                                    <button class="md-icon-btn" onclick="switchTab('messagerie')" title="Voir tous les messages">
-                                        <span class="material-icons">arrow_forward</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="widget-card-content">
-                                <ul class="activity-list" id="recentMessagesList">
-                                    <li class="activity-item">
-                                        <div class="activity-icon"><span class="material-icons">mail</span></div>
-                                        <div class="activity-content">
-                                            <p class="activity-text">Chargement des messages...</p>
-                                            <span class="activity-time">Maintenant</span>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="widget-card">
-                            <div class="widget-card-header"><h3 class="widget-card-title">Actions rapides</h3></div>
-                            <div class="widget-card-content">
-                                <div class="quick-actions">
-                                    <button class="quick-action-btn" onclick="switchTab('inscriptions'); setTimeout(showInscriptionForm, 300)">
-                                        <span class="material-icons">person_add</span><span>Nouvel inscription</span>
-                                    </button>
-                                    <button class="quick-action-btn" onclick="switchTab('appel')">
-                                        <span class="material-icons">fact_check</span><span>Faire l'appel</span>
-                                    </button>
-                                    <button class="quick-action-btn" onclick="switchTab('messagerie'); setTimeout(showComposeMessage, 300)">
-                                        <span class="material-icons">send</span><span>Envoyer message</span>
-                                    </button>
-                                    <button class="quick-action-btn" onclick="switchTab('classes'); setTimeout(showAddClasseForm, 300)">
-                                        <span class="material-icons">add_circle</span><span>Nouvelle classe</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+
+                    <!-- ✦ Contenu principal : Actualités + Actions rapides ✦ -->
+                    <div class="db-content-grid">
+
+                        <!-- Dernières actualités -->
                         <div class="widget-card">
                             <div class="widget-card-header">
-                                <h3 class="widget-card-title">Dernières actualités</h3>
-                                <div class="widget-card-actions">
-                                    <button class="md-icon-btn" onclick="switchTab('actualites')" title="Voir toutes les actualités">
-                                        <span class="material-icons">arrow_forward</span>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="db-card-icon db-icon-news"><span class="material-icons">newspaper</span></div>
+                                    <h3 class="widget-card-title">Dernières actualités</h3>
+                                </div>
+                                <button class="db-btn-sm" onclick="switchTab('actualites')">
+                                    <span>Voir tout</span>
+                                    <span class="material-icons" style="font-size:18px;">arrow_forward</span>
+                                </button>
+                            </div>
+                            <div class="widget-card-content" style="padding:0;">
+                                <div id="recentActualitesList">
+                                    <div class="db-news-item">
+                                        <div class="db-news-icon"><span class="material-icons">newspaper</span></div>
+                                        <div class="db-news-body">
+                                            <div class="db-news-title">Chargement des actualités...</div>
+                                            <div class="db-news-desc">Récupération en cours</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions rapides -->
+                        <div class="widget-card">
+                            <div class="widget-card-header">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="db-card-icon db-icon-actions"><span class="material-icons">bolt</span></div>
+                                    <h3 class="widget-card-title">Actions rapides</h3>
+                                </div>
+                            </div>
+                            <div class="widget-card-content" style="padding:12px;">
+                                <div class="db-quick-actions-v2">
+                                    <button class="db-qa-btn db-qa-btn-blue" onclick="switchTab('inscriptions'); setTimeout(showInscriptionForm, 300)">
+                                        <span class="material-icons">person_add</span>
+                                        <span>Inscription</span>
+                                    </button>
+                                    <button class="db-qa-btn db-qa-btn-green" onclick="switchTab('appel')">
+                                        <span class="material-icons">fact_check</span>
+                                        <span>Appel</span>
+                                    </button>
+                                    <button class="db-qa-btn db-qa-btn-purple" onclick="switchTab('messagerie'); setTimeout(showComposeMessage, 300)">
+                                        <span class="material-icons">send</span>
+                                        <span>Message</span>
+                                    </button>
+                                    <button class="db-qa-btn db-qa-btn-orange" onclick="switchTab('actualites')">
+                                        <span class="material-icons">campaign</span>
+                                        <span>Actualité</span>
+                                    </button>
+                                    <button class="db-qa-btn db-qa-btn-teal" onclick="switchTab('classes'); setTimeout(showAddClasseForm, 300)">
+                                        <span class="material-icons">add_circle</span>
+                                        <span>Classe</span>
+                                    </button>
+                                    <button class="db-qa-btn db-qa-btn-red" onclick="switchTab('absences')">
+                                        <span class="material-icons">event_busy</span>
+                                        <span>Absences</span>
                                     </button>
                                 </div>
                             </div>
-                            <div class="widget-card-content">
-                                <ul class="activity-list" id="recentActualitesList">
-                                    <li class="activity-item">
-                                        <div class="activity-icon"><span class="material-icons">newspaper</span></div>
-                                        <div class="activity-content">
-                                            <p class="activity-text">Chargement des actualités...</p>
-                                            <span class="activity-time">Maintenant</span>
+                        </div>
+
+                        <!-- Derniers messages (pleine largeur) -->
+                        <div class="widget-card db-col-full" id="messagesWidget" style="display:none;">
+                            <div class="widget-card-header">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="db-card-icon db-icon-messages"><span class="material-icons">mail</span></div>
+                                    <h3 class="widget-card-title">Derniers messages reçus</h3>
+                                    <span class="db-unread-badge" id="dbUnreadBadge" style="display:none;">0</span>
+                                </div>
+                                <button class="db-btn-sm" onclick="switchTab('messagerie')">
+                                    <span>Voir tout</span>
+                                    <span class="material-icons" style="font-size:18px;">arrow_forward</span>
+                                </button>
+                            </div>
+                            <div class="widget-card-content" style="padding:0;">
+                                <div id="recentMessagesList" class="db-messages-grid">
+                                    <div class="db-msg-item">
+                                        <div class="db-msg-avatar"><span class="material-icons" style="font-size:20px;">mail</span></div>
+                                        <div class="db-msg-body">
+                                            <div class="db-msg-sender">Chargement...</div>
+                                            <div class="db-msg-preview">Récupération des messages en cours</div>
                                         </div>
-                                    </li>
-                                </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -1946,21 +2189,29 @@
                 allStaff = Array.isArray(staff) ? staff : [];
 
                 // Combiner professeurs et staff pour la recherche
+                const profIds = new Set(allProfesseurs.map(p => p.id));
                 allStaffMembers = [
                     ...allProfesseurs.map(p => ({ ...p, type: 'professeur', displayName: `${p.prenom} ${p.nom} (${p.matiere || 'Professeur'})` })),
-                    ...allStaff.filter(s => s.role === 'professeur').map(s => ({ ...s, type: 'staff', displayName: `${s.prenom} ${s.nom} (${s.matiere || 'Professeur'})` }))
+                    ...allStaff.filter(s => s.role === 'professeur' && !profIds.has(s.id)).map(s => ({ ...s, type: 'professeur', displayName: `${s.prenom} ${s.nom} (${s.matiere || 'Professeur'})` })),
+                    ...allStaff.filter(s => s.role !== 'professeur').map(s => ({ ...s, type: 'staff', displayName: `${s.prenom} ${s.nom} (${s.matiere || s.role})` }))
                 ];
-
-                document.getElementById('totalEleves').textContent = allEleves.length;
-                document.getElementById('totalClasses').textContent = allClasses.length;
-                document.getElementById('totalProfesseurs').textContent = allProfesseurs.length;
 
                 const today = new Date().toISOString().split('T')[0];
                 const todayAbsences = Array.isArray(absences) ? absences.filter(a => a.date === today) : [];
-                document.getElementById('absencesToday').textContent = todayAbsences.length;
+
+                // Mettre à jour les chips de la bannière
+                const wcEl = document.getElementById('wc-eleves');
+                const wcCl = document.getElementById('wc-classes');
+                const wcAb = document.getElementById('wc-absences');
+                if (wcEl) wcEl.textContent = allEleves.length;
+                if (wcCl) wcCl.textContent = allClasses.length;
+                if (wcAb) wcAb.textContent = todayAbsences.length;
             } catch (error) {
                 console.error('Erreur chargement:', error);
             }
+
+            // Initialiser la bannière de bienvenue
+            setupWelcomeBanner();
 
             // Remplir les selects de classes après chargement
             fillClasseSelects();
@@ -1972,53 +2223,66 @@
             loadRecentActualites();
         }
 
+        function setupWelcomeBanner() {
+            const now   = new Date();
+            const hours = now.getHours();
+            const greeting = 'Salam Aleykoum '
+            const userName  = document.getElementById('userName')?.textContent?.trim() || '';
+
+            const greetingEl = document.getElementById('dashboardGreeting');
+            if (greetingEl) greetingEl.textContent = `${greeting}${userName ? ', ' + userName : ''} !`;
+
+            const dateEl = document.getElementById('dashboardDate');
+            if (dateEl) {
+                const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const s = now.toLocaleDateString('fr-FR', opts);
+                dateEl.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+            }
+        }
+
         async function loadRecentActualites() {
             try {
                 const response = await fetch(`${API_URL}/actualites`, { headers: getHeaders() });
                 if (!response.ok) throw new Error('Erreur chargement actualités');
-                
+
                 const actualites = await response.json();
-                const recentActualites = actualites.slice(0, 4); // Prendre les 4 premières (déjà triées par date DESC)
-                
+                const recentActualites = actualites.slice(0, 5);
+
                 const actualitesList = document.getElementById('recentActualitesList');
-                
+
                 if (recentActualites.length > 0) {
                     actualitesList.innerHTML = recentActualites.map(actu => `
-                        <li class="activity-item">
-                            <div class="activity-icon">
-                                <span class="material-icons">newspaper</span>
+                        <div class="db-news-item" onclick="switchTab('actualites')">
+                            <div class="db-news-icon"><span class="material-icons">newspaper</span></div>
+                            <div class="db-news-body">
+                                <div class="db-news-title">${actu.titre}</div>
+                                <div class="db-news-desc">${actu.description || ''}</div>
+                                <div class="db-news-time">${formatActualiteDate(actu.date)}</div>
                             </div>
-                            <div class="activity-content">
-                                <p class="activity-text">
-                                    <strong>${actu.titre}</strong><br>
-                                    ${actu.description.length > 80 ? actu.description.substring(0, 80) + '...' : actu.description}
-                                </p>
-                                <span class="activity-time">${formatActualiteDate(actu.date)}</span>
-                            </div>
-                        </li>
+                        </div>
                     `).join('');
                 } else {
                     actualitesList.innerHTML = `
-                        <li class="activity-item">
-                            <div class="activity-icon"><span class="material-icons">newspaper</span></div>
-                            <div class="activity-content">
-                                <p class="activity-text">Aucune actualité récente</p>
-                                <span class="activity-time">Maintenant</span>
+                        <div class="db-news-item">
+                            <div class="db-news-icon"><span class="material-icons">newspaper</span></div>
+                            <div class="db-news-body">
+                                <div class="db-news-title">Aucune actualité récente</div>
+                                <div class="db-news-desc">Publiez votre première actualité depuis l'onglet Actualités.</div>
                             </div>
-                        </li>
+                        </div>
                     `;
                 }
             } catch (error) {
                 console.error('Erreur chargement actualités:', error);
                 const actualitesList = document.getElementById('recentActualitesList');
                 actualitesList.innerHTML = `
-                    <li class="activity-item">
-                        <div class="activity-icon"><span class="material-icons">error</span></div>
-                        <div class="activity-content">
-                            <p class="activity-text">Erreur de chargement des actualités</p>
-                            <span class="activity-time">Maintenant</span>
+                    <div class="db-news-item">
+                        <div class="db-news-icon" style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);"><span class="material-icons">error</span></div>
+                        <div class="db-news-body">
+                            <div class="db-news-title">Erreur de chargement</div>
+                            <div class="db-news-desc">Impossible de charger les actualités.</div>
                         </div>
-                    </li>
+                    </div>
                 `;
             }
         }
@@ -2039,52 +2303,70 @@
         async function loadRecentMessages() {
             const userRole = getCurrentUserRole();
             const bureauRoles = ['directeur', 'secretariat', 'admin'];
-            
-            if (!bureauRoles.includes(userRole)) {
-                return;
-            }
+
+            if (!bureauRoles.includes(userRole)) return;
 
             try {
                 const response = await fetch(`${API_URL}/messagerie`, { headers: getHeaders() });
                 if (!response.ok) throw new Error('Erreur chargement messages');
-                
+
                 const messages = await response.json();
-                const recentMessages = messages.filter(msg => msg.expediteurNom != user.nom).slice(0, 3); 
-                
+                const allReceived = messages.filter(msg => msg.expediteurId != user.id);
+                const recentMessages = allReceived.slice(0, 6);
+                const unreadCount = allReceived.filter(msg => !msg.lu).length;
+
                 const messagesList = document.getElementById('recentMessagesList');
                 const messagesWidget = document.getElementById('messagesWidget');
-                
+
+                // Badge non lus dans l'en-tête
+                const badge = document.getElementById('dbUnreadBadge');
+                if (badge) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+                }
+                // Chip de la bannière
+                const wcMsgChip = document.getElementById('wc-msg-chip');
+                const wcMessages  = document.getElementById('wc-messages');
+                if (wcMsgChip && wcMessages) {
+                    wcMessages.textContent = unreadCount;
+                    wcMsgChip.style.display = unreadCount > 0 ? 'flex' : 'none';
+                }
+
                 if (recentMessages.length > 0) {
-                    messagesList.innerHTML = recentMessages.map(msg => `
-                        <li class="activity-item">
-                            <div class="activity-icon">
-                                <span class="material-icons">${msg.lu ? 'mail' : 'mail_outline'}</span>
+                    messagesList.innerHTML = recentMessages.map(msg => {
+                        const initiale = (msg.expediteurNom || '?')[0].toUpperCase();
+                        const preview  = msg.contenu.length > 65 ? msg.contenu.substring(0, 65) + '…' : msg.contenu;
+                        return `
+                        <div class="db-msg-item ${!msg.lu ? 'unread' : ''}" onclick="switchTab('messagerie')">
+                            <div class="db-msg-avatar">${initiale}</div>
+                            <div class="db-msg-body">
+                                <div class="db-msg-sender">${msg.expediteurNom}</div>
+                                <div class="db-msg-preview">${preview}</div>
                             </div>
-                            <div class="activity-content">
-                                <p class="activity-text">
-                                    <strong> ${msg.expediteurNom}</strong>: ${msg.contenu.length > 50 ? msg.contenu.substring(0, 50) + '...' : msg.contenu}
-                                </p>
-                                <span class="activity-time">${formatMessageDate(msg.date)}</span>
+                            <div class="db-msg-meta">
+                                <div class="db-msg-time">${formatMessageDate(msg.date)}</div>
+                                ${!msg.lu ? '<div class="db-msg-unread-dot"></div>' : ''}
                             </div>
-                        </li>
-                    `).join('');
+                        </div>`;
+                    }).join('');
                     messagesWidget.style.display = 'block';
                 } else {
                     messagesList.innerHTML = `
-                        <li class="activity-item">
-                            <div class="activity-icon"><span class="material-icons">mail</span></div>
-                            <div class="activity-content">
-                                <p class="activity-text">Aucun message récent</p>
-                                <span class="activity-time">Maintenant</span>
+                        <div class="db-msg-item">
+                            <div class="db-msg-avatar" style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container);">
+                                <span class="material-icons">mark_email_read</span>
                             </div>
-                        </li>
+                            <div class="db-msg-body">
+                                <div class="db-msg-sender">Aucun message reçu</div>
+                                <div class="db-msg-preview">Vous n'avez pas encore reçu de message. Les messages reçus apparaîtront ici.</div>
+                            </div>
+                        </div>
                     `;
                     messagesWidget.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Erreur chargement messages:', error);
-                const messagesWidget = document.getElementById('messagesWidget');
-                messagesWidget.style.display = 'none';
+                document.getElementById('messagesWidget').style.display = 'none';
             }
         }
 
@@ -2146,9 +2428,11 @@
                 allStaff = Array.isArray(staff) ? staff : [];
 
                 // Combiner professeurs et staff pour la recherche
+                const profIds2 = new Set(allProfesseurs.map(p => p.id));
                 allStaffMembers = [
                     ...allProfesseurs.map(p => ({ ...p, type: 'professeur', displayName: `${p.prenom} ${p.nom} (${p.matiere || 'Professeur'})` })),
-                    ...allStaff.filter(s => s.role === 'professeur').map(s => ({ ...s, type: 'staff', displayName: `${s.prenom} ${s.nom} (${s.matiere || 'Professeur'})` }))
+                    ...allStaff.filter(s => s.role === 'professeur' && !profIds2.has(s.id)).map(s => ({ ...s, type: 'professeur', displayName: `${s.prenom} ${s.nom} (${s.matiere || 'Professeur'})` })),
+                    ...allStaff.filter(s => s.role !== 'professeur').map(s => ({ ...s, type: 'staff', displayName: `${s.prenom} ${s.nom} (${s.matiere || s.role})` }))
                 ];
             } catch (error) {
                 console.error('Erreur loadAllData:', error);
@@ -3503,28 +3787,62 @@
             const results = document.getElementById('profSearchResults');
             if (!input || !results) return;
             const q = input.value.toLowerCase().trim();
-            if (q.length < 2) {
+            if (q.length < 1) {
                 results.style.display = 'none';
                 return;
             }
-            const filtered = allStaffMembers.filter(p =>
-                p.displayName.toLowerCase().includes(q)
-            ).slice(0, 8);
-            if (filtered.length === 0) {
+
+            // Séparer professeurs et autres membres du staff
+            const professeurs = allStaffMembers.filter(p => p.type === 'professeur' && p.displayName.toLowerCase().includes(q));
+            const autresStaff = allStaffMembers.filter(p => p.type === 'staff' && p.displayName.toLowerCase().includes(q));
+
+            if (professeurs.length === 0 && autresStaff.length === 0) {
                 results.style.display = 'block';
                 results.innerHTML = `<div style="padding:12px 14px;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
                 return;
             }
+
+            let html = '';
+
+            // Section Professeurs
+            if (professeurs.length > 0) {
+                html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;">
+                    <span class="material-icons" style="font-size:16px;">school</span> Professeurs
+                </div>`;
+                html += professeurs.slice(0, 6).map(p => `
+                    <div onmousedown="event.preventDefault(); classeProfSelect('${p.id}', '${p.displayName.replace(/'/g, "\\'")}')"
+                         style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                                border-bottom:1px solid var(--md-sys-color-outline-variant);"
+                         onmouseover="this.style.background='var(--md-sys-color-primary-container)'"
+                         onmouseout="this.style.background=''">
+                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">person</span>
+                        <span style="font-size:13px;">${p.displayName}</span>
+                    </div>`).join('');
+            }
+
+            // Séparateur si les deux sections existent
+            if (professeurs.length > 0 && autresStaff.length > 0) {
+                html += `<div style="border-top:2px solid var(--md-sys-color-outline);margin:4px 0;"></div>`;
+            }
+
+            // Section Autres membres du staff
+            if (autresStaff.length > 0) {
+                html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:700;color:var(--md-sys-color-secondary);text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;">
+                    <span class="material-icons" style="font-size:16px;">badge</span> Autres membres du Bureau
+                </div>`;
+                html += autresStaff.slice(0, 6).map(p => `
+                    <div onmousedown="event.preventDefault(); classeProfSelect('${p.id}', '${p.displayName.replace(/'/g, "\\'")}')"
+                         style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                                border-bottom:1px solid var(--md-sys-color-outline-variant);"
+                         onmouseover="this.style.background='var(--md-sys-color-secondary-container)'"
+                         onmouseout="this.style.background=''">
+                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-secondary);">person_outline</span>
+                        <span style="font-size:13px;">${p.displayName}</span>
+                    </div>`).join('');
+            }
+
             results.style.display = 'block';
-            results.innerHTML = filtered.map(p => `
-                <div onmousedown="event.preventDefault(); classeProfSelect('${p.id}', '${p.displayName.replace(/'/g, "\\'")}')"
-                     style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
-                            border-bottom:1px solid var(--md-sys-color-outline-variant);"
-                     onmouseover="this.style.background='var(--md-sys-color-primary-container)'"
-                     onmouseout="this.style.background=''">
-                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-secondary);">person</span>
-                    <span style="font-size:13px;">${p.displayName}</span>
-                </div>`).join('');
+            results.innerHTML = html;
         }
 
         function classeProfSelect(id, name) {
@@ -3729,144 +4047,236 @@
         }
 
         function showClasseFormInternal(classe = null) {
-            const isEdit = classe !== null;
-            const title = isEdit ? 'Modifier la classe' : 'Nouvelle classe';
-
-            console.log('showClasseFormInternal appelée, allStaffMembers:', allStaffMembers);
-
-            // Trouver le professeur actuel si en mode édition
-            let selectedProfesseur = null;
-            if (isEdit && classe.professeurId) {
-                selectedProfesseur = allStaffMembers.find(p => p.id === classe.professeurId);
-                console.log('Professeur trouvé pour édition:', selectedProfesseur);
-            }
-
-            showDialog(title, `
-                <form id="classeForm" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input type="text" id="classeNom" class="md-text-field-input" placeholder=" " value="${isEdit ? classe.nom : ''}" required>
-                            <label class="md-text-field-label">Nom de la classe *</label>
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="classeNiveau" class="md-text-field-input">
-                                <option value="">-- Sélectionner un niveau --</option>
-                                ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
-                                    `<option value="${n}" ${isEdit && n === classe.niveau ? 'selected' : ''}>${n}</option>`
-                                ).join('')}
-                            </select>
-                            <label class="md-text-field-label">Niveau</label>
-                        </div>
-                    </div>
-
-                    <!-- Sélecteur de professeur simple -->
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <select id="selectedProfesseurId" class="md-text-field-input" ${isEdit ? '' : ''}>
-                                <option value="">-- Sélectionner un professeur --</option>
-                                ${allStaffMembers.map(p => `<option value="${p.id}" ${isEdit && classe.professeurId === p.id ? 'selected' : ''}>${p.displayName}</option>`).join('')}
-                            </select>
-                            <label class="md-text-field-label">Professeur</label>
-                        </div>
-                    </div>
-                </form>
-            `, async () => {
-                const data = {
-                    nom: document.getElementById('classeNom').value,
-                    niveau: document.getElementById('classeNiveau').value,
-                    professeurId: document.getElementById('selectedProfesseurId').value || null
-                };
-
-                console.log('Données envoyées:', data);
-
-                // Validation côté client
-                if (!data.nom.trim()) {
-                    showSnackbar('Le nom de la classe est requis');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${API_URL}/classes${isEdit ? '/' + classe.id : ''}`, {
-                        method: isEdit ? 'PUT' : 'POST',
-                        headers: getHeaders(),
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) {
-                        showSnackbar(`Classe ${isEdit ? 'modifiée' : 'créée'} avec succès`);
-                        loadClasses();
-                        loadDashboardData();
-                    } else {
-                        const errorData = await response.json();
-                        console.error('Erreur serveur:', errorData);
-                        showSnackbar(`Erreur lors de la ${isEdit ? 'modification' : 'création'}: ${errorData.error || 'Erreur inconnue'}`);
-                    }
-                } catch (error) {
-                    console.error('Erreur de connexion:', error);
-                    showSnackbar('Erreur de connexion');
-                }
-            });
-        }
-
-        function selectProfesseur(id, displayName) {
-            console.log('=== FONCTION selectProfesseur appelée ===');
-            console.log('Paramètres reçus:', { id, displayName });
-
-            const selectedIdInput = document.getElementById('selectedProfesseurId');
-            const selectedDiv = document.getElementById('selectedProfesseur');
-            const selectedNameSpan = document.getElementById('selectedProfesseurName');
-            const searchInput = document.getElementById('professeurSearch');
-            const resultsDiv = document.getElementById('professeurResults');
-
-            console.log('Éléments DOM trouvés:', {
-                selectedIdInput: !!selectedIdInput,
-                selectedDiv: !!selectedDiv,
-                selectedNameSpan: !!selectedNameSpan,
-                searchInput: !!searchInput,
-                resultsDiv: !!resultsDiv
-            });
-
-            if (!selectedIdInput || !selectedDiv || !selectedNameSpan) {
-                console.error('Éléments DOM non trouvés pour la sélection du professeur');
+            if (allStaffMembers.length === 0 || allEleves.length === 0) {
+                loadAllData().then(() => showClasseFormInternal(classe));
                 return;
             }
 
-            selectedIdInput.value = id;
-            console.log('Valeur définie dans le champ hidden:', selectedIdInput.value);
-            selectedNameSpan.textContent = displayName;
-            selectedDiv.style.display = 'block';
-
-            if (searchInput) searchInput.value = '';
-            if (resultsDiv) resultsDiv.style.display = 'none';
-
-            console.log('Professeur sélectionné avec succès:', id, displayName);
-        }
-
-        function clearSelectedProfesseur() {
-            document.getElementById('selectedProfesseurId').value = '';
-            document.getElementById('selectedProfesseur').style.display = 'none';
-            document.getElementById('professeurSearch').value = '';
-        }
-
-        // Rendre les fonctions globales pour l'accès depuis le HTML inline
-        window.selectProfesseur = selectProfesseur;
-        window.clearSelectedProfesseur = clearSelectedProfesseur;
-        window.testSelect = function(id, name) {
-            console.log('testSelect appelé avec:', id, name);
-            console.log('Champ hidden existe:', !!document.getElementById('selectedProfesseurId'));
-            selectProfesseur(id, name);
-        };
-
-        window.testWithRealId = function() {
-            if (allStaffMembers.length > 0) {
-                const prof = allStaffMembers[0];
-                console.log('Test avec un vrai professeur:', prof);
-                selectProfesseur(prof.id, prof.displayName);
-            } else {
-                console.error('Aucun professeur disponible pour le test');
+            // Sauvegarder la grille actuelle pour pouvoir y revenir
+            if (!window.classeDetailsBackup) {
+                window.classeDetailsBackup = {
+                    searchValue: document.getElementById('classesSearchInput')?.value || '',
+                    gridContent: document.getElementById('classesGrid')?.innerHTML || ''
+                };
             }
-        };
+
+            // Initialiser l'état
+            window._createClasseProfesseurId = null;
+
+            const widgetCardContent = document.querySelector('#classes .widget-card-content');
+            widgetCardContent.innerHTML = `
+
+                <!-- Bandeau mode création -->
+                <div class="fiche-header fiche-header--edit">
+                    <span class="material-icons" style="color:var(--md-sys-color-primary);font-size:24px;flex-shrink:0;">add_circle</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-surface);">Nouvelle classe</div>
+                        <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">Renseignez les informations puis cliquez sur <strong>Créer</strong></div>
+                    </div>
+                    <button class="md-btn md-btn-text" onclick="backToClassesList()">
+                        <span class="material-icons">close</span> Annuler
+                    </button>
+                </div>
+
+                <!-- Informations de la classe -->
+                <div class="fiche-section" style="margin-bottom:20px;border-color:var(--md-sys-color-primary);">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-primary-container);">
+                        <div class="stat-widget-icon" style="width:52px;height:52px;flex-shrink:0;border-radius:14px;background:var(--md-sys-color-primary);color:white;display:flex;align-items:center;justify-content:center;">
+                            <span class="material-icons" style="font-size:26px;">class</span>
+                        </div>
+                        <div style="flex:1;">
+                            <h4 class="fiche-section-title">Informations de la classe</h4>
+                            <p class="fiche-section-subtitle">Nom, niveau et professeur référent</p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <div class="fiche-edit-grid">
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons">badge</span> Nom de la classe *</label>
+                                <input id="classeNom" class="fiche-edit-input" type="text" value="" placeholder="ex: CE1-A" required>
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons">school</span> Niveau</label>
+                                <select id="classeNiveau" class="fiche-edit-input">
+                                    <option value="">-- Sélectionner --</option>
+                                    ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
+                                        `<option value="${n}">${n}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                            <div class="fiche-edit-item fiche-edit-item--full" style="position:relative;">
+                                <label class="fiche-edit-label"><span class="material-icons">person</span> Professeur référent</label>
+                                <div>
+                                    <input type="hidden" id="selectedProfesseurId" value="">
+                                    <input id="createProfSearchInput" class="fiche-edit-input" type="text"
+                                           placeholder="Rechercher un professeur ou membre du staff..."
+                                           oninput="createClasseProfSearchUpdate()"
+                                           onfocus="createClasseProfSearchUpdate()"
+                                           autocomplete="off">
+                                    <div id="createProfSearchResults"
+                                         style="display:none;
+                                                background:var(--md-sys-color-surface-container-highest);
+                                                border:1px solid var(--md-sys-color-outline);border-radius:10px;
+                                                box-shadow:var(--md-sys-elevation-2);margin-top:4px;
+                                                max-height:250px;overflow-y:auto;"></div>
+                                    <div id="createProfSelectedBadge"
+                                         style="display:none;align-items:center;gap:10px;
+                                                background:var(--md-sys-color-secondary-container);border-radius:10px;padding:10px 14px;">
+                                        <span class="material-icons" style="color:var(--md-sys-color-secondary);flex-shrink:0;">person</span>
+                                        <span id="createProfSelectedName" style="flex:1;font-weight:600;color:var(--md-sys-color-on-secondary-container);"></span>
+                                        <button type="button" class="md-btn md-btn-text" style="padding:2px 6px;min-width:0;" onclick="createClasseProfClear()">
+                                            <span class="material-icons" style="font-size:18px;">close</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barre Créer / Annuler -->
+                <div class="fiche-edit-actions">
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:900px;margin:0 auto;width:100%;">
+                        <span style="flex:1;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Renseignez les champs puis cliquez sur Créer</span>
+                        <button class="md-btn md-btn-text" onclick="backToClassesList()">
+                            <span class="material-icons">close</span> Annuler
+                        </button>
+                        <button id="createClasseBtn" class="md-btn md-btn-filled" onclick="submitNewClasse()">
+                            <span class="material-icons">add</span> Créer la classe
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Soumission du formulaire de création de classe (pleine page)
+        async function submitNewClasse() {
+            const btn = document.getElementById('createClasseBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;">sync</span> Création...';
+            }
+
+            const nom = document.getElementById('classeNom')?.value?.trim();
+            const niveau = document.getElementById('classeNiveau')?.value || null;
+            const professeurId = document.getElementById('selectedProfesseurId')?.value || null;
+
+            if (!nom) {
+                showSnackbar('Le nom de la classe est requis');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">add</span> Créer la classe'; }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/classes`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ nom, niveau, professeurId })
+                });
+                if (response.ok) {
+                    showSnackbar('Classe créée avec succès');
+                    await loadAllData();
+                    loadClasses();
+                    loadDashboardData();
+                } else {
+                    const errorData = await response.json();
+                    showSnackbar(`Erreur lors de la création: ${errorData.error || 'Erreur inconnue'}`);
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">add</span> Créer la classe'; }
+                }
+            } catch (error) {
+                showSnackbar('Erreur de connexion');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">add</span> Créer la classe'; }
+            }
+        }
+
+        // ─── Recherche Professeur (formulaire création/édition via dialog) ───
+        function createClasseProfSearchUpdate() {
+            const input = document.getElementById('createProfSearchInput');
+            const results = document.getElementById('createProfSearchResults');
+            if (!input || !results) return;
+            const q = input.value.toLowerCase().trim();
+            if (q.length < 1) {
+                results.style.display = 'none';
+                return;
+            }
+
+            // Séparer professeurs et autres membres du staff
+            const professeurs = allStaffMembers.filter(p => p.type === 'professeur' && p.displayName.toLowerCase().includes(q));
+            const autresStaff = allStaffMembers.filter(p => p.type === 'staff' && p.displayName.toLowerCase().includes(q));
+
+            if (professeurs.length === 0 && autresStaff.length === 0) {
+                results.style.display = 'block';
+                results.innerHTML = `<div style="padding:12px 14px;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
+                return;
+            }
+
+            let html = '';
+
+            // Section Professeurs
+            if (professeurs.length > 0) {
+                html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;">
+                    <span class="material-icons" style="font-size:16px;">school</span> Professeurs
+                </div>`;
+                html += professeurs.slice(0, 6).map(p => `
+                    <div onmousedown="event.preventDefault(); createClasseProfSelect('${p.id}', '${p.displayName.replace(/'/g, "\\'")}')"
+                         style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                                border-bottom:1px solid var(--md-sys-color-outline-variant);"
+                         onmouseover="this.style.background='var(--md-sys-color-primary-container)'"
+                         onmouseout="this.style.background=''">
+                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">person</span>
+                        <span style="font-size:13px;">${p.displayName}</span>
+                    </div>`).join('');
+            }
+
+            // Séparateur si les deux sections existent
+            if (professeurs.length > 0 && autresStaff.length > 0) {
+                html += `<div style="border-top:2px solid var(--md-sys-color-outline);margin:4px 0;"></div>`;
+            }
+
+            // Section Autres membres du staff
+            if (autresStaff.length > 0) {
+                html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:700;color:var(--md-sys-color-secondary);text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;">
+                    <span class="material-icons" style="font-size:16px;">badge</span> Autres membres du Bureau
+                </div>`;
+                html += autresStaff.slice(0, 6).map(p => `
+                    <div onmousedown="event.preventDefault(); createClasseProfSelect('${p.id}', '${p.displayName.replace(/'/g, "\\'")}')"
+                         style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+                                border-bottom:1px solid var(--md-sys-color-outline-variant);"
+                         onmouseover="this.style.background='var(--md-sys-color-secondary-container)'"
+                         onmouseout="this.style.background=''">
+                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-secondary);">person_outline</span>
+                        <span style="font-size:13px;">${p.displayName}</span>
+                    </div>`).join('');
+            }
+
+            results.style.display = 'block';
+            results.innerHTML = html;
+        }
+
+        function createClasseProfSelect(id, name) {
+            document.getElementById('selectedProfesseurId').value = id;
+            window._createClasseProfesseurId = id;
+            document.getElementById('createProfSearchInput').style.display = 'none';
+            document.getElementById('createProfSearchResults').style.display = 'none';
+            document.getElementById('createProfSelectedName').textContent = name;
+            document.getElementById('createProfSelectedBadge').style.display = 'flex';
+        }
+
+        function createClasseProfClear() {
+            document.getElementById('selectedProfesseurId').value = '';
+            window._createClasseProfesseurId = null;
+            const input = document.getElementById('createProfSearchInput');
+            input.value = '';
+            input.style.display = '';
+            input.focus();
+            document.getElementById('createProfSelectedBadge').style.display = 'none';
+            document.getElementById('createProfSearchResults').style.display = 'none';
+        }
+
+        // Rendre les fonctions globales
+        window.createClasseProfSelect = createClasseProfSelect;
+        window.createClasseProfClear = createClasseProfClear;
+        window.createClasseProfSearchUpdate = createClasseProfSearchUpdate;
 
         // ==================== APPEL ====================
         async function loadClassesForSelect() {

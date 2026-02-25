@@ -26,78 +26,175 @@
             word-wrap: normal;
             direction: ltr;
             -webkit-font-smoothing: antialiased;
-        }
-        
-        .parent-profile-card {
-            background: linear-gradient(135deg, var(--md-sys-color-primary, #1976d2) 0%, var(--md-sys-color-tertiary, #7b1fa2) 100%);
-            border-radius: 24px;
-            padding: 24px;
-            color: white;
-            text-align: center;
-            margin-bottom: 24px;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            font-feature-settings: 'liga';
         }
 
-        .parent-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: white;
-            margin: 0 auto 16px;
+        /* =====================================================
+           PARENT DASHBOARD v2 – STYLES MODERNISÉS
+           ===================================================== */
+
+        /* --- Bannière de bienvenue --- */
+        .p-welcome-banner {
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, #2563b0 55%, #3b4a68 100%);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: var(--md-sys-color-primary, #1976d2);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(30, 90, 168, 0.35);
+            position: relative;
+            overflow: hidden;
         }
-
-        .parent-name {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 8px;
+        .p-welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: -60%; right: 2%;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            pointer-events: none;
         }
-
-        .parent-email {
-            opacity: 0.9;
-            font-size: 0.9rem;
+        .p-welcome-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -40%; right: 18%;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+            pointer-events: none;
         }
-
-        .children-section {
-            margin-top: 24px;
+        .p-welcome-left { position: relative; z-index: 1; }
+        .p-welcome-greeting {
+            font-size: 24px; font-weight: 700; margin-bottom: 6px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
+        .p-welcome-date { font-size: 14px; opacity: 0.88; }
+        .p-welcome-chips {
+            display: flex; gap: 12px; flex-wrap: wrap;
+            position: relative; z-index: 1;
+        }
+        .p-welcome-chip {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.22);
+            padding: 10px 18px;
+            border-radius: 50px;
+            transition: background 0.2s, transform 0.2s;
+            color: white;
+            cursor: pointer; user-select: none;
+        }
+        .p-welcome-chip:hover { background: rgba(255,255,255,0.26); transform: translateY(-2px); }
+        .p-welcome-chip .material-icons { font-size: 22px; }
+        .p-welcome-chip-value { font-size: 20px; font-weight: 700; line-height: 1; }
+        .p-welcome-chip-label { font-size: 11px; opacity: 0.9; margin-top: 2px; }
 
+        /* --- Widget card (réutilisable) --- */
+        .widget-card {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 16px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            transition: box-shadow 0.2s;
+        }
+        .widget-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .widget-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px; gap: 12px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .widget-card-title {
+            font: var(--md-sys-typescale-title-medium);
+            color: var(--md-sys-color-on-surface);
+            margin: 0;
+        }
+        .widget-card-content { padding: 24px; }
+        .widget-card-actions { display: flex; gap: 8px; align-items: center; }
+
+        /* --- Content grid 2 colonnes --- */
+        .p-content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        .p-col-full { grid-column: 1 / -1; }
+
+        /* --- Actions rapides parent --- */
+        .p-quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .p-qa-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 16px 8px; border: none; border-radius: 14px;
+            cursor: pointer; transition: all 0.2s; text-align: center;
+            font-family: inherit;
+        }
+        .p-qa-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .p-qa-btn .material-icons { font-size: 28px; }
+        .p-qa-btn span:last-child { font-size: 11px; font-weight: 500; line-height: 1.3; }
+        .p-qa-blue   { background: #e3f2fd; color: #1565c0; } .p-qa-blue:hover   { background: #bbdefb; }
+        .p-qa-green  { background: #e8f5e9; color: #2e7d32; } .p-qa-green:hover  { background: #c8e6c9; }
+        .p-qa-purple { background: #f3e5f5; color: #6a1b9a; } .p-qa-purple:hover { background: #e1bee7; }
+        .p-qa-orange { background: #fff3e0; color: #e65100; } .p-qa-orange:hover { background: #ffe0b2; }
+        .p-qa-teal   { background: #e0f7fa; color: #006064; } .p-qa-teal:hover   { background: #b2ebf2; }
+        .p-qa-red    { background: #fce4ec; color: #b71c1c; } .p-qa-red:hover    { background: #f8bbd0; }
+
+        /* --- Bouton texte compact --- */
+        .p-btn-sm {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 13px; padding: 6px 10px;
+            border-radius: 8px; border: none;
+            background: none; color: var(--md-sys-color-primary);
+            cursor: pointer; font-weight: 500;
+            font-family: inherit; transition: background 0.15s;
+        }
+        .p-btn-sm:hover { background: var(--md-sys-color-primary-container); }
+
+        /* --- Sélecteur d'enfants amélioré --- */
         .child-selector {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 24px;
+            margin-bottom: 0;
         }
-
         .child-tab {
-            padding: 12px 24px;
-            border-radius: 20px;
-            background: var(--md-sys-color-surface-container, #f5f5f5);
-            border: 2px solid transparent;
+            padding: 10px 22px;
+            border-radius: 50px;
+            background: var(--md-sys-color-surface-container);
+            border: 2px solid var(--md-sys-color-outline-variant);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--md-sys-color-on-surface);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
         .child-tab:hover {
-            background: var(--md-sys-color-primary-container, #e3f2fd);
+            background: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary);
+            transform: translateY(-1px);
         }
-
         .child-tab.active {
-            background: var(--md-sys-color-primary, #1976d2);
-            color: white;
-            border-color: var(--md-sys-color-primary, #1976d2);
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 4px 12px rgba(30,90,168,0.3);
         }
 
+        /* --- Détails enfant --- */
         .child-details {
-            background: var(--md-sys-color-surface-container-lowest, #fff);
+            background: var(--md-sys-color-surface-container-lowest);
             border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 0;
         }
 
         .child-header {
@@ -105,126 +202,408 @@
             align-items: center;
             gap: 16px;
             margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
         }
 
         .child-avatar {
-            width: 80px;
-            height: 80px;
+            width: 72px; height: 72px;
             border-radius: 50%;
-            background: var(--md-sys-color-primary-container, #e3f2fd);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            color: var(--md-sys-color-primary, #1976d2);
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-secondary-container));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px;
+            color: var(--md-sys-color-primary);
+            box-shadow: 0 4px 12px rgba(30,90,168,0.15);
+            flex-shrink: 0;
         }
-
         .child-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
+            width: 100%; height: 100%;
+            border-radius: 50%; object-fit: cover;
+        }
+        .child-avatar-wrapper {
+            position: relative; display: inline-block;
+        }
+        .child-avatar-edit {
+            position: absolute; bottom: 0; right: 0;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            color: #fff; border: 2px solid #fff;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .child-avatar-edit:hover {
+            background: var(--md-sys-color-primary-dark, #1a4f94);
+            transform: scale(1.1);
+        }
+        .child-avatar-edit .material-icons { font-size: 15px; }
+        .child-photo-input { display: none; }
+
+        /* Modal de prévisualisation photo */
+        .photo-preview-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .photo-preview-overlay.active { opacity: 1; pointer-events: all; }
+        .photo-preview-modal {
+            background: var(--md-sys-color-surface); border-radius: 20px;
+            padding: 28px; width: 90%; max-width: 400px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .photo-preview-modal h3 {
+            margin: 0 0 20px; font-size: 18px; font-weight: 700;
+            color: var(--md-sys-color-on-surface);
+        }
+        .photo-preview-img {
+            width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+            border: 4px solid var(--md-sys-color-primary-container);
+            margin: 0 auto 20px;
+        }
+        .photo-preview-actions {
+            display: flex; gap: 10px; justify-content: center;
+        }
+        .photo-preview-actions button {
+            padding: 10px 24px; border-radius: 12px; border: none;
+            font-weight: 600; font-size: 14px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .photo-preview-actions .btn-cancel {
+            background: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface);
+        }
+        .photo-preview-actions .btn-confirm {
+            background: var(--md-sys-color-primary);
+            color: #fff;
+        }
+        .photo-preview-actions .btn-confirm:hover {
+            filter: brightness(1.1); transform: translateY(-1px);
+        }
+        .photo-preview-actions .btn-delete {
+            background: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
         }
 
         .child-info h3 {
-            margin: 0 0 8px 0;
-            font-size: 1.3rem;
-            color: var(--md-sys-color-on-surface, #333);
+            margin: 0 0 6px 0;
+            font: var(--md-sys-typescale-title-large);
+            color: var(--md-sys-color-on-surface);
         }
-
         .child-info p {
             margin: 0;
-            color: var(--md-sys-color-on-surface-variant, #666);
+            font: var(--md-sys-typescale-body-medium);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        .child-class-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 12px; border-radius: 50px;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            font-size: 12px; font-weight: 600;
         }
 
+        /* --- Info cards --- */
         .info-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 16px;
-            margin-top: 24px;
+            margin-top: 20px;
         }
 
         .info-card {
-            background: var(--md-sys-color-surface-container, #f5f5f5);
-            border-radius: 12px;
+            background: var(--md-sys-color-surface-container-low);
+            border-radius: 16px;
             padding: 20px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .info-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
         }
 
         .info-card h4 {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex; align-items: center; gap: 10px;
             margin: 0 0 16px 0;
-            color: var(--md-sys-color-primary, #1976d2);
+            font: var(--md-sys-typescale-title-small);
+            color: var(--md-sys-color-on-surface);
         }
-
         .info-card h4 .material-icons {
             font-size: 20px;
+            color: var(--md-sys-color-primary);
         }
-
-        .info-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .info-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .info-list li:last-child {
-            border-bottom: none;
-        }
-
-        .absence-item, .appreciation-item {
-            padding: 12px;
-            background: white;
+        .info-card-icon {
+            width: 32px; height: 32px;
             border-radius: 8px;
-            margin-bottom: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
         }
+        .info-card-icon .material-icons { font-size: 18px; }
+        .ic-blue   { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+        .ic-green  { background: var(--md-sys-color-success-container); color: var(--md-sys-color-on-success-container); }
+        .ic-orange { background: var(--md-sys-color-warning-container); color: var(--md-sys-color-on-warning-container); }
+        .ic-red    { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+        .ic-purple { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+
+        /* --- Absence / appréciation items --- */
+        .absence-item, .appreciation-item {
+            padding: 14px 16px;
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s;
+        }
+        .absence-item:hover, .appreciation-item:hover {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 2px 8px rgba(30,90,168,0.1);
+        }
+        .absence-item:last-child, .appreciation-item:last-child { margin-bottom: 0; }
 
         .absence-date, .appreciation-date {
-            font-size: 0.8rem;
-            color: var(--md-sys-color-on-surface-variant, #666);
+            font-size: 12px; font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex; align-items: center; gap: 4px;
         }
 
-        .frais-progress {
-            margin-top: 12px;
+        /* --- Status badges --- */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 50px;
+            font-size: 11px; font-weight: 600;
         }
+        .status-absent { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+        .status-retard { background: var(--md-sys-color-warning-container); color: var(--md-sys-color-on-warning-container); }
+        .status-present { background: var(--md-sys-color-success-container); color: var(--md-sys-color-on-success-container); }
 
+        /* --- Progress bar améliorée --- */
+        .frais-progress { margin-top: 12px; }
         .progress-bar {
-            height: 8px;
-            background: var(--md-sys-color-outline-variant, #e0e0e0);
-            border-radius: 4px;
+            height: 10px;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 50px;
             overflow: hidden;
         }
-
         .progress-bar-fill {
             height: 100%;
-            background: var(--md-sys-color-primary, #1976d2);
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, var(--md-sys-color-primary), #4a90d9);
+            border-radius: 50px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .progress-bar-fill.complete {
+            background: linear-gradient(90deg, var(--md-sys-color-success), #2ecc71);
         }
 
-        .frais-details {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 0.85rem;
+        /* --- Stat cards pour frais --- */
+        .p-stat-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
         }
+        .p-stat-card {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s;
+        }
+        .p-stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .p-stat-card-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px; font-weight: 600;
+        }
+        .p-stat-card-value { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
+        .p-stat-card-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+        }
+        .p-stat-card-icon .material-icons { font-size: 22px; }
 
+        /* --- No data amélioré --- */
         .no-data {
             text-align: center;
-            color: var(--md-sys-color-on-surface-variant, #666);
-            padding: 24px;
-            font-style: italic;
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 40px 24px;
+            font-style: normal;
+        }
+        .no-data-illustration {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: var(--md-sys-color-surface-variant);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .no-data-illustration .material-icons { font-size: 32px; color: var(--md-sys-color-on-surface-variant); opacity: 0.5; }
+        .no-data-text { font-size: 14px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 4px; }
+        .no-data-sub { font-size: 13px; color: var(--md-sys-color-on-surface-variant); }
+
+        /* --- Profil formulaire --- */
+        .p-profile-section { margin-bottom: 24px; }
+        .p-profile-header {
+            display: flex; align-items: center; gap: 20px;
+            padding: 24px; margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-secondary-container));
+            border-radius: 16px;
+        }
+        .p-profile-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: 700; flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(30,90,168,0.3);
+        }
+        .p-profile-name { font: var(--md-sys-typescale-headline-small); color: var(--md-sys-color-on-surface); }
+        .p-profile-email { font: var(--md-sys-typescale-body-medium); color: var(--md-sys-color-on-surface-variant); margin-top: 4px; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font: var(--md-sys-typescale-label-large);
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px;
+            background: var(--md-sys-color-surface-container-lowest);
+            color: var(--md-sys-color-on-surface);
+            font: var(--md-sys-typescale-body-large);
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 3px rgba(30,90,168,0.12);
+        }
+        .form-group input[readonly] {
+            background: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: not-allowed;
         }
 
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), color-mix(in srgb, var(--md-sys-color-primary) 80%, #003c8f));
+            color: var(--md-sys-color-on-primary);
+            border: none; border-radius: 50px;
+            font: var(--md-sys-typescale-label-large);
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(30,90,168,0.35);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 5px 18px rgba(30,90,168,0.45);
+            transform: translateY(-1px);
+        }
+        .btn-primary .material-icons { font-size: 18px; }
+
+        /* --- Actualités parent items --- */
+        .p-actu-item {
+            display: flex; align-items: flex-start; gap: 16px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background 0.15s; cursor: default;
+        }
+        .p-actu-item:last-child { border-bottom: none; }
+        .p-actu-item:hover { background: var(--md-sys-color-surface-container-low); }
+        .p-actu-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .p-actu-icon .material-icons { font-size: 22px; }
+        .p-actu-body { flex: 1; min-width: 0; }
+        .p-actu-title {
+            font-weight: 600; font-size: 15px;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 6px;
+        }
+        .p-actu-desc {
+            font-size: 13px; color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.6; margin-bottom: 8px;
+        }
+        .p-actu-meta {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+        }
+        .p-actu-meta .material-icons { font-size: 14px; }
+        .p-actu-pj {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+        }
+        .p-actu-pj-link {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px; background: var(--md-sys-color-surface-container);
+            border-radius: 16px; font-size: 12px; color: var(--md-sys-color-on-surface);
+            text-decoration: none; border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s; max-width: 200px;
+        }
+        .p-actu-pj-link span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .p-actu-pj-link:hover {
+            background: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary);
+        }
+        .p-actu-pj-link .material-icons { font-size: 14px; color: var(--md-sys-color-primary); }
+
+        /* --- Items récents dashboard --- */
+        .p-recent-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background 0.15s; cursor: pointer;
+        }
+        .p-recent-item:last-child { border-bottom: none; }
+        .p-recent-item:hover { background: var(--md-sys-color-surface-container-low); }
+        .p-recent-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .p-recent-icon .material-icons { font-size: 20px; }
+        .p-recent-body { flex: 1; min-width: 0; }
+        .p-recent-title {
+            font-weight: 500; font-size: 14px;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 4px;
+        }
+        .p-recent-desc {
+            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.4;
+        }
+        .p-recent-time { font-size: 11px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px; }
+
+        /* --- Children list (Mes Enfants) --- */
+        .p-child-card {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 16px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            overflow: hidden;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .p-child-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .p-child-card-header {
+            display: flex; align-items: center; gap: 16px;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-surface-container-low) 100%);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .p-child-card-body { padding: 20px 24px; }
+
+        /* --- Sidebar active states --- */
         .sidebar-nav-item[data-section="accueil-parent"].active,
         .sidebar-nav-item[data-section="mes-enfants"].active,
         .sidebar-nav-item[data-section="absences-parent"].active,
@@ -235,6 +614,18 @@
         .sidebar-nav-item[data-section="profil-parent"].active {
             background: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
+        }
+
+        /* --- Responsive parent dashboard --- */
+        @media (max-width: 1200px) {
+            .p-content-grid { grid-template-columns: 1fr; }
+            .p-col-full { grid-column: 1; }
+        }
+        @media (max-width: 768px) {
+            .p-welcome-banner { padding: 20px; }
+            .p-quick-actions { grid-template-columns: repeat(3, 1fr); }
+            .p-stat-cards { grid-template-columns: 1fr; }
+            .info-cards { grid-template-columns: 1fr; }
         }
 
         /* ========== MESSAGERIE – design unifié ========== */
@@ -492,58 +883,215 @@
             <div class="dashboard-content">
                 <!-- Section Accueil Parent -->
                 <section id="section-accueil-parent" class="tab-content active">
-                    <div class="parent-profile-card">
-                        <div class="parent-avatar">
-                            <span class="material-icons">family_restroom</span>
+
+                    <!-- Bannière de bienvenue -->
+                    <div class="p-welcome-banner">
+                        <div class="p-welcome-left">
+                            <div class="p-welcome-greeting" id="parentGreeting">Salam Aleykoum !</div>
+                            <div class="p-welcome-date" id="parentDate">Bienvenue sur votre espace parent</div>
                         </div>
-                        <div class="parent-name" id="parentFullName">Chargement...</div>
-                        <div class="parent-email" id="parentEmail"></div>
+                        <div class="p-welcome-chips">
+                            <div class="p-welcome-chip" onclick="navigateParent('mes-enfants')">
+                                <span class="material-icons">child_care</span>
+                                <div>
+                                    <div class="p-welcome-chip-value" id="wc-enfants-count">0</div>
+                                    <div class="p-welcome-chip-label">Enfant(s)</div>
+                                </div>
+                            </div>
+                            <div class="p-welcome-chip" onclick="navigateParent('absences-parent')">
+                                <span class="material-icons">event_busy</span>
+                                <div>
+                                    <div class="p-welcome-chip-value" id="wc-absences-count">0</div>
+                                    <div class="p-welcome-chip-label">Absence(s)</div>
+                                </div>
+                            </div>
+                            <div class="p-welcome-chip" onclick="navigateParent('messagerie-parent')">
+                                <span class="material-icons">mark_email_unread</span>
+                                <div>
+                                    <div class="p-welcome-chip-value" id="wc-messages-count">0</div>
+                                    <div class="p-welcome-chip-label">Message(s)</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <h2>Mes Enfants</h2>
-                    <div class="child-selector" id="childSelector">
-                        <!-- Onglets enfants générés dynamiquement -->
-                    </div>
+                    <!-- Grille de contenu -->
+                    <div class="p-content-grid">
 
-                    <div class="child-details" id="childDetails">
-                        <p class="no-data">Sélectionnez un enfant pour voir ses informations</p>
+                        <!-- Mes enfants (résumé) -->
+                        <div class="widget-card">
+                            <div class="widget-card-header">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="info-card-icon ic-blue"><span class="material-icons">child_care</span></div>
+                                    <h3 class="widget-card-title">Mes Enfants</h3>
+                                </div>
+                                <button class="p-btn-sm" onclick="navigateParent('mes-enfants')">
+                                    Voir tout <span class="material-icons" style="font-size:16px;">chevron_right</span>
+                                </button>
+                            </div>
+                            <div class="widget-card-content">
+                                <div class="child-selector" id="childSelector"></div>
+                                <div class="child-details" id="childDetails" style="margin-top: 16px;">
+                                    <div class="no-data">
+                                        <div class="no-data-illustration"><span class="material-icons">child_care</span></div>
+                                        <div class="no-data-text">Sélectionnez un enfant</div>
+                                        <div class="no-data-sub">pour voir ses informations</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions rapides -->
+                        <div class="widget-card">
+                            <div class="widget-card-header">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="info-card-icon ic-purple"><span class="material-icons">flash_on</span></div>
+                                    <h3 class="widget-card-title">Accès rapide</h3>
+                                </div>
+                            </div>
+                            <div class="widget-card-content" style="padding:12px;">
+                                <div class="p-quick-actions">
+                                    <button class="p-qa-btn p-qa-blue" onclick="navigateParent('mes-enfants')">
+                                        <span class="material-icons">child_care</span>
+                                        <span>Mes Enfants</span>
+                                    </button>
+                                    <button class="p-qa-btn p-qa-green" onclick="navigateParent('absences-parent')">
+                                        <span class="material-icons">event_busy</span>
+                                        <span>Absences</span>
+                                    </button>
+                                    <button class="p-qa-btn p-qa-purple" onclick="navigateParent('appreciations-parent')">
+                                        <span class="material-icons">star</span>
+                                        <span>Appréciations</span>
+                                    </button>
+                                    <button class="p-qa-btn p-qa-orange" onclick="navigateParent('frais-parent')">
+                                        <span class="material-icons">payments</span>
+                                        <span>Frais</span>
+                                    </button>
+                                    <button class="p-qa-btn p-qa-teal" onclick="navigateParent('messagerie-parent')">
+                                        <span class="material-icons">mail</span>
+                                        <span>Messagerie</span>
+                                    </button>
+                                    <button class="p-qa-btn p-qa-red" onclick="navigateParent('actualites-parent')">
+                                        <span class="material-icons">newspaper</span>
+                                        <span>Actualités</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dernières actualités -->
+                        <div class="widget-card p-col-full">
+                            <div class="widget-card-header">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="info-card-icon ic-green"><span class="material-icons">newspaper</span></div>
+                                    <h3 class="widget-card-title">Dernières actualités</h3>
+                                </div>
+                                <button class="p-btn-sm" onclick="navigateParent('actualites-parent')">
+                                    Voir tout <span class="material-icons" style="font-size:16px;">chevron_right</span>
+                                </button>
+                            </div>
+                            <div class="widget-card-content" style="padding:0;">
+                                <div id="recentActualitesDashboard">
+                                    <div class="no-data">
+                                        <div class="no-data-illustration"><span class="material-icons">newspaper</span></div>
+                                        <div class="no-data-text">Aucune actualité récente</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
 
                 <!-- Section Mes Enfants -->
                 <section id="section-mes-enfants" class="tab-content">
-                    <h2>Détails de mes enfants</h2>
-                    <div id="childrenList">
-                        <!-- Liste des enfants avec détails complets -->
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-blue"><span class="material-icons">child_care</span></div>
+                                <h3 class="widget-card-title">Détails de mes enfants</h3>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="childrenList">
+                                <div class="no-data">
+                                    <div class="no-data-illustration"><span class="material-icons">child_care</span></div>
+                                    <div class="no-data-text">Chargement...</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
                 <!-- Section Absences Parent -->
                 <section id="section-absences-parent" class="tab-content">
-                    <h2>Absences de mes enfants</h2>
-                    <div class="child-selector" id="absencesChildSelector"></div>
-                    <div id="absencesList">
-                        <p class="no-data">Sélectionnez un enfant pour voir ses absences</p>
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-red"><span class="material-icons">event_busy</span></div>
+                                <h3 class="widget-card-title">Absences de mes enfants</h3>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div class="child-selector" id="absencesChildSelector" style="margin-bottom:20px;"></div>
+                            <div id="absencesList">
+                                <div class="no-data">
+                                    <div class="no-data-illustration"><span class="material-icons">event_busy</span></div>
+                                    <div class="no-data-text">Sélectionnez un enfant</div>
+                                    <div class="no-data-sub">pour voir ses absences</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
                 <!-- Section Appréciations Parent -->
                 <section id="section-appreciations-parent" class="tab-content">
-                    <h2>Appréciations de mes enfants</h2>
-                    <div class="child-selector" id="appreciationsChildSelector"></div>
-                    <div id="appreciationsList">
-                        <p class="no-data">Sélectionnez un enfant pour voir ses appréciations</p>
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-orange"><span class="material-icons">star</span></div>
+                                <h3 class="widget-card-title">Appréciations de mes enfants</h3>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div class="child-selector" id="appreciationsChildSelector" style="margin-bottom:20px;"></div>
+                            <div id="appreciationsList">
+                                <div class="no-data">
+                                    <div class="no-data-illustration"><span class="material-icons">star</span></div>
+                                    <div class="no-data-text">Sélectionnez un enfant</div>
+                                    <div class="no-data-sub">pour voir ses appréciations</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
                 <!-- Section Frais Parent -->
                 <section id="section-frais-parent" class="tab-content">
-                    <h2>Frais d'inscription</h2>
-                    <div id="fraisSummary" class="info-card" style="margin-bottom: 24px;">
-                        <!-- Résumé des frais -->
+                    <!-- Résumé global -->
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-green"><span class="material-icons">account_balance</span></div>
+                                <h3 class="widget-card-title">Récapitulatif des frais</h3>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="fraisSummary"></div>
+                        </div>
                     </div>
-                    <div id="fraisDetailsList">
-                        <!-- Détails par enfant -->
+                    <!-- Détails par enfant -->
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-blue"><span class="material-icons">receipt_long</span></div>
+                                <h3 class="widget-card-title">Détails par enfant</h3>
+                            </div>
+                        </div>
+                        <div class="widget-card-content">
+                            <div id="fraisDetailsList"></div>
+                        </div>
                     </div>
                 </section>
 
@@ -712,64 +1260,111 @@
 
                 <!-- Section Actualités Parent -->
                 <section id="section-actualites-parent" class="tab-content">
-                    <h2>Actualités</h2>
-                    <div id="actualitesList">
-                        <p class="no-data">Chargement des actualités...</p>
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-green"><span class="material-icons">newspaper</span></div>
+                                <h3 class="widget-card-title">Actualités</h3>
+                            </div>
+                        </div>
+                        <div class="widget-card-content" style="padding:0;">
+                            <div id="actualitesList">
+                                <div class="no-data">
+                                    <div class="no-data-illustration"><span class="material-icons">newspaper</span></div>
+                                    <div class="no-data-text">Chargement des actualités...</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
                 <!-- Section Profil Parent -->
                 <section id="section-profil-parent" class="tab-content">
-                    <h2>Mon Profil</h2>
-                    <div class="info-card">
-                        <form id="parentProfileForm">
-                            <div class="form-group">
-                                <label>Nom</label>
-                                <input type="text" id="profilNom" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Prénom</label>
-                                <input type="text" id="profilPrenom" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="profilEmail" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Téléphone</label>
-                                <input type="tel" id="profilTel" placeholder="Votre numéro de téléphone">
-                            </div>
-                            <div class="form-group">
-                                <label>Adresse</label>
-                                <textarea id="profilAdresse" rows="3" placeholder="Votre adresse"></textarea>
-                            </div>
-                            <button type="submit" class="btn-primary">
-                                <span class="material-icons">save</span>
-                                Enregistrer
-                            </button>
-                        </form>
+                    <!-- En-tête profil -->
+                    <div class="p-profile-header">
+                        <div class="p-profile-avatar" id="profilAvatar">P</div>
+                        <div>
+                            <div class="p-profile-name" id="profilDisplayName">Parent</div>
+                            <div class="p-profile-email" id="profilDisplayEmail"></div>
+                        </div>
                     </div>
 
-                    <div class="info-card" style="margin-top: 24px;">
-                        <h4><span class="material-icons">lock</span> Changer le mot de passe</h4>
-                        <form id="changePasswordForm">
-                            <div class="form-group">
-                                <label>Mot de passe actuel</label>
-                                <input type="password" id="currentPassword" required>
+                    <!-- Informations personnelles -->
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-blue"><span class="material-icons">person</span></div>
+                                <h3 class="widget-card-title">Informations personnelles</h3>
                             </div>
-                            <div class="form-group">
-                                <label>Nouveau mot de passe</label>
-                                <input type="password" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="widget-card-content">
+                            <form id="parentProfileForm">
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                                    <div class="form-group">
+                                        <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">badge</span> Nom</label>
+                                        <input type="text" id="profilNom" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">badge</span> Prénom</label>
+                                        <input type="text" id="profilPrenom" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">email</span> Email</label>
+                                    <input type="email" id="profilEmail" readonly>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                                    <div class="form-group">
+                                        <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">phone</span> Téléphone</label>
+                                        <input type="tel" id="profilTel" placeholder="Votre numéro de téléphone">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">home</span> Adresse</label>
+                                        <textarea id="profilAdresse" rows="2" placeholder="Votre adresse"></textarea>
+                                    </div>
+                                </div>
+                                <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+                                    <button type="submit" class="btn-primary">
+                                        <span class="material-icons">save</span>
+                                        Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Changer le mot de passe -->
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="info-card-icon ic-orange"><span class="material-icons">lock</span></div>
+                                <h3 class="widget-card-title">Sécurité — Mot de passe</h3>
                             </div>
-                            <div class="form-group">
-                                <label>Confirmer le nouveau mot de passe</label>
-                                <input type="password" id="confirmPassword" required minlength="6">
-                            </div>
-                            <button type="submit" class="btn-primary">
-                                <span class="material-icons">vpn_key</span>
-                                Changer le mot de passe
-                            </button>
-                        </form>
+                        </div>
+                        <div class="widget-card-content">
+                            <form id="changePasswordForm">
+                                <div class="form-group">
+                                    <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">vpn_key</span> Mot de passe actuel</label>
+                                    <input type="password" id="currentPassword" required placeholder="Saisissez votre mot de passe actuel">
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                                    <div class="form-group">
+                                        <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">lock_open</span> Nouveau mot de passe</label>
+                                        <input type="password" id="newPassword" required minlength="6" placeholder="Min. 6 caractères">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">check_circle</span> Confirmer</label>
+                                        <input type="password" id="confirmPassword" required minlength="6" placeholder="Confirmez le mot de passe">
+                                    </div>
+                                </div>
+                                <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+                                    <button type="submit" class="btn-primary">
+                                        <span class="material-icons">vpn_key</span>
+                                        Changer le mot de passe
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -811,15 +1406,17 @@
                 enfantsData = response.enfants || [];
 
                 // Mettre à jour l'interface
-                document.getElementById('userName').textContent = `${parentData.prenom} ${parentData.nom}`;
-                document.getElementById('sidebarUserName').textContent = `${parentData.prenom} ${parentData.nom}`;
+                const displayName = `${parentData.prenom} ${parentData.nom}`;
+                document.getElementById('userName').textContent = displayName;
+                document.getElementById('sidebarUserName').textContent = displayName;
                 const avatarEl = document.getElementById('userAvatar');
                 if (avatarEl) avatarEl.textContent = (parentData.prenom || 'P')[0].toUpperCase();
-                document.getElementById('parentFullName').textContent = `${parentData.prenom} ${parentData.nom}`;
-                document.getElementById('parentEmail').textContent = parentData.email;
 
                 // Générer les onglets enfants
                 renderChildTabs();
+
+                // Bannière de bienvenue
+                setupParentWelcome();
 
                 // Charger les données du profil
                 loadProfileData();
@@ -833,10 +1430,151 @@
                 // Charger les messages
                 loadParentMessages();
 
+                // Charger la liste des enfants (section Mes Enfants)
+                renderChildrenList();
+
+                // Charger les actualités récentes pour le dashboard
+                loadRecentActualitesDashboard();
+
             } catch (error) {
                 console.error('Erreur chargement données parent:', error);
                 showNotification('Erreur lors du chargement des données', 'error');
             }
+        }
+
+        // Navigation helper
+        function navigateParent(sectionId) {
+            const navItem = document.querySelector(`.sidebar-nav-item[data-section="${sectionId}"]`);
+            if (navItem) navItem.click();
+        }
+
+        // Bannière de bienvenue
+        function setupParentWelcome() {
+            const now = new Date();
+            const greeting = 'Salam Aleykoum';
+            const displayName = parentData ? `${parentData.prenom}` : '';
+
+            const greetingEl = document.getElementById('parentGreeting');
+            if (greetingEl) greetingEl.textContent = `${greeting}${displayName ? ', ' + displayName : ''} !`;
+
+            const dateEl = document.getElementById('parentDate');
+            if (dateEl) {
+                dateEl.textContent = now.toLocaleDateString('fr-FR', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                });
+            }
+
+            // Chips valeurs
+            const wcEnfants = document.getElementById('wc-enfants-count');
+            if (wcEnfants) wcEnfants.textContent = enfantsData.length;
+
+            // Compter toutes les absences
+            loadAllAbsencesCount();
+        }
+
+        async function loadAllAbsencesCount() {
+            try {
+                let totalAbsences = 0;
+                for (const enfant of enfantsData) {
+                    const abs = await apiRequest(`/api/absences/eleve/${enfant.id}`).catch(() => []);
+                    totalAbsences += abs.length;
+                }
+                const wcAbs = document.getElementById('wc-absences-count');
+                if (wcAbs) wcAbs.textContent = totalAbsences;
+            } catch(e) {}
+        }
+
+        // Charger les enfants dans la section "Mes Enfants"
+        function renderChildrenList() {
+            const container = document.getElementById('childrenList');
+            if (!container || enfantsData.length === 0) {
+                if (container) container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-illustration"><span class="material-icons">child_care</span></div>
+                        <div class="no-data-text">Aucun enfant enregistré</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = enfantsData.map(enfant => {
+                const initial = (enfant.prenom || 'E')[0].toUpperCase();
+                return `
+                    <div class="p-child-card">
+                        <div class="p-child-card-header">
+                            <div class="child-avatar-wrapper">
+                                <div class="child-avatar">
+                                    ${enfant.photo ? `<img src="${enfant.photo}" alt="${enfant.prenom}">` : `<span class="material-icons">person</span>`}
+                                </div>
+                                <div class="child-avatar-edit" onclick="openChildPhotoEdit('${enfant.id}', '${enfant.prenom} ${enfant.nom}', ${enfant.photo ? `'${enfant.photo}'` : 'null'})" title="Modifier la photo">
+                                    <span class="material-icons">photo_camera</span>
+                                </div>
+                                <input type="file" id="photoInput-list-${enfant.id}" class="child-photo-input" accept="image/*" onchange="previewChildPhoto(this, '${enfant.id}', '${enfant.prenom} ${enfant.nom}')">
+                            </div>
+                            <div class="child-info">
+                                <h3>${enfant.prenom} ${enfant.nom}</h3>
+                                <p><span class="child-class-badge"><span class="material-icons" style="font-size:14px;">class</span> ${enfant.classe || 'Non assignée'}</span></p>
+                            </div>
+                        </div>
+                        <div class="p-child-card-body">
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;">
+                                <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;">
+                                    <div class="info-card-icon ic-blue"><span class="material-icons">person</span></div>
+                                    <div>
+                                        <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600;">Nom complet</div>
+                                        <div style="font-weight:600;font-size:14px;">${enfant.prenom} ${enfant.nom}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;">
+                                    <div class="info-card-icon ic-green"><span class="material-icons">class</span></div>
+                                    <div>
+                                        <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600;">Classe</div>
+                                        <div style="font-weight:600;font-size:14px;">${enfant.classe || 'Non assignée'}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;">
+                                    <div class="info-card-icon ic-orange"><span class="material-icons">payments</span></div>
+                                    <div>
+                                        <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600;">Frais</div>
+                                        <div style="font-weight:600;font-size:14px;">${enfant.fraisValide ? '✓ Validés' : 'En cours'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // Charger les actualités récentes pour le dashboard
+        async function loadRecentActualitesDashboard() {
+            try {
+                const actualites = await apiRequest('/api/actualites');
+                const container = document.getElementById('recentActualitesDashboard');
+                if (!container) return;
+
+                const recent = actualites.slice(0, 3);
+                if (recent.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-illustration"><span class="material-icons">newspaper</span></div>
+                            <div class="no-data-text">Aucune actualité récente</div>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = recent.map(actu => `
+                    <div class="p-recent-item" onclick="navigateParent('actualites-parent')">
+                        <div class="p-recent-icon ic-green"><span class="material-icons">article</span></div>
+                        <div class="p-recent-body">
+                            <div class="p-recent-title">${actu.titre}</div>
+                            <div class="p-recent-desc">${(actu.description || '').substring(0, 100)}${(actu.description || '').length > 100 ? '...' : ''}</div>
+                            <div class="p-recent-time">
+                                <span class="material-icons" style="font-size:12px;vertical-align:middle;">schedule</span>
+                                ${new Date(actu.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' })}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) {}
         }
 
         // Générer les onglets enfants
@@ -852,7 +1590,7 @@
                 enfantsData.forEach((enfant, index) => {
                     const tab = document.createElement('button');
                     tab.className = 'child-tab' + (index === 0 ? ' active' : '');
-                    tab.textContent = `${enfant.prenom} ${enfant.nom}`;
+                    tab.innerHTML = `<span class="material-icons" style="font-size:18px;">person</span> ${enfant.prenom} ${enfant.nom}`;
                     tab.dataset.enfantId = enfant.id;
                     tab.onclick = () => selectChild(enfant.id, selectorId);
                     container.appendChild(tab);
@@ -904,57 +1642,105 @@
                 const montantPaye = parseFloat(enfant.montantPaye || 0);
                 const restant = Math.max(0, (enfant.fraisInscription || 0) - montantPaye);
                 const progressPercent = enfant.fraisInscription > 0 ? (montantPaye / enfant.fraisInscription) * 100 : 0;
+                const isComplete = progressPercent >= 100;
 
                 container.innerHTML = `
                     <div class="child-header">
-                        <div class="child-avatar">
-                            ${enfant.photo ? `<img src="${enfant.photo}" alt="${enfant.prenom}">` : `<span class="material-icons">person</span>`}
+                        <div class="child-avatar-wrapper">
+                            <div class="child-avatar">
+                                ${enfant.photo ? `<img src="${enfant.photo}" alt="${enfant.prenom}">` : `<span class="material-icons">person</span>`}
+                            </div>
+                            <div class="child-avatar-edit" onclick="openChildPhotoEdit('${enfant.id}', '${enfant.prenom} ${enfant.nom}', ${enfant.photo ? `'${enfant.photo}'` : 'null'})" title="Modifier la photo">
+                                <span class="material-icons">photo_camera</span>
+                            </div>
+                            <input type="file" id="photoInput-detail-${enfant.id}" class="child-photo-input" accept="image/*" onchange="previewChildPhoto(this, '${enfant.id}', '${enfant.prenom} ${enfant.nom}')">
                         </div>
                         <div class="child-info">
                             <h3>${enfant.prenom} ${enfant.nom}</h3>
-                            <p>Classe: ${enfant.classe || 'Non assignée'}</p>
+                            <p><span class="child-class-badge"><span class="material-icons" style="font-size:14px;">class</span> ${enfant.classe || 'Non assignée'}</span></p>
                         </div>
                     </div>
 
                     <div class="info-cards">
                         <div class="info-card">
-                            <h4><span class="material-icons">event_busy</span> Dernières absences</h4>
+                            <h4>
+                                <div class="info-card-icon ic-red"><span class="material-icons">event_busy</span></div>
+                                Dernières absences
+                                <span style="margin-left:auto;font-size:12px;font-weight:600;color:var(--md-sys-color-on-surface-variant);">${absences.length} total</span>
+                            </h4>
                             ${absences.length > 0 ? absences.slice(0, 5).map(a => `
                                 <div class="absence-item">
-                                    <div>${a.type || 'Absence'}</div>
-                                    <div class="absence-date">${new Date(a.date).toLocaleDateString('fr-FR')}</div>
-                                    ${a.motif ? `<div style="font-size: 0.85rem; color: #666;">${a.motif}</div>` : ''}
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <span class="status-badge status-${(a.type || 'absent').toLowerCase() === 'retard' ? 'retard' : 'absent'}">
+                                            <span class="material-icons" style="font-size:12px;">${(a.type || 'absent').toLowerCase() === 'retard' ? 'schedule' : 'close'}</span>
+                                            ${a.type || 'Absence'}
+                                        </span>
+                                        <span class="absence-date">
+                                            <span class="material-icons" style="font-size:12px;">calendar_today</span>
+                                            ${new Date(a.date).toLocaleDateString('fr-FR')}
+                                        </span>
+                                    </div>
+                                    ${a.motif ? `<div style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:8px;">${a.motif}</div>` : ''}
                                 </div>
-                            `).join('') : '<p class="no-data">Aucune absence</p>'}
+                            `).join('') : `
+                                <div class="no-data" style="padding:20px;">
+                                    <div class="no-data-illustration" style="width:48px;height:48px;"><span class="material-icons" style="font-size:24px;">check_circle</span></div>
+                                    <div class="no-data-text" style="font-size:13px;">Aucune absence</div>
+                                </div>`}
                         </div>
 
                         <div class="info-card">
-                            <h4><span class="material-icons">star</span> Dernières appréciations</h4>
+                            <h4>
+                                <div class="info-card-icon ic-orange"><span class="material-icons">star</span></div>
+                                Dernières appréciations
+                                <span style="margin-left:auto;font-size:12px;font-weight:600;color:var(--md-sys-color-on-surface-variant);">${appreciations.length} total</span>
+                            </h4>
                             ${appreciations.length > 0 ? appreciations.slice(0, 5).map(a => `
                                 <div class="appreciation-item">
-                                    <div><strong>${a.matiere || 'Général'}</strong> - ${a.periode || ''}</div>
-                                    ${a.note ? `<div>Note: ${a.note}/20</div>` : ''}
-                                    ${a.commentaire ? `<div style="font-size: 0.85rem; color: #666;">${a.commentaire}</div>` : ''}
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <strong style="font-size:14px;color:var(--md-sys-color-on-surface);">${a.matiere || 'Général'}</strong>
+                                        <span style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${a.periode || ''}</span>
+                                    </div>
+                                    ${a.note ? `<div style="margin-top:6px;"><span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:3px 10px;border-radius:50px;font-size:12px;font-weight:600;">Note: ${a.note}/20</span></div>` : ''}
+                                    ${a.commentaire ? `<div style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;line-height:1.5;">${a.commentaire}</div>` : ''}
                                 </div>
-                            `).join('') : '<p class="no-data">Aucune appréciation</p>'}
+                            `).join('') : `
+                                <div class="no-data" style="padding:20px;">
+                                    <div class="no-data-illustration" style="width:48px;height:48px;"><span class="material-icons" style="font-size:24px;">star_border</span></div>
+                                    <div class="no-data-text" style="font-size:13px;">Aucune appréciation</div>
+                                </div>`}
                         </div>
 
                         <div class="info-card">
-                            <h4><span class="material-icons">payments</span> Frais d'inscription</h4>
-                            <div style="display:flex; gap:12px; flex-wrap:wrap; margin:8px 0;">
-                                <div style="flex:1; min-width:80px;"><span style="font-size:0.85rem; color:#666;">Total</span><br><strong>${formatCurrency(enfant.fraisInscription)}</strong></div>
-                                <div style="flex:1; min-width:80px;"><span style="font-size:0.85rem; color:#666;">Payé</span><br><strong style="color:var(--md-sys-color-primary, #1976d2);">${formatCurrency(montantPaye)}</strong></div>
-                                <div style="flex:1; min-width:80px;"><span style="font-size:0.85rem; color:#666;">Reste</span><br><strong style="color:${restant > 0 ? 'var(--md-sys-color-error, #f44336)' : 'var(--md-sys-color-primary, #1976d2)'};">${formatCurrency(restant)}</strong></div>
+                            <h4>
+                                <div class="info-card-icon ic-green"><span class="material-icons">payments</span></div>
+                                Frais d'inscription
+                            </h4>
+                            <div class="p-stat-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Total</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;">${formatCurrency(enfant.fraisInscription)}</div>
+                                </div>
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Payé</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
+                                </div>
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Reste</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;color:${restant > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)'};">${formatCurrency(restant)}</div>
+                                </div>
                             </div>
                             <div class="frais-progress">
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                                    <div class="progress-bar-fill ${isComplete ? 'complete' : ''}" style="width: ${Math.min(progressPercent, 100)}%"></div>
                                 </div>
-                                <div style="text-align:center; font-size:0.8rem; color:#666; margin-top:4px;">${progressPercent.toFixed(0)}%</div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:6px; margin-top:8px;">
-                                <span class="material-icons" style="font-size:18px; color:${enfant.fraisValide ? 'var(--md-sys-color-primary, #1976d2)' : 'var(--md-sys-color-error, #f44336)'};">${enfant.fraisValide ? 'check_circle' : 'pending'}</span>
-                                <span style="font-size:0.85rem;">${enfant.fraisValide ? 'Frais validés' : 'Paiement en cours'} — ${enfant.paiementsEffectues || 0} transaction(s)</span>
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span class="material-icons" style="font-size:16px;color:${enfant.fraisValide ? 'var(--md-sys-color-success)' : 'var(--md-sys-color-warning)'};">${enfant.fraisValide ? 'check_circle' : 'pending'}</span>
+                                        <span style="font-size:12px;font-weight:500;">${enfant.fraisValide ? 'Frais validés' : 'Paiement en cours'}</span>
+                                    </div>
+                                    <span style="font-size:13px;font-weight:600;color:var(--md-sys-color-primary);">${progressPercent.toFixed(0)}%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -962,7 +1748,11 @@
 
             } catch (error) {
                 console.error('Erreur chargement détails enfant:', error);
-                container.innerHTML = '<p class="no-data">Erreur lors du chargement</p>';
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-illustration"><span class="material-icons">error</span></div>
+                        <div class="no-data-text">Erreur lors du chargement</div>
+                    </div>`;
             }
         }
 
@@ -974,23 +1764,59 @@
                 const absences = await apiRequest(`/api/absences/eleve/${enfantId}`);
                 
                 if (absences.length === 0) {
-                    container.innerHTML = '<p class="no-data">Aucune absence enregistrée</p>';
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-illustration"><span class="material-icons">check_circle</span></div>
+                            <div class="no-data-text">Aucune absence enregistrée</div>
+                            <div class="no-data-sub">Excellent !</div>
+                        </div>`;
                     return;
                 }
 
-                container.innerHTML = absences.map(a => `
-                    <div class="absence-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong>${a.type || 'Absence'}</strong>
-                            <span class="absence-date">${new Date(a.date).toLocaleDateString('fr-FR')}</span>
+                // Statistiques
+                const nbAbsences = absences.filter(a => (a.type || '').toLowerCase() !== 'retard').length;
+                const nbRetards = absences.filter(a => (a.type || '').toLowerCase() === 'retard').length;
+
+                container.innerHTML = `
+                    <div style="display:flex;gap:12px;margin-bottom:16px;">
+                        <div style="flex:1;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--md-sys-color-error-container);border-radius:12px;">
+                            <span class="material-icons" style="color:var(--md-sys-color-on-error-container);font-size:20px;">close</span>
+                            <div>
+                                <div style="font-size:20px;font-weight:700;color:var(--md-sys-color-on-error-container);">${nbAbsences}</div>
+                                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--md-sys-color-on-error-container);opacity:0.8;">Absence(s)</div>
+                            </div>
                         </div>
-                        ${a.motif ? `<p style="margin: 8px 0 0; color: #666;">${a.motif}</p>` : ''}
+                        <div style="flex:1;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--md-sys-color-warning-container);border-radius:12px;">
+                            <span class="material-icons" style="color:var(--md-sys-color-on-warning-container);font-size:20px;">schedule</span>
+                            <div>
+                                <div style="font-size:20px;font-weight:700;color:var(--md-sys-color-on-warning-container);">${nbRetards}</div>
+                                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--md-sys-color-on-warning-container);opacity:0.8;">Retard(s)</div>
+                            </div>
+                        </div>
                     </div>
-                `).join('');
+                    ${absences.map(a => `
+                    <div class="absence-item">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span class="status-badge status-${(a.type || 'absent').toLowerCase() === 'retard' ? 'retard' : 'absent'}">
+                                <span class="material-icons" style="font-size:12px;">${(a.type || 'absent').toLowerCase() === 'retard' ? 'schedule' : 'close'}</span>
+                                ${a.type || 'Absence'}
+                            </span>
+                            <span class="absence-date">
+                                <span class="material-icons" style="font-size:12px;">calendar_today</span>
+                                ${new Date(a.date).toLocaleDateString('fr-FR', {weekday:'short', day:'2-digit', month:'long', year:'numeric'})}
+                            </span>
+                        </div>
+                        ${a.motif ? `<p style="margin:8px 0 0;font-size:13px;color:var(--md-sys-color-on-surface-variant);">${a.motif}</p>` : ''}
+                    </div>
+                    `).join('')}`;
 
             } catch (error) {
                 console.error('Erreur chargement absences:', error);
-                container.innerHTML = '<p class="no-data">Erreur lors du chargement</p>';
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-illustration"><span class="material-icons">error</span></div>
+                        <div class="no-data-text">Erreur lors du chargement</div>
+                    </div>`;
             }
         }
 
@@ -1002,27 +1828,39 @@
                 const appreciations = await apiRequest(`/api/appreciations/eleve/${enfantId}`);
                 
                 if (appreciations.length === 0) {
-                    container.innerHTML = '<p class="no-data">Aucune appréciation enregistrée</p>';
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-illustration"><span class="material-icons">star_border</span></div>
+                            <div class="no-data-text">Aucune appréciation enregistrée</div>
+                        </div>`;
                     return;
                 }
 
                 container.innerHTML = appreciations.map(a => `
                     <div class="appreciation-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong>${a.matiere || 'Général'}</strong>
-                            <span>${a.periode || ''}</span>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div class="info-card-icon ic-orange" style="width:28px;height:28px;"><span class="material-icons" style="font-size:16px;">star</span></div>
+                                <strong style="font-size:14px;color:var(--md-sys-color-on-surface);">${a.matiere || 'Général'}</strong>
+                            </div>
+                            <span style="font-size:12px;color:var(--md-sys-color-on-surface-variant);background:var(--md-sys-color-surface-container);padding:3px 10px;border-radius:50px;font-weight:500;">${a.periode || ''}</span>
                         </div>
-                        ${a.note ? `<div style="margin-top: 8px;">Note: <strong>${a.note}/20</strong></div>` : ''}
-                        ${a.commentaire ? `<p style="margin: 8px 0 0; color: #666;">${a.commentaire}</p>` : ''}
-                        <div class="appreciation-date" style="margin-top: 8px;">
-                            ${a.dateCreated ? new Date(a.dateCreated).toLocaleDateString('fr-FR') : ''}
+                        ${a.note ? `<div style="margin-top:8px;"><span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:4px 12px;border-radius:50px;font-size:13px;font-weight:700;">Note: ${a.note}/20</span></div>` : ''}
+                        ${a.commentaire ? `<p style="margin:8px 0 0;font-size:13px;color:var(--md-sys-color-on-surface-variant);line-height:1.6;">${a.commentaire}</p>` : ''}
+                        <div class="appreciation-date" style="margin-top:8px;">
+                            <span class="material-icons" style="font-size:12px;">calendar_today</span>
+                            ${a.dateCreated ? new Date(a.dateCreated).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'}) : ''}
                         </div>
                     </div>
                 `).join('');
 
             } catch (error) {
                 console.error('Erreur chargement appréciations:', error);
-                container.innerHTML = '<p class="no-data">Erreur lors du chargement</p>';
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-illustration"><span class="material-icons">error</span></div>
+                        <div class="no-data-text">Erreur lors du chargement</div>
+                    </div>`;
             }
         }
 
@@ -1044,29 +1882,32 @@
                 const totalMontantPaye = parseFloat(response.totalMontantPaye || 0);
                 const resteAPayer = Math.max(0, response.resteAPayer || 0);
                 const progressGlobal = totalFrais > 0 ? Math.round((totalMontantPaye / totalFrais) * 100) : 0;
+                const isComplete = progressGlobal >= 100;
 
                 const summary = document.getElementById('fraisSummary');
                 summary.innerHTML = `
-                    <h4><span class="material-icons">account_balance</span> Récapitulatif</h4>
-                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin:16px 0;">
-                        <div style="flex:1; min-width:120px; text-align:center;">
-                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant, #666); margin-bottom:4px;">Total</div>
-                            <div style="font-size:1.3rem; font-weight:700;">${formatCurrency(totalFrais)}</div>
+                    <div class="p-stat-cards">
+                        <div class="p-stat-card">
+                            <div class="p-stat-card-icon ic-blue"><span class="material-icons">account_balance_wallet</span></div>
+                            <div class="p-stat-card-label">Total des frais</div>
+                            <div class="p-stat-card-value">${formatCurrency(totalFrais)}</div>
                         </div>
-                        <div style="flex:1; min-width:120px; text-align:center;">
-                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant, #666); margin-bottom:4px;">Payé</div>
-                            <div style="font-size:1.3rem; font-weight:700; color:var(--md-sys-color-primary, #1976d2);">${formatCurrency(totalMontantPaye)}</div>
+                        <div class="p-stat-card">
+                            <div class="p-stat-card-icon ic-green"><span class="material-icons">check_circle</span></div>
+                            <div class="p-stat-card-label">Montant payé</div>
+                            <div class="p-stat-card-value" style="color:var(--md-sys-color-success);">${formatCurrency(totalMontantPaye)}</div>
                         </div>
-                        <div style="flex:1; min-width:120px; text-align:center;">
-                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant, #666); margin-bottom:4px;">Reste</div>
-                            <div style="font-size:1.3rem; font-weight:700; color:${resteAPayer > 0 ? 'var(--md-sys-color-error, #f44336)' : 'var(--md-sys-color-primary, #1976d2)'};">${formatCurrency(resteAPayer)}</div>
+                        <div class="p-stat-card">
+                            <div class="p-stat-card-icon ${resteAPayer > 0 ? 'ic-red' : 'ic-green'}"><span class="material-icons">${resteAPayer > 0 ? 'warning' : 'done_all'}</span></div>
+                            <div class="p-stat-card-label">Reste à payer</div>
+                            <div class="p-stat-card-value" style="color:${resteAPayer > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)'};">${formatCurrency(resteAPayer)}</div>
                         </div>
                     </div>
                     <div class="frais-progress">
                         <div class="progress-bar">
-                            <div class="progress-bar-fill" style="width: ${progressGlobal}%"></div>
+                            <div class="progress-bar-fill ${isComplete ? 'complete' : ''}" style="width: ${Math.min(progressGlobal, 100)}%"></div>
                         </div>
-                        <div style="text-align:center; font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666); margin-top:6px;">${progressGlobal}% payé</div>
+                        <div style="text-align:center;font-size:13px;font-weight:600;color:var(--md-sys-color-primary);margin-top:8px;">${progressGlobal}% payé</div>
                     </div>
                 `;
 
@@ -1077,22 +1918,29 @@
                     const reste = Math.max(0, total - montantPaye);
                     const progressPercent = total > 0 ? Math.round((montantPaye / total) * 100) : 0;
                     const paiements = enfant.paiements || [];
+                    const isEnfantComplete = progressPercent >= 100;
 
                     let paiementsHtml = '';
                     if (paiements.length > 0) {
                         paiementsHtml = `
-                            <div style="margin-top:12px;">
-                                <div style="font-weight:600; margin-bottom:6px; font-size:0.9rem;">Historique des paiements</div>
+                            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--md-sys-color-outline-variant);">
+                                <div style="font-weight:600;margin-bottom:10px;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-primary);">receipt</span>
+                                    Historique des paiements (${paiements.length})
+                                </div>
                                 ${paiements.sort((a, b) => new Date(b.date) - new Date(a.date)).map(p => `
-                                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--md-sys-color-surface-container, #f5f5f5); border-radius:8px; margin-bottom:4px; font-size:0.85rem;">
-                                        <div>
-                                            <strong>${formatCurrency(p.montant)}</strong>
-                                            <span style="color:var(--md-sys-color-on-surface-variant, #666); margin-left:8px;">
-                                                ${new Date(p.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}
-                                            </span>
-                                            ${p.note ? `<span style="color:var(--md-sys-color-on-surface-variant, #666);"> — <em>${p.note}</em></span>` : ''}
+                                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;margin-bottom:6px;font-size:13px;border:1px solid var(--md-sys-color-outline-variant);">
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            <div class="info-card-icon ic-green" style="width:28px;height:28px;"><span class="material-icons" style="font-size:14px;">check</span></div>
+                                            <div>
+                                                <strong>${formatCurrency(p.montant)}</strong>
+                                                <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);">
+                                                    ${new Date(p.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}
+                                                    ${p.note ? ` — ${p.note}` : ''}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span style="padding:3px 10px; border-radius:16px; font-size:0.75rem; font-weight:500; background:var(--md-sys-color-secondary-container, #e3f2fd); color:var(--md-sys-color-on-secondary-container, #1565c0);">
+                                        <span style="padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);">
                                             ${getMethodeLabel(p.methodePaiement)}
                                         </span>
                                     </div>
@@ -1102,22 +1950,36 @@
                     }
 
                     return `
-                        <div class="info-card" style="margin-bottom: 16px;">
-                            <h4><span class="material-icons">person</span> ${enfant.prenom} ${enfant.nom}</h4>
-                            <div style="display:flex; gap:12px; flex-wrap:wrap; margin:8px 0;">
-                                <div style="flex:1; min-width:100px;"><span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666);">Total</span><br><strong>${formatCurrency(total)}</strong></div>
-                                <div style="flex:1; min-width:100px;"><span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666);">Payé</span><br><strong style="color:var(--md-sys-color-primary, #1976d2);">${formatCurrency(montantPaye)}</strong></div>
-                                <div style="flex:1; min-width:100px;"><span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant, #666);">Reste</span><br><strong style="color:${reste > 0 ? 'var(--md-sys-color-error, #f44336)' : 'var(--md-sys-color-primary, #1976d2)'};">${formatCurrency(reste)}</strong></div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:8px; margin:8px 0;">
-                                <span class="material-icons" style="font-size:18px; color:${enfant.fraisValide ? 'var(--md-sys-color-primary, #1976d2)' : 'var(--md-sys-color-error, #f44336)'};">${enfant.fraisValide ? 'check_circle' : 'pending'}</span>
-                                <span style="font-size:0.9rem; font-weight:500;">${enfant.fraisValide ? 'Frais validés' : 'Paiement en cours'}</span>
+                        <div class="info-card" style="margin-bottom:16px;">
+                            <h4>
+                                <div class="info-card-icon ic-blue"><span class="material-icons">person</span></div>
+                                ${enfant.prenom} ${enfant.nom}
+                                <span style="margin-left:auto;">
+                                    <span class="status-badge ${enfant.fraisValide ? 'status-present' : 'status-retard'}">
+                                        <span class="material-icons" style="font-size:12px;">${enfant.fraisValide ? 'check_circle' : 'pending'}</span>
+                                        ${enfant.fraisValide ? 'Validés' : 'En cours'}
+                                    </span>
+                                </span>
+                            </h4>
+                            <div class="p-stat-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Total</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;">${formatCurrency(total)}</div>
+                                </div>
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Payé</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
+                                </div>
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Reste</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;color:${reste > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)'};">${formatCurrency(reste)}</div>
+                                </div>
                             </div>
                             <div class="frais-progress">
                                 <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                                    <div class="progress-bar-fill ${isEnfantComplete ? 'complete' : ''}" style="width: ${Math.min(progressPercent, 100)}%"></div>
                                 </div>
-                                <div style="text-align:center; font-size:0.8rem; color:var(--md-sys-color-on-surface-variant, #666); margin-top:4px;">${progressPercent}%</div>
+                                <div style="text-align:center;font-size:12px;font-weight:600;color:var(--md-sys-color-primary);margin-top:6px;">${progressPercent}%</div>
                             </div>
                             ${paiementsHtml}
                         </div>
@@ -1136,12 +1998,26 @@
                 const container = document.getElementById('actualitesList');
                 
                 if (actualites.length === 0) {
-                    container.innerHTML = '<p class="no-data">Aucune actualité</p>';
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="no-data-illustration"><span class="material-icons">newspaper</span></div>
+                            <div class="no-data-text">Aucune actualité pour le moment</div>
+                        </div>`;
                     return;
                 }
 
+                const getTypeIcon = (titre) => {
+                    const t = (titre || '').toLowerCase();
+                    if (t.includes('important') || t.includes('urgent')) return { icon: 'priority_high', color: 'ic-red' };
+                    if (t.includes('événement') || t.includes('fête') || t.includes('sortie')) return { icon: 'event', color: 'ic-purple' };
+                    if (t.includes('inscription') || t.includes('rentrée')) return { icon: 'school', color: 'ic-blue' };
+                    if (t.includes('résultat') || t.includes('examen')) return { icon: 'emoji_events', color: 'ic-orange' };
+                    return { icon: 'campaign', color: 'ic-green' };
+                };
+
                 container.innerHTML = actualites.map(actu => {
                     const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
+                    const typeInfo = getTypeIcon(actu.titre);
                     const getFileIcon = (type, name) => {
                         if (type && type.startsWith('image/')) return 'image';
                         if (name && name.match(/\.pdf$/i)) return 'picture_as_pdf';
@@ -1150,25 +2026,29 @@
                         return 'insert_drive_file';
                     };
                     const pjHtml = pj.length > 0 ? `
-                        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">
+                        <div class="p-actu-pj">
                             ${pj.map(f => `
-                                <a href="${f.url}" target="_blank" download="${f.nom}"
-                                   style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;
-                                          background:#f0f4ff;border-radius:16px;font-size:12px;color:#333;
-                                          text-decoration:none;border:1px solid #c5d0e8;">
-                                    <span class="material-icons" style="font-size:15px;color:#1e5aa8;">${getFileIcon(f.type, f.nom)}</span>
-                                    <span style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.nom}</span>
+                                <a href="${f.url}" target="_blank" download="${f.nom}" class="p-actu-pj-link">
+                                    <span class="material-icons" style="font-size:15px;">${getFileIcon(f.type, f.nom)}</span>
+                                    <span>${f.nom}</span>
                                 </a>`).join('')}
                         </div>` : '';
+                    const dateFormatted = new Date(actu.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'});
                     return `
-                    <div class="info-card" style="margin-bottom: 16px;">
-                        <h4>${actu.titre}</h4>
-                        <p>${actu.description}</p>
-                        ${pjHtml}
-                        <small style="color: #666;">
-                            ${new Date(actu.date).toLocaleDateString('fr-FR')}
-                            ${actu.auteurNom ? ` - ${actu.auteurNom}` : ''}
-                        </small>
+                    <div class="p-actu-item">
+                        <div class="p-actu-icon ${typeInfo.color}">
+                            <span class="material-icons">${typeInfo.icon}</span>
+                        </div>
+                        <div class="p-actu-body">
+                            <div class="p-actu-title">${actu.titre}</div>
+                            <div class="p-actu-desc">${actu.description}</div>
+                            ${pjHtml}
+                            <div class="p-actu-meta">
+                                <span class="material-icons" style="font-size:13px;">calendar_today</span>
+                                ${dateFormatted}
+                                ${actu.auteurNom ? `<span style="margin-left:12px;display:inline-flex;align-items:center;gap:3px;"><span class="material-icons" style="font-size:13px;">person</span>${actu.auteurNom}</span>` : ''}
+                            </div>
+                        </div>
                     </div>
                 `;}).join('');
 
@@ -1185,6 +2065,15 @@
                 document.getElementById('profilEmail').value = parentData.email || '';
                 document.getElementById('profilTel').value = parentData.tel || '';
                 document.getElementById('profilAdresse').value = parentData.adresse || '';
+                
+                // Populate profile header
+                const initials = ((parentData.prenom || '')[0] || '') + ((parentData.nom || '')[0] || '');
+                const avatarEl = document.getElementById('profilAvatar');
+                if (avatarEl) avatarEl.textContent = initials.toUpperCase();
+                const displayNameEl = document.getElementById('profilDisplayName');
+                if (displayNameEl) displayNameEl.textContent = `${parentData.prenom || ''} ${parentData.nom || ''}`;
+                const displayEmailEl = document.getElementById('profilDisplayEmail');
+                if (displayEmailEl) displayEmailEl.textContent = parentData.email || '';
             }
         }
 
@@ -1379,6 +2268,9 @@
                 badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
                 badge.style.display = unreadCount > 0 ? 'flex' : 'none';
             }
+            // Update welcome banner chip
+            const wcMessages = document.getElementById('wc-messages-count');
+            if (wcMessages) wcMessages.textContent = unreadCount;
         }
 
         function switchParentMessageView(view) {
@@ -1738,6 +2630,223 @@
             if (mimetype.includes('word') || mimetype.includes('document')) return 'description';
             if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('compressed')) return 'folder_zip';
             return 'insert_drive_file';
+        }
+
+        // ========== GESTION PHOTO ENFANT ==========
+        let pendingPhotoFile = null;
+        let pendingPhotoEnfantId = null;
+
+        function openChildPhotoEdit(enfantId, enfantName, currentPhoto) {
+            // Trigger file input
+            const input = document.getElementById(`photoInput-list-${enfantId}`) || document.getElementById(`photoInput-detail-${enfantId}`);
+            if (!input) return;
+            
+            // If child already has a photo, show options (change or delete)
+            if (currentPhoto) {
+                showPhotoOptionsModal(enfantId, enfantName, currentPhoto);
+            } else {
+                input.click();
+            }
+        }
+
+        function showPhotoOptionsModal(enfantId, enfantName, currentPhoto) {
+            // Remove existing modal if any
+            const existing = document.getElementById('photoPreviewOverlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'photoPreviewOverlay';
+            overlay.className = 'photo-preview-overlay active';
+            overlay.innerHTML = `
+                <div class="photo-preview-modal">
+                    <h3>Photo de ${enfantName}</h3>
+                    <img src="${currentPhoto}" alt="${enfantName}" class="photo-preview-img">
+                    <div class="photo-preview-actions">
+                        <button class="btn-cancel" onclick="closePhotoModal()">Annuler</button>
+                        <button class="btn-delete" onclick="deleteChildPhoto('${enfantId}')">
+                            <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">delete</span>Supprimer
+                        </button>
+                        <button class="btn-confirm" onclick="triggerPhotoInput('${enfantId}')">
+                            <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">photo_camera</span>Changer
+                        </button>
+                    </div>
+                </div>
+            `;
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closePhotoModal(); });
+            document.body.appendChild(overlay);
+        }
+
+        function triggerPhotoInput(enfantId) {
+            closePhotoModal();
+            const input = document.getElementById(`photoInput-list-${enfantId}`) || document.getElementById(`photoInput-detail-${enfantId}`);
+            if (input) input.click();
+        }
+
+        function previewChildPhoto(input, enfantId, enfantName) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Validate
+            if (!file.type.startsWith('image/')) {
+                alert('Veuillez sélectionner une image (JPG, PNG, etc.)');
+                input.value = '';
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('L\'image ne doit pas dépasser 5 Mo');
+                input.value = '';
+                return;
+            }
+
+            pendingPhotoFile = file;
+            pendingPhotoEnfantId = enfantId;
+
+            // Show preview modal
+            const existing = document.getElementById('photoPreviewOverlay');
+            if (existing) existing.remove();
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const overlay = document.createElement('div');
+                overlay.id = 'photoPreviewOverlay';
+                overlay.className = 'photo-preview-overlay active';
+                overlay.innerHTML = `
+                    <div class="photo-preview-modal">
+                        <h3>Nouvelle photo pour ${enfantName}</h3>
+                        <img src="${e.target.result}" alt="Prévisualisation" class="photo-preview-img">
+                        <div style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-bottom:16px;">
+                            ${file.name} — ${(file.size / 1024).toFixed(0)} Ko
+                        </div>
+                        <div class="photo-preview-actions">
+                            <button class="btn-cancel" onclick="cancelPhotoUpload()">Annuler</button>
+                            <button class="btn-confirm" onclick="confirmPhotoUpload()">
+                                <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">check</span>Confirmer
+                            </button>
+                        </div>
+                    </div>
+                `;
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) cancelPhotoUpload(); });
+                document.body.appendChild(overlay);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function cancelPhotoUpload() {
+            pendingPhotoFile = null;
+            pendingPhotoEnfantId = null;
+            // Reset file inputs
+            document.querySelectorAll('.child-photo-input').forEach(i => i.value = '');
+            closePhotoModal();
+        }
+
+        async function confirmPhotoUpload() {
+            if (!pendingPhotoFile || !pendingPhotoEnfantId) return;
+
+            const modal = document.querySelector('.photo-preview-modal');
+            const confirmBtn = modal.querySelector('.btn-confirm');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<span class="material-icons" style="font-size:16px;vertical-align:middle;animation:spin 1s linear infinite;">sync</span> Envoi...';
+            confirmBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('photo', pendingPhotoFile);
+                formData.append('enfantId', pendingPhotoEnfantId);
+
+                const result = await apiRequest('/api/eleves/profil', {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                // Update local data
+                const enfant = enfantsData.find(e => e.id === pendingPhotoEnfantId);
+                if (enfant && result.eleve) {
+                    enfant.photo = result.eleve.photo || null;
+                }
+
+                closePhotoModal();
+                pendingPhotoFile = null;
+                pendingPhotoEnfantId = null;
+                document.querySelectorAll('.child-photo-input').forEach(i => i.value = '');
+
+                // Refresh views
+                renderChildrenList();
+                if (selectedEnfantId) loadChildDetails(selectedEnfantId);
+
+                showToast('Photo mise à jour avec succès !', 'success');
+            } catch (error) {
+                console.error('Erreur upload photo:', error);
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+                showToast('Erreur lors de la mise à jour de la photo', 'error');
+            }
+        }
+
+        async function deleteChildPhoto(enfantId) {
+            const modal = document.querySelector('.photo-preview-modal');
+            const deleteBtn = modal.querySelector('.btn-delete');
+            deleteBtn.innerHTML = '<span class="material-icons" style="font-size:16px;vertical-align:middle;animation:spin 1s linear infinite;">sync</span> Suppression...';
+            deleteBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('enfantId', enfantId);
+                formData.append('deletePhoto', 'true');
+
+                await apiRequest('/api/eleves/profil', {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                // Update local data
+                const enfant = enfantsData.find(e => e.id === enfantId);
+                if (enfant) enfant.photo = null;
+
+                closePhotoModal();
+
+                // Refresh views
+                renderChildrenList();
+                if (selectedEnfantId) loadChildDetails(selectedEnfantId);
+
+                showToast('Photo supprimée', 'success');
+            } catch (error) {
+                console.error('Erreur suppression photo:', error);
+                deleteBtn.innerHTML = '<span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">delete</span>Supprimer';
+                deleteBtn.disabled = false;
+                showToast('Erreur lors de la suppression de la photo', 'error');
+            }
+        }
+
+        function closePhotoModal() {
+            const overlay = document.getElementById('photoPreviewOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.remove(), 250);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const existing = document.querySelector('.p-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'p-toast';
+            const bgColor = type === 'success' ? 'var(--md-sys-color-success, #4caf50)' : 
+                           type === 'error' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)';
+            toast.style.cssText = `
+                position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);
+                background:${bgColor};color:#fff;padding:14px 28px;border-radius:14px;
+                font-size:14px;font-weight:600;z-index:10000;box-shadow:0 8px 24px rgba(0,0,0,0.2);
+                display:flex;align-items:center;gap:8px;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            `;
+            const icon = type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info';
+            toast.innerHTML = `<span class="material-icons" style="font-size:20px;">${icon}</span>${message}`;
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => { toast.style.transform = 'translateX(-50%) translateY(0)'; });
+            setTimeout(() => {
+                toast.style.transform = 'translateX(-50%) translateY(80px)';
+                setTimeout(() => toast.remove(), 350);
+            }, 3000);
         }
     </script>
 </body>

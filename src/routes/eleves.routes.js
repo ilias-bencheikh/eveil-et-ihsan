@@ -10,7 +10,7 @@ const fs = require('fs');
 // Configuration multer pour l'upload de photos
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../../public/uploads'));
+        cb(null, path.join(__dirname, '../../public/uploads/profile'));
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -179,7 +179,7 @@ router.put('/profil', requireAuth, uploadMiddleware, async (req, res) => {
 
         const { email, tel, deletePhoto } = req.body;
         const deletePhotoValue = Array.isArray(deletePhoto) ? deletePhoto[0] : deletePhoto;
-        const photo = req.file ? `/uploads/${req.file.filename}` : null;
+        const photo = req.file ? `/uploads/profile/${req.file.filename}` : null;
         
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return res.status(400).json({ error: 'Email invalide' });
@@ -674,9 +674,31 @@ router.put('/:id', checkPermission('update'), async (req, res) => {
     }
 });
 
+// Fonction utilitaire : supprimer les parents orphelins (sans enfants)
+async function cleanupOrphanParents(parentIds) {
+    if (!parentIds || parentIds.length === 0) return [];
+    const deletedParents = [];
+    for (const parentId of parentIds) {
+        const remaining = await dbGet(db, 'SELECT COUNT(*) as count FROM eleve_parent WHERE parentId = ?', [parentId]);
+        if (remaining && remaining.count === 0) {
+            // Supprimer les sessions du parent
+            await dbRun(db, 'DELETE FROM sessions WHERE userId = ?', [parentId]).catch(() => {});
+            // Supprimer le parent
+            await dbRun(db, 'DELETE FROM parents WHERE id = ?', [parentId]);
+            deletedParents.push(parentId);
+            console.log(`Parent orphelin supprimé automatiquement: ${parentId}`);
+        }
+    }
+    return deletedParents;
+}
+
 // Supprimer un élève
 router.delete('/:id', checkPermission('delete'), async (req, res) => {
     try {
+        // Récupérer les parents liés avant suppression
+        const parentLinks = await dbAll(db, 'SELECT parentId FROM eleve_parent WHERE eleveId = ?', [req.params.id]);
+        const parentIds = parentLinks.map(l => l.parentId);
+
         // Supprimer les liaisons élève-parent
         await dbRun(db, 'DELETE FROM eleve_parent WHERE eleveId = ?', [req.params.id]);
         
@@ -686,8 +708,14 @@ router.delete('/:id', checkPermission('delete'), async (req, res) => {
         if (result.changes === 0) {
             return res.status(404).json({ message: 'Élève non trouvé' });
         }
+
+        // Supprimer les parents qui n'ont plus d'enfants
+        const deletedParents = await cleanupOrphanParents(parentIds);
         
-        res.json({ message: 'Élève supprimé' });
+        res.json({ 
+            message: 'Élève supprimé',
+            deletedParents: deletedParents.length > 0 ? deletedParents : undefined
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

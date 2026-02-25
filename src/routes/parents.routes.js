@@ -459,13 +459,32 @@ router.delete('/link/:linkId', checkPermission('delete'), async (req, res) => {
     const { linkId } = req.params;
     
     try {
-        const result = await dbRun(db, 'DELETE FROM eleve_parent WHERE id = ?', [linkId]);
-        
-        if (result.changes === 0) {
+        // Récupérer le parentId avant suppression du lien
+        const link = await dbGet(db, 'SELECT parentId FROM eleve_parent WHERE id = ?', [linkId]);
+        if (!link) {
             return res.status(404).json({ error: 'Liaison non trouvée' });
         }
+
+        await dbRun(db, 'DELETE FROM eleve_parent WHERE id = ?', [linkId]);
+
+        // Vérifier si le parent a encore des enfants
+        let parentDeleted = false;
+        const remaining = await dbGet(db, 'SELECT COUNT(*) as count FROM eleve_parent WHERE parentId = ?', [link.parentId]);
+        if (remaining && remaining.count === 0) {
+            // Supprimer les sessions du parent
+            await dbRun(db, 'DELETE FROM sessions WHERE userId = ?', [link.parentId]).catch(() => {});
+            // Supprimer le compte parent orphelin
+            await dbRun(db, 'DELETE FROM parents WHERE id = ?', [link.parentId]);
+            parentDeleted = true;
+            console.log(`Parent orphelin supprimé automatiquement: ${link.parentId}`);
+        }
         
-        res.json({ message: 'Liaison supprimée' });
+        res.json({ 
+            message: parentDeleted 
+                ? 'Liaison supprimée et compte parent supprimé (plus aucun enfant lié)' 
+                : 'Liaison supprimée',
+            parentDeleted
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
