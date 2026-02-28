@@ -256,6 +256,162 @@
         }
         .actu-pj-read-chip .material-icons { font-size: 16px; color: var(--md-sys-color-primary); }
 
+        /* ── Grille actualités ── */
+        #actualitesList {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+        @media (max-width: 960px) { #actualitesList { grid-template-columns: 1fr; } }
+
+        /* ── Cartes actualités enrichies ── */
+        .actu-card {
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--md-sys-color-surface-container-lowest);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07), 0 0 0 1px var(--md-sys-color-outline-variant);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
+            position: relative;
+        }
+        .actu-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+        }
+        .actu-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(30, 90, 168, 0.15), 0 0 0 1.5px var(--md-sys-color-primary); }
+        .actu-card-cover {
+            width: 100%; height: 200px;
+            object-fit: cover;
+            display: block;
+            background: var(--md-sys-color-surface-container);
+        }
+        .actu-card-cover-placeholder {
+            width: 100%; height: 0;
+        }
+        .actu-card-head {
+            padding: 20px 22px 14px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, rgba(247, 216, 255, 0.5) 100%);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .actu-card-title {
+            font-size: 17px; font-weight: 700;
+            color: var(--md-sys-color-on-surface);
+            margin: 0 0 10px; line-height: 1.35;
+        }
+        .actu-card-meta {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+        }
+        .actu-card-meta .material-icons { font-size: 13px; vertical-align: middle; }
+        .actu-meta-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 20px;
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+            font-size: 11px; font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .actu-meta-chip .material-icons { font-size: 13px; }
+        .actu-meta-chip-warning { background: var(--md-sys-color-warning-container); color: var(--md-sys-color-on-warning-container); border-color: var(--md-sys-color-warning); }
+        .actu-badge-new {
+            display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+            padding: 4px 10px; border-radius: 20px;
+            background: var(--md-sys-color-primary); color: white;
+            font-size: 11px; font-weight: 700; line-height: 1;
+            box-shadow: 0 2px 8px rgba(30, 90, 168, 0.4);
+            animation: pulseBadge 2.5s ease-in-out infinite;
+        }
+        @keyframes pulseBadge {
+            0%, 100% { box-shadow: 0 2px 8px rgba(30, 90, 168, 0.4); }
+            50% { box-shadow: 0 2px 18px rgba(30, 90, 168, 0.7); }
+        }
+        .actu-card-body { padding: 18px 22px 16px; }
+        .actu-card-desc {
+            font-size: 14px; line-height: 1.7;
+            color: var(--md-sys-color-on-surface);
+            white-space: pre-wrap; margin: 0 0 14px;
+        }
+        /* Galerie d'images */
+        .actu-img-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .actu-img-thumb {
+            position: relative; border-radius: 10px; overflow: hidden;
+            aspect-ratio: 1 / 1; background: var(--md-sys-color-surface-container);
+            cursor: pointer;
+        }
+        .actu-img-thumb img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.25s;
+        }
+        .actu-img-thumb:hover img { transform: scale(1.06); }
+        .actu-img-thumb a {
+            display: block; width: 100%; height: 100%;
+        }
+        /* Aperçu PDF */
+        .actu-pdf-preview {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            background: #fff3f3;
+            border: 1px solid #f5c6c6;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #c0392b;
+            transition: background 0.2s;
+            margin-bottom: 6px;
+        }
+        .actu-pdf-preview:hover { background: #fde8e8; }
+        .actu-pdf-preview .actu-pdf-icon {
+            width: 42px; height: 42px; border-radius: 8px;
+            background: #e74c3c; color: white;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-weight: 700; font-size: 11px;
+        }
+        .actu-pdf-preview .actu-pdf-icon .material-icons { font-size: 22px; }
+        .actu-pdf-preview .actu-pdf-name {
+            font-weight: 600; font-size: 13px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .actu-pdf-preview .actu-pdf-sub { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+        /* Aperçu Word/Excel */
+        .actu-file-doc  { background: #ebf5fb; border-color: #aad4ee; color: #1a5276; }
+        .actu-file-doc .actu-pdf-icon  { background: #2980b9; }
+        .actu-file-doc:hover { background: #d6eaf8; }
+        .actu-file-xls  { background: #eafaf1; border-color: #a9dfbf; color: #1e8449; }
+        .actu-file-xls .actu-pdf-icon  { background: #27ae60; }
+        .actu-file-xls:hover { background: #d5f5e3; }
+        .actu-file-zip  { background: #fdf5e6; border-color: #f9e4b7; color: #9a6b0a; }
+        .actu-file-zip .actu-pdf-icon  { background: #e67e22; }
+        .actu-file-zip:hover { background: #fdebd0; }
+        /* Zone pièces jointes dans la lecture */
+        .actu-pj-section {
+            margin-top: 16px; padding-top: 16px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+        .actu-pj-section-title {
+            font-size: 12px; font-weight: 600;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex; align-items: center; gap: 5px; margin-bottom: 10px;
+        }
+        /* Miniature dashboard actualités */
+        .db-news-thumb {
+            width: 56px; height: 56px; border-radius: 12px;
+            object-fit: cover; flex-shrink: 0;
+            border: 2px solid var(--md-sys-color-outline-variant);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .db-news-thumb-placeholder {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-tertiary-container));
+            color: var(--md-sys-color-on-primary-container);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(30, 90, 168, 0.18);
+        }
+
         .appel-save-btn:active {
             transform: translateY(0);
         }
@@ -439,40 +595,263 @@
         }
         .db-btn-sm:hover { background: var(--md-sys-color-primary-container); }
 
-        /* Items d'actualités */
-        .db-news-item {
-            display: flex; align-items: flex-start; gap: 14px;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            transition: background 0.15s; cursor: pointer;
+        /* ========================================
+           CARROUSEL STYLE POWERPOINT
+           ======================================== */
+        .ppt-widget-card {
+            padding: 0 !important;
+            overflow: hidden;
+            border-radius: 20px !important;
         }
-        .db-news-item:last-child { border-bottom: none; }
-        .db-news-item:hover { background: var(--md-sys-color-surface-container-low); }
-        .db-news-icon {
-            width: 44px; height: 44px; border-radius: 12px;
+
+        .ppt-carousel {
+            position: relative;
+            width: 100%;
+            height: 400px;
             background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            border-radius: 20px;
+            overflow: hidden;
+            user-select: none;
         }
-        .db-news-icon .material-icons { font-size: 22px; }
-        .db-news-body { flex: 1; min-width: 0; }
-        .db-news-title {
-            font-weight: 500; font-size: 14px;
-            color: var(--md-sys-color-on-surface);
-            margin-bottom: 4px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+
+        /* ── Diapositive ── */
+        .ppt-slide {
+            position: absolute; inset: 0;
+            opacity: 0;
+            transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(60px) scale(0.97);
+            pointer-events: none;
         }
-        .db-news-desc {
-            font-size: 12px; color: var(--md-sys-color-on-surface-variant);
-            line-height: 1.5;
+        .ppt-slide.active {
+            opacity: 1; transform: translateX(0) scale(1); pointer-events: auto;
+        }
+        .ppt-slide.exit-left {
+            opacity: 0; transform: translateX(-60px) scale(0.97); pointer-events: none;
+        }
+
+        /* Image de fond */
+        .ppt-slide-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            transition: transform 8s ease;
+        }
+        .ppt-slide.active .ppt-slide-bg { transform: scale(1.06); }
+
+        /* Overlay dégradé */
+        .ppt-slide-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(5, 15, 40, 0.25) 0%,
+                rgba(5, 15, 40, 0.55) 45%,
+                rgba(5, 15, 40, 0.93) 100%
+            );
+        }
+
+        /* Bandeau couleur en haut */
+        .ppt-slide-topbar {
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+        }
+
+        /* Contenu texte */
+        .ppt-slide-content {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 14px 18px 42px;
+        }
+
+        .ppt-slide-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.14); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.22);
+            color: white; padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+            margin-bottom: 7px;
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .ppt-slide-badge .material-icons { font-size: 13px; }
+
+        .ppt-slide-title {
+            font-size: 15px; font-weight: 700; color: white;
+            line-height: 1.3; margin: 0 0 5px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
             display: -webkit-box;
             -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
-        .db-news-time { font-size: 11px; color: var(--md-sys-color-on-surface-variant); margin-top: 5px; }
+
+        .ppt-slide-desc {
+            font-size: 12px; color: rgba(255,255,255,0.82); line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+        }
+
+        .ppt-slide-meta {
+            display: flex; align-items: center; gap: 8px; margin-top: 7px;
+        }
+        .ppt-meta-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(255,255,255,0.12); backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.9); padding: 2px 9px; border-radius: 20px;
+            font-size: 11px; font-weight: 500;
+        }
+        .ppt-meta-pill .material-icons { font-size: 12px; }
+
+        /* Bouton "Voir tout" flottant */
+        .ppt-see-all-btn {
+            position: absolute; top: 14px; right: 14px;
+            display: inline-flex; align-items: center; gap: 5px;
+            background: white;
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-primary); padding: 6px 13px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .ppt-see-all-btn:hover { background: var(--md-sys-color-primary-container); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,90,168,0.18); color: var(--md-sys-color-primary); }
+        .ppt-see-all-btn .material-icons { font-size: 15px; }
+
+        /* Titre du widget flottant en haut gauche */
+        .ppt-widget-header {
+            position: absolute; top: 14px; left: 16px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--md-sys-color-primary);
+            color: white; padding: 6px 14px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; pointer-events: none;
+            box-shadow: 0 2px 8px rgba(30, 90, 168, 0.3);
+        }
+        .ppt-widget-header .material-icons { font-size: 15px; opacity: 0.9; }
+
+        /* ── Flèches de navigation ── */
+        .ppt-nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.90); backdrop-filter: blur(6px);
+            border: 1.5px solid var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-primary); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; font-family: inherit;
+            opacity: 0; transition: opacity 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(30,90,168,0.18);
+        }
+        .ppt-carousel:hover .ppt-nav-btn { opacity: 1; }
+        .ppt-nav-btn:hover { background: white; transform: translateY(-50%) scale(1.1); box-shadow: 0 4px 14px rgba(30,90,168,0.28); }
+        .ppt-nav-btn .material-icons { font-size: 22px; }
+        .ppt-nav-prev { left: 12px; }
+        .ppt-nav-next { right: 12px; }
+        .ppt-nav-btn:disabled { opacity: 0 !important; pointer-events: none; }
+
+        /* ── Barre de progression + dots ── */
+        .ppt-bottom-bar {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 7px 16px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            z-index: 10;
+        }
+        .ppt-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,0.85); border: 1.5px solid rgba(30,90,168,0.22); padding: 0;
+            cursor: pointer; transition: all 0.3s; font-family: inherit;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .ppt-dot.active {
+            width: 24px; border-radius: 4px;
+            background: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 8px rgba(30,90,168,0.4);
+        }
+        .ppt-dot:hover:not(.active) { background: white; transform: scale(1.3); border-color: var(--md-sys-color-primary); }
+
+        /* Barre de progression auto-play */
+        .ppt-progress-bar {
+            position: absolute; bottom: 0; left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+            border-radius: 0 2px 2px 0;
+            width: 0%;
+            transition: none;
+            z-index: 11;
+        }
+        .ppt-progress-bar.running {
+            transition: width linear;
+        }
+
+        /* Slide fond clair : texte foncé */
+        .ppt-slide.ppt-light .ppt-slide-title {
+            color: var(--md-sys-color-on-primary-container);
+            text-shadow: none;
+        }
+        .ppt-slide.ppt-light .ppt-slide-desc {
+            color: var(--md-sys-color-on-surface-variant);
+            text-shadow: none;
+        }
+        .ppt-slide.ppt-light .ppt-slide-badge {
+            background: rgba(30, 90, 168, 0.12);
+            border-color: rgba(30, 90, 168, 0.25);
+            color: var(--md-sys-color-primary);
+        }
+        .ppt-slide.ppt-light .ppt-meta-pill {
+            background: rgba(30, 90, 168, 0.1);
+            border-color: rgba(30, 90, 168, 0.2);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        .ppt-slide.ppt-light .ppt-slide-topbar {
+            background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+        }
+
+        /* ── No news / Error state ── */
+        .ppt-empty-state {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 14px;
+            color: var(--md-sys-color-on-primary-container);
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-secondary-container) 100%);
+        }
+        .ppt-empty-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: rgba(30,90,168,0.12); border: 1.5px solid rgba(30,90,168,0.22);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ppt-empty-icon .material-icons { font-size: 32px; color: var(--md-sys-color-primary); }
+        .ppt-empty-state p { margin: 0; font-size: 14px; font-weight: 600; color: var(--md-sys-color-on-primary-container); }
+        .ppt-empty-state span { font-size: 12px; opacity: 0.7; text-align: center; color: var(--md-sys-color-on-primary-container); }
+
+        /* ── Skeleton ── */
+        @keyframes pptShimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        .ppt-slide-skeleton .ppt-slide-bg {
+            background: linear-gradient(90deg, var(--md-sys-color-primary-container) 25%, var(--md-sys-color-tertiary-container) 50%, var(--md-sys-color-primary-container) 75%);
+            background-size: 800px 100%;
+            animation: pptShimmer 1.6s infinite linear;
+        }
+        .ppt-skeleton-badge, .ppt-skeleton-title,
+        .ppt-skeleton-desc, .ppt-skeleton-meta {
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
+            background-size: 800px 100%;
+            animation: pptShimmer 1.6s infinite linear;
+            margin-bottom: 10px;
+        }
+        .ppt-skeleton-badge  { width: 90px;  height: 22px; border-radius: 20px; }
+        .ppt-skeleton-title  { width: 75%;   height: 22px; }
+        .ppt-skeleton-desc   { width: 90%;   height: 14px; margin-bottom: 6px; }
+        .ppt-skeleton-meta   { width: 50%;   height: 20px; border-radius: 20px; }
+
+        /* Legacy – conservé pour compat (caché si PPT actif) */
+        .db-news-item { display: none; }
+        .db-news-icon, .db-news-body, .db-news-title,
+        .db-news-desc, .db-news-time { display: none; }
 
         /* Actions rapides v2 */
-        .db-quick-actions-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .db-quick-actions-v2 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+        @media (max-width: 900px) { .db-quick-actions-v2 { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 480px) { .db-quick-actions-v2 { grid-template-columns: repeat(2, 1fr); } }
         .db-qa-btn {
             display: flex; flex-direction: column; align-items: center; gap: 6px;
             padding: 14px 8px; border: none; border-radius: 12px;
@@ -497,18 +876,15 @@
             border-radius: 50px; font-size: 11px; font-weight: 600;
         }
 
-        /* Grille de messages (3 colonnes) */
-        .db-messages-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+        /* Grille de messages (1 colonne – ligne par ligne) */
+        .db-messages-grid { display: flex; flex-direction: column; }
         .db-msg-item {
             display: flex; align-items: flex-start; gap: 12px;
-            padding: 16px 18px;
-            border-right: 1px solid var(--md-sys-color-outline-variant);
+            padding: 14px 18px;
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
             transition: background 0.15s; cursor: pointer;
         }
-        .db-msg-item:nth-child(3n) { border-right: none; }
-        .db-msg-item:last-child,
-        .db-msg-item:nth-last-child(-n+3):nth-child(3n+1) ~ .db-msg-item { border-bottom: none; }
+        .db-msg-item:last-child { border-bottom: none; }
         .db-msg-item:hover { background: var(--md-sys-color-surface-container-low); }
         .db-msg-item.unread { background: rgba(30, 90, 168, 0.06); }
         .db-msg-avatar {
@@ -528,15 +904,12 @@
         @media (max-width: 1200px) {
             .db-content-grid { grid-template-columns: 1fr; }
             .db-col-full { grid-column: 1; }
-            .db-messages-grid { grid-template-columns: repeat(2, 1fr); }
-            .db-msg-item:nth-child(3n) { border-right: 1px solid var(--md-sys-color-outline-variant); }
-            .db-msg-item:nth-child(2n) { border-right: none; }
+            .db-messages-grid { flex-direction: column; }
         }
         @media (max-width: 768px) {
             .db-welcome-banner { padding: 20px; }
             .db-quick-actions-v2 { grid-template-columns: repeat(3, 1fr); }
-            .db-messages-grid { grid-template-columns: 1fr; }
-            .db-msg-item { border-right: none; }
+            .db-messages-grid { flex-direction: column; }
         }
     </style>
 </head>
@@ -713,25 +1086,43 @@
                     <!-- ✦ Contenu principal : Actualités + Actions rapides ✦ -->
                     <div class="db-content-grid">
 
-                        <!-- Dernières actualités -->
-                        <div class="widget-card">
+                        <!-- Dernières actualités – Carrousel -->
+                        <div class="widget-card ppt-widget-card">
+                            <div id="recentActualitesList" class="ppt-carousel">
+                                <!-- Skeleton chargement -->
+                                <div class="ppt-slide ppt-slide-skeleton">
+                                    <div class="ppt-slide-bg"></div>
+                                    <div class="ppt-slide-overlay"></div>
+                                    <div class="ppt-slide-content">
+                                        <div class="ppt-skeleton-badge"></div>
+                                        <div class="ppt-skeleton-title"></div>
+                                        <div class="ppt-skeleton-desc"></div>
+                                        <div class="ppt-skeleton-meta"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Derniers messages (colonne 2, admin seulement) -->
+                        <div class="widget-card" id="messagesWidget" style="display:none;">
                             <div class="widget-card-header">
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="db-card-icon db-icon-news"><span class="material-icons">newspaper</span></div>
-                                    <h3 class="widget-card-title">Dernières actualités</h3>
+                                    <div class="db-card-icon db-icon-messages"><span class="material-icons">mail</span></div>
+                                    <h3 class="widget-card-title">Derniers messages reçus</h3>
+                                    <span class="db-unread-badge" id="dbUnreadBadge" style="display:none;">0</span>
                                 </div>
-                                <button class="db-btn-sm" onclick="switchTab('actualites')">
+                                <button class="db-btn-sm" onclick="switchTab('messagerie')">
                                     <span>Voir tout</span>
                                     <span class="material-icons" style="font-size:18px;">arrow_forward</span>
                                 </button>
                             </div>
                             <div class="widget-card-content" style="padding:0;">
-                                <div id="recentActualitesList">
-                                    <div class="db-news-item">
-                                        <div class="db-news-icon"><span class="material-icons">newspaper</span></div>
-                                        <div class="db-news-body">
-                                            <div class="db-news-title">Chargement des actualités...</div>
-                                            <div class="db-news-desc">Récupération en cours</div>
+                                <div id="recentMessagesList" class="db-messages-grid">
+                                    <div class="db-msg-item">
+                                        <div class="db-msg-avatar"><span class="material-icons" style="font-size:20px;">mail</span></div>
+                                        <div class="db-msg-body">
+                                            <div class="db-msg-sender">Chargement...</div>
+                                            <div class="db-msg-preview">Récupération des messages en cours</div>
                                         </div>
                                     </div>
                                 </div>
@@ -739,7 +1130,7 @@
                         </div>
 
                         <!-- Actions rapides -->
-                        <div class="widget-card">
+                        <div class="widget-card db-col-full">
                             <div class="widget-card-header">
                                 <div style="display:flex;align-items:center;gap:10px;">
                                     <div class="db-card-icon db-icon-actions"><span class="material-icons">bolt</span></div>
@@ -772,32 +1163,6 @@
                                         <span class="material-icons">event_busy</span>
                                         <span>Absences</span>
                                     </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Derniers messages (pleine largeur) -->
-                        <div class="widget-card db-col-full" id="messagesWidget" style="display:none;">
-                            <div class="widget-card-header">
-                                <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="db-card-icon db-icon-messages"><span class="material-icons">mail</span></div>
-                                    <h3 class="widget-card-title">Derniers messages reçus</h3>
-                                    <span class="db-unread-badge" id="dbUnreadBadge" style="display:none;">0</span>
-                                </div>
-                                <button class="db-btn-sm" onclick="switchTab('messagerie')">
-                                    <span>Voir tout</span>
-                                    <span class="material-icons" style="font-size:18px;">arrow_forward</span>
-                                </button>
-                            </div>
-                            <div class="widget-card-content" style="padding:0;">
-                                <div id="recentMessagesList" class="db-messages-grid">
-                                    <div class="db-msg-item">
-                                        <div class="db-msg-avatar"><span class="material-icons" style="font-size:20px;">mail</span></div>
-                                        <div class="db-msg-body">
-                                            <div class="db-msg-sender">Chargement...</div>
-                                            <div class="db-msg-preview">Récupération des messages en cours</div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1806,7 +2171,13 @@
                     <div class="widget-card" id="inscriptionsListCard">
                         <div class="widget-card-header">
                             <h3 class="widget-card-title">Dossiers d'inscription en attente</h3>
-                            <div class="widget-card-actions">
+                            <div class="widget-card-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="md-btn md-btn-outlined" onclick="showNouvelleAnneeConfirm()" style="color: var(--md-sys-color-tertiary); border-color: var(--md-sys-color-tertiary);">
+                                    <span class="material-icons">calendar_today</span> Nouvelle année scolaire
+                                </button>
+                                <button class="md-btn md-btn-tonal" onclick="showReinscriptionForm()">
+                                    <span class="material-icons">autorenew</span> Réinscription
+                                </button>
                                 <button class="md-btn md-btn-filled" onclick="showInscriptionForm()">
                                     <span class="material-icons">add</span> Nouvelle inscription
                                 </button>
@@ -1814,6 +2185,119 @@
                         </div>
                         <div class="widget-card-content">
                             <div id="inscriptionsList" class="md-grid md-grid-auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de réinscription (caché par défaut) -->
+                    <div class="widget-card" id="reinscriptionFormCard" style="display: none;">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title" id="reinscriptionFormTitle">
+                                <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">autorenew</span>
+                                Réinscription
+                            </h3>
+                            <button class="md-btn md-btn-text" onclick="hideReinscriptionForm()">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+                        <div class="widget-card-content">
+
+                            <!-- Stepper réinscription -->
+                            <div class="md-stepper" id="reinscriptionStepper">
+                                <div class="md-stepper-step active" data-step="1">
+                                    <div class="md-stepper-indicator" onclick="goToReinscriptionStep(1)">
+                                        <div class="md-stepper-number">1</div>
+                                        <div class="md-stepper-label">Année</div>
+                                    </div>
+                                </div>
+                                <div class="md-stepper-connector"></div>
+                                <div class="md-stepper-step" data-step="2">
+                                    <div class="md-stepper-indicator" onclick="goToReinscriptionStep(2)">
+                                        <div class="md-stepper-number">2</div>
+                                        <div class="md-stepper-label">Élève(s)</div>
+                                    </div>
+                                </div>
+                                <div class="md-stepper-connector"></div>
+                                <div class="md-stepper-step" data-step="3">
+                                    <div class="md-stepper-indicator" onclick="goToReinscriptionStep(3)">
+                                        <div class="md-stepper-number">3</div>
+                                        <div class="md-stepper-label">Récap</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 1 : Sélection année scolaire et recherche élève -->
+                            <div class="reinscription-step active" id="reinscriptionStep1">
+                                <h4 style="margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">calendar_today</span>
+                                    Nouvelle année scolaire
+                                </h4>
+                                <p style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
+                                    Sélectionnez l'année scolaire de réinscription puis recherchez un élève ou une famille à réinscrire.
+                                </p>
+
+                                <div class="md-text-field" style="margin-bottom: 24px; max-width: 300px;">
+                                    <div class="md-text-field-container">
+                                        <select id="reinsc_anneeScolaire" class="md-text-field-input" style="padding: 16px 12px;"></select>
+                                        <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Année scolaire *</label>
+                                    </div>
+                                </div>
+
+                                <!-- Recherche élève -->
+                                <div style="padding: 20px; background: var(--md-sys-color-surface-container); border-radius: 16px;">
+                                    <h5 style="margin-bottom: 12px; color: var(--md-sys-color-on-surface); display: flex; align-items: center; gap: 8px;">
+                                        <span class="material-icons">search</span> Rechercher un élève ou une famille
+                                    </h5>
+                                    <div class="md-text-field" style="margin-bottom: 16px;">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="reinscSearchInput" class="md-text-field-input" placeholder=" " oninput="searchElevesForReinscription()">
+                                            <label class="md-text-field-label">Nom ou prénom...</label>
+                                        </div>
+                                    </div>
+                                    <div id="reinscSearchResults" style="max-height: 400px; overflow-y: auto;"></div>
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                                    <button class="md-btn md-btn-filled" onclick="nextReinscriptionStep()" id="reinscNextStep1Btn" disabled>
+                                        Suivant <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 2 : Modifier informations élève -->
+                            <div class="reinscription-step" id="reinscriptionStep2">
+                                <div id="reinscriptionFormContent"></div>
+
+                                <div style="display: flex; gap: 16px; justify-content: space-between; margin-top: 24px;">
+                                    <button class="md-btn md-btn-outlined" onclick="prevReinscriptionStep()">
+                                        <span class="material-icons">arrow_back</span> Précédent
+                                    </button>
+                                    <button class="md-btn md-btn-filled" onclick="nextReinscriptionStep()">
+                                        Suivant <span class="material-icons">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 3 : Récapitulatif -->
+                            <div class="reinscription-step" id="reinscriptionStep3">
+                                <h4 style="margin-bottom: 8px; color: var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">fact_check</span>
+                                    Récapitulatif de la réinscription
+                                </h4>
+                                <p style="margin-bottom: 20px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
+                                    Vérifiez les informations avant de valider.
+                                </p>
+                                <div id="reinscriptionRecap"></div>
+
+                                <div style="display: flex; gap: 16px; justify-content: space-between; margin-top: 24px;">
+                                    <button class="md-btn md-btn-outlined" onclick="prevReinscriptionStep()">
+                                        <span class="material-icons">arrow_back</span> Précédent
+                                    </button>
+                                    <button class="md-btn md-btn-filled" onclick="submitReinscription()" style="min-width: 200px;" id="reinscSubmitBtn">
+                                        <span class="material-icons">check_circle</span> Valider la réinscription
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -2240,50 +2724,167 @@
             }
         }
 
+        /* ── Carrousel PPT : état global ── */
+        let _pptSlides     = [];
+        let _pptIndex      = 0;
+        let _pptTimer      = null;
+        let _pptProgressId = null;
+        const PPT_DELAY    = 5000; // ms par diapositive
+
         async function loadRecentActualites() {
+            const container = document.getElementById('recentActualitesList');
             try {
                 const response = await fetch(`${API_URL}/actualites`, { headers: getHeaders() });
                 if (!response.ok) throw new Error('Erreur chargement actualités');
-
                 const actualites = await response.json();
-                const recentActualites = actualites.slice(0, 5);
-
-                const actualitesList = document.getElementById('recentActualitesList');
-
-                if (recentActualites.length > 0) {
-                    actualitesList.innerHTML = recentActualites.map(actu => `
-                        <div class="db-news-item" onclick="switchTab('actualites')">
-                            <div class="db-news-icon"><span class="material-icons">newspaper</span></div>
-                            <div class="db-news-body">
-                                <div class="db-news-title">${actu.titre}</div>
-                                <div class="db-news-desc">${actu.description || ''}</div>
-                                <div class="db-news-time">${formatActualiteDate(actu.date)}</div>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    actualitesList.innerHTML = `
-                        <div class="db-news-item">
-                            <div class="db-news-icon"><span class="material-icons">newspaper</span></div>
-                            <div class="db-news-body">
-                                <div class="db-news-title">Aucune actualité récente</div>
-                                <div class="db-news-desc">Publiez votre première actualité depuis l'onglet Actualités.</div>
-                            </div>
-                        </div>
-                    `;
-                }
+                _pptSlides = actualites.slice(0, 8);
+                _buildPptCarousel(container);
             } catch (error) {
                 console.error('Erreur chargement actualités:', error);
-                const actualitesList = document.getElementById('recentActualitesList');
-                actualitesList.innerHTML = `
-                    <div class="db-news-item">
-                        <div class="db-news-icon" style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);"><span class="material-icons">error</span></div>
-                        <div class="db-news-body">
-                            <div class="db-news-title">Erreur de chargement</div>
-                            <div class="db-news-desc">Impossible de charger les actualités.</div>
+                container.innerHTML = `
+                    <div class="ppt-empty-state" style="background:linear-gradient(135deg,#ffeaea 0%,var(--md-sys-color-secondary-container) 100%);color:var(--md-sys-color-on-primary-container);">
+                        <div class="ppt-empty-icon" style="background:rgba(186,26,26,0.1);border:1.5px solid rgba(186,26,26,0.25);">
+                            <span class="material-icons" style="color:#b91c1c;">wifi_off</span>
+                        </div>
+                        <p style="color:#7f1d1d;">Connexion impossible</p>
+                        <span style="color:#7f1d1d;">Vérifiez votre connexion et rechargez la page</span>
+                    </div>`;
+            }
+        }
+
+        function _buildPptCarousel(container) {
+            if (!_pptSlides.length) {
+                container.innerHTML = `<div class="ppt-empty-state">
+                        <div class="ppt-empty-icon"><span class="material-icons">newspaper</span></div>
+                        <p>Aucune actualité</p>
+                        <span>Publiez votre première actualité<br>depuis l'onglet Actualités</span>
+                    </div>`;
+                return;
+            }
+
+            // Couleurs de fond basées sur les variables CSS du site
+            const cs = getComputedStyle(document.documentElement);
+            const clrPrimCont  = cs.getPropertyValue('--md-sys-color-primary-container').trim();
+            const clrSecCont   = cs.getPropertyValue('--md-sys-color-secondary-container').trim();
+            const clrTertCont  = cs.getPropertyValue('--md-sys-color-tertiary-container').trim();
+            const clrPrimary   = cs.getPropertyValue('--md-sys-color-primary').trim();
+            const bgPalette = [
+                `linear-gradient(135deg,${clrPrimCont} 0%,${clrSecCont} 100%)`,
+                `linear-gradient(135deg,${clrSecCont} 0%,${clrPrimCont} 100%)`,
+                `linear-gradient(135deg,${clrPrimCont} 0%,${clrTertCont} 100%)`,
+                `linear-gradient(135deg,${clrTertCont} 0%,${clrSecCont} 100%)`,
+                `linear-gradient(135deg,${clrSecCont} 0%,${clrTertCont} 60%,${clrPrimCont} 100%)`,
+            ];
+
+            const slidesHtml = _pptSlides.map((actu, i) => {
+                const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
+                const imgPj = pj.find(f => f.type && f.type.startsWith('image/'));
+                const bgStyle = imgPj
+                    ? `background-image:url('${imgPj.url}');`
+                    : `background:${bgPalette[i % bgPalette.length]};`;
+                const hasImg = !!imgPj;
+                const dateStr = formatActualiteDate(actu.date);
+                const isNew = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
+                const overlayStyle = hasImg
+                    ? ''
+                    : 'background:transparent';
+
+                return `
+                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasImg ? ' ppt-light' : ''}" data-index="${i}">
+                    <div class="ppt-slide-topbar"></div>
+                    <div class="ppt-slide-bg" style="${bgStyle}"></div>
+                    <div class="ppt-slide-overlay" style="${overlayStyle}"></div>
+                    <div class="ppt-slide-content">
+                        <div class="ppt-slide-badge">
+                            <span class="material-icons">campaign</span>
+                            ${isNew ? 'Nouveau · ' : ''}Actualité
+                        </div>
+                        <div class="ppt-slide-title">${actu.titre}</div>
+                        ${actu.description ? `<div class="ppt-slide-desc">${actu.description}</div>` : ''}
+                        <div class="ppt-slide-meta">
+                            <span class="ppt-meta-pill"><span class="material-icons">calendar_today</span> ${dateStr}</span>
+                            ${actu.auteurNom ? `<span class="ppt-meta-pill"><span class="material-icons">person</span> ${actu.auteurNom}</span>` : ''}
                         </div>
                     </div>
-                `;
+                </div>`;
+            }).join('');
+
+            const dotsHtml = _pptSlides.map((_, i) =>
+                `<button class="ppt-dot${i === 0 ? ' active' : ''}" onclick="_pptGoTo(${i})" aria-label="Diapositive ${i+1}"></button>`
+            ).join('');
+
+            container.innerHTML = `
+                ${slidesHtml}
+                <div class="ppt-widget-header"><span class="material-icons">newspaper</span> Dernières actualités</div>
+                <button class="ppt-see-all-btn" onclick="switchTab('actualites')">
+                    <span class="material-icons">open_in_new</span> Voir tout
+                </button>
+                ${_pptSlides.length > 1 ? `
+                <button class="ppt-nav-btn ppt-nav-prev" onclick="_pptPrev()" aria-label="Précédent">
+                    <span class="material-icons">chevron_left</span>
+                </button>
+                <button class="ppt-nav-btn ppt-nav-next" onclick="_pptNext()" aria-label="Suivant">
+                    <span class="material-icons">chevron_right</span>
+                </button>
+                <div class="ppt-bottom-bar">${dotsHtml}</div>
+                <div class="ppt-progress-bar" id="pptProgressBar"></div>
+                ` : ''}
+            `;
+
+            _pptIndex = 0;
+            if (_pptSlides.length > 1) _pptStartAuto();
+        }
+
+        function _pptGoTo(idx, dir = 'next') {
+            const slides = document.querySelectorAll('#recentActualitesList .ppt-slide');
+            const dots   = document.querySelectorAll('#recentActualitesList .ppt-dot');
+            if (!slides.length) return;
+
+            // Exit current
+            slides[_pptIndex].classList.remove('active');
+            if (dir === 'prev') slides[_pptIndex].style.transform = 'translateX(60px) scale(0.97)';
+            slides[_pptIndex].classList.add('exit-left');
+            setTimeout(() => {
+                slides[_pptIndex]?.classList.remove('exit-left');
+                slides[_pptIndex] && (slides[_pptIndex].style.transform = '');
+            }, 650);
+
+            if (dots[_pptIndex]) dots[_pptIndex].classList.remove('active');
+            _pptIndex = (idx + _pptSlides.length) % _pptSlides.length;
+
+            // Enter new
+            slides[_pptIndex].style.transform = dir === 'next'
+                ? 'translateX(60px) scale(0.97)' : 'translateX(-60px) scale(0.97)';
+            slides[_pptIndex].classList.add('active');
+            if (dots[_pptIndex]) dots[_pptIndex].classList.add('active');
+
+            if (_pptSlides.length > 1) { _pptResetProgress(); _pptStartAuto(); }
+        }
+
+        function _pptNext() { _pptGoTo(_pptIndex + 1, 'next'); }
+        function _pptPrev() { _pptGoTo(_pptIndex - 1, 'prev'); }
+
+        function _pptStartAuto() {
+            clearTimeout(_pptTimer);
+            _pptTimer = setTimeout(() => _pptNext(), PPT_DELAY);
+            _pptResetProgress();
+            const bar = document.getElementById('pptProgressBar');
+            if (bar) {
+                bar.classList.remove('running');
+                void bar.offsetWidth; // reflow
+                bar.style.width = '0%';
+                bar.classList.add('running');
+                bar.style.transition = `width ${PPT_DELAY}ms linear`;
+                bar.style.width = '100%';
+            }
+        }
+
+        function _pptResetProgress() {
+            const bar = document.getElementById('pptProgressBar');
+            if (bar) {
+                bar.classList.remove('running');
+                bar.style.transition = 'none';
+                bar.style.width = '0%';
             }
         }
 
@@ -2409,6 +3010,7 @@
                 case 'inscriptions': await loadInscriptions(); break;
                 case 'frais-admin': await adminFraisTabInit(); break;
                 case 'maintenance': await loadMaintenanceStatus(); break;
+                case 'dashboard': await loadDashboardData(); break;
             }
         }
 
@@ -2579,6 +3181,11 @@
                                       style="background:var(--md-sys-color-primary); color:white; display:flex; align-items:center; gap:4px;">
                                     <span class="material-icons" style="font-size:15px;">class</span> ${eleve.classe || 'Sans classe'}
                                 </span>
+                                ${eleve.anneeScolaire ? `
+                                <span class="md-chip md-chip-filter"
+                                      style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); display:flex; align-items:center; gap:4px;">
+                                    <span class="material-icons" style="font-size:15px;">calendar_today</span> ${eleve.anneeScolaire}
+                                </span>` : ''}
                                 ${eleve.fraisValide
                                     ? `<span class="md-chip md-chip-filter"
                                               style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; gap:4px;">
@@ -2633,8 +3240,15 @@
                                     <div class="fiche-info-value">${eleve.tel}</div>
                                 </div>
                             </div>` : ''}
-                            <div class="fiche-info-item"
-                                 style="border-left:3px solid ${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
+                            ${eleve.anneeScolaire ? `
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">calendar_today</span>
+                                <div>
+                                    <div class="fiche-info-label">Année scolaire</div>
+                                    <div class="fiche-info-value" style="color:var(--md-sys-color-secondary);font-weight:600;">${eleve.anneeScolaire}</div>
+                                </div>
+                            </div>` : ''}
+                            <div class="fiche-info-item">
                                 <span class="material-icons fiche-info-icon"
                                       style="color:${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">payments</span>
                                 <div>
@@ -5930,13 +6544,12 @@
             const search = (document.getElementById('composeSearchInput')?.value || '').toLowerCase();
             const listEl = document.getElementById('composeDestList');
             const filtered = allDestinataires.filter(d =>
-                !search || d.nom.toLowerCase().includes(search) || (d.role||'').toLowerCase().includes(search)
+                !search || d.nom.toLowerCase().includes(search) || (d.role||'').toLowerCase().includes(search) || (d.group||'').toLowerCase().includes(search)
             );
             if (filtered.length === 0) {
                 listEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
                 return;
             }
-            // Grouper par rôle
             const groups = {};
             filtered.forEach(d => {
                 const g = d.role || 'Autre';
@@ -6626,6 +7239,35 @@
         let inscriptionType = 'seul';
         let inscriptionEnfantCount = 1;
 
+        // Calculer l'année scolaire courante (ex: "2026-2027")
+        function getCurrentAnneeScolaire() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth(); // 0-indexed
+            // Si on est entre septembre et décembre, c'est l'année en cours - année suivante
+            // Sinon c'est l'année précédente - l'année en cours
+            if (month >= 8) { // Septembre = 8
+                return `${year}-${year + 1}`;
+            } else {
+                return `${year - 1}-${year}`;
+            }
+        }
+
+        // Générer les options d'année scolaire (année courante + 1 en avant, 2 en arrière)
+        function getAnneeScolaireOptions(selectedValue) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const currentAnnee = getCurrentAnneeScolaire();
+            const selected = selectedValue || currentAnnee;
+            
+            const options = [];
+            for (let y = year - 2; y <= year + 1; y++) {
+                const val = `${y}-${y + 1}`;
+                options.push(`<option value="${val}" ${val === selected ? 'selected' : ''}>${val}</option>`);
+            }
+            return options.join('');
+        }
+
         // Fonction pour calculer l'âge à partir de la date de naissance
         function calculateAge(birthDate) {
             if (!birthDate) return null;
@@ -7066,6 +7708,7 @@
                 const classe = field.querySelector('.enfant-classe').value || 'Non assigné';
                 const email = field.querySelector('.enfant-email')?.value.trim() || '';
                 const frais = field.querySelector('.enfant-frais')?.value || '0';
+                const anneeScolaire = field.querySelector('.enfant-anneeScolaire')?.value || getCurrentAnneeScolaire();
                 
                 html += `
                     <div class="fiche-section" style="margin-bottom: 12px;">
@@ -7075,7 +7718,7 @@
                             </div>
                             <div style="flex: 1;">
                                 <h5 style="margin: 0;">Élève ${idx + 1} — ${prenom} ${nom}</h5>
-                                <p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Classe: ${classe} ${email ? '| Email: ' + email : ''} | Frais: ${frais}€</p>
+                                <p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Année: ${anneeScolaire} | Classe: ${classe} ${email ? '| Email: ' + email : ''} | Frais: ${frais}€</p>
                             </div>
                         </div>
                     </div>
@@ -7286,7 +7929,7 @@
                         <div class="md-text-field">
                             <div class="md-text-field-container">
                                 <input type="date" class="md-text-field-input enfant-date" data-index="${index}" placeholder=" ">
-                                <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Date de naissance</label>
+                                <label class="md-text-field-label">Date de naissance</label>
                             </div>
                         </div>
                         <div class="md-text-field">
@@ -7323,6 +7966,12 @@
                                     <label class="md-text-field-label">Téléphone</label>
                                 </div>
                             </div>
+                            <div class="md-text-field full-width">
+                                <div class="md-text-field-container">
+                                    <input type="text" class="md-text-field-input enfant-adresse" data-index="${index}" placeholder=" ">
+                                    <label class="md-text-field-label">Adresse</label>
+                                </div>
+                            </div>
                         </div>
                         <p class="email-required-note" style="margin: 8px 0 0; font-size: 12px; color: var(--md-sys-color-error); display: none;">
                             <span class="material-icons" style="font-size: 14px; vertical-align: middle;">warning</span>
@@ -7330,12 +7979,20 @@
                         </p>
                     </div>
                     
-                    <!-- Frais -->
+                    <!-- Frais et année scolaire -->
                     <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
                         <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
-                            <span class="material-icons" style="font-size: 16px;">payments</span> Frais d'inscription
+                            <span class="material-icons" style="font-size: 16px;">payments</span> Frais d'inscription & Année scolaire
                         </div>
                         <div class="md-form-grid">
+                            <div class="md-text-field">
+                                <div class="md-text-field-container">
+                                    <select class="md-text-field-input enfant-anneeScolaire" data-index="${index}" style="padding: 12px;margin-top: 8px;">
+                                        ${getAnneeScolaireOptions()}
+                                    </select>
+                                    <label class="md-text-field-label">Année scolaire *</label>
+                                </div>
+                            </div>
                             <div class="md-text-field">
                                 <div class="md-text-field-container">
                                     <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="0">
@@ -7437,9 +8094,11 @@
                     const classe = field.querySelector('.enfant-classe').value;
                     const email = field.querySelector('.enfant-email')?.value.trim() || '';
                     const tel = field.querySelector('.enfant-tel')?.value.trim() || '';
+                    const adresse = field.querySelector('.enfant-adresse')?.value.trim() || '';
                     const fraisInscription = parseFloat(field.querySelector('.enfant-frais')?.value || 0) || 0;
                     const nbPaiements = parseInt(field.querySelector('.enfant-nbPaiements')?.value || '1', 10) || 1;
-                    enfants.push({ nom, prenom, dateNaissance, classe, email, tel, fraisInscription, nbPaiements });
+                    const anneeScolaire = field.querySelector('.enfant-anneeScolaire')?.value || getCurrentAnneeScolaire();
+                    enfants.push({ nom, prenom, dateNaissance, classe, email, tel, adresse, fraisInscription, nbPaiements, anneeScolaire });
                 }
                 
                 try {
@@ -7492,6 +8151,7 @@
                 const classe = field.querySelector('.enfant-classe').value;
                 const email = field.querySelector('.enfant-email')?.value.trim() || '';
                 const tel = field.querySelector('.enfant-tel')?.value.trim() || '';
+                const adresse = field.querySelector('.enfant-adresse')?.value.trim() || '';
                 
                 if (!hasParent1 && !email) {
                     showSnackbar(`L'email est obligatoire pour l'élève ${prenom} car aucun parent n'est renseigné`);
@@ -7500,8 +8160,9 @@
                 
                 const fraisInscription = parseFloat(field.querySelector('.enfant-frais')?.value || 0) || 0;
                 const nbPaiements = parseInt(field.querySelector('.enfant-nbPaiements')?.value || '1', 10) || 1;
+                const anneeScolaire = field.querySelector('.enfant-anneeScolaire')?.value || getCurrentAnneeScolaire();
                 
-                enfants.push({ nom, prenom, dateNaissance, classe, email, tel, fraisInscription, nbPaiements });
+                enfants.push({ nom, prenom, dateNaissance, classe, email, tel, adresse, fraisInscription, nbPaiements, anneeScolaire });
             }
             
             try {
@@ -7639,11 +8300,13 @@
                     if (dateInput && s.dateNaissance) dateInput.value = s.dateNaissance.split('T')[0];
                     if (classeSelect && s.classe) classeSelect.value = s.classe;
 
-                    // Frais d'inscription
+                    // Frais d'inscription et année scolaire
                     const fraisInput = field.querySelector('.enfant-frais');
                     if (fraisInput && s.fraisInscription != null) fraisInput.value = s.fraisInscription;
                     const nbPaiementsSelect = field.querySelector('.enfant-nbPaiements');
                     if (nbPaiementsSelect && s.nbPaiements) nbPaiementsSelect.value = s.nbPaiements;
+                    const anneeScolaireSelect = field.querySelector('.enfant-anneeScolaire');
+                    if (anneeScolaireSelect && s.anneeScolaire) anneeScolaireSelect.value = s.anneeScolaire;
 
                     if (s.email) {
                         const emailSection = field.querySelector('.enfant-email-section');
@@ -7748,6 +8411,756 @@
             hideInscriptionForm();
             await loadAllData();
             loadInscriptions();
+        }
+
+        // ==================== RÉINSCRIPTION ====================
+        let currentReinscriptionStep = 1;
+        let selectedReinscriptionEleve = null; // { allEleves: [...], selectedIds: Set, eleves: [...], parents: [...], isFamille: bool }
+
+        function showReinscriptionForm() {
+            document.getElementById('reinscriptionFormCard').style.display = 'block';
+            document.getElementById('inscriptionFormCard').style.display = 'none';
+            document.getElementById('inscriptionsListCard').style.display = 'none';
+            currentReinscriptionStep = 1;
+            selectedReinscriptionEleve = null;
+
+            // Populate année scolaire dropdown (default: next year)
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            let nextYear;
+            if (month >= 8) {
+                nextYear = `${year + 1}-${year + 2}`;
+            } else {
+                nextYear = `${year}-${year + 1}`;
+            }
+            const select = document.getElementById('reinsc_anneeScolaire');
+            let opts = '';
+            for (let y = year - 1; y <= year + 2; y++) {
+                const val = `${y}-${y + 1}`;
+                opts += `<option value="${val}" ${val === nextYear ? 'selected' : ''}>${val}</option>`;
+            }
+            select.innerHTML = opts;
+
+            // Reset
+            document.getElementById('reinscSearchInput').value = '';
+            document.getElementById('reinscSearchResults').innerHTML = '';
+            document.getElementById('reinscriptionFormContent').innerHTML = '';
+            document.getElementById('reinscriptionRecap').innerHTML = '';
+            document.getElementById('reinscNextStep1Btn').disabled = true;
+
+            updateReinscriptionStepperUI();
+        }
+
+        function hideReinscriptionForm() {
+            document.getElementById('reinscriptionFormCard').style.display = 'none';
+            document.getElementById('inscriptionsListCard').style.display = 'block';
+        }
+
+        // ===== NOUVELLE ANNÉE (reset classes) =====
+        function showNouvelleAnneeConfirm() {
+            const currentAnnee = getCurrentAnneeScolaire();
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            let nextYear;
+            if (month >= 8) {
+                nextYear = `${year + 1}-${year + 2}`;
+            } else {
+                nextYear = `${year}-${year + 1}`;
+            }
+
+            showDialog('Nouvelle année scolaire', `
+                <div style="text-align:center;padding:16px 0;">
+                    <span class="material-icons" style="font-size:48px;color:var(--md-sys-color-tertiary);margin-bottom:12px;">calendar_today</span>
+                    <h4 style="margin-bottom:8px;">Passer à la nouvelle année scolaire</h4>
+                    <p style="color:var(--md-sys-color-on-surface-variant);font-size:14px;margin-bottom:20px;">
+                        Cette action va <strong>retirer tous les élèves de leurs classes</strong> sans supprimer les classes elles-mêmes.
+                        Vous pourrez ensuite réinscrire les élèves dans leurs nouvelles classes.
+                    </p>
+                    <div style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);padding:12px 16px;border-radius:12px;font-size:13px;margin-bottom:16px;">
+                        <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px;">warning</span>
+                        Attention : cette action est irréversible.
+                    </div>
+                    <div class="md-text-field" style="max-width:250px;margin:0 auto;">
+                        <div class="md-text-field-container">
+                            <select id="nouvelleAnneeSelect" class="md-text-field-input" style="padding:16px 12px;">
+                                ${(() => {
+                                    let opts = '';
+                                    for (let y = year - 1; y <= year + 2; y++) {
+                                        const val = `${y}-${y + 1}`;
+                                        opts += `<option value="${val}" ${val === nextYear ? 'selected' : ''}>${val}</option>`;
+                                    }
+                                    return opts;
+                                })()}
+                            </select>
+                            <label class="md-text-field-label" style="top:-10px;font-size:12px;">Nouvelle année scolaire</label>
+                        </div>
+                    </div>
+                </div>
+            `, executeNouvelleAnnee);
+        }
+
+        async function executeNouvelleAnnee() {
+            const anneeScolaire = document.getElementById('nouvelleAnneeSelect')?.value;
+            if (!anneeScolaire) {
+                showSnackbar('Veuillez sélectionner une année scolaire');
+                return;
+            }
+
+            try {
+                const resp = await fetch(`${API_URL}/classes/nouvelle-annee`, {
+                    method: 'POST',
+                    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ anneeScolaire })
+                });
+
+                if (!resp.ok) {
+                    const d = await resp.json();
+                    throw new Error(d.error || 'Erreur');
+                }
+
+                const data = await resp.json();
+                showSnackbar(`✅ ${data.message}`);
+                await loadAllData();
+                loadInscriptions();
+            } catch (err) {
+                console.error(err);
+                showSnackbar('❌ ' + (err.message || 'Erreur lors du changement d\'année'));
+            }
+        }
+
+        function searchElevesForReinscription() {
+            const query = document.getElementById('reinscSearchInput').value.trim().toLowerCase();
+            const container = document.getElementById('reinscSearchResults');
+
+            if (query.length < 2) {
+                container.innerHTML = '<p style="color:var(--md-sys-color-on-surface-variant);font-size:13px;text-align:center;padding:16px;">Tapez au moins 2 caractères...</p>';
+                return;
+            }
+
+            // Trouver les élèves correspondants
+            const matchingEleves = allEleves.filter(e => {
+                const fullName = `${e.prenom} ${e.nom}`.toLowerCase();
+                return fullName.includes(query) || (e.nom && e.nom.toLowerCase().includes(query)) || (e.prenom && e.prenom.toLowerCase().includes(query));
+            });
+
+            if (matchingEleves.length === 0) {
+                container.innerHTML = '<p style="color:var(--md-sys-color-on-surface-variant);font-size:13px;text-align:center;padding:16px;">Aucun élève trouvé.</p>';
+                return;
+            }
+
+            // Grouper : familles + élèves seuls
+            const famillesVues = new Set();
+            const groupes = []; // { type: 'famille'|'seul', eleves: [...], familleId }
+
+            matchingEleves.forEach(e => {
+                if (e.enFamille && e.familleLienId) {
+                    if (famillesVues.has(e.familleLienId)) return;
+                    famillesVues.add(e.familleLienId);
+                    const membres = allEleves.filter(m => m.familleLienId === e.familleLienId);
+                    groupes.push({ type: 'famille', eleves: membres, familleId: e.familleLienId });
+                } else {
+                    groupes.push({ type: 'seul', eleves: [e], familleId: null });
+                }
+            });
+
+            // Ajouter aussi les familles trouvées via un seul membre qui ne matchait pas directement
+            // (les autres membres de la famille sont déjà inclus via le groupement)
+
+            const isSelected = (groupe) => {
+                if (!selectedReinscriptionEleve) return false;
+                if (groupe.type === 'famille') {
+                    return selectedReinscriptionEleve.isFamille && selectedReinscriptionEleve.allEleves && selectedReinscriptionEleve.allEleves.some(e => e.familleLienId === groupe.familleId);
+                }
+                return !selectedReinscriptionEleve.isFamille && selectedReinscriptionEleve.eleves[0]?.id === groupe.eleves[0]?.id;
+            };
+
+            container.innerHTML = groupes.map(g => {
+                const selected = isSelected(g);
+                if (g.type === 'famille') {
+                    return `
+                        <div class="md-card md-card-elevated" style="padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;border:2px solid ${selected ? 'var(--md-sys-color-primary)' : 'transparent'};border-left:4px solid var(--md-sys-color-tertiary);"
+                             onclick="selectFamilleForReinscription('${g.familleId}')"
+                             onmouseover="this.style.background='var(--md-sys-color-surface-container-high)'"
+                             onmouseout="this.style.background=''">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div class="md-avatar" style="width:40px;height:40px;font-size:16px;background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);">
+                                    <span class="material-icons" style="font-size:20px;">groups</span>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:600;font-size:14px;">Famille ${g.eleves[0]?.nom || ''}</div>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${g.eleves.length} enfant(s)</div>
+                                </div>
+                                ${selected
+                                    ? '<span class="material-icons" style="color:var(--md-sys-color-primary);">check_circle</span>'
+                                    : '<span class="material-icons" style="color:var(--md-sys-color-outline);">radio_button_unchecked</span>'}
+                            </div>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                ${g.eleves.map(e => `
+                                    <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--md-sys-color-surface-container);border-radius:8px;font-size:12px;">
+                                        <span class="md-avatar" style="width:22px;height:22px;font-size:10px;">${(e.prenom||'E')[0]}</span>
+                                        ${e.prenom} ${e.nom}
+                                        <span style="color:var(--md-sys-color-on-surface-variant);">• ${e.classe || 'Pas de classe'}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const e = g.eleves[0];
+                    return `
+                        <div class="md-card md-card-elevated" style="padding:12px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;border:2px solid ${selected ? 'var(--md-sys-color-primary)' : 'transparent'};"
+                             onclick="selectSeulForReinscription('${e.id}')"
+                             onmouseover="this.style.background='var(--md-sys-color-surface-container-high)'"
+                             onmouseout="this.style.background=''">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div class="md-avatar" style="width:40px;height:40px;font-size:16px;">${(e.prenom||'E')[0]}</div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:500;">${e.prenom} ${e.nom}</div>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">
+                                        ${e.classe || 'Pas de classe'} ${e.anneeScolaire ? '• ' + e.anneeScolaire : ''}
+                                    </div>
+                                </div>
+                                ${selected
+                                    ? '<span class="material-icons" style="color:var(--md-sys-color-primary);">check_circle</span>'
+                                    : '<span class="material-icons" style="color:var(--md-sys-color-outline);">radio_button_unchecked</span>'}
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        // Sélectionner un élève seul pour réinscription
+        async function selectSeulForReinscription(eleveId) {
+            try {
+                const resp = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
+                if (!resp.ok) throw new Error('Erreur');
+                const data = await resp.json();
+
+                selectedReinscriptionEleve = {
+                    allEleves: [data],
+                    selectedIds: new Set([data.id]),
+                    eleves: [data],
+                    parents: data.parents || [],
+                    isFamille: false
+                };
+
+                document.getElementById('reinscNextStep1Btn').disabled = false;
+                searchElevesForReinscription();
+                showSnackbar(`✅ ${data.prenom} ${data.nom} sélectionné(e)`);
+            } catch (err) {
+                console.error(err);
+                showSnackbar('Erreur lors du chargement de l\'élève');
+            }
+        }
+
+        // Sélectionner une famille entière pour réinscription
+        async function selectFamilleForReinscription(familleId) {
+            try {
+                // Récupérer tous les membres de la famille
+                const membres = allEleves.filter(e => e.familleLienId === familleId);
+                if (membres.length === 0) {
+                    showSnackbar('Aucun membre trouvé dans cette famille');
+                    return;
+                }
+
+                // Charger les détails de chaque élève (avec parents)
+                const elevesDetails = [];
+                let parents = [];
+                for (const m of membres) {
+                    const resp = await fetch(`${API_URL}/eleves/${m.id}`, { headers: getHeaders() });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        elevesDetails.push(data);
+                        // Collecter les parents (dédupliquer par id)
+                        if (data.parents) {
+                            data.parents.forEach(p => {
+                                if (!parents.find(pp => pp.id === p.id)) parents.push(p);
+                            });
+                        }
+                    }
+                }
+
+                // Tous sélectionnés par défaut
+                const selectedIds = new Set(elevesDetails.map(e => e.id));
+
+                selectedReinscriptionEleve = {
+                    allEleves: elevesDetails,
+                    selectedIds: selectedIds,
+                    eleves: [...elevesDetails],
+                    parents: parents,
+                    isFamille: true
+                };
+
+                document.getElementById('reinscNextStep1Btn').disabled = false;
+                searchElevesForReinscription();
+                showSnackbar(`✅ Famille ${membres[0].nom} sélectionnée (${elevesDetails.length} enfant(s))`);
+            } catch (err) {
+                console.error(err);
+                showSnackbar('Erreur lors du chargement de la famille');
+            }
+        }
+
+        // Toggle activation d'un enfant dans le formulaire de réinscription (étape 2)
+        function toggleReinscriptionChild(idx) {
+            if (!selectedReinscriptionEleve || !selectedReinscriptionEleve.isFamille) return;
+
+            const eleve = selectedReinscriptionEleve.allEleves[idx];
+            if (!eleve) return;
+
+            const { selectedIds } = selectedReinscriptionEleve;
+
+            if (selectedIds.has(eleve.id)) {
+                if (selectedIds.size <= 1) {
+                    showSnackbar('Au moins un enfant doit être sélectionné');
+                    return;
+                }
+                selectedIds.delete(eleve.id);
+            } else {
+                selectedIds.add(eleve.id);
+            }
+
+            // Mettre à jour la liste active
+            selectedReinscriptionEleve.eleves = selectedReinscriptionEleve.allEleves.filter(e => selectedIds.has(e.id));
+
+            // Mettre à jour l'apparence du bloc
+            const card = document.getElementById(`reinsc_child_card_${idx}`);
+            const toggle = document.getElementById(`reinsc_child_toggle_${idx}`);
+            const fields = document.getElementById(`reinsc_child_fields_${idx}`);
+            if (card && toggle && fields) {
+                const isActive = selectedIds.has(eleve.id);
+                card.style.opacity = isActive ? '1' : '0.45';
+                card.style.border = isActive ? '2px solid var(--md-sys-color-tertiary)' : '2px dashed var(--md-sys-color-outline)';
+                toggle.innerHTML = isActive
+                    ? '<span class="material-icons" style="color:var(--md-sys-color-primary);font-size:24px;">toggle_on</span> <span style="font-size:12px;color:var(--md-sys-color-primary);">Inclus</span>'
+                    : '<span class="material-icons" style="color:var(--md-sys-color-outline);font-size:24px;">toggle_off</span> <span style="font-size:12px;color:var(--md-sys-color-outline);">Exclu</span>';
+                fields.style.display = isActive ? 'block' : 'none';
+            }
+        }
+
+        function goToReinscriptionStep(step) {
+            if (step > currentReinscriptionStep + 1) return;
+            if (step < 1 || step > 3) return;
+            currentReinscriptionStep = step;
+
+            if (step === 2) renderReinscriptionForm();
+            if (step === 3) generateReinscriptionRecap();
+
+            updateReinscriptionStepperUI();
+        }
+
+        function nextReinscriptionStep() {
+            if (currentReinscriptionStep === 1) {
+                if (!selectedReinscriptionEleve) {
+                    showSnackbar('Veuillez sélectionner un élève ou une famille');
+                    return;
+                }
+            }
+            if (currentReinscriptionStep === 2) {
+                // Recalculer les élèves actifs depuis les toggles
+                if (selectedReinscriptionEleve.isFamille) {
+                    selectedReinscriptionEleve.eleves = selectedReinscriptionEleve.allEleves.filter(e => selectedReinscriptionEleve.selectedIds.has(e.id));
+                }
+                if (selectedReinscriptionEleve.eleves.length === 0) {
+                    showSnackbar('Veuillez inclure au moins un enfant');
+                    return;
+                }
+                // Validate required fields for each active eleve
+                const allToRender = selectedReinscriptionEleve.isFamille ? selectedReinscriptionEleve.allEleves : selectedReinscriptionEleve.eleves;
+                for (let i = 0; i < allToRender.length; i++) {
+                    if (!selectedReinscriptionEleve.selectedIds.has(allToRender[i].id)) continue;
+                    const nom = document.getElementById(`reinsc_nom_${i}`)?.value?.trim();
+                    const prenom = document.getElementById(`reinsc_prenom_${i}`)?.value?.trim();
+                    if (!nom || !prenom) {
+                        showSnackbar(`Le nom et le prénom sont obligatoires pour chaque élève inclus`);
+                        return;
+                    }
+                }
+            }
+
+            let next = currentReinscriptionStep + 1;
+            if (next > 3) return;
+
+            if (next === 2) renderReinscriptionForm();
+            if (next === 3) generateReinscriptionRecap();
+
+            currentReinscriptionStep = next;
+            updateReinscriptionStepperUI();
+        }
+
+        function prevReinscriptionStep() {
+            let prev = currentReinscriptionStep - 1;
+            if (prev < 1) return;
+            currentReinscriptionStep = prev;
+            updateReinscriptionStepperUI();
+        }
+
+        function updateReinscriptionStepperUI() {
+            // Update stepper indicators
+            document.querySelectorAll('#reinscriptionStepper .md-stepper-step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                if (stepNum === currentReinscriptionStep) {
+                    step.classList.add('active');
+                } else if (stepNum < currentReinscriptionStep) {
+                    step.classList.add('completed');
+                    step.querySelector('.md-stepper-number').innerHTML = '<span class="material-icons" style="font-size:18px;">check</span>';
+                } else {
+                    step.querySelector('.md-stepper-number').textContent = stepNum;
+                }
+            });
+
+            // Update connectors
+            document.querySelectorAll('#reinscriptionStepper .md-stepper-connector').forEach((conn, idx) => {
+                conn.classList.toggle('completed', idx + 1 < currentReinscriptionStep);
+            });
+
+            // Show/hide steps
+            for (let i = 1; i <= 3; i++) {
+                const stepDiv = document.getElementById(`reinscriptionStep${i}`);
+                if (stepDiv) stepDiv.classList.toggle('active', i === currentReinscriptionStep);
+            }
+        }
+
+        function renderReinscriptionForm() {
+            const { eleves, parents, isFamille } = selectedReinscriptionEleve;
+            const anneeScolaire = document.getElementById('reinsc_anneeScolaire').value;
+
+            let html = `
+                <h4 style="margin-bottom:8px;color:var(--md-sys-color-on-surface);">
+                    <span class="material-icons" style="vertical-align:middle;margin-right:8px;">edit</span>
+                    ${isFamille ? `Réinscription famille ${eleves[0]?.nom || ''} — ${anneeScolaire}` : `Réinscription — ${anneeScolaire}`}
+                </h4>
+                <p style="margin-bottom:20px;color:var(--md-sys-color-on-surface-variant);font-size:14px;">
+                    ${isFamille ? `Modifiez les informations de chaque enfant. La classe et les frais sont réinitialisés.` : `Modifiez les informations si nécessaire. La classe et les frais sont réinitialisés.`}
+                </p>
+            `;
+
+            // Section pour chaque élève — on utilise allEleves pour garder les index stables
+            const allElevesToRender = isFamille ? selectedReinscriptionEleve.allEleves : eleves;
+            allElevesToRender.forEach((eleve, idx) => {
+                const isActive = selectedReinscriptionEleve.selectedIds.has(eleve.id);
+                html += `
+                <div id="reinsc_child_card_${idx}" style="padding:20px;background:var(--md-sys-color-surface-container);border-radius:16px;margin-bottom:20px;transition:all 0.3s;${isFamille ? `border:2px solid ${isActive ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-outline)'};${isActive ? '' : 'opacity:0.45;border-style:dashed;'}` : ''}">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                        <h5 style="margin:0;display:flex;align-items:center;gap:8px;color:var(--md-sys-color-primary);">
+                            <span class="material-icons">person</span> ${isFamille ? `Enfant ${idx + 1} : ${eleve.prenom} ${eleve.nom}` : 'Élève'}
+                        </h5>
+                        ${isFamille ? `
+                        <div id="reinsc_child_toggle_${idx}" style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;" onclick="toggleReinscriptionChild(${idx})">
+                            ${isActive
+                                ? '<span class="material-icons" style="color:var(--md-sys-color-primary);font-size:24px;">toggle_on</span> <span style="font-size:12px;color:var(--md-sys-color-primary);">Inclus</span>'
+                                : '<span class="material-icons" style="color:var(--md-sys-color-outline);font-size:24px;">toggle_off</span> <span style="font-size:12px;color:var(--md-sys-color-outline);">Exclu</span>'}
+                        </div>` : ''}
+                    </div>
+                    <div id="reinsc_child_fields_${idx}" style="display:${isActive ? 'block' : 'none'};">
+                    <div class="md-form-grid">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="reinsc_nom_${idx}" class="md-text-field-input" placeholder=" " value="${eleve.nom || ''}" required>
+                                <label class="md-text-field-label">Nom *</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="reinsc_prenom_${idx}" class="md-text-field-input" placeholder=" " value="${eleve.prenom || ''}" required>
+                                <label class="md-text-field-label">Prénom *</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="date" id="reinsc_dateNaissance_${idx}" class="md-text-field-input" placeholder=" " value="${eleve.dateNaissance || ''}">
+                                <label class="md-text-field-label" style="top:-10px;font-size:12px;">Date de naissance</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <select id="reinsc_classe_${idx}" class="md-text-field-input" style="padding:16px 12px;">
+                                    <option value="">Sélectionner une classe</option>
+                                    ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
+                                </select>
+                                <label class="md-text-field-label" style="top:-10px;font-size:12px;">Classe *</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frais -->
+                    <h5 style="margin:20px 0 12px;display:flex;align-items:center;gap:8px;color:var(--md-sys-color-primary);">
+                        <span class="material-icons">payments</span> Frais d'inscription
+                    </h5>
+                    <div class="md-form-grid">
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="number" id="reinsc_frais_${idx}" class="md-text-field-input" placeholder=" " value="${eleve.fraisInscription || 0}" min="0" step="0.01">
+                                <label class="md-text-field-label">Frais d'inscription (€)</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="number" id="reinsc_nbPaiements_${idx}" class="md-text-field-input" placeholder=" " value="${eleve.nbPaiements || 1}" min="1" max="12">
+                                <label class="md-text-field-label">Nombre de paiements</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${eleve.email ? `
+                    <div style="margin-top:16px;padding:12px;background:var(--md-sys-color-surface-container-high);border-radius:12px;">
+                        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--md-sys-color-on-surface-variant);">
+                            <span class="material-icons" style="font-size:16px;">email</span>
+                            Email élève : <strong>${eleve.email}</strong>
+                        </div>
+                    </div>` : ''}
+                    </div><!-- /reinsc_child_fields -->
+                </div>
+                `;
+            });
+
+            // Section parents
+            if (parents.length > 0) {
+                html += `
+                    <div style="padding:20px;background:var(--md-sys-color-surface-container);border-radius:16px;">
+                        <h5 style="margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--md-sys-color-tertiary);">
+                            <span class="material-icons">supervisor_account</span> Parent(s) / Tuteur(s)
+                        </h5>
+                `;
+
+                parents.forEach((p, idx) => {
+                    html += `
+                        <div style="padding:16px;background:var(--md-sys-color-surface-container-high);border-radius:12px;margin-bottom:12px;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                                <span class="md-avatar" style="width:32px;height:32px;font-size:14px;">${(p.prenom||'P')[0]}</span>
+                                <span style="font-weight:500;">${p.isPrimary ? 'Parent principal' : 'Parent ' + (idx + 1)}</span>
+                                ${p.activated ? '<span class="md-badge" style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);font-size:11px;padding:2px 8px;border-radius:12px;">Compte activé</span>' : ''}
+                            </div>
+                            <div class="md-form-grid">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" class="md-text-field-input reinsc-parent-nom" data-parent-id="${p.id}" placeholder=" " value="${p.nom || ''}">
+                                        <label class="md-text-field-label">Nom</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" class="md-text-field-input reinsc-parent-prenom" data-parent-id="${p.id}" placeholder=" " value="${p.prenom || ''}">
+                                        <label class="md-text-field-label">Prénom</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="text" class="md-text-field-input reinsc-parent-tel" data-parent-id="${p.id}" placeholder=" " value="${p.tel || ''}">
+                                        <label class="md-text-field-label">Téléphone</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <input type="email" class="md-text-field-input reinsc-parent-email" data-parent-id="${p.id}" placeholder=" " value="${p.email || ''}">
+                                        <label class="md-text-field-label">Email</label>
+                                    </div>
+                                </div>
+                                <div class="md-text-field" style="grid-column: span 2;">
+                                    <div class="md-text-field-container">
+                                        <input type="text" class="md-text-field-input reinsc-parent-adresse" data-parent-id="${p.id}" placeholder=" " value="${p.adresse || ''}">
+                                        <label class="md-text-field-label">Adresse</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+            }
+
+            document.getElementById('reinscriptionFormContent').innerHTML = html;
+        }
+
+        function generateReinscriptionRecap() {
+            const { eleves, parents, isFamille } = selectedReinscriptionEleve;
+            const anneeScolaire = document.getElementById('reinsc_anneeScolaire').value;
+            const allToRender = isFamille ? selectedReinscriptionEleve.allEleves : eleves;
+
+            let html = `
+                <div class="fiche-section" style="margin-bottom:16px;">
+                    <div class="fiche-section-header">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);">
+                            <span class="material-icons">autorenew</span>
+                        </div>
+                        <div>
+                            <h5 style="margin:0;">Réinscription${isFamille ? ' — Famille ' + (eleves[0]?.nom || '') : ''}</h5>
+                            <p style="margin:0;font-size:13px;color:var(--md-sys-color-on-surface-variant);">
+                                Ancienne année : ${eleves[0]?.anneeScolaire || 'Non définie'} → Nouvelle année scolaire : <strong>${anneeScolaire}</strong>
+                                ${isFamille ? ` • ${eleves.length} enfant(s) inclus` : ''}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Recap each active eleve (using allToRender to get correct idx for form fields)
+            let childNum = 0;
+            allToRender.forEach((eleve, idx) => {
+                if (!selectedReinscriptionEleve.selectedIds.has(eleve.id)) return;
+                childNum++;
+                const nom = document.getElementById(`reinsc_nom_${idx}`)?.value?.trim() || eleve.nom;
+                const prenom = document.getElementById(`reinsc_prenom_${idx}`)?.value?.trim() || eleve.prenom;
+                const dateNaissance = document.getElementById(`reinsc_dateNaissance_${idx}`)?.value || eleve.dateNaissance;
+                const classe = document.getElementById(`reinsc_classe_${idx}`)?.value || 'Non assignée';
+                const frais = document.getElementById(`reinsc_frais_${idx}`)?.value || '0';
+                const nbPaiements = document.getElementById(`reinsc_nbPaiements_${idx}`)?.value || '1';
+
+                html += `
+                    <div class="fiche-section" style="margin-bottom:16px;">
+                        <div class="fiche-section-header">
+                            <div class="fiche-section-icon" style="background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);">
+                                <span class="material-icons">person</span>
+                            </div>
+                            <div>
+                                <h5 style="margin:0;">${isFamille ? 'Enfant ' + childNum : 'Élève'}</h5>
+                                <p style="margin:0;font-size:13px;color:var(--md-sys-color-on-surface-variant);">
+                                    ${prenom} ${nom} ${dateNaissance ? '• Né(e) le ' + new Date(dateNaissance).toLocaleDateString('fr-FR') : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;padding:12px;background:var(--md-sys-color-surface-container);border-radius:12px;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+                                <div><span style="color:var(--md-sys-color-on-surface-variant);">Classe :</span> <strong>${classe}</strong></div>
+                                <div><span style="color:var(--md-sys-color-on-surface-variant);">Frais :</span> <strong>${parseFloat(frais).toFixed(2)} €</strong></div>
+                                <div><span style="color:var(--md-sys-color-on-surface-variant);">Paiements :</span> <strong>${nbPaiements}x</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Parents recap
+            if (parents.length > 0) {
+                html += `
+                    <div class="fiche-section">
+                        <div class="fiche-section-header">
+                            <div class="fiche-section-icon" style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);">
+                                <span class="material-icons">supervisor_account</span>
+                            </div>
+                            <div>
+                                <h5 style="margin:0;">Parent(s)</h5>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;">
+                `;
+
+                parents.forEach((p) => {
+                    const nomP = document.querySelector(`.reinsc-parent-nom[data-parent-id="${p.id}"]`)?.value || p.nom;
+                    const prenomP = document.querySelector(`.reinsc-parent-prenom[data-parent-id="${p.id}"]`)?.value || p.prenom;
+                    const telP = document.querySelector(`.reinsc-parent-tel[data-parent-id="${p.id}"]`)?.value || p.tel;
+                    const emailP = document.querySelector(`.reinsc-parent-email[data-parent-id="${p.id}"]`)?.value || p.email;
+
+                    html += `
+                        <div style="padding:10px;background:var(--md-sys-color-surface-container);border-radius:10px;margin-bottom:8px;font-size:13px;">
+                            <strong>${prenomP} ${nomP}</strong> ${p.isPrimary ? '<span style="color:var(--md-sys-color-tertiary);font-size:11px;">(principal)</span>' : ''}
+                            <div style="color:var(--md-sys-color-on-surface-variant);margin-top:4px;">
+                                ${telP ? '📞 ' + telP : ''} ${emailP ? '✉️ ' + emailP : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+            }
+
+            document.getElementById('reinscriptionRecap').innerHTML = html;
+        }
+
+        async function submitReinscription() {
+            if (!selectedReinscriptionEleve) return;
+
+            const { eleves, parents, isFamille } = selectedReinscriptionEleve;
+            const anneeScolaire = document.getElementById('reinsc_anneeScolaire').value;
+
+            const submitBtn = document.getElementById('reinscSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-icons rotating">sync</span> En cours...';
+
+            try {
+                // Préparer les données de chaque élève actif
+                const allToRender = isFamille ? selectedReinscriptionEleve.allEleves : eleves;
+                const elevesData = [];
+                const elevesInfoUpdates = [];
+                allToRender.forEach((eleve, idx) => {
+                    if (!selectedReinscriptionEleve.selectedIds.has(eleve.id)) return;
+                    elevesData.push({
+                        id: eleve.id,
+                        classe: document.getElementById(`reinsc_classe_${idx}`)?.value || '',
+                        fraisInscription: parseFloat(document.getElementById(`reinsc_frais_${idx}`)?.value) || 0,
+                        nbPaiements: parseInt(document.getElementById(`reinsc_nbPaiements_${idx}`)?.value) || 1
+                    });
+                    elevesInfoUpdates.push({
+                        eleve,
+                        idx,
+                        nom: document.getElementById(`reinsc_nom_${idx}`)?.value?.trim(),
+                        prenom: document.getElementById(`reinsc_prenom_${idx}`)?.value?.trim(),
+                        dateNaissance: document.getElementById(`reinsc_dateNaissance_${idx}`)?.value
+                    });
+                });
+
+                // Utiliser le batch endpoint pour réinscrire tous les élèves
+                const resp = await fetch(`${API_URL}/eleves/reinscription/batch`, {
+                    method: 'POST',
+                    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ anneeScolaire, eleves: elevesData })
+                });
+
+                if (!resp.ok) {
+                    const d = await resp.json();
+                    throw new Error(d.error || 'Erreur lors de la réinscription');
+                }
+
+                // Mettre à jour les infos de chaque élève (nom, prenom, dateNaissance) si modifiées
+                for (const u of elevesInfoUpdates) {
+                    const { eleve, nom, prenom, dateNaissance } = u;
+                    if (nom !== eleve.nom || prenom !== eleve.prenom || dateNaissance !== (eleve.dateNaissance || '')) {
+                        await fetch(`${API_URL}/eleves/${eleve.id}`, {
+                            method: 'PUT',
+                            headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ nom, prenom, dateNaissance })
+                        });
+                    }
+                }
+
+                // Mettre à jour les parents si modifiés
+                for (const p of parents) {
+                    const nomP = document.querySelector(`.reinsc-parent-nom[data-parent-id="${p.id}"]`)?.value?.trim();
+                    const prenomP = document.querySelector(`.reinsc-parent-prenom[data-parent-id="${p.id}"]`)?.value?.trim();
+                    const telP = document.querySelector(`.reinsc-parent-tel[data-parent-id="${p.id}"]`)?.value?.trim();
+                    const emailP = document.querySelector(`.reinsc-parent-email[data-parent-id="${p.id}"]`)?.value?.trim();
+                    const adresseP = document.querySelector(`.reinsc-parent-adresse[data-parent-id="${p.id}"]`)?.value?.trim();
+
+                    const changed = nomP !== p.nom || prenomP !== p.prenom || telP !== (p.tel || '') || emailP !== (p.email || '') || adresseP !== (p.adresse || '');
+
+                    if (changed) {
+                        await fetch(`${API_URL}/parents/${p.id}`, {
+                            method: 'PUT',
+                            headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ nom: nomP, prenom: prenomP, tel: telP, email: emailP, adresse: adresseP })
+                        });
+                    }
+                }
+
+                const msg = isFamille
+                    ? `✅ Famille ${eleves[0]?.nom || ''} réinscrite (${eleves.length} enfant(s)) pour ${anneeScolaire} !`
+                    : `✅ ${eleves[0]?.prenom} ${eleves[0]?.nom} réinscrit(e) pour ${anneeScolaire} !`;
+                showSnackbar(msg);
+                hideReinscriptionForm();
+                await loadAllData();
+                loadInscriptions();
+
+            } catch (err) {
+                console.error(err);
+                showSnackbar('❌ ' + (err.message || 'Erreur lors de la réinscription'));
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="material-icons">check_circle</span> Valider la réinscription';
+            }
         }
 
         // ==================== GESTION DES FRAIS (Admin) ====================
@@ -8413,15 +9826,57 @@
         function renderActualites() {
             const isAdmin = ['admin', 'directeur', 'secretariat'].includes(user.role);
 
-            const getFileIcon = (type, name) => {
-                if (type && type.startsWith('image/')) return 'image';
-                if (name && name.match(/\.pdf$/i)) return 'picture_as_pdf';
-                if (name && name.match(/\.(doc|docx)$/i)) return 'description';
-                if (name && name.match(/\.(xls|xlsx|csv)$/i)) return 'table_chart';
-                if (name && name.match(/\.(zip|rar)$/i)) return 'folder_zip';
-                return 'insert_drive_file';
+            const isImg = f => f.type && f.type.startsWith('image/');
+            const isPdf = f => !!(f.nom||'').match(/\.pdf$/i);
+            const isDoc = f => !!(f.nom||'').match(/\.(doc|docx)$/i);
+            const isXls = f => !!(f.nom||'').match(/\.(xls|xlsx|csv)$/i);
+            const isZip = f => !!(f.nom||'').match(/\.(zip|rar|7z)$/i);
+
+            const filePreviewHtml = (f) => {
+                if (isImg(f)) return ''; // handled in gallery
+                if (isPdf(f)) return `
+                    <a href="${f.url}" target="_blank" class="actu-pdf-preview" title="${f.nom}">
+                        <div class="actu-pdf-icon"><span class="material-icons">picture_as_pdf</span></div>
+                        <div style="min-width:0;flex:1;">
+                            <div class="actu-pdf-name">${f.nom}</div>
+                            <div class="actu-pdf-sub">Cliquer pour ouvrir le PDF</div>
+                        </div>
+                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">open_in_new</span>
+                    </a>`;
+                if (isDoc(f)) return `
+                    <a href="${f.url}" target="_blank" class="actu-pdf-preview actu-file-doc" title="${f.nom}">
+                        <div class="actu-pdf-icon"><span class="material-icons">description</span></div>
+                        <div style="min-width:0;flex:1;">
+                            <div class="actu-pdf-name">${f.nom}</div>
+                            <div class="actu-pdf-sub">Document Word</div>
+                        </div>
+                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">open_in_new</span>
+                    </a>`;
+                if (isXls(f)) return `
+                    <a href="${f.url}" target="_blank" class="actu-pdf-preview actu-file-xls" title="${f.nom}">
+                        <div class="actu-pdf-icon"><span class="material-icons">table_chart</span></div>
+                        <div style="min-width:0;flex:1;">
+                            <div class="actu-pdf-name">${f.nom}</div>
+                            <div class="actu-pdf-sub">Feuille de calcul</div>
+                        </div>
+                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">open_in_new</span>
+                    </a>`;
+                if (isZip(f)) return `
+                    <a href="${f.url}" target="_blank" class="actu-pdf-preview actu-file-zip" title="${f.nom}">
+                        <div class="actu-pdf-icon"><span class="material-icons">folder_zip</span></div>
+                        <div style="min-width:0;flex:1;">
+                            <div class="actu-pdf-name">${f.nom}</div>
+                            <div class="actu-pdf-sub">Archive compressée</div>
+                        </div>
+                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">download</span>
+                    </a>`;
+                return `
+                    <a href="${f.url}" target="_blank" class="actu-pj-read-chip" download="${f.nom}">
+                        <span class="material-icons" style="font-size:16px;">insert_drive_file</span>
+                        <span style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.nom}</span>
+                    </a>`;
             };
-            
+
             const html = allActualites.length ? allActualites.map(actu => {
                 let cibleLabel = 'Tous';
                 if (actu.cible && actu.cible !== 'tous') {
@@ -8431,57 +9886,90 @@
                     } catch { cibleLabel = actu.cible; }
                 }
 
-                // Pièces jointes
                 const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
-                const pjHtml = pj.length > 0 ? `
-                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--md-sys-color-outline-variant);">
-                        <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
-                            <span class="material-icons" style="font-size: 15px;">attach_file</span>
+                const images = pj.filter(isImg);
+                const others = pj.filter(f => !isImg(f));
+
+                // Image de couverture (1ère image)
+                const coverHtml = images.length > 0
+                    ? `<a href="${images[0].url}" target="_blank"><img class="actu-card-cover" src="${images[0].url}" alt="${images[0].nom}" loading="lazy"></a>`
+                    : `<div class="actu-card-cover-placeholder"></div>`;
+
+                // Galerie des images restantes
+                const extraImages = images.slice(1);
+                const galleryHtml = extraImages.length > 0 ? `
+                    <div class="actu-img-gallery">
+                        ${extraImages.map(f => `
+                            <div class="actu-img-thumb">
+                                <a href="${f.url}" target="_blank">
+                                    <img src="${f.url}" alt="${f.nom}" loading="lazy" title="${f.nom}">
+                                </a>
+                            </div>`).join('')}
+                    </div>` : '';
+
+                // Autres fichiers (PDF, doc, etc.)
+                const othersHtml = others.length > 0 ? `
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
+                        ${others.map(filePreviewHtml).join('')}
+                    </div>` : '';
+
+                const hasAttachments = pj.length > 0;
+                const pjSection = hasAttachments ? `
+                    <div class="actu-pj-section">
+                        <div class="actu-pj-section-title">
+                            <span class="material-icons" style="font-size:15px;">attach_file</span>
                             ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
                         </div>
-                        <div class="actu-pj-read-list">
-                            ${pj.map(f => `
-                                <a href="${f.url}" target="_blank" class="actu-pj-read-chip" download="${f.nom}">
-                                    <span class="material-icons">${getFileIcon(f.type, f.nom)}</span>
-                                    <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.nom}</span>
-                                </a>
-                            `).join('')}
-                        </div>
+                        ${galleryHtml}
+                        ${othersHtml}
                     </div>` : '';
-                
+
+                const isNew = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
+                const expireSoon = actu.dateFin && (new Date(actu.dateFin).getTime() - Date.now()) < 3 * 86400000 && new Date(actu.dateFin) > new Date();
+
                 return `
-                    <div class="md-card md-card-elevated" style="padding: 0; overflow: hidden;">
-                        <div style="background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-tertiary-container)); padding: 20px;">
-                            <h3 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 4px;">${actu.titre}</h3>
-                            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--md-sys-color-on-surface-variant);">
-                                <span class="material-icons" style="font-size: 16px;">calendar_today</span>
-                                ${actu.date ? new Date(actu.date).toLocaleDateString('fr-FR') : 'Non daté'}
-                                ${actu.dateFin ? ` - Expire le ${new Date(actu.dateFin).toLocaleDateString('fr-FR')}` : ''}
-                                <span style="margin-left: 8px;">par ${actu.auteurNom || 'Système'}</span>
+                    <div class="actu-card">
+                        ${coverHtml}
+                        <div class="actu-card-head">
+                            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
+                                <h3 class="actu-card-title">${actu.titre}</h3>
+                                ${isNew ? '<span class="actu-badge-new"><span class="material-icons" style="font-size:12px;line-height:1;">fiber_new</span> Nouveau</span>' : ''}
+                            </div>
+                            <div class="actu-card-meta">
+                                <span class="actu-meta-chip"><span class="material-icons">calendar_today</span> ${actu.date ? new Date(actu.date).toLocaleDateString('fr-FR') : 'Non daté'}</span>
+                                <span class="actu-meta-chip"><span class="material-icons">person</span> ${actu.auteurNom || 'Système'}</span>
+                                ${actu.dateFin ? `<span class="actu-meta-chip${expireSoon ? ' actu-meta-chip-warning' : ''}"><span class="material-icons">schedule</span> Expire le ${new Date(actu.dateFin).toLocaleDateString('fr-FR')}</span>` : ''}
                             </div>
                         </div>
-                        <div style="padding: 20px;">
-                            <p style="color: var(--md-sys-color-on-surface); line-height: 1.6; white-space: pre-wrap;">${actu.description}</p>
-                            ${pjHtml}
+                        <div class="actu-card-body">
+                            <p class="actu-card-desc">${actu.description}</p>
+                            ${pjSection}
                             ${isAdmin ? `
-                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline-variant);">
-                                    <span class="md-chip" style="font-size: 11px; background: var(--md-sys-color-surface-variant);">
-                                        <span class="material-icons" style="font-size: 14px;">groups</span> ${cibleLabel}
+                                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--md-sys-color-outline-variant);">
+                                    <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:var(--md-sys-color-surface-container);font-size:11px;font-weight:600;color:var(--md-sys-color-on-surface-variant);border:1px solid var(--md-sys-color-outline-variant);">
+                                        <span class="material-icons" style="font-size:14px;">groups</span> ${cibleLabel}
                                     </span>
-                                    <div style="flex: 1;"></div>
-                                    <button class="md-btn md-btn-text" onclick="editActualite('${actu.id}')">
-                                        <span class="material-icons">edit</span>
+                                    <div style="flex:1;"></div>
+                                    <button class="md-btn md-btn-outlined" style="padding:6px 14px;font-size:13px;gap:4px;" onclick="editActualite('${actu.id}')">
+                                        <span class="material-icons" style="font-size:16px;">edit</span> Modifier
                                     </button>
-                                    <button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="deleteActualite('${actu.id}')">
-                                        <span class="material-icons">delete</span>
+                                    <button class="md-btn md-btn-outlined" style="padding:6px 14px;font-size:13px;gap:4px;color:var(--md-sys-color-error);border-color:var(--md-sys-color-error);" onclick="deleteActualite('${actu.id}')">
+                                        <span class="material-icons" style="font-size:16px;">delete</span> Supprimer
                                     </button>
                                 </div>
                             ` : ''}
                         </div>
                     </div>
                 `;
-            }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 40px;">Aucune actualité pour le moment</p>';
-            
+            }).join('') : `
+                <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;color:var(--md-sys-color-on-surface-variant);">
+                    <div style="width:72px;height:72px;border-radius:50%;background:var(--md-sys-color-surface-container);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:36px;color:var(--md-sys-color-outline);">newspaper</span>
+                    </div>
+                    <p style="margin:0;font-size:15px;font-weight:500;">Aucune actualité pour le moment</p>
+                    <p style="margin:0;font-size:13px;opacity:0.7;">Les actualités publiées s'afficheront ici</p>
+                </div>`;
+
             document.getElementById('actualitesList').innerHTML = html;
         }
         

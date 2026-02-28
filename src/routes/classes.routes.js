@@ -65,4 +65,23 @@ router.delete('/:id', checkPermission('delete'), (req, res) => {
     });
 });
 
+// Nouvelle année : vider toutes les classes (retirer les élèves sans supprimer les classes)
+router.post('/nouvelle-annee', checkPermission('update'), (req, res) => {
+    const { anneeScolaire } = req.body;
+    if (!anneeScolaire) {
+        return res.status(400).json({ error: 'L\'année scolaire est requise' });
+    }
+
+    // Mettre la classe de tous les élèves à NULL
+    db.run('UPDATE eleves SET classe = NULL', function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        const nbEleves = this.changes;
+        res.json({
+            success: true,
+            message: `Nouvelle année ${anneeScolaire} initialisée. ${nbEleves} élève(s) retirés de leurs classes.`,
+            elevesModifies: nbEleves
+        });
+    });
+});
+
 module.exports = router;

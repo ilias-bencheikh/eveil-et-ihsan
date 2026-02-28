@@ -821,12 +821,14 @@ body {
 
 /* ===== INSCRIPTION FORM STYLES ===== */
 
-.inscription-step {
+.inscription-step,
+.reinscription-step {
     display: none;
     animation: fadeInUp 0.3s ease;
 }
 
-.inscription-step.active {
+.inscription-step.active,
+.reinscription-step.active {
     display: block;
 }
 

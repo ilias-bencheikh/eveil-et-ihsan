@@ -1114,12 +1114,10 @@
                                     <button class="msg-tab active" id="btn-received" onclick="switchParentMessageView('received')">
                                         <span class="material-icons">move_to_inbox</span>
                                         <span>Reçus</span>
-                                        <span class="msg-tab-count" id="received-count">0</span>
                                     </button>
                                     <button class="msg-tab" id="btn-sent" onclick="switchParentMessageView('sent')">
                                         <span class="material-icons">send</span>
                                         <span>Envoyés</span>
-                                        <span class="msg-tab-count" id="sent-count">0</span>
                                     </button>
                                 </div>
                             </div>
@@ -2112,7 +2110,10 @@
                     document.getElementById('pageTitle').textContent = titles[sectionId] || 'Accueil';
 
                     // Charger les données spécifiques si nécessaire
-                    if (sectionId === 'messagerie-parent') {
+                    if (sectionId === 'accueil-parent') {
+                        loadRecentActualitesDashboard();
+                        loadParentMessages();
+                    } else if (sectionId === 'messagerie-parent') {
                         loadParentMessages();
                     } else if (sectionId === 'absences-parent' && enfantsData.length > 0) {
                         selectChild(enfantsData[0].id, 'absencesChildSelector');
@@ -2252,8 +2253,6 @@
                     sent: messages.filter(m => m.expediteurId === user.id),
                     received: messages.filter(m => m.destinataireId === user.id)
                 };
-                document.getElementById('received-count').textContent = allParentMessages.received.length;
-                document.getElementById('sent-count').textContent = allParentMessages.sent.length;
                 updateParentMessageBadge();
                 switchParentMessageView(currentParentMessageView);
             } catch (error) {

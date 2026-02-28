@@ -44,11 +44,13 @@ function initDatabase() {
                 photo TEXT,
                 status TEXT DEFAULT 'mineur',
                 tel TEXT,
+                adresse TEXT,
                 fraisInscription REAL DEFAULT 0,
                 nbPaiements INTEGER DEFAULT 1,
                 fraisValide INTEGER DEFAULT 0,
                 paiementsEffectues INTEGER DEFAULT 0,
-                montantPaye REAL DEFAULT 0
+                montantPaye REAL DEFAULT 0,
+                anneeScolaire TEXT
             )`);
 
             // Migrations pour élèves
@@ -59,6 +61,8 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN montantPaye REAL DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN tel TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN status TEXT DEFAULT 'mineur'`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN anneeScolaire TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN adresse TEXT`, () => {});
 
             // Table paiements (historique des transactions)
             db.run(`CREATE TABLE IF NOT EXISTS paiements (

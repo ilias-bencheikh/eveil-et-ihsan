@@ -138,7 +138,8 @@ router.post('/inscription', async (req, res) => {
     const { 
         parent1, // { nom, prenom, email, tel, adresse, profession } - optionnel
         parent2, // { nom, prenom, email, tel, adresse, profession } - optionnel
-        enfants  // [{ nom, prenom, dateNaissance, classe, fraisInscription, nbPaiements, email }]
+        enfants, // [{ nom, prenom, dateNaissance, classe, fraisInscription, nbPaiements, email, anneeScolaire }]
+        anneeScolaire // année scolaire globale (ex: "2026-2027")
     } = req.body;
     
     // parent1 peut être null/vide (0 parent)
@@ -248,9 +249,9 @@ router.post('/inscription', async (req, res) => {
             }
             
             await dbRun(db, `
-                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues)
-                VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, 0, 0)
-            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, enfants.length > 1 ? 1 : 0, enfants.length, familleLienId, frais, nbPaiements]);
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire, adresse)
+                VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, 0, 0, ?, ?)
+            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, enfants.length > 1 ? 1 : 0, enfants.length, familleLienId, frais, nbPaiements, enfant.anneeScolaire || anneeScolaire || null, enfant.adresse || null]);
             
             createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail, activationToken: eleveActivationToken });
             
@@ -363,9 +364,9 @@ router.post('/inscription/famille-existante', checkPermission('update'), async (
             }
 
             await dbRun(db, `
-                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues)
-                VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 1, ?, ?, ?, ?, 0, 0)
-            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, totalChildren, familleLienId, frais, nbPaiements]);
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire)
+                VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 1, ?, ?, ?, ?, 0, 0, ?)
+            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, eleveActivationToken, totalChildren, familleLienId, frais, nbPaiements, enfant.anneeScolaire || null]);
 
             createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail });
 

@@ -68,23 +68,57 @@ router.get('/destinataires', async (req, res) => {
 
             const classeNames = [...new Set(enfants.map(e => e.classe).filter(Boolean))];
 
-            // Professeurs des classes de leurs enfants
-            let profs = [];
+            // Professeurs (table professeurs) des classes de leurs enfants, avec le nom de l'enfant
+            let profsRaw = [];
             if (classeNames.length > 0) {
                 const placeholders = classeNames.map(() => '?').join(',');
-                profs = await dbAll(`
-                    SELECT DISTINCT p.id, p.nom, p.prenom FROM professeurs p
+                const profsFromTable = await dbAll(`
+                    SELECT p.id, p.nom, p.prenom, e.prenom as enfantPrenom, e.nom as enfantNom
+                    FROM professeurs p
                     INNER JOIN classes c ON c.professeurId = p.id
-                    WHERE c.nom IN (${placeholders})
-                `, classeNames);
+                    INNER JOIN eleves e ON e.classe = c.nom
+                    INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                    WHERE ep.parentId = ? AND c.nom IN (${placeholders})
+                `, [userId, ...classeNames]);
+
+                // Membres du bureau ayant le rôle "professeur" et enseignant les classes des enfants
+                const staffProfs = await dbAll(`
+                    SELECT s.id, s.nom, s.prenom, e.prenom as enfantPrenom, e.nom as enfantNom
+                    FROM staff s
+                    INNER JOIN classes c ON c.professeurId = s.id
+                    INNER JOIN eleves e ON e.classe = c.nom
+                    INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+                    WHERE LOWER(s.role) = 'professeur' AND ep.parentId = ? AND c.nom IN (${placeholders})
+                `, [userId, ...classeNames]);
+
+                profsRaw = [...profsFromTable, ...staffProfs];
             }
 
-            // Tout le staff (directeur, secretariat, admin)
+            // Grouper par id de prof pour agréger les noms d'enfants (ex: prof commun à des frères/sœurs)
+            const profsMap = {};
+            profsRaw.forEach(row => {
+                if (!profsMap[row.id]) {
+                    profsMap[row.id] = { id: row.id, nom: row.nom, prenom: row.prenom, enfants: [] };
+                }
+                const enfantName = `${row.enfantPrenom} ${row.enfantNom}`;
+                if (!profsMap[row.id].enfants.includes(enfantName)) {
+                    profsMap[row.id].enfants.push(enfantName);
+                }
+            });
+
+            // Tout le staff (directeur, secrétariat, admin) — exclure ceux déjà listés comme profs
             const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff');
+            const profStaffIds = new Set(Object.keys(profsMap));
+            const staffFiltered = staffs.filter(s => !profStaffIds.has(s.id));
 
             res.json([
-                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
-                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' }))
+                ...Object.values(profsMap).map(p => ({
+                    id: p.id,
+                    nom: `${p.prenom} ${p.nom} (Prof de ${p.enfants.join(', ')})`,
+                    role: 'Professeur',
+                    type: 'user'
+                })),
+                ...staffFiltered.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' }))
             ]);
 
         } else if (userRole === 'professeur') {
@@ -97,9 +131,14 @@ router.get('/destinataires', async (req, res) => {
             `, [userId]);
 
             const profs = await dbAll(`
-                SELECT id, nom, prenom FROM professeurs WHERE id != ?
-                UNION
-                SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur' AND id != ?
+                SELECT p.id, p.nom, p.prenom, GROUP_CONCAT(c.nom, ', ') as classes
+                FROM (
+                    SELECT id, nom, prenom FROM professeurs WHERE id != ?
+                    UNION
+                    SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur' AND id != ?
+                ) p
+                LEFT JOIN classes c ON c.professeurId = p.id
+                GROUP BY p.id
             `, [userId, userId]);
             const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) != \'professeur\'');
             const classes = await dbAll('SELECT nom FROM classes');
@@ -115,7 +154,7 @@ router.get('/destinataires', async (req, res) => {
             `, [userId]);
 
             res.json([
-                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
+                ...profs.map(p => ({ id: p.id, nom: p.classes ? `${p.prenom} ${p.nom} (Prof de ${p.classes})` : `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
                 ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' })),
                 ...parents.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom} (parent de ${p.enfantPrenom} ${p.enfantNom})`, role: 'Parent', type: 'user' })),
                 ...eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })),
@@ -126,8 +165,19 @@ router.get('/destinataires', async (req, res) => {
             // Staff peut envoyer à tous (y compris parents)
             // Seuls les élèves avec un compte activé apparaissent
             const eleves = await dbAll('SELECT id, nom, prenom FROM eleves WHERE activated = 1');
-            const profs = await dbAll('SELECT id, nom, prenom FROM professeurs');
-            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE id != ?', [userId]);
+            const profs = await dbAll(`
+                SELECT p.id, p.nom, p.prenom, GROUP_CONCAT(c.nom, ', ') as classes
+                FROM professeurs p
+                LEFT JOIN classes c ON c.professeurId = p.id
+                GROUP BY p.id
+            `);
+            const staffs = await dbAll(`
+                SELECT s.id, s.nom, s.prenom, s.role, GROUP_CONCAT(c.nom, ', ') as classes
+                FROM staff s
+                LEFT JOIN classes c ON c.professeurId = s.id
+                WHERE s.id != ?
+                GROUP BY s.id
+            `, [userId]);
             const classes = await dbAll('SELECT nom FROM classes');
             const parents = await dbAll(`
                 SELECT DISTINCT pa.id, pa.nom, pa.prenom,
@@ -140,8 +190,8 @@ router.get('/destinataires', async (req, res) => {
 
             res.json([
                 ...eleves.map(e => ({ id: e.id, nom: `${e.prenom} ${e.nom}`, role: 'Élève', type: 'user' })),
-                ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
-                ...staffs.map(s => ({ id: s.id, nom: `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' })),
+                ...profs.map(p => ({ id: p.id, nom: p.classes ? `${p.prenom} ${p.nom} (Prof de ${p.classes})` : `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
+                ...staffs.map(s => ({ id: s.id, nom: (s.classes && s.role && s.role.toLowerCase() === 'professeur') ? `${s.prenom} ${s.nom} (Prof de ${s.classes})`.trim() : `${s.prenom} ${s.nom}`.trim(), role: s.role, type: 'user' })),
                 ...parents.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom} (parent de ${p.enfantsNoms})`, role: 'Parent', type: 'user' })),
                 ...classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class' }))
             ]);

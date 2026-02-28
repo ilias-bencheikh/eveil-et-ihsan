@@ -2436,6 +2436,11 @@
             document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
 
             // Charger les données spécifiques à l'onglet
+            if (tabName === 'accueil') {
+                loadActualites();
+                loadMessages();
+                loadRecentAppreciations();
+            }
             if (tabName === 'profil') {
                 loadProfile();
             }

@@ -342,7 +342,7 @@ router.get('/famille-by-email/:email', (req, res) => {
 
 // Route d'inscription publique pour élèves sans parents
 router.post('/inscription', async (req, res) => {
-    const { nom, prenom, email, tel, dateNaissance, classe, fraisInscription, nbPaiements } = req.body;
+    const { nom, prenom, email, tel, dateNaissance, classe, fraisInscription, nbPaiements, anneeScolaire } = req.body;
     
     if (!email || !nom || !prenom) {
         return res.status(400).json({ error: 'Email, nom et prénom requis' });
@@ -377,9 +377,9 @@ router.post('/inscription', async (req, res) => {
         
         await dbRun(db, `
             INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, 
-                               enFamille, nombreFamille, familleLienId, tel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, ?, 0, 0)
-        `, [id, nom, prenom, dateNaissance || null, classe || null, email, activationToken, tel || null, frais, nb]);
+                               enFamille, nombreFamille, familleLienId, tel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, ?, 0, 0, ?)
+        `, [id, nom, prenom, dateNaissance || null, classe || null, email, activationToken, tel || null, frais, nb, anneeScolaire || null]);
         
         res.status(201).json({ 
             success: true,
@@ -395,7 +395,7 @@ router.post('/inscription', async (req, res) => {
 
 // Créer un élève (admin/secretariat)
 router.post('/', checkPermission('create'), async (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, tel } = req.body;
+    const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, tel, anneeScolaire } = req.body;
     
     try {
         // Vérifier que l'email n'est pas déjà utilisé si fourni
@@ -429,10 +429,10 @@ router.post('/', checkPermission('create'), async (req, res) => {
         await dbRun(db, `
             INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, 
                                enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, 
-                               fraisValide, paiementsEffectues, tel)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, ?, 0, 0, ?)
+                               fraisValide, paiementsEffectues, tel, anneeScolaire)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
         `, [id, nom, prenom, dateNaissance || null, classe || null, email || null, activationToken, 
-            enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, tel || null]);
+            enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, tel || null, anneeScolaire || null]);
         
         const activationLink = email ? `http://${req.headers.host}/activation.html?token=${activationToken}` : null;
         
@@ -900,6 +900,105 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
         
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// ================== RÉINSCRIPTION ==================
+
+// Réinscrire un élève pour une nouvelle année scolaire
+router.post('/:id/reinscription', checkPermission('update'), async (req, res) => {
+    const { anneeScolaire, classe, fraisInscription, nbPaiements } = req.body;
+    const eleveId = req.params.id;
+
+    if (!anneeScolaire) {
+        return res.status(400).json({ error: 'L\'année scolaire est requise' });
+    }
+
+    try {
+        const eleve = await dbGet(db, 'SELECT * FROM eleves WHERE id = ?', [eleveId]);
+        if (!eleve) {
+            return res.status(404).json({ error: 'Élève non trouvé' });
+        }
+
+        const frais = parseFloat(fraisInscription || 0) || 0;
+        const nb = parseInt(nbPaiements || 1, 10) || 1;
+
+        // Mettre à jour l'élève avec la nouvelle année scolaire, la classe, les frais réinitialisés
+        await dbRun(db, `
+            UPDATE eleves SET 
+                anneeScolaire = ?,
+                classe = ?,
+                fraisInscription = ?,
+                nbPaiements = ?,
+                fraisValide = 0,
+                paiementsEffectues = 0,
+                montantPaye = 0
+            WHERE id = ?
+        `, [anneeScolaire, classe || eleve.classe, frais, nb, eleveId]);
+
+        res.json({
+            success: true,
+            message: `Réinscription de ${eleve.prenom} ${eleve.nom} pour l'année ${anneeScolaire} effectuée.`,
+            eleve: { id: eleveId, anneeScolaire, classe: classe || eleve.classe, fraisInscription: frais, nbPaiements: nb }
+        });
+
+    } catch (err) {
+        console.error('Erreur réinscription:', err);
+        res.status(500).json({ error: 'Erreur lors de la réinscription' });
+    }
+});
+
+// Réinscription en lot (plusieurs élèves)
+router.post('/reinscription/batch', checkPermission('update'), async (req, res) => {
+    const { anneeScolaire, eleves } = req.body;
+    // eleves: [{ id, classe, fraisInscription, nbPaiements }]
+
+    if (!anneeScolaire) {
+        return res.status(400).json({ error: 'L\'année scolaire est requise' });
+    }
+    if (!eleves || eleves.length === 0) {
+        return res.status(400).json({ error: 'Au moins un élève requis' });
+    }
+
+    try {
+        const results = [];
+        const errors = [];
+
+        for (const e of eleves) {
+            const existing = await dbGet(db, 'SELECT * FROM eleves WHERE id = ?', [e.id]);
+            if (!existing) {
+                errors.push(`Élève ${e.id} non trouvé`);
+                continue;
+            }
+
+            const frais = parseFloat(e.fraisInscription || 0) || 0;
+            const nb = parseInt(e.nbPaiements || 1, 10) || 1;
+
+            await dbRun(db, `
+                UPDATE eleves SET 
+                    anneeScolaire = ?,
+                    classe = ?,
+                    fraisInscription = ?,
+                    nbPaiements = ?,
+                    fraisValide = 0,
+                    paiementsEffectues = 0,
+                    montantPaye = 0
+                WHERE id = ?
+            `, [anneeScolaire, e.classe || existing.classe, frais, nb, e.id]);
+
+            results.push({ id: e.id, nom: existing.nom, prenom: existing.prenom });
+        }
+
+        res.json({
+            success: true,
+            message: `${results.length} élève(s) réinscrit(s) pour l'année ${anneeScolaire}.`,
+            results,
+            errors: errors.length > 0 ? errors : undefined
+        });
+
+    } catch (err) {
+        console.error('Erreur réinscription batch:', err);
+        res.status(500).json({ error: 'Erreur lors de la réinscription' });
     }
 });
 
