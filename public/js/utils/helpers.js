@@ -142,6 +142,49 @@ function getUrlParams() {
     return params;
 }
 
+// ==========================================
+// SÉCURITÉ FRONTEND
+// ==========================================
+
+/**
+ * Échapper les caractères HTML pour prévenir les attaques XSS
+ * Utiliser cette fonction AVANT d'insérer du contenu dynamique dans le DOM
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+        '/': '&#x2F;',
+        '`': '&#x60;'
+    };
+    return String(text).replace(/[&<>"'\/`]/g, s => map[s]);
+}
+
+/**
+ * Valider un mot de passe avec les mêmes règles que le serveur
+ */
+function validatePasswordClient(password) {
+    const errors = [];
+    if (!password || password.length < 8) errors.push('Au moins 8 caractères');
+    if (password && password.length > 128) errors.push('128 caractères maximum');
+    if (!/[A-Z]/.test(password)) errors.push('Au moins une majuscule');
+    if (!/[a-z]/.test(password)) errors.push('Au moins une minuscule');
+    if (!/[0-9]/.test(password)) errors.push('Au moins un chiffre');
+    return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Nettoyer les entrées utilisateur avant envoi
+ */
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    return input.trim().replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+}
+
 // Export global
 window.Utils = {
     formatDate,
@@ -154,5 +197,8 @@ window.Utils = {
     copyToClipboard,
     downloadFile,
     imageToBase64,
-    getUrlParams
+    getUrlParams,
+    escapeHtml,
+    validatePasswordClient,
+    sanitizeInput
 };

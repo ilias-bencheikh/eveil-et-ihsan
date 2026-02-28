@@ -3,6 +3,8 @@ const router = express.Router();
 const { db } = require('../config/database');
 const { checkPermission, requireAuth } = require('../middleware/auth');
 const { generateToken, generateId, dbGet, dbRun, dbAll } = require('../utils/helpers');
+const { hashPassword } = require('../utils/password');
+const { validatePassword, activationLimiter } = require('../middleware/security');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -57,7 +59,7 @@ router.get('/', (req, res) => {
             INNER JOIN classes c ON e.classe = c.nom
             WHERE c.professeurId = ?
         `, [userId], (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     } else {
@@ -71,7 +73,7 @@ router.get('/', (req, res) => {
                 (SELECT COUNT(*) FROM eleve_parent ep2 WHERE ep2.eleveId = e.id) AS nbParents
             FROM eleves e
         `, (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     }
@@ -96,7 +98,7 @@ router.get('/classe/:nomClasse', (req, res) => {
     }
 
     db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });
 });
@@ -149,7 +151,7 @@ router.get('/profil', requireAuth, async (req, res) => {
         });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -301,24 +303,24 @@ router.get('/:id', async (req, res) => {
         
         res.json({ ...eleve, parents, parentsActivated });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
 // Obtenir la famille d'un élève par son ID
 router.get('/:id/famille', (req, res) => {
     db.get('SELECT familleLienId, enFamille, email FROM eleves WHERE id = ?', [req.params.id], (err, eleve) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!eleve) return res.status(404).json({ message: 'Élève non trouvé' });
         
         if (!eleve.enFamille || !eleve.familleLienId) {
             db.get('SELECT * FROM eleves WHERE id = ?', [req.params.id], (err, row) => {
-                if (err) return res.status(500).json({ error: err.message });
+                if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
                 return res.json([row]);
             });
         } else {
             db.all('SELECT * FROM eleves WHERE familleLienId = ?', [eleve.familleLienId], (err, rows) => {
-                if (err) return res.status(500).json({ error: err.message });
+                if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
                 res.json(rows || []);
             });
         }
@@ -332,7 +334,7 @@ router.get('/famille-by-email/:email', (req, res) => {
     db.all('SELECT id, nom, prenom, classe, photo, enFamille, familleLienId FROM eleves WHERE email = ? AND activated = 1', 
         [email], 
         (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows || []);
         }
     );
@@ -443,7 +445,7 @@ router.post('/', checkPermission('create'), async (req, res) => {
         });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -503,7 +505,7 @@ router.post('/:id/paiement', checkPermission('update'), async (req, res) => {
         });
     } catch (err) {
         console.error('Erreur enregistrement paiement:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -572,7 +574,7 @@ router.post('/paiement-famille', checkPermission('update'), async (req, res) => 
         res.json({ message: 'Paiement famille enregistré', results });
     } catch (err) {
         console.error('Erreur paiement famille:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -580,7 +582,7 @@ router.post('/paiement-famille', checkPermission('update'), async (req, res) => 
 router.post('/:id/validate-frais', checkPermission('update'), (req, res) => {
     const count = parseInt(req.body.count || '1', 10) || 1;
     db.get('SELECT paiementsEffectues, nbPaiements FROM eleves WHERE id = ?', [req.params.id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!row) return res.status(404).json({ message: 'Élève non trouvé' });
 
         const current = parseInt(row.paiementsEffectues || 0, 10);
@@ -589,7 +591,7 @@ router.post('/:id/validate-frais', checkPermission('update'), (req, res) => {
         const fraisValide = newCount >= max ? 1 : 0;
 
         db.run('UPDATE eleves SET paiementsEffectues = ?, fraisValide = ? WHERE id = ?', [newCount, fraisValide, req.params.id], function(err) {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json({ message: 'Paiements mis à jour', paiementsEffectues: newCount, fraisValide });
         });
     });
@@ -631,7 +633,7 @@ router.post('/validate-frais-famille', checkPermission('update'), (req, res) => 
         }
 
         res.json({ message: 'Mise à jour des paiements effectuée', results });
-    })().catch(err => res.status(500).json({ error: err.message }));
+    })().catch(err => res.status(500).json({ error: 'Erreur interne du serveur' }));
 });
 
 // Mettre à jour un élève
@@ -670,7 +672,7 @@ router.put('/:id', checkPermission('update'), async (req, res) => {
         res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, tel });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -717,20 +719,22 @@ router.delete('/:id', checkPermission('delete'), async (req, res) => {
             deletedParents: deletedParents.length > 0 ? deletedParents : undefined
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
-// Activer un compte élève
-router.post('/activate', async (req, res) => {
+// Activer un compte élève (avec hashage bcrypt et rate limiting)
+router.post('/activate', activationLimiter, async (req, res) => {
     const { token, password } = req.body;
     
     if (!token || !password) {
         return res.status(400).json({ error: 'Token et mot de passe requis' });
     }
     
-    if (password.length < 6) {
-        return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
+    // Validation du mot de passe avec règles de complexité
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+        return res.status(400).json({ error: passwordCheck.message });
     }
     
     try {
@@ -740,9 +744,12 @@ router.post('/activate', async (req, res) => {
             return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
         }
         
+        // Hasher le mot de passe avec bcrypt
+        const hashedPassword = await hashPassword(password);
+        
         await dbRun(db, 
             'UPDATE eleves SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
-            [password, eleve.id]
+            [hashedPassword, eleve.id]
         );
         
         res.json({ 
@@ -751,7 +758,7 @@ router.post('/activate', async (req, res) => {
         });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -766,7 +773,7 @@ router.get('/check-token/:token', async (req, res) => {
         
         res.json(eleve);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -809,7 +816,7 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
         });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -849,7 +856,7 @@ router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
         });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -899,7 +906,7 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
         });
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 

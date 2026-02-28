@@ -53,7 +53,7 @@ router.get('/', (req, res) => {
     // Filtrer les actualités non expirées (dateFin NULL ou > date actuelle)
     const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
     db.all('SELECT * FROM actualites WHERE (dateFin IS NULL OR dateFin > ?) ORDER BY date DESC, createdAt DESC', [currentDate], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         
         // Pour les parents, on doit d'abord récupérer les classes de leurs enfants
         if (userRole === 'parent') {
@@ -120,7 +120,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     db.get('SELECT * FROM actualites WHERE id = ?', [id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!row) return res.status(404).json({ error: 'Actualité non trouvée' });
         res.json({ ...row, piecesJointes: row.piecesJointes ? JSON.parse(row.piecesJointes) : [] });
     });
@@ -129,7 +129,7 @@ router.get('/:id', (req, res) => {
 // Créer une actualité (réservé au bureau/admin)
 router.post('/', (req, res) => {
     upload.array('piecesJointes', 5)(req, res, (uploadErr) => {
-        if (uploadErr) return res.status(400).json({ error: uploadErr.message || 'Erreur lors de l\'upload' });
+        if (uploadErr) return res.status(400).json({ error: 'Erreur lors de l\'upload des fichiers' });
 
         const { titre, description, date, auteurId, auteurNom, cible, dateFin } = req.body;
         const id = generateId();
@@ -149,7 +149,7 @@ router.post('/', (req, res) => {
             'INSERT INTO actualites (id, titre, description, date, auteurId, auteurNom, cible, dateFin, piecesJointes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [id, titre, description, date, auteurId || null, auteurNom || 'Système', cibleStr, dateFin || null, piecesJointesJson],
             function(err) {
-                if (err) return res.status(500).json({ error: err.message });
+                if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
                 res.status(201).json({ id, titre, description, date, auteurId, auteurNom, cible: cibleStr, dateFin, piecesJointes: piecesJointesMeta });
             }
         );
@@ -159,14 +159,14 @@ router.post('/', (req, res) => {
 // Modifier une actualité
 router.put('/:id', (req, res) => {
     upload.array('piecesJointes', 5)(req, res, (uploadErr) => {
-        if (uploadErr) return res.status(400).json({ error: uploadErr.message || 'Erreur lors de l\'upload' });
+        if (uploadErr) return res.status(400).json({ error: 'Erreur lors de l\'upload des fichiers' });
 
         const { id } = req.params;
         const { titre, description, date, dateFin, piecesJointesExistantes } = req.body;
 
         // Récupérer l'actualité actuelle pour gérer les fichiers à supprimer
         db.get('SELECT piecesJointes FROM actualites WHERE id = ?', [id], (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             if (!row) return res.status(404).json({ error: 'Actualité non trouvée' });
 
             // Pièces jointes conservées (envoyées en JSON depuis le client)
@@ -216,7 +216,7 @@ router.delete('/:id', (req, res) => {
 
     // Récupérer d'abord les fichiers associés pour les supprimer
     db.get('SELECT piecesJointes FROM actualites WHERE id = ?', [id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!row) return res.status(404).json({ error: 'Actualité non trouvée' });
 
         db.run('DELETE FROM actualites WHERE id = ?', [id], function(err2) {

@@ -6,13 +6,23 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const hpp = require('hpp');
 require('dotenv').config();
 
 // Configuration
 const { SERVER_CONFIG, SESSION_CONFIG } = require('./src/config/constants');
 const { initDatabase, closeDatabase } = require('./src/config/database');
 const { getLocalIpAddress } = require('./src/utils/helpers');
-const { checkMaintenance } = require('./src/middleware/auth');
+const { checkMaintenance, requireAuth } = require('./src/middleware/auth');
+const {
+    globalLimiter,
+    sanitizeInputs,
+    preventParamPollution,
+    hideServerInfo,
+    additionalSecurityHeaders,
+    secureErrorHandler
+} = require('./src/middleware/security');
 
 // Fonction de nettoyage automatique des actualités expirées
 function cleanupExpiredNews() {
@@ -61,33 +71,148 @@ const {
 // Initialisation de l'application
 const app = express();
 
-// Middleware globaux
+// ==========================================
+// MIDDLEWARE DE SÉCURITÉ
+// ==========================================
+
+// Faire confiance au premier proxy (nécessaire pour le rate limiting derrière un proxy/WSL)
+app.set('trust proxy', 1);
+
+// Headers de sécurité HTTP (helmet)
+const isProduction = process.env.NODE_ENV === 'production';
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+            scriptSrcAttr: ["'unsafe-inline'"], // Nécessaire pour les onclick= inline dans le HTML
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "blob:"],
+            connectSrc: ["'self'"],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"]
+            // Pas de upgrade-insecure-requests : le serveur fonctionne en HTTP
+        }
+    },
+    crossOriginEmbedderPolicy: false, // Nécessaire si on charge des images externes
+    // Désactiver HSTS en HTTP (sinon le navigateur force HTTPS et tout casse)
+    strictTransportSecurity: isProduction,
+    // Ces headers nécessitent une origine trustworthy (HTTPS ou localhost)
+    crossOriginOpenerPolicy: isProduction,
+    originAgentCluster: isProduction
+}));
+
+// Masquer les informations du serveur
+app.use(hideServerInfo);
+
+// Headers de sécurité supplémentaires
+app.use(additionalSecurityHeaders);
+
+// Protection contre la pollution de paramètres HTTP
+app.use(hpp());
+
+// Rate limiting global
+app.use(globalLimiter);
+
+// CORS configuré strictement
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',') 
+    : [];
+
 app.use(cors({
-    origin: true, // Permet toutes les origines
+    origin: function(origin, callback) {
+        // Permettre les requêtes sans origin (apps mobiles, Postman en dev)
+        if (!origin) return callback(null, true);
+        // En production, vérifier l'origin
+        if (allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
+            return callback(new Error('Non autorisé par CORS'), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-role', 'x-user-id']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400 // Cache preflight 24h
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Fichiers statiques
-app.use(express.static(path.join(__dirname, 'public')));
+// Parsing avec limites de taille
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Sanitization automatique des entrées (anti-XSS)
+app.use(sanitizeInputs);
+
+// Protection contre les injections dans les paramètres
+app.use(preventParamPollution);
+
+// Fichiers statiques avec headers de cache sécurisés
+app.use(express.static(path.join(__dirname, 'public'), {
+    dotfiles: 'deny', // Bloquer l'accès aux fichiers cachés (.env, .git etc.)
+    etag: true,
+    maxAge: '1h',
+    setHeaders: (res, filePath) => {
+        // Pas de cache pour les fichiers HTML
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        }
+    }
+}));
+
+// Bloquer l'accès aux fichiers sensibles
+app.use('/uploads', (req, res, next) => {
+    // Empêcher la traversée de répertoire
+    if (req.path.includes('..') || req.path.includes('\\')) {
+        return res.status(403).json({ error: 'Accès interdit' });
+    }
+    next();
+});
+
+// Middleware pour sécuriser les headers : après requireAuth,
+// on écrase les headers manipulables par le client avec les valeurs de session
+function secureHeaders(req, res, next) {
+    if (req.userId && req.userRole) {
+        req.headers['x-user-role'] = req.userRole;
+        req.headers['x-user-id'] = req.userId;
+    }
+    next();
+}
+
+/**
+ * Middleware d'authentification conditionnel
+ * Exclut les routes publiques (activation de compte, vérification de token)
+ */
+function conditionalAuth(req, res, next) {
+    // Routes publiques qui ne nécessitent pas d'authentification
+    const publicPaths = ['/activate', '/check-token', '/inscription'];
+    const isPublic = publicPaths.some(p => req.path === p || req.path.startsWith('/check-token/'));
+    
+    if (isPublic) {
+        return next();
+    }
+    
+    // Appliquer requireAuth puis secureHeaders
+    requireAuth(req, res, (err) => {
+        if (err) return next(err);
+        secureHeaders(req, res, next);
+    });
+}
 
 // Routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
-app.use('/api/eleves', checkMaintenance, elevesRoutes);
-app.use('/api/professeurs', checkMaintenance, professeursRoutes);
-app.use('/api/classes', checkMaintenance, classesRoutes);
-app.use('/api/absences', checkMaintenance, absencesRoutes);
-app.use('/api/appreciations', checkMaintenance, appreciationsRoutes);
-app.use('/api/messagerie', checkMaintenance, messagerieRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/email', emailRoutes);
-app.use('/api/actualites', checkMaintenance, actualitesRoutes);
-app.use('/api/parents', checkMaintenance, parentsRoutes);
-app.use('/api', emailRoutes);
+app.use('/api/eleves', conditionalAuth, checkMaintenance, elevesRoutes);
+app.use('/api/professeurs', conditionalAuth, checkMaintenance, professeursRoutes);
+app.use('/api/classes', requireAuth, secureHeaders, checkMaintenance, classesRoutes);
+app.use('/api/absences', requireAuth, secureHeaders, checkMaintenance, absencesRoutes);
+app.use('/api/appreciations', requireAuth, secureHeaders, checkMaintenance, appreciationsRoutes);
+app.use('/api/messagerie', requireAuth, secureHeaders, checkMaintenance, messagerieRoutes);
+app.use('/api/staff', conditionalAuth, staffRoutes);
+app.use('/api/email', requireAuth, secureHeaders, emailRoutes);
+app.use('/api/actualites', requireAuth, secureHeaders, checkMaintenance, actualitesRoutes);
+app.use('/api/parents', conditionalAuth, checkMaintenance, parentsRoutes);
+app.use('/api', requireAuth, secureHeaders, emailRoutes);
 
 // Route principale
 app.get('/', (req, res) => {
@@ -99,11 +224,8 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route non trouvée' });
 });
 
-// Gestion globale des erreurs
-app.use((err, req, res, next) => {
-    console.error('❌ Erreur:', err);
-    res.status(500).json({ error: 'Erreur serveur interne' });
-});
+// Gestion globale des erreurs (sécurisée - ne fuite pas les détails)
+app.use(secureErrorHandler);
 
 // Démarrage du serveur
 async function startServer() {

@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
 const { checkPermission, requireAuth } = require('../middleware/auth');
-const { generateToken, generateId, dbGet, dbRun, dbAll } = require('../utils/helpers');
+const { generateToken, generateId, dbGet, dbRun, dbAll, isValidEmail } = require('../utils/helpers');
 const { sendEmail } = require('../config/email');
+const { hashPassword } = require('../utils/password');
+const { validatePassword, activationLimiter } = require('../middleware/security');
 
 // ====================================================================
 //  ROUTES SPÉCIFIQUES (AVANT /:id pour éviter les conflits de routing)
@@ -36,7 +38,7 @@ router.get('/profil/me', requireAuth, async (req, res) => {
         
         res.json({ ...parent, enfants });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -54,7 +56,7 @@ router.put('/profil/me', requireAuth, async (req, res) => {
         const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession FROM parents WHERE id = ?', [req.userId]);
         res.json({ message: 'Profil mis à jour', parent });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -74,7 +76,7 @@ router.get('/mes-enfants', requireAuth, async (req, res) => {
         
         res.json(enfants);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -94,20 +96,22 @@ router.get('/check-token/:token', async (req, res) => {
         
         res.json(parent);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
-// Activer un compte parent
-router.post('/activate', async (req, res) => {
+// Activer un compte parent (avec hashage bcrypt et rate limiting)
+router.post('/activate', activationLimiter, async (req, res) => {
     const { token, password } = req.body;
     
     if (!token || !password) {
         return res.status(400).json({ error: 'Token et mot de passe requis' });
     }
     
-    if (password.length < 6) {
-        return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
+    // Validation du mot de passe avec règles de complexité
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+        return res.status(400).json({ error: passwordCheck.message });
     }
     
     try {
@@ -117,9 +121,12 @@ router.post('/activate', async (req, res) => {
             return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
         }
         
+        // Hasher le mot de passe avec bcrypt
+        const hashedPassword = await hashPassword(password);
+        
         await dbRun(db, 
             'UPDATE parents SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
-            [password, parent.id]
+            [hashedPassword, parent.id]
         );
         
         res.json({ 
@@ -127,7 +134,7 @@ router.post('/activate', async (req, res) => {
             email: parent.email
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -451,7 +458,7 @@ router.post('/link', checkPermission('update'), async (req, res) => {
         
         res.status(201).json({ id, eleveId, parentId, relation, isPrimary, message: 'Liaison créée' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -487,7 +494,7 @@ router.delete('/link/:linkId', checkPermission('delete'), async (req, res) => {
             parentDeleted
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -505,7 +512,7 @@ router.get('/eleve/:eleveId', requireAuth, async (req, res) => {
         
         res.json(parents);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -549,7 +556,7 @@ router.get('/search-familles', requireAuth, async (req, res) => {
 
         res.json(parents);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -578,7 +585,7 @@ router.get('/', requireAuth, async (req, res) => {
         
         res.json(parents);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -603,7 +610,7 @@ router.get('/:id', requireAuth, async (req, res) => {
         
         res.json({ ...parent, enfants });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -653,7 +660,7 @@ router.post('/', checkPermission('create'), async (req, res) => {
             message: 'Parent créé. Envoyez le lien d\'activation au parent.'
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -699,7 +706,7 @@ router.put('/:id', checkPermission('update'), async (req, res) => {
         
         res.json({ id, nom, prenom, email, tel, adresse, profession });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -722,7 +729,7 @@ router.delete('/:id', checkPermission('delete'), async (req, res) => {
         
         res.json({ message: 'Parent supprimé' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -759,7 +766,7 @@ router.post('/:id/send-activation', checkPermission('update'), async (req, res) 
         }
         
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 

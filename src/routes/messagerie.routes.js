@@ -201,7 +201,7 @@ router.get('/destinataires', async (req, res) => {
         }
     } catch (err) {
         console.error('Erreur destinataires:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -235,7 +235,7 @@ router.get('/', (req, res) => {
            OR (m.expediteurId = ? AND m.deleted_by_sender = 0)
         ORDER BY m.date DESC
     `, [userId, userId], (err, messages) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
 
         const enrichedMessages = messages.map(m => {
             let expediteurNom = 'Système';
@@ -292,7 +292,7 @@ router.post('/', (req, res, next) => {
             if (err.code === 'LIMIT_FILE_SIZE') {
                 return res.status(400).json({ error: 'Fichier trop volumineux (max 10 Mo par fichier)' });
             }
-            return res.status(400).json({ error: err.message || 'Erreur lors de l\'upload' });
+            return res.status(400).json({ error: 'Erreur lors de l\'upload du fichier' });
         }
         next();
     });
@@ -358,7 +358,7 @@ router.post('/', (req, res, next) => {
             `, [className], (err, rows) => {
                 if (err) {
                     completed++;
-                    if (completed === total) res.status(500).json({ error: err.message });
+                    if (completed === total) res.status(500).json({ error: 'Erreur interne du serveur' });
                     return;
                 }
 
@@ -414,7 +414,7 @@ router.post('/', (req, res, next) => {
                     if (err) {
                         console.error('Erreur insertion message:', err);
                         completed++;
-                        if (completed === total) res.status(500).json({ error: err.message });
+                        if (completed === total) res.status(500).json({ error: 'Erreur interne du serveur' });
                         return;
                     }
                     sentMessages.push({
@@ -468,7 +468,7 @@ router.put('/:id/lu', (req, res) => {
     const userId = req.headers['x-user-id'];
 
     db.run('UPDATE messages SET lu = 1 WHERE id = ? AND destinataireId = ?', [req.params.id, userId], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (this.changes === 0) return res.status(404).json({ message: 'Message non trouvé ou non autorisé' });
         res.json({ message: 'Message marqué comme lu' });
     });
@@ -481,7 +481,7 @@ router.delete('/:id', (req, res) => {
 
     // Récupérer le message pour vérifier les droits
     db.get('SELECT * FROM messages WHERE id = ?', [messageId], (err, message) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!message) return res.status(404).json({ error: 'Message non trouvé' });
 
         const isExpéditeur = message.expediteurId === userId;
@@ -495,11 +495,11 @@ router.delete('/:id', (req, res) => {
         const column = isExpéditeur ? 'deleted_by_sender' : 'deleted_by_receiver';
 
         db.run(`UPDATE messages SET ${column} = 1 WHERE id = ?`, [messageId], function(updateErr) {
-            if (updateErr) return res.status(500).json({ error: updateErr.message });
+            if (updateErr) return res.status(500).json({ error: 'Erreur interne du serveur' });
 
             // Recharger pour voir si les deux côtés ont supprimé
             db.get('SELECT * FROM messages WHERE id = ?', [messageId], (err2, updated) => {
-                if (err2) return res.status(500).json({ error: err2.message });
+                if (err2) return res.status(500).json({ error: 'Erreur interne du serveur' });
                 if (!updated) return res.json({ deleted: true, purged: false }); // déjà supprimé
 
                 const bothDeleted = updated.deleted_by_sender === 1 && updated.deleted_by_receiver === 1;
@@ -525,7 +525,7 @@ router.delete('/:id', (req, res) => {
 
                     // Supprimer la ligne en base
                     db.run('DELETE FROM messages WHERE id = ?', [messageId], (delErr) => {
-                        if (delErr) return res.status(500).json({ error: delErr.message });
+                        if (delErr) return res.status(500).json({ error: 'Erreur interne du serveur' });
                         res.json({ deleted: true, purged: true, message: 'Message supprimé définitivement' });
                     });
                 } else {

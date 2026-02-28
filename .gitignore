@@ -1,5 +1,39 @@
+# Dépendances
 node_modules/
+
+# Base de données (contient les mots de passe et données personnelles)
 data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Variables d'environnement (contient les secrets)
+.env
+.env.local
+.env.production
+
+# Logs
 *.log
-.DS_Store
+npm-debug.log*
+
+# Fichiers uploadés par les utilisateurs
 uploads/
+public/uploads/actualites/*
+public/uploads/messagerie/*
+public/uploads/profile/*
+!public/uploads/.gitkeep
+
+# Certificats SSL
+ssl/server.key
+ssl/*.key
+ssl/*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -15,9 +15,12 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('❌ Erreur de connexion à la base de données:', err);
     } else {
         console.log('✅ Connecté à la base de données SQLite');
-        // Configurer la base de données pour une meilleure persistance
-        db.run('PRAGMA synchronous = FULL');
-        db.run('PRAGMA journal_mode = DELETE');
+        // Sécurité et performance de la base de données
+        db.run('PRAGMA synchronous = FULL');        // Intégrité maximale des données
+        db.run('PRAGMA journal_mode = WAL');         // Write-Ahead Logging (meilleure performance)
+        db.run('PRAGMA busy_timeout = 5000');        // Attendre 5s si la DB est verrouillée
+        db.run('PRAGMA foreign_keys = ON');          // Activer les contraintes de clés étrangères
+        db.run('PRAGMA secure_delete = ON');         // Écraser les données supprimées (sécurité)
     }
 });
 

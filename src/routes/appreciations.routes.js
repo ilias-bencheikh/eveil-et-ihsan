@@ -16,12 +16,12 @@ router.get('/', (req, res) => {
             INNER JOIN classes c ON e.classe = c.nom
             WHERE c.professeurId = ?
         `, [userId], (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     } else {
         db.all('SELECT * FROM appreciations', (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     }
@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
 // Obtenir une appréciation par ID
 router.get('/single/:id', (req, res) => {
     db.get('SELECT * FROM appreciations WHERE id = ?', [req.params.id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!row) return res.status(404).json({ message: 'Appréciation non trouvée' });
         res.json(row);
     });
@@ -39,7 +39,7 @@ router.get('/single/:id', (req, res) => {
 // Obtenir les appréciations d'un élève
 router.get('/eleve/:eleveId', (req, res) => {
     db.all('SELECT * FROM appreciations WHERE eleveId = ? ORDER BY dateCreated DESC', [req.params.eleveId], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });
 });
@@ -73,7 +73,7 @@ router.get('/classe/:nomClasse', (req, res) => {
     db.all(query, params, (err, rows) => {
         if (err) {
             console.error('Erreur SQL classe:', err);
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: 'Erreur interne du serveur' });
         }
         res.json(rows);
     });
@@ -101,7 +101,7 @@ router.get('/classes', (req, res) => {
     query += ' GROUP BY c.nom ORDER BY c.nom';
 
     db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });
 });
@@ -114,7 +114,7 @@ router.get('/eleves/classe/:nomClasse', (req, res) => {
         WHERE classe = ?
         ORDER BY nom, prenom
     `, [req.params.nomClasse], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });
 });
@@ -148,7 +148,7 @@ router.get('/historique/classe/:nomClasse', (req, res) => {
     `;
 
     db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });
 });
@@ -174,7 +174,7 @@ router.get('/batch/:batchId', (req, res) => {
     query += ' ORDER BY e.nom, e.prenom';
 
     db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });
 });
@@ -193,7 +193,7 @@ router.delete('/batch/:batchId', (req, res) => {
     }
 
     db.run(query, params, function(err) {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json({ deleted: this.changes, batchId: req.params.batchId });
     });
 });
@@ -232,7 +232,7 @@ router.get('/historique/classe/:nomClasse', (req, res) => {
     db.all(baseQuery, params, (err, batches) => {
         if (err) {
             console.error('Erreur SQL historique:', err);
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: 'Erreur interne du serveur' });
         }
 
         // Pour chaque batch, récupérer la liste des élèves
@@ -282,7 +282,7 @@ router.get('/batch/:batchId', (req, res) => {
     db.all(query, [req.params.batchId], (err, rows) => {
         if (err) {
             console.error('Erreur SQL batch:', err);
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: 'Erreur interne du serveur' });
         }
         res.json(rows || []);
     });
@@ -291,7 +291,7 @@ router.get('/batch/:batchId', (req, res) => {
 // Supprimer un lot complet d'appréciations
 router.delete('/batch/:batchId', checkPermission('delete'), (req, res) => {
     db.run('DELETE FROM appreciations WHERE batchId = ?', [req.params.batchId], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (this.changes === 0) return res.status(404).json({ message: 'Lot non trouvé' });
         res.json({ message: 'Lot d\'appréciations supprimé', deleted: this.changes });
     });
@@ -321,7 +321,7 @@ router.put('/batch/:batchId', (req, res) => {
                     processed++;
                     if (err) {
                         console.error('Erreur mise à jour appréciation:', err);
-                        results.push({ id, success: false, error: err.message });
+                        results.push({ id, success: false, error: 'Erreur de traitement' });
                     } else {
                         results.push({ id, success: true });
                     }
@@ -369,7 +369,7 @@ router.post('/bulk', (req, res) => {
                     processed++;
                     if (err) {
                         console.error('Erreur mise à jour appréciation:', err);
-                        results.push({ id, success: false, error: err.message });
+                        results.push({ id, success: false, error: 'Erreur de traitement' });
                     } else {
                         results.push({ id, success: true });
                     }
@@ -387,7 +387,7 @@ router.post('/bulk', (req, res) => {
                     processed++;
                     if (err) {
                         console.error('Erreur création appréciation:', err);
-                        results.push({ eleveId, success: false, error: err.message });
+                        results.push({ eleveId, success: false, error: 'Erreur de traitement' });
                     } else {
                         results.push({ id: newId, eleveId, success: true });
                     }
@@ -411,7 +411,7 @@ router.post('/', (req, res) => {
     db.run('INSERT INTO appreciations (id, eleveId, professeurId, matiere, periode, note, commentaire, createdByRole, dateCreated, classe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [id, eleveId, professeurId, matiere, periode, note || null, commentaire, createdByRole || null, dateCreated, classe || null],
         function(err) {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.status(201).json({ id, eleveId, professeurId, matiere, periode, note, commentaire, dateCreated });
         }
     );
@@ -424,7 +424,7 @@ router.put('/:id', checkPermission('update'), (req, res) => {
     db.run('UPDATE appreciations SET eleveId = ?, professeurId = ?, matiere = ?, periode = ?, note = ?, commentaire = ? WHERE id = ?',
         [eleveId, professeurId, matiere, periode, note || null, commentaire, req.params.id],
         function(err) {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             if (this.changes === 0) return res.status(404).json({ message: 'Appréciation non trouvée' });
             res.json({ id: req.params.id, eleveId, professeurId, matiere, periode, note, commentaire });
         }
@@ -434,7 +434,7 @@ router.put('/:id', checkPermission('update'), (req, res) => {
 // Supprimer une appréciation
 router.delete('/:id', checkPermission('delete'), (req, res) => {
     db.run('DELETE FROM appreciations WHERE id = ?', [req.params.id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (this.changes === 0) return res.status(404).json({ message: 'Appréciation non trouvée' });
         res.json({ message: 'Appréciation supprimée' });
     });

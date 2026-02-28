@@ -5,6 +5,8 @@ const { TOKEN_EXPIRY, SESSION_CONFIG } = require('../config/constants');
 const { sendEmail } = require('../config/email');
 const { generateToken, generateId, dbGet, dbRun, dbAll } = require('../utils/helpers');
 const { requireAuth } = require('../middleware/auth');
+const { hashPassword, verifyPassword } = require('../utils/password');
+const { loginLimiter, resetPasswordLimiter, validateEmail, validatePassword } = require('../middleware/security');
 
 // Créer une session pour un utilisateur
 async function createSession(user, req) {
@@ -52,19 +54,29 @@ async function createSession(user, req) {
     return sessionToken;
 }
 
-// Login
-router.post('/login', async (req, res) => {
+// Login (avec rate limiting anti brute-force)
+router.post('/login', loginLimiter, async (req, res) => {
     const { email, password } = req.body;
+
+    // Validation des entrées
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email et mot de passe requis' });
+    }
+
+    const cleanEmail = validateEmail(email);
+    if (!cleanEmail) {
+        return res.status(400).json({ error: 'Format d\'email invalide' });
+    }
 
     try {
         // Vérifier le mode maintenance en premier
         const maintenance = await dbGet(db, 'SELECT * FROM maintenance WHERE id = 1 AND active = 1');
 
-        // Vérifier dans la table STAFF
-        let row = await dbGet(db, 'SELECT * FROM staff WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        // Vérifier dans la table STAFF (par email uniquement, vérification mdp via bcrypt)
+        let row = await dbGet(db, 'SELECT * FROM staff WHERE email = ? AND activated = 1', [cleanEmail]);
         
-        if (row) {
-            // En maintenance, seuls les admins et directeurs peuvent se connecter
+        if (row && await verifyPassword(password, row.password)) {
+            // En maintenance, seuls les admins peuvent se connecter
             const adminRoles = ['admin'];
             if (maintenance && !adminRoles.includes(row.role)) {
                 return res.status(503).json({
@@ -75,6 +87,9 @@ router.post('/login', async (req, res) => {
                     message: maintenance.message || null
                 });
             }
+            // Migrer le mot de passe vers bcrypt si nécessaire
+            await migratePasswordIfNeeded('staff', row.id, password, row.password);
+            
             const user = {
                 id: row.id,
                 email: row.email,
@@ -98,10 +113,11 @@ router.post('/login', async (req, res) => {
         }
 
         // Vérifier dans la table PARENTS
-        row = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        row = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND activated = 1', [cleanEmail]);
         
-        if (row) {
-            // Récupérer les enfants du parent
+        if (row && await verifyPassword(password, row.password)) {
+            await migratePasswordIfNeeded('parents', row.id, password, row.password);
+            
             const enfants = await dbAll(db, `
                 SELECT e.id, e.nom, e.prenom, e.classe, e.photo, ep.isPrimary
                 FROM eleves e
@@ -122,9 +138,11 @@ router.post('/login', async (req, res) => {
         }
 
         // Vérifier dans la table ÉLÈVES
-        row = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        row = await dbGet(db, 'SELECT * FROM eleves WHERE email = ? AND activated = 1', [cleanEmail]);
         
-        if (row) {
+        if (row && await verifyPassword(password, row.password)) {
+            await migratePasswordIfNeeded('eleves', row.id, password, row.password);
+            
             const user = {
                 id: row.id,
                 email: row.email,
@@ -137,9 +155,11 @@ router.post('/login', async (req, res) => {
         }
 
         // Vérifier dans la table PROFESSEURS
-        row = await dbGet(db, 'SELECT * FROM professeurs WHERE email = ? AND password = ? AND activated = 1', [email, password]);
+        row = await dbGet(db, 'SELECT * FROM professeurs WHERE email = ? AND activated = 1', [cleanEmail]);
         
-        if (row) {
+        if (row && await verifyPassword(password, row.password)) {
+            await migratePasswordIfNeeded('professeurs', row.id, password, row.password);
+            
             const user = {
                 id: row.id,
                 email: row.email,
@@ -151,13 +171,31 @@ router.post('/login', async (req, res) => {
             return res.json({ user, token });
         }
 
+        // Message générique pour ne pas révéler si l'email existe
         return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
         
     } catch (err) {
         console.error('Erreur login:', err);
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: 'Erreur lors de la connexion' });
     }
 });
+
+/**
+ * Migration automatique des mots de passe en clair vers bcrypt
+ * Exécuté au login lorsque le mot de passe est encore en clair
+ */
+async function migratePasswordIfNeeded(table, userId, plainPassword, storedPassword) {
+    try {
+        // Si le mot de passe stocké n'est pas encore hashé avec bcrypt
+        if (!storedPassword.startsWith('$2b$') && !storedPassword.startsWith('$2a$')) {
+            const hashed = await hashPassword(plainPassword);
+            await dbRun(db, `UPDATE ${table} SET password = ? WHERE id = ?`, [hashed, userId]);
+            console.log(`🔒 Mot de passe migré vers bcrypt pour ${table}/${userId}`);
+        }
+    } catch (err) {
+        console.error('Erreur migration mot de passe:', err);
+    }
+}
 
 // Valider une session (vérifier si le token est valide)
 router.post('/validate-session', async (req, res) => {
@@ -198,7 +236,7 @@ router.post('/validate-session', async (req, res) => {
         });
     } catch (err) {
         console.error('Erreur validation session:', err);
-        res.status(500).json({ valid: false, error: err.message });
+        res.status(500).json({ valid: false, error: 'Erreur serveur' });
     }
 });
 
@@ -215,7 +253,7 @@ router.post('/logout', async (req, res) => {
         res.json({ success: true, message: 'Déconnexion réussie' });
     } catch (err) {
         console.error('Erreur logout:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -235,7 +273,7 @@ router.post('/logout-all', requireAuth, async (req, res) => {
         });
     } catch (err) {
         console.error('Erreur logout-all:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -267,7 +305,7 @@ router.get('/sessions', requireAuth, async (req, res) => {
         res.json({ sessions: formattedSessions });
     } catch (err) {
         console.error('Erreur liste sessions:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
@@ -290,12 +328,12 @@ router.delete('/sessions/:sessionId', requireAuth, async (req, res) => {
         res.json({ success: true, message: 'Session révoquée' });
     } catch (err) {
         console.error('Erreur révocation session:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
 
-// Demande de réinitialisation du mot de passe
-router.post('/forgot-password', async (req, res) => {
+// Demande de réinitialisation du mot de passe (rate limited)
+router.post('/forgot-password', resetPasswordLimiter, async (req, res) => {
     const { email } = req.body;
     
     if (!email) {
@@ -398,19 +436,24 @@ router.get('/check-reset-token/:token', async (req, res) => {
     }
 });
 
-// Réinitialiser le mot de passe
-router.post('/reset-password', async (req, res) => {
+// Réinitialiser le mot de passe (avec hashage bcrypt)
+router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
     const { token, password } = req.body;
     
     if (!token || !password) {
         return res.status(400).json({ error: 'Token et mot de passe requis' });
     }
     
-    if (password.length < 6) {
-        return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
+    // Validation du mot de passe avec règles de complexité
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+        return res.status(400).json({ error: passwordCheck.message });
     }
     
     try {
+        // Hasher le nouveau mot de passe
+        const hashedPassword = await hashPassword(password);
+        
         const tables = ['parents', 'eleves', 'professeurs', 'staff'];
         let updated = false;
         
@@ -418,7 +461,7 @@ router.post('/reset-password', async (req, res) => {
             if (!updated) {
                 const result = await dbRun(db, 
                     `UPDATE ${table} SET password = ?, resetToken = NULL, resetExpires = NULL WHERE resetToken = ? AND resetExpires > ?`,
-                    [password, token, Date.now()]
+                    [hashedPassword, token, Date.now()]
                 );
                 if (result.changes > 0) updated = true;
             }
@@ -431,53 +474,66 @@ router.post('/reset-password', async (req, res) => {
         }
         
     } catch (error) {
-        console.error('Erreur:', error);
+        console.error('Erreur reset-password:', error);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
-// Changer le mot de passe (utilisateur connecté)
-router.put('/change-password', requireAuth, (req, res) => {
+// Changer le mot de passe (utilisateur connecté, avec hashage bcrypt)
+router.put('/change-password', requireAuth, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     
     if (!currentPassword || !newPassword) {
         return res.status(400).json({ error: 'Mot de passe actuel et nouveau mot de passe requis' });
     }
     
-    if (newPassword.length < 8) {
-        return res.status(400).json({ error: 'Le nouveau mot de passe doit contenir au moins 8 caractères' });
+    // Validation du nouveau mot de passe avec règles de complexité
+    const passwordCheck = validatePassword(newPassword);
+    if (!passwordCheck.valid) {
+        return res.status(400).json({ error: passwordCheck.message });
     }
     
     const userId = req.userId;
     const userRole = req.userRole;
     
-    // Déterminer la table selon le rôle
-    let tableName;
-    if (userRole === 'parent') tableName = 'parents';
-    else if (userRole === 'eleve') tableName = 'eleves';
-    else if (userRole === 'professeur') tableName = 'professeurs';
-    else if (['admin', 'directeur', 'secretaire', 'secretariat', 'staff'].includes(userRole)) tableName = 'staff';
-    else return res.status(400).json({ error: 'Rôle utilisateur invalide' });
+    // Déterminer la table selon le rôle (whitelist stricte)
+    const roleTableMap = {
+        'parent': 'parents',
+        'eleve': 'eleves',
+        'professeur': 'professeurs',
+        'admin': 'staff',
+        'directeur': 'staff',
+        'secretaire': 'staff',
+        'secretariat': 'staff'
+    };
     
-    // Vérifier l'ancien mot de passe
-    db.get(`SELECT * FROM ${tableName} WHERE id = ? AND password = ?`, 
-        [userId, currentPassword], 
-        (err, userRow) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (!userRow) return res.status(400).json({ error: 'Mot de passe actuel incorrect' });
-            
-            // Mettre à jour avec le nouveau mot de passe
-            db.run(`UPDATE ${tableName} SET password = ? WHERE id = ?`, 
-                [newPassword, userId], 
-                function(err) {
-                    if (err) return res.status(500).json({ error: err.message });
-                    if (this.changes === 0) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-                    
-                    res.json({ success: true, message: 'Mot de passe changé avec succès' });
-                }
-            );
+    const tableName = roleTableMap[userRole];
+    if (!tableName) {
+        return res.status(400).json({ error: 'Rôle utilisateur invalide' });
+    }
+    
+    try {
+        // Récupérer l'utilisateur par ID uniquement
+        const userRow = await dbGet(db, `SELECT id, password FROM ${tableName} WHERE id = ?`, [userId]);
+        if (!userRow) {
+            return res.status(404).json({ error: 'Utilisateur non trouvé' });
         }
-    );
+        
+        // Vérifier l'ancien mot de passe avec bcrypt
+        const isValid = await verifyPassword(currentPassword, userRow.password);
+        if (!isValid) {
+            return res.status(400).json({ error: 'Mot de passe actuel incorrect' });
+        }
+        
+        // Hasher et sauvegarder le nouveau mot de passe
+        const hashedPassword = await hashPassword(newPassword);
+        await dbRun(db, `UPDATE ${tableName} SET password = ? WHERE id = ?`, [hashedPassword, userId]);
+        
+        res.json({ success: true, message: 'Mot de passe changé avec succès' });
+    } catch (err) {
+        console.error('Erreur change-password:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 module.exports = router;

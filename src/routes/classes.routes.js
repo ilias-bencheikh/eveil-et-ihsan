@@ -11,12 +11,12 @@ router.get('/', (req, res) => {
 
     if (userRole === 'professeur') {
         db.all('SELECT * FROM classes WHERE professeurId = ?', [userId], (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     } else {
         db.all('SELECT * FROM classes', (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     }
@@ -34,7 +34,7 @@ router.post('/', checkPermission('create'), (req, res) => {
         function(err) {
             if (err) {
                 console.error('Erreur lors de l\'insertion en base:', err);
-                return res.status(500).json({ error: err.message });
+                return res.status(500).json({ error: 'Erreur interne du serveur' });
             }
             console.log('Classe créée avec succès:', { id, nom, niveau, professeurId });
             res.status(201).json({ id, nom, niveau, professeurId });
@@ -49,7 +49,7 @@ router.put('/:id', checkPermission('update'), (req, res) => {
     db.run('UPDATE classes SET nom = ?, niveau = ?, professeurId = ? WHERE id = ?',
         [nom, niveau, professeurId, req.params.id],
         function(err) {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             if (this.changes === 0) return res.status(404).json({ message: 'Classe non trouvée' });
             res.json({ id: req.params.id, nom, niveau, professeurId });
         }
@@ -59,7 +59,7 @@ router.put('/:id', checkPermission('update'), (req, res) => {
 // Supprimer une classe
 router.delete('/:id', checkPermission('delete'), (req, res) => {
     db.run('DELETE FROM classes WHERE id = ?', [req.params.id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (this.changes === 0) return res.status(404).json({ message: 'Classe non trouvée' });
         res.json({ message: 'Classe supprimée' });
     });
@@ -74,7 +74,7 @@ router.post('/nouvelle-annee', checkPermission('update'), (req, res) => {
 
     // Mettre la classe de tous les élèves à NULL
     db.run('UPDATE eleves SET classe = NULL', function(err) {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         const nbEleves = this.changes;
         res.json({
             success: true,
