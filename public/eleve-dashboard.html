@@ -894,6 +894,15 @@
     </style>
 </head>
 <body>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('eleve_active_tab') || 'accueil';
+            var style = document.createElement('style');
+            style.id = 'early-tab-fix';
+            style.textContent = '.tab-content:not(#' + saved + ') { display: none !important; }';
+            document.head.appendChild(style);
+        })();
+    </script>
     <div class="dashboard-page">
         <!-- Overlay Mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -925,7 +934,7 @@
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Mon espace</span>
                     
-                    <a href="#accueil" class="sidebar-nav-item active" data-tab="accueil">
+                    <a href="#accueil" class="sidebar-nav-item" data-tab="accueil">
                         <span class="material-icons">home</span>
                         <span>Accueil</span>
                     </a>
@@ -1014,7 +1023,7 @@
             <!-- Content Area -->
             <div class="dashboard-content">
                 <!-- Accueil Tab -->
-                <div id="accueil" class="tab-content active">
+                <div id="accueil" class="tab-content">
                     <!-- Famille Cards -->
                     <div id="familyCards" class="family-cards-grid">
                         <!-- Les cartes des enfants seront générées dynamiquement -->
@@ -1874,6 +1883,18 @@
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
+            // Restaurer l'onglet sauvegardé au chargement
+            const savedTab = localStorage.getItem('eleve_active_tab');
+            if (savedTab && document.getElementById(savedTab)) {
+                switchTab(savedTab);
+            } else {
+                switchTab('accueil');
+            }
+
+            // Supprimer le style anti-flash
+            const earlyFix = document.getElementById('early-tab-fix');
+            if (earlyFix) earlyFix.remove();
+
             // Theme toggle
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
@@ -2408,6 +2429,9 @@
         }
 
         function switchTab(tabName) {
+            // Sauvegarder l'onglet actif dans localStorage
+            localStorage.setItem('eleve_active_tab', tabName);
+
             // Mettre à jour la navigation
             document.querySelectorAll('.sidebar-nav-item').forEach(item => {
                 item.classList.remove('active');

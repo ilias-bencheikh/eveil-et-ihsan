@@ -914,6 +914,19 @@
     </style>
 </head>
 <body>
+    <script>
+        // Appliquer immédiatement l'onglet sauvegardé pour éviter le flash visuel
+        (function() {
+            var saved = localStorage.getItem('staff_active_tab');
+            if (!saved) saved = 'dashboard';
+            var style = document.createElement('style');
+            style.id = 'early-tab-fix';
+            style.textContent = '.tab-content:not(#' + saved + ') { display: none !important; }' +
+                '.sidebar-nav-item { }' +
+                '.sidebar-nav-item.active { }';
+            document.head.appendChild(style);
+        })();
+    </script>
     <div class="dashboard-page">
         <!-- Overlay Mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -944,7 +957,7 @@
             <nav class="sidebar-nav">
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Principal</span>
-                    <a href="#" class="sidebar-nav-item active" data-tab="dashboard">
+                    <a href="#" class="sidebar-nav-item" data-tab="dashboard">
                         <span class="material-icons">dashboard</span>
                         <span>Tableau de bord</span>
                     </a>
@@ -1043,7 +1056,7 @@
             <div class="dashboard-content">
                 
                 <!-- ========== DASHBOARD TAB ========== -->
-                <div id="dashboard" class="tab-content active">
+                <div id="dashboard" class="tab-content">
 
                     <!-- ✦ Bannière de bienvenue ✦ -->
                     <div class="db-welcome-banner">
@@ -2584,6 +2597,18 @@
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
+            // Restaurer l'onglet sauvegardé au chargement (ou dashboard par défaut)
+            const savedTab = localStorage.getItem('staff_active_tab');
+            if (savedTab && document.getElementById(savedTab)) {
+                switchTab(savedTab);
+            } else {
+                switchTab('dashboard');
+            }
+
+            // Supprimer le style anti-flash après initialisation
+            const earlyFix = document.getElementById('early-tab-fix');
+            if (earlyFix) earlyFix.remove();
+
             // Charger les messages pour mettre à jour le badge non lus
             loadMessages();
         }
@@ -2647,6 +2672,9 @@
             };
             document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
             loadTabData(tabName);
+
+            // Sauvegarder l'onglet actif dans localStorage
+            localStorage.setItem('staff_active_tab', tabName);
 
             if (window.innerWidth < 900) toggleSidebar();
         }

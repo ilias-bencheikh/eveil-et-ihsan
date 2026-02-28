@@ -776,6 +776,15 @@
     </style>
 </head>
 <body>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('parent_active_section') || 'accueil-parent';
+            var style = document.createElement('style');
+            style.id = 'early-tab-fix';
+            style.textContent = '.tab-content:not(#section-' + saved + ') { display: none !important; }';
+            document.head.appendChild(style);
+        })();
+    </script>
     <div class="dashboard-page">
         <!-- Overlay Mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -806,7 +815,7 @@
             <nav class="sidebar-nav">
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Principal</span>
-                    <a href="#" class="sidebar-nav-item active" data-section="accueil-parent">
+                    <a href="#" class="sidebar-nav-item" data-section="accueil-parent">
                         <span class="material-icons">home</span>
                         <span>Accueil</span>
                     </a>
@@ -882,7 +891,7 @@
             <!-- Content Area -->
             <div class="dashboard-content">
                 <!-- Section Accueil Parent -->
-                <section id="section-accueil-parent" class="tab-content active">
+                <section id="section-accueil-parent" class="tab-content">
 
                     <!-- Bannière de bienvenue -->
                     <div class="p-welcome-banner">
@@ -2080,34 +2089,42 @@
             const navItems = document.querySelectorAll('.sidebar-nav-item');
             const sections = document.querySelectorAll('.tab-content');
 
+            // Fonction pour naviguer vers une section
+            function navigateToSection(sectionId) {
+                // Mettre à jour la navigation
+                navItems.forEach(i => i.classList.remove('active'));
+                const navItem = document.querySelector(`.sidebar-nav-item[data-section="${sectionId}"]`);
+                if (navItem) navItem.classList.add('active');
+
+                // Afficher la section
+                sections.forEach(s => s.classList.remove('active'));
+                const section = document.getElementById(`section-${sectionId}`);
+                if (section) {
+                    section.classList.add('active');
+                }
+
+                // Mettre à jour le titre
+                const titles = {
+                    'accueil-parent': 'Accueil',
+                    'mes-enfants': 'Mes Enfants',
+                    'absences-parent': 'Absences',
+                    'appreciations-parent': 'Appréciations',
+                    'frais-parent': 'Frais d\'inscription',
+                    'messagerie-parent': 'Messagerie',
+                    'actualites-parent': 'Actualités',
+                    'profil-parent': 'Mon Profil'
+                };
+                document.getElementById('pageTitle').textContent = titles[sectionId] || 'Accueil';
+
+                // Sauvegarder la section active dans localStorage
+                localStorage.setItem('parent_active_section', sectionId);
+            }
+
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     const sectionId = item.dataset.section;
-
-                    // Mettre à jour la navigation
-                    navItems.forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-
-                    // Afficher la section
-                    sections.forEach(s => s.classList.remove('active'));
-                    const section = document.getElementById(`section-${sectionId}`);
-                    if (section) {
-                        section.classList.add('active');
-                    }
-
-                    // Mettre à jour le titre
-                    const titles = {
-                        'accueil-parent': 'Accueil',
-                        'mes-enfants': 'Mes Enfants',
-                        'absences-parent': 'Absences',
-                        'appreciations-parent': 'Appréciations',
-                        'frais-parent': 'Frais d\'inscription',
-                        'messagerie-parent': 'Messagerie',
-                        'actualites-parent': 'Actualités',
-                        'profil-parent': 'Mon Profil'
-                    };
-                    document.getElementById('pageTitle').textContent = titles[sectionId] || 'Accueil';
+                    navigateToSection(sectionId);
 
                     // Charger les données spécifiques si nécessaire
                     if (sectionId === 'accueil-parent') {
@@ -2126,6 +2143,18 @@
                     document.getElementById('sidebarOverlay').classList.remove('show');
                 });
             });
+
+            // Restaurer la section sauvegardée au chargement
+            const savedSection = localStorage.getItem('parent_active_section');
+            if (savedSection && document.getElementById(`section-${savedSection}`)) {
+                navigateToSection(savedSection);
+            } else {
+                navigateToSection('accueil-parent');
+            }
+
+            // Supprimer le style anti-flash
+            const earlyFix = document.getElementById('early-tab-fix');
+            if (earlyFix) earlyFix.remove();
 
             // Toggle sidebar sur mobile
             document.getElementById('menuToggle').addEventListener('click', () => {
