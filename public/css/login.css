@@ -410,35 +410,92 @@
 
 /* ===== CHARGEMENT ===== */
 
+/* ===== BARRE DE PROGRESSION ===== */
 .login-loading {
     position: absolute;
-    inset: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: var(--spacing-md);
-    border-radius: var(--md-sys-shape-corner-extra-large);
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) 0 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
     z-index: 10;
+    background: transparent;
 }
 
 .login-loading.show {
-    display: flex;
+    opacity: 1;
 }
+
+.login-loading::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--md-sys-color-primary) 20%,
+        #60a5fa 50%,
+        var(--md-sys-color-primary) 80%,
+        transparent 100%
+    );
+    background-size: 300% 100%;
+    animation: loginProgressShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes loginProgressShimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ===== BOUTON EN ÉTAT DE CHARGEMENT ===== */
+.login-submit {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-submit-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    flex-shrink: 0;
+}
+
+.login-submit.loading {
+    pointer-events: none;
+    gap: 10px;
+}
+
+.login-submit.loading .login-submit-icon { display: none; }
+.login-submit.loading .login-submit-spinner { display: block; }
+.login-submit.loading .login-submit-text {
+    opacity: 0.85;
+    letter-spacing: 0.03em;
+}
+
+.login-submit.success {
+    background: #22c55e !important;
+    pointer-events: none;
+}
+
+.login-submit.success .login-submit-spinner { display: none; }
+.login-submit.success .login-submit-icon { display: block; }
 
 .login-loading-spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--md-sys-color-surface-container-highest);
-    border-top-color: var(--md-sys-color-primary);
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-.login-loading-text {
-    font: var(--md-sys-typescale-body-medium);
-    color: var(--md-sys-color-on-surface-variant);
+    animation: spin 0.75s linear infinite;
 }
 
 /* ===== FOOTER ===== */
@@ -503,9 +560,7 @@
 /* ===== DARK MODE SUPPORT ===== */
 
 @media (prefers-color-scheme: dark) {
-    .login-loading {
-        background-color: rgba(0, 0, 0, 0.8);
-    }
+    /* dark mode: barre de progression inchangée */
 }
 
 /* ===========================================

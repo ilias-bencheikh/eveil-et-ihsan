@@ -148,7 +148,10 @@ router.post('/login', loginLimiter, async (req, res) => {
                 email: row.email,
                 role: 'eleve',
                 nom: row.nom,
-                prenom: row.prenom
+                prenom: row.prenom,
+                classe: row.classe || null,
+                tel: row.tel || null,
+                adresse: row.adresse || null
             };
             const token = await createSession(user, req);
             return res.json({ user, token });
@@ -409,7 +412,36 @@ router.post('/forgot-password', resetPasswordLimiter, async (req, res) => {
     }
 });
 
-// Vérifier le token de réinitialisation
+// Vérifier le token de réinitialisation (via query param, appelé par reset-password.html)
+router.get('/verify-reset-token', async (req, res) => {
+    const token = req.query.token;
+    if (!token) {
+        return res.status(400).json({ valid: false, message: 'Token manquant' });
+    }
+    try {
+        const parent = await dbGet(db, 'SELECT id FROM parents WHERE resetToken = ? AND resetExpires > ?',
+            [token, Date.now()]);
+        if (parent) return res.json({ valid: true, type: 'parent' });
+
+        const eleve = await dbGet(db, 'SELECT id FROM eleves WHERE resetToken = ? AND resetExpires > ?',
+            [token, Date.now()]);
+        if (eleve) return res.json({ valid: true, type: 'eleve' });
+
+        const prof = await dbGet(db, 'SELECT id FROM professeurs WHERE resetToken = ? AND resetExpires > ?',
+            [token, Date.now()]);
+        if (prof) return res.json({ valid: true, type: 'professeur' });
+
+        const staff = await dbGet(db, 'SELECT id FROM staff WHERE resetToken = ? AND resetExpires > ?',
+            [token, Date.now()]);
+        if (staff) return res.json({ valid: true, type: 'staff' });
+
+        res.status(400).json({ valid: false, message: 'Token invalide ou expiré' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+// Vérifier le token de réinitialisation (via paramètre de route, legacy)
 router.get('/check-reset-token/:token', async (req, res) => {
     const { token } = req.params;
     

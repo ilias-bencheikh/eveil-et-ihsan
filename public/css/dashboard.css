@@ -250,17 +250,21 @@
     color: rgba(255, 255, 255, 0.7);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
 }
 
 .sidebar-user-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    background: var(--md-sys-color-tertiary);
-    color: var(--md-sys-color-on-tertiary);
-    border-radius: var(--md-sys-shape-corner-full);
-    font: var(--md-sys-typescale-label-small);
-    text-transform: uppercase;
+    display: inline-block !important;
+    padding: 3px 12px !important;
+    background: #ffffff !important;
+    color: #1e5aa8 !important;
+    border-radius: 999px !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
 }
 
 /* Navigation Menu */

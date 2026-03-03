@@ -14,13 +14,13 @@ router.get('/', (req, res) => {
             SELECT DISTINCT a.* FROM absences a
             INNER JOIN eleves e ON a.eleveId = e.id
             INNER JOIN classes c ON e.classe = c.nom
-            WHERE c.professeurId = ?
+            WHERE c.professeurId = ? AND a.type != 'present'
         `, [userId], (err, rows) => {
             if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
     } else {
-        db.all('SELECT * FROM absences', (err, rows) => {
+        db.all("SELECT * FROM absences WHERE type != 'present'", (err, rows) => {
             if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows);
         });
@@ -29,7 +29,7 @@ router.get('/', (req, res) => {
 
 // Obtenir les absences d'un élève
 router.get('/eleve/:eleveId', (req, res) => {
-    db.all('SELECT * FROM absences WHERE eleveId = ?', [req.params.eleveId], (err, rows) => {
+    db.all('SELECT * FROM absences WHERE eleveId = ? AND type != ?', [req.params.eleveId, 'present'], (err, rows) => {
         if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         res.json(rows);
     });

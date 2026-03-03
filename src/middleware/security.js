@@ -23,11 +23,11 @@ const globalLimiter = rateLimit({
     legacyHeaders: false
 });
 
-// Rate limiter strict pour login : 5 tentatives par 15 minutes
+// Rate limiter strict pour login : 10 tentatives par 5 minutes
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5,
-    message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 10,
+    message: { error: 'Trop de tentatives de connexion érronées. Réessayez dans 5 minutes.' },
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: true // Ne compte que les échecs

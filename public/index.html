@@ -947,9 +947,9 @@
             <!-- User Info -->
             <div class="sidebar-user">
                 <div class="sidebar-user-avatar" id="userAvatar">A</div>
-                <div class="sidebar-user-info">
+                <div class="sidebar-user-info" style="width:100%;text-align:center;">
                     <h3 id="userName">Utilisateur</h3>
-                    <span id="userRole"><span class="sidebar-user-badge">Admin</span></span>
+                    <span id="userRole" style="display:flex;justify-content:center;"><span class="sidebar-user-badge">Admin</span></span>
                 </div>
             </div>
 
@@ -5436,14 +5436,16 @@
 
             for (const eleve of appelEleves) {
                 const status = document.querySelector(`input[name="appel_${eleve.id}"]:checked`).value;
-                absences.push({
-                    eleveId: eleve.id,
-                    type: status,
-                    motif: '',
-                    professeurId: user?.id,
-                    classe,
-                    date
-                });
+                if (status !== 'present') {
+                    absences.push({
+                        eleveId: eleve.id,
+                        type: status,
+                        motif: '',
+                        professeurId: user?.id,
+                        classe,
+                        date
+                    });
+                }
             }
 
             try {
@@ -5528,14 +5530,16 @@
 
             for (const eleve of appelEleves) {
                 const status = document.querySelector(`input[name="appel_${eleve.id}"]:checked`).value;
-                absences.push({
-                    eleveId: eleve.id,
-                    type: status,
-                    motif: '',
-                    professeurId: user?.id,
-                    classe,
-                    date
-                });
+                if (status !== 'present') {
+                    absences.push({
+                        eleveId: eleve.id,
+                        type: status,
+                        motif: '',
+                        professeurId: user?.id,
+                        classe,
+                        date
+                    });
+                }
             }
 
             try {
@@ -5980,9 +5984,6 @@
 
             // Afficher les actions
             showAppreciationButtons();
-
-            // Charger les données
-            loadAppreciationsRecap();
         }
 
         // Désélectionner la classe
@@ -6003,7 +6004,8 @@
             document.getElementById('historiqueCard').style.display = 'none';
 
             // Vider le récapitulatif
-            document.getElementById('appreciationsList').innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour afficher les appréciations</p>';
+            const _apprList = document.getElementById('appreciationsList');
+            if (_apprList) _apprList.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Sélectionnez une classe pour afficher les appréciations</p>';
         }
 
         // Afficher les boutons d'action quand une classe est sélectionnée
@@ -6045,8 +6047,10 @@
                 const appreciations = allAppreciations.filter(a => a.classe === currentSelectedClasse);
 
                 if (!Array.isArray(appreciations) || appreciations.length === 0) {
-                    document.getElementById('appreciationsList').innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Aucune appréciation pour cette classe</p>';
+                    const el = document.getElementById('appreciationsList');
+                    if (el) el.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Aucune appréciation pour cette classe</p>';
                     return;
+                }
                 // Grouper par élève
                 const byEleve = {};
                 appreciations.forEach(a => {
@@ -6060,7 +6064,8 @@
                     byEleve[a.eleveId].appreciations.push(a);
                 });
 
-                document.getElementById('appreciationsList').innerHTML = `
+                const listEl = document.getElementById('appreciationsList');
+                if (listEl) listEl.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
                         ${Object.entries(byEleve).map(([eleveId, data]) => `
                             <div class="md-card md-card-outlined" style="padding: 16px;">
@@ -6089,10 +6094,10 @@
                         `).join('')}
                     </div>
                 `;
-                }
             } catch (error) {
                 console.error('Erreur chargement appréciations:', error);
-                document.getElementById('appreciationsList').innerHTML = '<p style="color: var(--md-sys-color-error); text-align: center; padding: 20px;">Erreur lors du chargement</p>';
+                const errEl = document.getElementById('appreciationsList');
+                if (errEl) errEl.innerHTML = '<p style="color: var(--md-sys-color-error); text-align: center; padding: 20px;">Erreur lors du chargement</p>';
             }
         }
         

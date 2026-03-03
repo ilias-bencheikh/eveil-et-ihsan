@@ -279,6 +279,56 @@ function initDatabase() {
                 }
             });
 
+            // Table migrations (suivi des migrations one-time)
+            db.run(`CREATE TABLE IF NOT EXISTS migrations (
+                id TEXT PRIMARY KEY,
+                appliedAt TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
+
+            // ── Migration : supprimer le FK constraint sur professeurId dans appreciations ──
+            // Les membres du staff ne sont pas dans la table professeurs → SQLITE_CONSTRAINT.
+            // On chaîne chaque étape dans son callback pour garantir l'ordre d'exécution.
+            db.get(`SELECT id FROM migrations WHERE id = 'rm_appreciations_professeurId_fk'`, (err, row) => {
+                if (row) return; // déjà appliqué
+                db.run(`PRAGMA foreign_keys = OFF`, () => {
+                    db.run(`DROP TABLE IF EXISTS appreciations_new`, () => {
+                        db.run(`CREATE TABLE appreciations_new (
+                            id TEXT PRIMARY KEY,
+                            eleveId TEXT NOT NULL,
+                            professeurId TEXT,
+                            matiere TEXT,
+                            periode TEXT,
+                            note REAL,
+                            commentaire TEXT,
+                            createdByRole TEXT,
+                            dateCreated TEXT DEFAULT CURRENT_TIMESTAMP,
+                            batchId TEXT,
+                            classe TEXT,
+                            FOREIGN KEY (eleveId) REFERENCES eleves(id)
+                        )`, () => {
+                            db.run(`INSERT OR IGNORE INTO appreciations_new
+                                    SELECT id, eleveId, professeurId, matiere, periode, note,
+                                           commentaire, createdByRole, dateCreated, batchId, classe
+                                    FROM appreciations`, (insertErr) => {
+                                if (insertErr) {
+                                    console.error('❌ Migration appreciations INSERT échouée:', insertErr);
+                                    db.run(`PRAGMA foreign_keys = ON`);
+                                    return;
+                                }
+                                db.run(`DROP TABLE appreciations`, () => {
+                                    db.run(`ALTER TABLE appreciations_new RENAME TO appreciations`, () => {
+                                        db.run(`PRAGMA foreign_keys = ON`);
+                                        db.run(`INSERT INTO migrations (id) VALUES ('rm_appreciations_professeurId_fk')`, () => {
+                                            console.log('✅ Migration rm_appreciations_professeurId_fk appliquée');
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+
             console.log('✅ Tables créées avec succès');
             resolve();
         });

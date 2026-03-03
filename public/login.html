@@ -161,11 +161,8 @@
                     </div>
                 </div>
 
-                <!-- Loading Overlay -->
-                <div class="login-loading" id="loginLoading">
-                    <div class="login-loading-spinner"></div>
-                    <span class="login-loading-text">Connexion en cours...</span>
-                </div>
+                <!-- Barre de progression (haut de carte) -->
+
 
                 <div class="login-card-header">
                     <div class="login-logo-small">
@@ -214,9 +211,10 @@
                     </div>
 
                     <!-- Bouton de connexion -->
-                    <button type="submit" class="md-btn md-btn-filled login-submit">
-                        <span class="material-icons">login</span>
-                        Se connecter
+                    <button type="submit" class="md-btn md-btn-filled login-submit" id="loginSubmitBtn">
+                        <span class="material-icons login-submit-icon">login</span>
+                        <span class="login-submit-spinner"></span>
+                        <span class="login-submit-text">Se connecter</span>
                     </button>
                 </form>
 
@@ -357,7 +355,7 @@
         const passwordInput = document.getElementById('password');
         const loginError = document.getElementById('loginError');
         const errorMessage = document.getElementById('errorMessage');
-        const loginLoading = document.getElementById('loginLoading');
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
         const togglePassword = document.getElementById('togglePassword');
 
         // Toggle visibilité mot de passe
@@ -376,7 +374,8 @@
             loginError.classList.remove('show');
             
             // Afficher le chargement
-            loginLoading.classList.add('show');
+            loginSubmitBtn.classList.add('loading');
+            loginSubmitBtn.querySelector('.login-submit-text').textContent = 'Connexion en cours…';
 
             try {
                 const response = await fetch(`${API_URL}/auth/login`, {
@@ -395,7 +394,10 @@
                     localStorage.setItem('token', data.token);
                     
                     // Animation de succès puis redirection
-                    loginLoading.querySelector('.login-loading-text').textContent = 'Connexion réussie !';
+                    loginSubmitBtn.classList.remove('loading');
+                    loginSubmitBtn.classList.add('success');
+                    loginSubmitBtn.querySelector('.login-submit-text').textContent = 'Connexion réussie !';
+                    loginSubmitBtn.querySelector('.login-submit-icon').textContent = 'check_circle';
                     
                     setTimeout(() => {
                         // Redirection selon le rôle de l'utilisateur
@@ -407,6 +409,10 @@
                             window.location.href = 'index.html';
                         }
                     }, 800);
+                } else if (response.status === 429) {
+                    const retryAfter = response.headers.get('Retry-After');
+                    const minutes = retryAfter ? Math.ceil(retryAfter / 60) : 5;
+                    throw new Error(data.error || `Trop de tentatives. Réessayez dans ${minutes} minute${minutes > 1 ? 's' : ''}.`);
                 } else if (data.maintenance) {
                     // Maintenance renvoyée par le serveur lors du login
                     isMaintenanceActive = true;
@@ -433,10 +439,12 @@
                     }
                     throw new Error('Le site est en maintenance. Veuillez réessayer plus tard');
                 } else {
-                    throw new Error(data.message || 'Identifiants incorrects');
+                    throw new Error(data.error || data.message || 'Identifiants incorrects');
                 }
             } catch (error) {
-                loginLoading.classList.remove('show');
+                loginSubmitBtn.classList.remove('loading', 'success');
+                loginSubmitBtn.querySelector('.login-submit-text').textContent = 'Se connecter';
+                loginSubmitBtn.querySelector('.login-submit-icon').textContent = 'login';
                 errorMessage.textContent = error.message || 'Erreur de connexion au serveur';
                 loginError.classList.add('show');
             }

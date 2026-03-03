@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+﻿const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 // Configuration du transporteur d'email
@@ -13,340 +13,218 @@ const transporter = nodemailer.createTransport({
 // Templates d'emails
 const emailTemplates = {
     activation: (userName, activationLink) => ({
-        subject: 'Activation de votre compte - Eveil et Ihsan',
-        html: `
-            <!DOCTYPE html>
-            <html lang="fr">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Activation de compte - Eveil et Ihsan</title>
-                <style>
-                    body {
-                        font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        background-color: #f8f9ff;
-                        color: #191c20;
-                        line-height: 1.6;
-                    }
-                    .email-container {
-                        max-width: 600px;
-                        margin: 0 auto;
-                        background-color: #ffffff;
-                        border-radius: 12px;
-                        overflow: hidden;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    }
-                    .email-header {
-                        background-color: #5c9ded;
-                        padding: 30px;
-                        text-align: center;
-                        color: white;
-                    }
-                    .email-header h1 {
-                        margin: 0;
-                        font-size: 24px;
-                        font-weight: 500;
-                        letter-spacing: 0.5px;
-                    }
-                    .email-body {
-                        padding: 40px 30px;
-                        background-color: #ffffff;
-                    }
-                    .email-body h2 {
-                        color: #5c9ded;
-                        font-size: 20px;
-                        font-weight: 500;
-                        margin-top: 0;
-                        margin-bottom: 20px;
-                    }
-                    .email-body p {
-                        color: #43474e;
-                        font-size: 16px;
-                        line-height: 1.7;
-                        margin-bottom: 20px;
-                    }
-                    .cta-button {
-                        display: inline-block;
-                        background-color: #5c9ded;
-                        color: white;
-                        padding: 14px 28px;
-                        text-decoration: none;
-                        border-radius: 6px;
-                        font-weight: 500;
-                        font-size: 16px;
-                        text-align: center;
-                        margin: 25px 0;
-                        transition: background-color 0.3s ease;
-                    }
-                    .cta-button:hover {
-                        background-color: #4a90e2;
-                    }
-                    .link-box {
-                        background-color: #f0f7ff;
-                        padding: 16px;
-                        border-radius: 6px;
-                        border: 1px solid #b3d9ff;
-                        font-family: 'Courier New', monospace;
-                        font-size: 14px;
-                        color: #5c9ded;
-                        word-break: break-all;
-                        margin: 20px 0;
-                    }
-                    .info-box {
-                        background-color: #e3f2fd;
-                        border: 1px solid #90caf9;
-                        border-radius: 6px;
-                        padding: 16px;
-                        margin: 20px 0;
-                    }
-                    .info-box p {
-                        margin: 0;
-                        color: #1976d2;
-                        font-weight: 500;
-                    }
-                    .divider {
-                        border: none;
-                        border-top: 1px solid #e0e2ec;
-                        margin: 30px 0;
-                    }
-                    .footer {
-                        text-align: center;
-                        color: #666;
-                        font-size: 14px;
-                        padding: 20px 30px;
-                        background-color: #f8f9ff;
-                        border-top: 1px solid #e0e2ec;
-                    }
-                    .footer p {
-                        margin: 5px 0;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="email-container">
-                    <div class="email-header">
-                        <h1>Eveil et Ihsan</h1>
-                    </div>
-                    <div class="email-body">
-                        <h2>Salam Aleykoum ${userName},</h2>
-                        <p>
-                            Votre compte a été créé avec succès sur la plateforme de gestion scolaire <strong>Eveil et Ihsan</strong>.
-                            Pour finaliser votre inscription et accéder à votre espace personnel, veuillez activer votre compte.
-                        </p>
+        subject: 'Activez votre compte Eveil et Ihsan',
+        html: `<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Activez votre compte — Eveil et Ihsan</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f6f8fc;font-family:Roboto,'Segoe UI',Helvetica,Arial,sans-serif;">
 
-                        <div style="text-align: center;">
-                            <a href="${activationLink}" class="cta-button">
-                                Activer mon compte
-                            </a>
-                        </div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f8fc;">
+  <tr>
+    <td align="center" style="padding:32px 16px 48px;">
+      <!-- Carte principale -->
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0"
+             style="max-width:560px;width:100%;background:#ffffff;border-radius:8px;
+                    box-shadow:0 1px 3px rgba(60,64,67,.15),0 4px 8px rgba(60,64,67,.10);">
 
-                        <div class="info-box">
-                            <p>
-                                <strong>Instructions :</strong><br>
-                                • Cliquez sur le bouton "Activer mon compte"<br>
-                                • Définissez votre mot de passe<br>
-                                • Connectez-vous à votre compte
-                            </p>
-                        </div>
+        <!-- Barre colorée top -->
+        <tr>
+          <td style="height:4px;background:#1e5aa8;border-radius:8px 8px 0 0;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
 
-                        <p>
-                            Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :
-                        </p>
-                        <div class="link-box">
-                            ${activationLink}
-                        </div>
+        <tr>
+           <td style="padding:24px 0 0;text-align:center;">
+            <span style="font-size:22px;font-weight:700;color:#1e5aa8;letter-spacing:-0.3px;">Eveil et Ihsan</span>
+          </td>
+        </tr>
 
-                        <hr class="divider">
+        <!-- Contenu -->
+        <tr>
+          <td style="padding:24px 48px 0;">
+            <h1 style="margin:0 0 8px;font-size:24px;font-weight:400;color:#202124;text-align:center;letter-spacing:0;">
+              Activez votre compte
+            </h1>
 
-                        <p style="font-size: 14px; color: #666;">
-                            <strong>Informations importantes :</strong><br>
-                            • Ce lien d'activation est personnel et confidentiel<br>
-                            • Il expire automatiquement après utilisation<br>
-                            • Pour toute question, contactez l'administration
-                        </p>
-                    </div>
-                    <div class="footer">
-                        <p>
-                            Cet email a été envoyé automatiquement par le système de gestion Eveil et Ihsan
-                        </p>
-                        <p style="font-size: 12px;">
-                            © 2025 Eveil et Ihsan - Système de gestion scolaire
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `
+            <p style="margin:24px 0 16px;font-size:15px;color:#202124;line-height:1.6;">
+              Salam Aleykoum <strong>${userName}</strong>,
+            </p>
+            <p style="margin:0 0 32px;font-size:15px;color:#3c4043;line-height:1.7;">
+              Votre compte a été créé avec succès sur la plateforme <strong>Eveil et Ihsan</strong>.
+              Cliquez sur le bouton ci-dessous pour l'activer et définir votre mot de passe.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Bouton CTA (style Google) -->
+        <tr>
+          <td align="center" style="padding:0 48px 32px;">
+            <a href="${activationLink}"
+               style="display:inline-block;background:#1e5aa8;color:#ffffff;text-decoration:none;
+                      font-size:14px;font-weight:500;padding:10px 24px;border-radius:4px;
+                      letter-spacing:.25px;">
+              Activer mon compte
+            </a>
+          </td>
+        </tr>
+
+        <!-- Séparateur -->
+        <tr>
+          <td style="padding:0 48px;">
+            <div style="border-top:1px solid #e8eaed;"></div>
+          </td>
+        </tr>
+
+        <!-- Lien de secours + note sécurité -->
+        <tr>
+          <td style="padding:24px 48px 40px;">
+            <p style="margin:0 0 12px;font-size:13px;color:#5f6368;line-height:1.7;">
+              Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur&nbsp;:
+            </p>
+            <p style="margin:0 0 24px;font-size:12px;color:#1e5aa8;word-break:break-all;line-height:1.6;font-family:'Courier New',monospace;">
+              ${activationLink}
+            </p>
+            <p style="margin:0;font-size:12px;color:#80868b;line-height:1.7;border-top:1px solid #e8eaed;padding-top:20px;">
+              Ce lien d'activation est personnel et confidentiel. Il expire après utilisation.<br>
+              Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      <!-- /Carte -->
+
+      <!-- Footer (style Google) -->
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+        <tr>
+          <td style="padding:24px 0 0;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#80868b;line-height:1.8;">
+              © 2026 Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
+              Merci de ne pas répondre à cet email. Si vous avez besoin d'aide, contactez l'établissement scolaire ou l'administrateur de votre compte.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>`
     }),
 
     resetPassword: (userName, resetLink) => ({
-        subject: 'Réinitialisation de votre mot de passe - Eveil et Ihsan',
-        html: `
-            <!DOCTYPE html>
-            <html lang="fr">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Réinitialisation de mot de passe - Eveil et Ihsan</title>
-                <style>
-                    body {
-                        font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        background-color: #f8f9ff;
-                        color: #191c20;
-                        line-height: 1.6;
-                    }
-                    .email-container {
-                        max-width: 600px;
-                        margin: 0 auto;
-                        background-color: #ffffff;
-                        border-radius: 12px;
-                        overflow: hidden;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    }
-                    .email-header {
-                        background-color: #ffb74d;
-                        padding: 30px;
-                        text-align: center;
-                        color: white;
-                    }
-                    .email-header h1 {
-                        margin: 0;
-                        font-size: 24px;
-                        font-weight: 500;
-                        letter-spacing: 0.5px;
-                    }
-                    .email-body {
-                        padding: 40px 30px;
-                        background-color: #ffffff;
-                    }
-                    .email-body h2 {
-                        color: #ffb74d;
-                        font-size: 20px;
-                        font-weight: 500;
-                        margin-top: 0;
-                        margin-bottom: 20px;
-                    }
-                    .email-body p {
-                        color: #43474e;
-                        font-size: 16px;
-                        line-height: 1.7;
-                        margin-bottom: 20px;
-                    }
-                    .cta-button {
-                        display: inline-block;
-                        background-color: #ffb74d;
-                        color: white;
-                        padding: 14px 28px;
-                        text-decoration: none;
-                        border-radius: 6px;
-                        font-weight: 500;
-                        font-size: 16px;
-                        text-align: center;
-                        margin: 25px 0;
-                        transition: background-color 0.3s ease;
-                    }
-                    .cta-button:hover {
-                        background-color: #ff9800;
-                    }
-                    .link-box {
-                        background-color: #fff8e1;
-                        padding: 16px;
-                        border-radius: 6px;
-                        border: 1px solid #ffcc02;
-                        font-family: 'Courier New', monospace;
-                        font-size: 14px;
-                        color: #ffb74d;
-                        word-break: break-all;
-                        margin: 20px 0;
-                    }
-                    .warning-box {
-                        background-color: #fff3e0;
-                        border: 1px solid #ffb74d;
-                        border-radius: 6px;
-                        padding: 16px;
-                        margin: 20px 0;
-                    }
-                    .warning-box p {
-                        margin: 0;
-                        color: #f57c00;
-                        font-weight: 500;
-                    }
-                    .divider {
-                        border: none;
-                        border-top: 1px solid #e0e2ec;
-                        margin: 30px 0;
-                    }
-                    .footer {
-                        text-align: center;
-                        color: #666;
-                        font-size: 14px;
-                        padding: 20px 30px;
-                        background-color: #f8f9ff;
-                        border-top: 1px solid #e0e2ec;
-                    }
-                    .footer p {
-                        margin: 5px 0;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="email-container">
-                    <div class="email-header">
-                        <h1>Eveil et Ihsan</h1>
-                    </div>
-                    <div class="email-body">
-                        <h2>Bonjour ${userName},</h2>
-                        <p>
-                            Vous avez demandé la réinitialisation de votre mot de passe pour votre compte sur la plateforme <strong>Eveil et Ihsan</strong>.
-                            Pour créer un nouveau mot de passe sécurisé, cliquez sur le bouton ci-dessous :
-                        </p>
+        subject: 'Réinitialisez votre mot de passe - Eveil et Ihsan',
+        html: `<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Réinitialisation du mot de passe — Eveil et Ihsan</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f6f8fc;font-family:Roboto,'Segoe UI',Helvetica,Arial,sans-serif;">
 
-                        <div style="text-align: center;">
-                            <a href="${resetLink}" class="cta-button">
-                                Réinitialiser mon mot de passe
-                            </a>
-                        </div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f8fc;">
+  <tr>
+    <td align="center" style="padding:32px 16px 48px;">
 
-                        <div class="warning-box">
-                            <p>
-                                <strong>Informations importantes :</strong><br>
-                                • Ce lien est valable pendant 1 heure seulement<br>
-                                • Si vous n'avez pas demandé cette réinitialisation, ignorez cet email<br>
-                                • Votre mot de passe actuel reste valide jusqu'à la réinitialisation
-                            </p>
-                        </div>
+      <!-- Carte principale -->
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0"
+             style="max-width:560px;width:100%;background:#ffffff;border-radius:8px;
+                    box-shadow:0 1px 3px rgba(60,64,67,.15),0 4px 8px rgba(60,64,67,.10);">
 
-                        <p>
-                            Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :
-                        </p>
-                        <div class="link-box">
-                            ${resetLink}
-                        </div>
+        <!-- Barre colorée top (orange/ambre pour le mot de passe) -->
+        <tr>
+          <td style="height:4px;background:#e37400;border-radius:8px 8px 0 0;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
 
-                        <p>
-                            <strong>Étapes à suivre :</strong><br>
-                            • Cliquez sur le lien de réinitialisation<br>
-                            • Saisissez votre nouveau mot de passe<br>
-                            • Confirmez le nouveau mot de passe<br>
-                            • Connectez-vous avec vos nouvelles informations
-                        </p>
-                    </div>
-                    <div class="footer">
-                        <p>
-                            Cet email a été envoyé automatiquement par le système de gestion Eveil et Ihsan
-                        </p>
-                        <p style="font-size: 12px;">
-                            © 2025 Eveil et Ihsan - Système de gestion scolaire
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `
+        <tr>
+             <td style="padding:24px 0 16px;text-align:center;">
+            <span style="font-size:22px;font-weight:700;color:#1e5aa8;letter-spacing:-0.3px;">Eveil et Ihsan</span>
+          </td>
+        </tr>
+
+        <!-- Contenu -->
+        <tr>
+          <td style="padding:24px 48px 0;">
+            <h1 style="margin:0 0 8px;font-size:24px;font-weight:400;color:#202124;text-align:center;letter-spacing:0;">
+              Réinitialiser votre mot de passe
+            </h1>
+            <p style="margin:0 0 28px;font-size:14px;color:#5f6368;text-align:center;">Demande reçue pour votre compte</p>
+
+            <p style="margin:0 0 16px;font-size:15px;color:#202124;line-height:1.6;">
+              Salam Aleykoum <strong>${userName}</strong>,
+            </p>
+            <p style="margin:0 0 32px;font-size:15px;color:#3c4043;line-height:1.7;">
+              Nous avons reçu une demande de réinitialisation du mot de passe associé à votre compte
+              <strong>Eveil et Ihsan</strong>. Cliquez sur le bouton ci-dessous pour en créer un nouveau.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Bouton CTA -->
+        <tr>
+          <td align="center" style="padding:0 48px 32px;">
+            <a href="${resetLink}"
+               style="display:inline-block;background:#e37400;color:#ffffff;text-decoration:none;
+                      font-size:14px;font-weight:500;padding:10px 24px;border-radius:4px;
+                      letter-spacing:.25px;">
+              Réinitialiser mon mot de passe
+            </a>
+          </td>
+        </tr>
+
+        <!-- Séparateur -->
+        <tr>
+          <td style="padding:0 48px;">
+            <div style="border-top:1px solid #e8eaed;"></div>
+          </td>
+        </tr>
+
+        <!-- Lien de secours + notes importantes -->
+        <tr>
+          <td style="padding:24px 48px 40px;">
+            <p style="margin:0 0 12px;font-size:13px;color:#5f6368;line-height:1.7;">
+              Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur&nbsp;:
+            </p>
+            <p style="margin:0 0 24px;font-size:12px;color:#e37400;word-break:break-all;line-height:1.6;font-family:'Courier New',monospace;">
+              ${resetLink}
+            </p>
+            <p style="margin:0;font-size:12px;color:#80868b;line-height:1.7;border-top:1px solid #e8eaed;padding-top:20px;">
+              Ce lien est valable <strong>1 heure</strong> à compter de la réception de cet email.<br>
+              Si vous n'avez pas demandé cette réinitialisation, ignorez cet email — votre mot de passe restera inchangé.<br>
+              Ne communiquez jamais ce lien à une autre personne.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      <!-- /Carte -->
+
+      <!-- Footer -->
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+        <tr>
+          <td style="padding:24px 0 0;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#80868b;line-height:1.8;">
+               © 2026 Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
+              Merci de ne pas répondre à cet email. Si vous avez besoin d'aide, contactez l'établissement scolaire ou l'administrateur de votre compte.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>`
     })
 };
 
