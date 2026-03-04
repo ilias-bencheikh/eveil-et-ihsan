@@ -52,7 +52,7 @@ function handleSessionExpired(message) {
     if (window.UI) {
         window.UI.showAlert(message, 'warning');
     }
-    setTimeout(() => window.location.href = 'login.html', 1500);
+    setTimeout(() => window.location.href = '/login', 1500);
 }
 
 // Réinitialiser le timer d'inactivité
@@ -90,7 +90,7 @@ function checkAuth() {
     const token = localStorage.getItem('token');
     
     if (!userStr || !token) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
         return null;
     }
     
@@ -157,7 +157,7 @@ async function logout() {
     }
     
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 // Déconnecter toutes les sessions
@@ -182,7 +182,7 @@ async function logoutAll() {
     }
     
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 // Obtenir la liste des sessions actives

@@ -61,7 +61,7 @@ router.put('/profil/me', requireAuth, async (req, res) => {
 });
 
 // Obtenir les enfants du parent connecté
-router.get('/mes-enfants', requireAuth, async (req, res) => {
+router.get('/enfants', requireAuth, async (req, res) => {
     if (req.userRole !== 'parent') {
         return res.status(403).json({ error: 'Accès réservé aux parents' });
     }

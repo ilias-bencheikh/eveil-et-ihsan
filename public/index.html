@@ -917,7 +917,9 @@
     <script>
         // Appliquer immédiatement l'onglet sauvegardé pour éviter le flash visuel
         (function() {
-            var saved = localStorage.getItem('staff_active_tab');
+            var path = window.location.pathname;
+            var urlSection = path.startsWith('/dashboard/') ? path.slice('/dashboard/'.length) : null;
+            var saved = urlSection || localStorage.getItem('staff_active_tab');
             if (!saved) saved = 'dashboard';
             var style = document.createElement('style');
             style.id = 'early-tab-fix';
@@ -2493,7 +2495,7 @@
         const token = localStorage.getItem('token');
         
         if (!user || !token) {
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }
 
         // Charger les utilitaires
@@ -2597,8 +2599,11 @@
             document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
             document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
-            // Restaurer l'onglet sauvegardé au chargement (ou dashboard par défaut)
-            const savedTab = localStorage.getItem('staff_active_tab');
+            // Restaurer l'onglet depuis l'URL, puis localStorage, sinon dashboard par défaut
+            const urlSection = window.location.pathname.startsWith('/dashboard/')
+                ? window.location.pathname.slice('/dashboard/'.length)
+                : null;
+            const savedTab = urlSection || localStorage.getItem('staff_active_tab');
             if (savedTab && document.getElementById(savedTab)) {
                 switchTab(savedTab);
             } else {
@@ -2656,7 +2661,7 @@
         }
 
         // ==================== NAVIGATION ====================
-        function switchTab(tabName) {
+        function switchTab(tabName, pushToHistory = true) {
             document.querySelectorAll('.sidebar-nav-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.tab === tabName);
             });
@@ -2676,8 +2681,21 @@
             // Sauvegarder l'onglet actif dans localStorage
             localStorage.setItem('staff_active_tab', tabName);
 
+            // Mettre à jour l'URL sans rechargement de page
+            if (pushToHistory) {
+                const urlPath = tabName === 'dashboard' ? '/dashboard' : '/dashboard/' + tabName;
+                history.pushState({ tab: tabName }, '', urlPath);
+            }
+
             if (window.innerWidth < 900) toggleSidebar();
         }
+
+        // Réagir au bouton Précédent/Suivant du navigateur
+        window.addEventListener('popstate', (e) => {
+            const section = e.state && e.state.tab ? e.state.tab
+                : (window.location.pathname.startsWith('/dashboard/') ? window.location.pathname.slice('/dashboard/'.length) : 'dashboard');
+            if (section && document.getElementById(section)) switchTab(section, false);
+        });
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
@@ -2931,7 +2949,7 @@
 
         async function loadRecentMessages() {
             const userRole = getCurrentUserRole();
-            const bureauRoles = ['directeur', 'secretariat', 'admin'];
+            const bureauRoles = ['directeur', 'secretariat', 'admin', 'professeur'];
 
             if (!bureauRoles.includes(userRole)) return;
 
@@ -9819,8 +9837,8 @@
         let allActualites = [];
         
         async function loadActualites() {
-            // Montrer le bouton d'ajout si admin/directeur/secrétariat
-            if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
+            // Montrer le bouton d'ajout si admin/directeur/secrétariat/professeur
+            if (['admin', 'directeur', 'secretariat', 'professeur'].includes(user.role)) {
                 document.getElementById('actualiteAddBtn').style.display = 'flex';
             }
             
@@ -9911,6 +9929,7 @@
             };
 
             const html = allActualites.length ? allActualites.map(actu => {
+                const canManage = isAdmin || (user.role === 'professeur' && actu.auteurId === String(user.id));
                 let cibleLabel = 'Tous';
                 if (actu.cible && actu.cible !== 'tous') {
                     try {
@@ -9977,7 +9996,7 @@
                         <div class="actu-card-body">
                             <p class="actu-card-desc">${actu.description}</p>
                             ${pjSection}
-                            ${isAdmin ? `
+                            ${canManage ? `
                                 <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--md-sys-color-outline-variant);">
                                     <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:var(--md-sys-color-surface-container);font-size:11px;font-weight:600;color:var(--md-sys-color-on-surface-variant);border:1px solid var(--md-sys-color-outline-variant);">
                                         <span class="material-icons" style="font-size:14px;">groups</span> ${cibleLabel}
@@ -10356,7 +10375,7 @@
 
         function logout() {
             localStorage.clear();
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }
 
         // ==================== MAINTENANCE ====================

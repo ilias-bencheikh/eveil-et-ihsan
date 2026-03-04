@@ -1300,13 +1300,13 @@
 
         /* --- Sidebar active states --- */
         .sidebar-nav-item[data-section="accueil-parent"].active,
-        .sidebar-nav-item[data-section="mes-enfants"].active,
-        .sidebar-nav-item[data-section="absences-parent"].active,
-        .sidebar-nav-item[data-section="appreciations-parent"].active,
-        .sidebar-nav-item[data-section="frais-parent"].active,
-        .sidebar-nav-item[data-section="messagerie-parent"].active,
-        .sidebar-nav-item[data-section="actualites-parent"].active,
-        .sidebar-nav-item[data-section="profil-parent"].active {
+        .sidebar-nav-item[data-section="enfants"].active,
+        .sidebar-nav-item[data-section="absences"].active,
+        .sidebar-nav-item[data-section="appreciations"].active,
+        .sidebar-nav-item[data-section="frais"].active,
+        .sidebar-nav-item[data-section="messagerie"].active,
+        .sidebar-nav-item[data-section="actualites"].active,
+        .sidebar-nav-item[data-section="profil"].active {
             background: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
         }
@@ -1473,7 +1473,9 @@
 <body>
     <script>
         (function() {
-            var saved = localStorage.getItem('parent_active_section') || 'accueil-parent';
+            var path = window.location.pathname;
+            var urlSection = path.startsWith('/parent/') ? path.slice('/parent/'.length) : null;
+            var saved = urlSection || localStorage.getItem('parent_active_section') || 'accueil-parent';
             var style = document.createElement('style');
             style.id = 'early-tab-fix';
             style.textContent = '.tab-content:not(#section-' + saved + ') { display: none !important; }';
@@ -1514,7 +1516,7 @@
                         <span class="material-icons">home</span>
                         <span>Accueil</span>
                     </a>
-                     <a href="#" class="sidebar-nav-item" data-section="actualites-parent">
+                     <a href="#" class="sidebar-nav-item" data-section="actualites">
                         <span class="material-icons">newspaper</span>
                         <span>Actualités</span>
                     </a>
@@ -1522,15 +1524,15 @@
 
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Suivi</span>
-                    <a href="#" class="sidebar-nav-item" data-section="absences-parent">
+                    <a href="#" class="sidebar-nav-item" data-section="absences">
                         <span class="material-icons">event_busy</span>
                         <span>Absences</span>
                     </a>
-                    <a href="#" class="sidebar-nav-item" data-section="appreciations-parent">
+                    <a href="#" class="sidebar-nav-item" data-section="appreciations">
                         <span class="material-icons">star</span>
                         <span>Appréciations</span>
                     </a>
-                    <a href="#" class="sidebar-nav-item" data-section="frais-parent">
+                    <a href="#" class="sidebar-nav-item" data-section="frais">
                         <span class="material-icons">payments</span>
                         <span>Frais</span>
                     </a>
@@ -1538,7 +1540,7 @@
 
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Communication</span>
-                    <a href="#" class="sidebar-nav-item" data-section="messagerie-parent">
+                    <a href="#" class="sidebar-nav-item" data-section="messagerie">
                         <span class="material-icons">mail</span>
                         <span>Messagerie</span>
                         <span class="message-badge" id="parentMessageBadge">0</span>
@@ -1547,11 +1549,11 @@
 
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Mon espace</span>
-                    <a href="#" class="sidebar-nav-item" data-section="profil-parent">
+                    <a href="#" class="sidebar-nav-item" data-section="profil">
                         <span class="material-icons">person</span>
                         <span>Mon Profil</span>
                     </a>
-                    <a href="#" class="sidebar-nav-item" data-section="mes-enfants">
+                    <a href="#" class="sidebar-nav-item" data-section="enfants">
                         <span class="material-icons">child_care</span>
                         <span>Mes Enfants</span>
                     </a>
@@ -1595,21 +1597,21 @@
                             <div class="p-welcome-date" id="parentDate">Bienvenue sur votre espace parent</div>
                         </div>
                         <div class="p-welcome-chips">
-                            <div class="p-welcome-chip" onclick="navigateParent('mes-enfants')">
+                            <div class="p-welcome-chip" onclick="navigateParent('enfants')">
                                 <span class="material-icons">child_care</span>
                                 <div>
                                     <div class="p-welcome-chip-value" id="wc-enfants-count">0</div>
                                     <div class="p-welcome-chip-label">Enfant(s)</div>
                                 </div>
                             </div>
-                            <div class="p-welcome-chip" onclick="navigateParent('absences-parent')">
+                            <div class="p-welcome-chip" onclick="navigateParent('absences')">
                                 <span class="material-icons">event_busy</span>
                                 <div>
                                     <div class="p-welcome-chip-value" id="wc-absences-count">0</div>
                                     <div class="p-welcome-chip-label">Absence(s)</div>
                                 </div>
                             </div>
-                            <div class="p-welcome-chip" onclick="navigateParent('messagerie-parent')">
+                            <div class="p-welcome-chip" onclick="navigateParent('messagerie')">
                                 <span class="material-icons">mark_email_unread</span>
                                 <div>
                                     <div class="p-welcome-chip-value" id="wc-messages-count">0</div>
@@ -1645,7 +1647,7 @@
                                     <div class="info-card-icon ic-blue"><span class="material-icons">child_care</span></div>
                                     <h3 class="widget-card-title">Mes Enfants</h3>
                                 </div>
-                                <button class="p-btn-sm" onclick="navigateParent('mes-enfants')">
+                                <button class="p-btn-sm" onclick="navigateParent('enfants')">
                                     Voir tout <span class="material-icons" style="font-size:16px;">chevron_right</span>
                                 </button>
                             </div>
@@ -1667,27 +1669,27 @@
                             </div>
                             <div class="widget-card-content" style="padding:12px;">
                                 <div class="p-quick-actions" style="grid-template-columns:repeat(3,1fr);">
-                                    <button class="p-qa-btn p-qa-blue" onclick="navigateParent('mes-enfants')">
+                                    <button class="p-qa-btn p-qa-blue" onclick="navigateParent('enfants')">
                                         <span class="material-icons">child_care</span>
                                         <span>Mes Enfants</span>
                                     </button>
-                                    <button class="p-qa-btn p-qa-green" onclick="navigateParent('absences-parent')">
+                                    <button class="p-qa-btn p-qa-green" onclick="navigateParent('absences')">
                                         <span class="material-icons">event_busy</span>
                                         <span>Absences</span>
                                     </button>
-                                    <button class="p-qa-btn p-qa-purple" onclick="navigateParent('appreciations-parent')">
+                                    <button class="p-qa-btn p-qa-purple" onclick="navigateParent('appreciations')">
                                         <span class="material-icons">star</span>
                                         <span>Appréciations</span>
                                     </button>
-                                    <button class="p-qa-btn p-qa-orange" onclick="navigateParent('frais-parent')">
+                                    <button class="p-qa-btn p-qa-orange" onclick="navigateParent('frais')">
                                         <span class="material-icons">payments</span>
                                         <span>Frais</span>
                                     </button>
-                                    <button class="p-qa-btn p-qa-teal" onclick="navigateParent('messagerie-parent')">
+                                    <button class="p-qa-btn p-qa-teal" onclick="navigateParent('messagerie')">
                                         <span class="material-icons">mail</span>
                                         <span>Messagerie</span>
                                     </button>
-                                    <button class="p-qa-btn p-qa-red" onclick="navigateParent('actualites-parent')">
+                                    <button class="p-qa-btn p-qa-red" onclick="navigateParent('actualites')">
                                         <span class="material-icons">newspaper</span>
                                         <span>Actualités</span>
                                     </button>
@@ -1703,7 +1705,7 @@
                                     <h3 class="widget-card-title">Derniers messages</h3>
                                     <span class="db-unread-badge" id="dbUnreadBadge" style="display:none;">0</span>
                                 </div>
-                                <button class="p-btn-sm" onclick="navigateParent('messagerie-parent')">
+                                <button class="p-btn-sm" onclick="navigateParent('messagerie')">
                                     Voir tout <span class="material-icons" style="font-size:16px;">arrow_forward</span>
                                 </button>
                             </div>
@@ -1724,7 +1726,7 @@
                 </section>
 
                 <!-- Section Mes Enfants -->
-                <section id="section-mes-enfants" class="tab-content">
+                <section id="section-enfants" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
                             <div style="display:flex;align-items:center;gap:10px;">
@@ -1744,7 +1746,7 @@
                 </section>
 
                 <!-- Section Absences Parent -->
-                <section id="section-absences-parent" class="tab-content">
+                <section id="section-absences" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
                             <div style="display:flex;align-items:center;gap:10px;">
@@ -1766,7 +1768,7 @@
                 </section>
 
                 <!-- Section Appréciations Parent -->
-                <section id="section-appreciations-parent" class="tab-content">
+                <section id="section-appreciations" class="tab-content">
                     <div class="widget-card">
                         <div class="widget-card-header">
                             <div style="display:flex;align-items:center;gap:10px;">
@@ -1788,7 +1790,7 @@
                 </section>
 
                 <!-- Section Frais Parent -->
-                <section id="section-frais-parent" class="tab-content">
+                <section id="section-frais" class="tab-content">
                     <!-- Résumé global -->
                     <div class="widget-card">
                         <div class="widget-card-header">
@@ -1816,7 +1818,7 @@
                 </section>
 
                 <!-- Section Messagerie Parent -->
-                <section id="section-messagerie-parent" class="tab-content">
+                <section id="section-messagerie" class="tab-content">
                     <div class="msg-layout">
                         <!-- ===== PANNEAU GAUCHE ===== -->
                         <div class="msg-sidebar">
@@ -1977,7 +1979,7 @@
                 </section>
 
                 <!-- Section Actualités Parent -->
-                <section id="section-actualites-parent" class="tab-content">
+                <section id="section-actualites" class="tab-content">
                     <div class="widget-card" style="overflow:visible;">
                         <div class="widget-card-header">
                             <div style="display:flex;align-items:center;gap:10px;">
@@ -2008,7 +2010,7 @@
                 </div>
 
                 <!-- Section Profil Parent -->
-                <section id="section-profil-parent" class="tab-content">
+                <section id="section-profil" class="tab-content">
                     <!-- En-tête profil -->
                     <div class="p-profile-header">
                         <div class="p-profile-avatar" id="profilAvatar">P</div>
@@ -2113,7 +2115,7 @@
             // Vérifier l'authentification via utilitaire Session
             const session = window.Session ? window.Session.checkAuth() : null;
             if (!session || session.role !== 'parent') {
-                window.location.href = '/login.html';
+                window.location.href = '/login';
                 return;
             }
 
@@ -2400,7 +2402,7 @@
             container.innerHTML = `
                 ${slidesHtml}
                 <div class="ppt-widget-header"><span class="material-icons">newspaper</span> Dernières actualités</div>
-                <button class="ppt-see-all-btn" onclick="navigateParent('actualites-parent')">
+                <button class="ppt-see-all-btn" onclick="navigateParent('actualites')">
                     <span class="material-icons">open_in_new</span> Voir tout
                 </button>
                 ${_pptSlides.length > 1 ? `
@@ -3201,7 +3203,7 @@
             const sections = document.querySelectorAll('.tab-content');
 
             // Fonction pour naviguer vers une section
-            function navigateToSection(sectionId) {
+            function navigateToSection(sectionId, pushToHistory = true) {
                 // Mettre à jour la navigation
                 navItems.forEach(i => i.classList.remove('active'));
                 const navItem = document.querySelector(`.sidebar-nav-item[data-section="${sectionId}"]`);
@@ -3217,18 +3219,24 @@
                 // Mettre à jour le titre
                 const titles = {
                     'accueil-parent': 'Accueil',
-                    'mes-enfants': 'Mes Enfants',
-                    'absences-parent': 'Absences',
-                    'appreciations-parent': 'Appréciations',
-                    'frais-parent': 'Frais d\'inscription',
-                    'messagerie-parent': 'Messagerie',
-                    'actualites-parent': 'Actualités',
-                    'profil-parent': 'Mon Profil'
+                    'enfants': 'Mes Enfants',
+                    'absences': 'Absences',
+                    'appreciations': 'Appréciations',
+                    'frais': 'Frais d\'inscription',
+                    'messagerie': 'Messagerie',
+                    'actualites': 'Actualités',
+                    'profil': 'Mon Profil'
                 };
                 document.getElementById('pageTitle').textContent = titles[sectionId] || 'Accueil';
 
                 // Sauvegarder la section active dans localStorage
                 localStorage.setItem('parent_active_section', sectionId);
+
+                // Mettre à jour l'URL sans rechargement de page
+                if (pushToHistory) {
+                    const urlPath = sectionId === 'accueil-parent' ? '/parent' : '/parent/' + sectionId;
+                    history.pushState({ section: sectionId }, '', urlPath);
+                }
             }
 
             navItems.forEach(item => {
@@ -3241,11 +3249,11 @@
                     if (sectionId === 'accueil-parent') {
                         loadRecentActualitesDashboard();
                         loadParentMessages();
-                    } else if (sectionId === 'messagerie-parent') {
+                    } else if (sectionId === 'messagerie') {
                         loadParentMessages();
-                    } else if (sectionId === 'absences-parent' && enfantsData.length > 0) {
+                    } else if (sectionId === 'absences' && enfantsData.length > 0) {
                         selectChild(enfantsData[0].id, 'absencesChildSelector');
-                    } else if (sectionId === 'appreciations-parent' && enfantsData.length > 0) {
+                    } else if (sectionId === 'appreciations' && enfantsData.length > 0) {
                         selectChild(enfantsData[0].id, 'appreciationsChildSelector');
                     }
 
@@ -3255,13 +3263,23 @@
                 });
             });
 
-            // Restaurer la section sauvegardée au chargement
-            const savedSection = localStorage.getItem('parent_active_section');
+            // Restaurer la section depuis l'URL, puis localStorage, sinon accueil-parent par défaut
+            const urlSection = window.location.pathname.startsWith('/parent/')
+                ? window.location.pathname.slice('/parent/'.length)
+                : null;
+            const savedSection = urlSection || localStorage.getItem('parent_active_section');
             if (savedSection && document.getElementById(`section-${savedSection}`)) {
                 navigateToSection(savedSection);
             } else {
                 navigateToSection('accueil-parent');
             }
+
+            // Réagir au bouton Précédent/Suivant du navigateur
+            window.addEventListener('popstate', (e) => {
+                const section = e.state && e.state.section ? e.state.section
+                    : (window.location.pathname.startsWith('/parent/') ? window.location.pathname.slice('/parent/'.length) : 'accueil-parent');
+                if (section && document.getElementById(`section-${section}`)) navigateToSection(section, false);
+            });
 
             // Supprimer le style anti-flash
             const earlyFix = document.getElementById('early-tab-fix');
@@ -3371,7 +3389,7 @@
         function logout() {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = '/login.html';
+            window.location.href = '/login';
         }
 
         // ============================================
@@ -3410,7 +3428,7 @@
                             ? d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })
                             : d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' });
                         return `
-                        <div class="db-msg-item ${!msg.lu ? 'unread' : ''}" onclick="navigateParent('messagerie-parent')">
+                        <div class="db-msg-item ${!msg.lu ? 'unread' : ''}" onclick="navigateParent('messagerie')">
                             <div class="db-msg-avatar">${initiale}</div>
                             <div class="db-msg-body">
                                 <div class="db-msg-sender">${msg.expediteurNom}</div>

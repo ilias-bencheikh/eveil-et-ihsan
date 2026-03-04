@@ -59,7 +59,7 @@ async function apiRequest(endpoint, options = {}) {
             if (window.UI) {
                 window.UI.showAlert('Votre session a expiré. Veuillez vous reconnecter.', 'warning');
             }
-            setTimeout(() => window.location.href = 'login.html', 1500);
+            setTimeout(() => window.location.href = '/login', 1500);
             throw new Error('Session expirée');
         }
         
@@ -132,7 +132,7 @@ const AuthService = {
             console.error('Erreur logout:', error);
         }
         localStorage.clear();
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     },
     
     async logoutAll() {
@@ -144,7 +144,7 @@ const AuthService = {
             console.error('Erreur logout-all:', error);
         }
         localStorage.clear();
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     },
     
     async getActiveSessions() {
@@ -511,7 +511,7 @@ const ParentsService = {
     },
     
     async getMyChildren() {
-        return apiRequest('/parents/mes-enfants');
+        return apiRequest('/parents/enfants');
     },
     
     async getParentsOfEleve(eleveId) {

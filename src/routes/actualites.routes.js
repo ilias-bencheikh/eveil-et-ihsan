@@ -165,9 +165,16 @@ router.put('/:id', (req, res) => {
         const { titre, description, date, dateFin, piecesJointesExistantes } = req.body;
 
         // Récupérer l'actualité actuelle pour gérer les fichiers à supprimer
-        db.get('SELECT piecesJointes FROM actualites WHERE id = ?', [id], (err, row) => {
+        db.get('SELECT piecesJointes, auteurId FROM actualites WHERE id = ?', [id], (err, row) => {
             if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             if (!row) return res.status(404).json({ error: 'Actualité non trouvée' });
+
+            // Vérifier les droits : professeurs ne peuvent modifier que leurs propres actualités
+            const userRole = req.userRole;
+            const userId = req.userId;
+            if (userRole === 'professeur' && String(row.auteurId) !== String(userId)) {
+                return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres actualités' });
+            }
 
             // Pièces jointes conservées (envoyées en JSON depuis le client)
             let conservees = [];
@@ -215,9 +222,16 @@ router.delete('/:id', (req, res) => {
     const { id } = req.params;
 
     // Récupérer d'abord les fichiers associés pour les supprimer
-    db.get('SELECT piecesJointes FROM actualites WHERE id = ?', [id], (err, row) => {
+    db.get('SELECT piecesJointes, auteurId FROM actualites WHERE id = ?', [id], (err, row) => {
         if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!row) return res.status(404).json({ error: 'Actualité non trouvée' });
+
+        // Vérifier les droits : professeurs ne peuvent supprimer que leurs propres actualités
+        const userRole = req.userRole;
+        const userId = req.userId;
+        if (userRole === 'professeur' && String(row.auteurId) !== String(userId)) {
+            return res.status(403).json({ error: 'Vous ne pouvez supprimer que vos propres actualités' });
+        }
 
         db.run('DELETE FROM actualites WHERE id = ?', [id], function(err2) {
             if (err2) return res.status(500).json({ error: err2.message });

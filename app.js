@@ -219,6 +219,40 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// ==========================================
+// ROUTES URL PROPRES (sans .html)
+// ==========================================
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+app.get('/activation', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'activation.html'));
+});
+app.get('/reset-password', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+});
+// Dashboard admin/staff avec sections
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.get('/dashboard/:section', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+// Dashboard élève avec sections
+app.get('/eleve', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'eleve-dashboard.html'));
+});
+app.get('/eleve/:section', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'eleve-dashboard.html'));
+});
+// Dashboard parent avec sections
+app.get('/parent', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'parent-dashboard.html'));
+});
+app.get('/parent/:section', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'parent-dashboard.html'));
+});
+
 // Gestion des erreurs 404
 app.use((req, res) => {
     res.status(404).json({ error: 'Route non trouvée' });
