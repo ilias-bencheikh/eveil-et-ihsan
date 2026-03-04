@@ -352,6 +352,235 @@
         .actu-img-thumb a {
             display: block; width: 100%; height: 100%;
         }
+        .actu-modal-pj-section {
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            padding-top: 22px;
+        }
+
+        .actu-modal-pj-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 11.5px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+        }
+
+        .actu-pj-icon-wrap {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .actu-pj-icon-wrap .material-icons { font-size: 15px; }
+
+          /* ══════════════════════════════════════════
+           MODALE DÉTAIL ACTUALITÉ — REDESIGN
+           ══════════════════════════════════════════ */
+        .actu-modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(10px) saturate(140%);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+            padding: 0;
+        }
+        @media (min-width: 640px) {
+            .actu-modal-overlay { align-items: center; padding: 20px; }
+        }
+        .actu-modal-overlay.open { opacity: 1; visibility: visible; }
+        .actu-modal {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 28px 28px 0 0;
+            width: 100%; max-width: 740px;
+            max-height: 94vh;
+            overflow-y: auto;
+            box-shadow: 0 -2px 24px rgba(0,0,0,0.12), 0 32px 64px rgba(0,0,0,0.35);
+            transform: translateY(80px);
+            transition: transform 0.42s cubic-bezier(0.22,1,0.36,1);
+            position: relative;
+        }
+        @media (min-width: 640px) {
+            .actu-modal { border-radius: 28px; transform: translateY(40px) scale(0.95); }
+            .actu-modal-overlay.open .actu-modal { transform: translateY(0) scale(1); }
+        }
+        .actu-modal-overlay.open .actu-modal { transform: translateY(0); }
+        .actu-modal::before {
+            content: ''; display: block;
+            width: 36px; height: 4px; border-radius: 2px;
+            background: rgba(255,255,255,0.4);
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 21; pointer-events: none;
+        }
+        @media (min-width: 640px) { .actu-modal::before { display: none; } }
+        .actu-modal::-webkit-scrollbar { width: 5px; }
+        .actu-modal::-webkit-scrollbar-track { background: transparent; }
+        .actu-modal::-webkit-scrollbar-thumb { background: var(--md-sys-color-outline-variant); border-radius: 10px; }
+        .actu-modal-close {
+            position: absolute; top: 14px; right: 14px; z-index: 22;
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255,255,255,0.22);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: white;
+            transition: background 0.2s, transform 0.25s;
+        }
+        .actu-modal-close:hover { background: rgba(0,0,0,0.75); transform: rotate(90deg) scale(1.1); }
+        .actu-modal-close .material-icons { font-size: 20px; }
+        /* Badge "Nouveau" dans la modale : statique (pas absolu comme sur les cartes) */
+        .actu-modal-body .actu-new-pill,
+        .actu-modal-head-chips .actu-new-pill { position: static; top: auto; right: auto; }
+        /* Hero */
+        .actu-modal-hero {
+            width: 100%; position: relative;
+            border-radius: 28px 28px 0 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-secondary-container) 100%);
+            min-height: 200px;
+        }
+        .actu-modal-hero img { width: 100%; height: 290px; object-fit: cover; display: block; }
+        @media (min-width: 640px) { .actu-modal-hero img { height: 350px; } }
+        .actu-modal-hero-grad {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.72) 100%);
+            pointer-events: none;
+        }
+        .actu-modal-hero.no-image .actu-modal-hero-grad {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.5) 100%);
+        }
+        .actu-modal-hero-icon {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .actu-modal-hero-icon .material-icons { font-size: 72px; color: rgba(255,255,255,0.28); }
+        .actu-modal-hero-content {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 20px 26px 22px; z-index: 3;
+        }
+        .actu-modal-hero-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+        .actu-modal-hero-title {
+            font-size: 21px; font-weight: 800; color: white;
+            line-height: 1.3; margin: 0 0 11px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.45);
+        }
+        @media (min-width: 640px) { .actu-modal-hero-title { font-size: 26px; } }
+        .actu-modal-hero-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 18px; }
+        .actu-modal-hero-meta span {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12.5px; color: rgba(255,255,255,0.85); font-weight: 500;
+        }
+        .actu-modal-hero-meta .material-icons { font-size: 14px; }
+        /* Corps */
+        .actu-modal-body { padding: 26px 28px 34px; }
+        @media (max-width: 480px) { .actu-modal-body { padding: 18px 18px 28px; } }
+        .actu-expire-chip-inline {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 14px; border-radius: 50px;
+            background: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            font-size: 12px; font-weight: 600; margin-bottom: 18px;
+        }
+        .actu-expire-chip-inline .material-icons { font-size: 14px; }
+        .actu-modal-desc {
+            font-size: 15px; line-height: 1.9;
+            color: var(--md-sys-color-on-surface-variant);
+            white-space: pre-wrap; margin: 0 0 28px;
+        }
+        /* PJ */
+        .actu-modal-pj-section {
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            padding-top: 22px;
+        }
+        .actu-modal-pj-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 11.5px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+        }
+        .actu-pj-icon-wrap {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .actu-pj-icon-wrap .material-icons { font-size: 15px; }
+        /* Galerie */
+        .actu-modal-img-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px; margin-bottom: 14px;
+        }
+        .actu-modal-img-thumb {
+            border-radius: 12px; overflow: hidden; aspect-ratio: 1;
+            background: var(--md-sys-color-surface-container);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .actu-modal-img-thumb:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,0.14); }
+        .actu-modal-img-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+        .actu-modal-img-thumb a { display:block; width:100%; height:100%; }
+        /* Fichiers */
+        .actu-modal-files { display: flex; flex-direction: column; gap: 7px; }
+        .actu-modal-file-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; border-radius: 14px; text-decoration: none;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            background: var(--md-sys-color-surface-container-lowest);
+            transition: background 0.15s, transform 0.15s, border-color 0.15s;
+        }
+        .actu-modal-file-item:hover { transform: translateX(3px); border-color: var(--md-sys-color-outline); }
+        .actu-modal-file-icon {
+            width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .actu-modal-file-icon .material-icons { font-size: 20px; color: white; }
+        .actu-modal-file-info { flex: 1; min-width: 0; }
+        .actu-modal-file-name { font-weight: 600; font-size: 13.5px; color: var(--md-sys-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .actu-modal-file-sub { font-size: 11.5px; color: var(--md-sys-color-on-surface-variant); margin-top: 1px; }
+        .actu-modal-file-open { width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-surface-container); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .actu-modal-file-open .material-icons { font-size: 15px; color: var(--md-sys-color-on-surface-variant); }
+        .actu-mf-pdf  { background: #fff5f5 !important; border-color: #fecaca !important; }
+        .actu-mf-pdf .actu-modal-file-icon { background: #dc2626; }
+        .actu-mf-pdf:hover { background: #fee2e2 !important; }
+        .actu-mf-doc  { background: #eff6ff !important; border-color: #bfdbfe !important; }
+        .actu-mf-doc .actu-modal-file-icon { background: #2563eb; }
+        .actu-mf-doc:hover { background: #dbeafe !important; }
+        .actu-mf-xls  { background: #f0fdf4 !important; border-color: #bbf7d0 !important; }
+        .actu-mf-xls .actu-modal-file-icon { background: #16a34a; }
+        .actu-mf-xls:hover { background: #dcfce7 !important; }
+        .actu-mf-zip  { background: #fffbeb !important; border-color: #fde68a !important; }
+        .actu-mf-zip .actu-modal-file-icon { background: #d97706; }
+        .actu-mf-zip:hover { background: #fef3c7 !important; }
+        .actu-mf-other { background: var(--md-sys-color-surface-container-low) !important; }
+        .actu-mf-other .actu-modal-file-icon { background: var(--md-sys-color-outline-variant); }
+        .actu-mf-other .actu-modal-file-icon .material-icons { color: var(--md-sys-color-on-surface-variant); }
+        .actu-mf-other:hover { background: var(--md-sys-color-surface-container) !important; }
+        /* Expire */
+        .actu-expire-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 100px;
+            background: var(--md-sys-color-warning-container);
+            color: var(--md-sys-color-on-warning-container);
+            border: 1px solid var(--md-sys-color-warning);
+            font-size: 11px; font-weight: 600;
+        }
+        .actu-expire-chip .material-icons { font-size: 12px; }
+
+        @media (max-width: 700px) {
+            #actualitesList { grid-template-columns: 1fr; padding: 14px 14px; gap: 16px; }
+            .actu-card-title { font-size: 15px; }
+            .actu-card-head { padding: 14px 16px 6px; }
+            .actu-card-body { padding: 0 16px 14px; }
+            .actu-card-media, .actu-card-media-placeholder { height: 160px; }
+            .actu-modal { border-radius: 18px; max-height: 95vh; }
+            .actu-modal-content { padding: 20px 18px 24px; }
+            .actu-modal-title { font-size: 20px; }
+            .actu-modal-hero img { max-height: 240px; }
+            .actu-modal-img-gallery { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        }
+
         /* Aperçu PDF */
         .actu-pdf-preview {
             display: flex; align-items: center; gap: 12px;
@@ -397,6 +626,18 @@
             color: var(--md-sys-color-on-surface-variant);
             display: flex; align-items: center; gap: 5px; margin-bottom: 10px;
         }
+
+        .actu-new-pill {
+            position: absolute; top: 12px; right: 12px; z-index: 2;
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--md-sys-color-primary);
+            color: white;
+            padding: 5px 12px; border-radius: 100px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+            box-shadow: 0 2px 10px rgba(30,90,168,0.45);
+            animation: pulseBadge 2.5s ease-in-out infinite;
+        }
+        .actu-new-pill .material-icons { font-size: 13px; }
         /* Miniature dashboard actualités */
         .db-news-thumb {
             width: 56px; height: 56px; border-radius: 12px;
@@ -1118,6 +1359,13 @@
                             </div>
                         </div>
 
+                        <!-- Modale détail actualité -->
+                        <div class="actu-modal-overlay" id="actuModalOverlay" onclick="if(event.target===this)closeActuModal()">
+                            <div class="actu-modal" id="actuModal">
+                                <div id="actuModalContent"></div>
+                            </div>
+                        </div>
+
                         <!-- Derniers messages (colonne 2, admin seulement) -->
                         <div class="widget-card" id="messagesWidget" style="display:none;">
                             <div class="widget-card-header">
@@ -1154,13 +1402,13 @@
                             </div>
                             <div class="widget-card-content" style="padding:12px;">
                                 <div class="db-quick-actions-v2">
-                                    <button class="db-qa-btn db-qa-btn-blue" onclick="switchTab('inscriptions'); setTimeout(showInscriptionForm, 300)">
-                                        <span class="material-icons">person_add</span>
-                                        <span>Inscription</span>
-                                    </button>
-                                    <button class="db-qa-btn db-qa-btn-green" onclick="switchTab('appel')">
+                                    <button class="db-qa-btn db-qa-btn-blue" onclick="switchTab('appel')">
                                         <span class="material-icons">fact_check</span>
                                         <span>Appel</span>
+                                    </button>
+                                    <button class="db-qa-btn db-qa-btn-green" onclick="switchTab('appreciations')">
+                                        <span class="material-icons">rate_review</span>
+                                        <span>Appréciations</span>
                                     </button>
                                     <button class="db-qa-btn db-qa-btn-purple" onclick="switchTab('messagerie'); setTimeout(showComposeMessage, 300)">
                                         <span class="material-icons">send</span>
@@ -2808,12 +3056,10 @@
                 return;
             }
 
-            // Couleurs de fond basées sur les variables CSS du site
-            const cs = getComputedStyle(document.documentElement);
-            const clrPrimCont  = cs.getPropertyValue('--md-sys-color-primary-container').trim();
-            const clrSecCont   = cs.getPropertyValue('--md-sys-color-secondary-container').trim();
-            const clrTertCont  = cs.getPropertyValue('--md-sys-color-tertiary-container').trim();
-            const clrPrimary   = cs.getPropertyValue('--md-sys-color-primary').trim();
+           const cs = getComputedStyle(document.documentElement);
+            const clrPrimCont = cs.getPropertyValue('--md-sys-color-primary-container').trim();
+            const clrSecCont  = cs.getPropertyValue('--md-sys-color-secondary-container').trim();
+            const clrTertCont = cs.getPropertyValue('--md-sys-color-tertiary-container').trim();
             const bgPalette = [
                 `linear-gradient(135deg,${clrPrimCont} 0%,${clrSecCont} 100%)`,
                 `linear-gradient(135deg,${clrSecCont} 0%,${clrPrimCont} 100%)`,
@@ -2823,20 +3069,16 @@
             ];
 
             const slidesHtml = _pptSlides.map((actu, i) => {
-                const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
+                const pj    = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
                 const imgPj = pj.find(f => f.type && f.type.startsWith('image/'));
-                const bgStyle = imgPj
-                    ? `background-image:url('${imgPj.url}');`
-                    : `background:${bgPalette[i % bgPalette.length]};`;
-                const hasImg = !!imgPj;
-                const dateStr = formatActualiteDate(actu.date);
-                const isNew = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
-                const overlayStyle = hasImg
-                    ? ''
-                    : 'background:transparent';
-
+                const bgStyle  = imgPj ? `background-image:url('${imgPj.url}');` : `background:${bgPalette[i % bgPalette.length]};`;
+                const hasImg   = !!imgPj;
+                const isNew    = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
+                const dateStr  = formatActualiteDate(actu.date);
+                const globalIdx = _pptSlides.findIndex(x => x.id === actu.id);
+                const overlayStyle = hasImg ? '' : 'background:transparent';
                 return `
-                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasImg ? ' ppt-light' : ''}" data-index="${i}">
+                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasImg ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal(${globalIdx})">
                     <div class="ppt-slide-topbar"></div>
                     <div class="ppt-slide-bg" style="${bgStyle}"></div>
                     <div class="ppt-slide-overlay" style="${overlayStyle}"></div>
@@ -2862,7 +3104,7 @@
             container.innerHTML = `
                 ${slidesHtml}
                 <div class="ppt-widget-header"><span class="material-icons">newspaper</span> Dernières actualités</div>
-                <button class="ppt-see-all-btn" onclick="switchTab('actualites')">
+                <button class="ppt-see-all-btn" onclick="navigateParent('actualites')">
                     <span class="material-icons">open_in_new</span> Voir tout
                 </button>
                 ${_pptSlides.length > 1 ? `
@@ -2885,25 +3127,18 @@
             const slides = document.querySelectorAll('#recentActualitesList .ppt-slide');
             const dots   = document.querySelectorAll('#recentActualitesList .ppt-dot');
             if (!slides.length) return;
-
-            // Exit current
             slides[_pptIndex].classList.remove('active');
             if (dir === 'prev') slides[_pptIndex].style.transform = 'translateX(60px) scale(0.97)';
             slides[_pptIndex].classList.add('exit-left');
             setTimeout(() => {
                 slides[_pptIndex]?.classList.remove('exit-left');
-                slides[_pptIndex] && (slides[_pptIndex].style.transform = '');
+                if (slides[_pptIndex]) slides[_pptIndex].style.transform = '';
             }, 650);
-
             if (dots[_pptIndex]) dots[_pptIndex].classList.remove('active');
             _pptIndex = (idx + _pptSlides.length) % _pptSlides.length;
-
-            // Enter new
-            slides[_pptIndex].style.transform = dir === 'next'
-                ? 'translateX(60px) scale(0.97)' : 'translateX(-60px) scale(0.97)';
+            slides[_pptIndex].style.transform = dir === 'next' ? 'translateX(60px) scale(0.97)' : 'translateX(-60px) scale(0.97)';
             slides[_pptIndex].classList.add('active');
             if (dots[_pptIndex]) dots[_pptIndex].classList.add('active');
-
             if (_pptSlides.length > 1) { _pptResetProgress(); _pptStartAuto(); }
         }
 
@@ -2917,7 +3152,7 @@
             const bar = document.getElementById('pptProgressBar');
             if (bar) {
                 bar.classList.remove('running');
-                void bar.offsetWidth; // reflow
+                void bar.offsetWidth;
                 bar.style.width = '0%';
                 bar.classList.add('running');
                 bar.style.transition = `width ${PPT_DELAY}ms linear`;
@@ -2927,12 +3162,108 @@
 
         function _pptResetProgress() {
             const bar = document.getElementById('pptProgressBar');
-            if (bar) {
-                bar.classList.remove('running');
-                bar.style.transition = 'none';
-                bar.style.width = '0%';
-            }
+            if (bar) { bar.classList.remove('running'); bar.style.transition = 'none'; bar.style.width = '0%'; }
         }
+
+        function openActuModal(idx) {
+            const a = _pptSlides[idx];
+            if (!a) return;
+            const overlay = document.getElementById('actuModalOverlay');
+            const content = document.getElementById('actuModalContent');
+            if (!overlay || !content) return;
+
+            const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
+            const isImg  = f => f.type && f.type.startsWith('image/');
+            const images = pj.filter(isImg);
+            const files  = pj.filter(f => !isImg(f));
+            const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
+            const dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : 'Non daté';
+
+            const isPdf = f => !!(f.nom||'').match(/\.pdf$/i);
+            const isDoc = f => !!(f.nom||'').match(/\.(doc|docx)$/i);
+            const isXls = f => !!(f.nom||'').match(/\.(xls|xlsx|csv)$/i);
+            const isZip = f => !!(f.nom||'').match(/\.(zip|rar|7z)$/i);
+            const fileClass = f => isPdf(f)?'actu-mf-pdf':isDoc(f)?'actu-mf-doc':isXls(f)?'actu-mf-xls':isZip(f)?'actu-mf-zip':'actu-mf-other';
+            const fileIcon  = f => isPdf(f)?'picture_as_pdf':isDoc(f)?'description':isXls(f)?'table_chart':isZip(f)?'folder_zip':'insert_drive_file';
+            const fileLabel = f => isPdf(f)?'Document PDF':isDoc(f)?'Document Word':isXls(f)?'Feuille de calcul':isZip(f)?'Archive compressée':'Fichier';
+
+            // Hero
+            const coverImg = images.length > 0 ? images[0] : null;
+            const heroClass = coverImg ? '' : ' no-image';
+            const heroImgHtml = coverImg
+                ? `<img src="${coverImg.url}" alt="${a.titre}">`
+                : `<div class="actu-modal-hero-icon"><span class="material-icons">newspaper</span></div>`;
+
+            // Chips
+            const chipsHtml = isNew ? '<span class="actu-new-pill" style="font-size:11px;padding:4px 10px;">Nouveau</span>' : '';
+            const expireChip = a.dateFin
+                ? `<span class="actu-expire-chip-inline"><span class="material-icons">schedule</span> Expire le ${new Date(a.dateFin).toLocaleDateString('fr-FR')}</span>`
+                : '';
+
+            // Galerie
+            const galleryHtml = images.length > 0 ? `
+                <div class="actu-modal-img-gallery">
+                    ${images.map(f => `<div class="actu-modal-img-thumb"><a href="${f.url}" target="_blank"><img src="${f.url}" alt="${f.nom||''}" loading="lazy"></a></div>`).join('')}
+                </div>` : '';
+
+            // Fichiers
+            const filesHtml = files.length > 0 ? `
+                <div class="actu-modal-files">
+                    ${files.map(f => `<a href="${f.url}" target="_blank" class="actu-modal-file-item ${fileClass(f)}" title="${f.nom}">
+                        <div class="actu-modal-file-icon"><span class="material-icons">${fileIcon(f)}</span></div>
+                        <div class="actu-modal-file-info">
+                            <div class="actu-modal-file-name">${f.nom}</div>
+                            <div class="actu-modal-file-sub">${fileLabel(f)}</div>
+                        </div>
+                        <div class="actu-modal-file-open"><span class="material-icons">open_in_new</span></div>
+                    </a>`).join('')}
+                </div>` : '';
+
+            const pjSectionHtml = pj.length > 0 ? `
+                <div class="actu-modal-pj-section">
+                    <div class="actu-modal-pj-title">
+                        <div class="actu-pj-icon-wrap"><span class="material-icons">attach_file</span></div>
+                        ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
+                    </div>
+                    ${galleryHtml}${filesHtml}
+                </div>` : '';
+
+            content.innerHTML = `
+                <div class="actu-modal-hero">
+                    <button class="actu-modal-close" onclick="closeActuModal()" aria-label="Fermer">
+                        <span class="material-icons">close</span>
+                    </button>
+                    ${heroImgHtml}
+                    <div class="actu-modal-hero-grad"></div>
+                </div>
+                <div class="actu-modal-body">
+                    ${chipsHtml ? `<div class="actu-modal-head-chips">${chipsHtml}</div>` : ''}
+                    <h2 class="actu-modal-main-title">${a.titre}</h2>
+                    <div class="actu-modal-meta-row">
+                        <span class="actu-meta-chip"><span class="material-icons">calendar_today</span>${dateStr}</span>
+                        ${a.auteurNom ? `<span class="actu-meta-chip actu-meta-chip-author"><span class="material-icons">person</span>${a.auteurNom}</span>` : ''}
+                        ${a.dateFin ? `<span class="actu-meta-chip" style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);"><span class="material-icons">schedule</span>Expire le ${new Date(a.dateFin).toLocaleDateString('fr-FR')}</span>` : ''}
+                    </div>
+                    <div class="actu-modal-desc">${a.description || ''}</div>
+                    ${pjSectionHtml}
+                </div>`;
+
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            const escHandler = e => { if (e.key === 'Escape') { closeActuModal(); document.removeEventListener('keydown', escHandler); } };
+            document.addEventListener('keydown', escHandler);
+        }
+
+        function closeActuModal() {
+            const overlay = document.getElementById('actuModalOverlay');
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Fermer avec Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeActuModal();
+        });
 
         function formatActualiteDate(dateString) {
             const date = new Date(dateString);
