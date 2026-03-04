@@ -3152,16 +3152,18 @@
             renderEleves(filtered);
         }
 
+        function backToElevesList() {
+            window.eleveDetailsBackup = null;
+            loadEleves();
+        }
+
         // Afficher les détails d'un élève dans la page principale
         async function showEleveDetails(eleveId) {
             let eleve;
             try {
                 const response = await fetch(`${API_URL}/eleves/${eleveId}`, { headers: getHeaders() });
-                if (response.ok) {
-                    eleve = await response.json();
-                } else {
-                    eleve = allEleves.find(e => e.id === eleveId);
-                }
+                if (response.ok) eleve = await response.json();
+                else eleve = allEleves.find(e => e.id === eleveId);
             } catch (error) {
                 eleve = allEleves.find(e => e.id === eleveId);
             }
@@ -3171,12 +3173,8 @@
             let familyMembers = [];
             try {
                 const response = await fetch(`${API_URL}/eleves/${eleveId}/famille`, { headers: getHeaders() });
-                if (response.ok) {
-                    familyMembers = await response.json();
-                }
-            } catch (error) {
-                familyMembers = [eleve];
-            }
+                if (response.ok) familyMembers = await response.json();
+            } catch (error) { familyMembers = [eleve]; }
 
             const otherChildren = familyMembers.filter(m => m.id !== eleveId);
 
@@ -3187,295 +3185,164 @@
                 };
             }
 
-            const fraisTotal = parseFloat(eleve.fraisInscription) || 0;
-            const nbPaie = parseInt(eleve.nbPaiements) || 1;
-            const nbPaieEffectues = parseInt(eleve.paiementsEffectues) || 0;
+            // ── Helpers inline ──────────────────────────────────────────────
+            const age = eleve.dateNaissance
+                ? Math.floor((Date.now() - new Date(eleve.dateNaissance)) / (365.25 * 24 * 3600 * 1000))
+                : null;
+
+            const chip = (icon, text, bg, color) =>
+                `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:${bg};color:${color};">
+                    <span class="material-icons" style="font-size:13px;">${icon}</span>${text}
+                </span>`;
+
+            const infoRow = (icon, label, value) =>
+                value ? `<div style="display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                    <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);width:22px;text-align:center;flex-shrink:0;">${icon}</span>
+                    <div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--md-sys-color-on-surface-variant);font-weight:500;margin-bottom:2px;">${label}</div>
+                        <div style="font-size:14px;font-weight:600;color:var(--md-sys-color-on-surface);">${value}</div>
+                    </div>
+                </div>` : '';
+
+            const card = (iconName, iconBg, iconColor, title, subtitle, body) =>
+                `<div style="background:var(--md-sys-color-surface);border-radius:16px;border:1px solid var(--md-sys-color-outline-variant);box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:16px;overflow:hidden;">
+                    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container);">
+                        <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${iconBg};color:${iconColor};">
+                            <span class="material-icons" style="font-size:20px;">${iconName}</span>
+                        </div>
+                        <div>
+                            <div style="font-size:15px;font-weight:600;color:var(--md-sys-color-on-surface);">${title}</div>
+                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;">${subtitle}</div>
+                        </div>
+                    </div>
+                    <div style="padding:16px 20px;">${body}</div>
+                </div>`;
+
+            // ── Chip statut parent ───────────────────────────────────────────
+            let parentChip = '';
+            if (parents.length === 0)
+                parentChip = chip('person_off', 'Sans parent', 'var(--md-sys-color-surface-variant)', 'var(--md-sys-color-on-surface-variant)');
+            else if (parents.some(p => p.activated))
+                parentChip = chip('how_to_reg', 'Compte parent actif', 'var(--md-sys-color-tertiary-container)', 'var(--md-sys-color-on-tertiary-container)');
+            else
+                parentChip = chip('schedule', 'Compte à activer', '#fff3cd', '#7c5800');
+
+            // ── Section parents ──────────────────────────────────────────────
+            const parentsBody = parents.length === 0
+                ? `<div style="text-align:center;padding:28px;color:var(--md-sys-color-on-surface-variant);">
+                        <span class="material-icons" style="font-size:44px;opacity:.25;display:block;margin-bottom:8px;">person_off</span>
+                        <span style="font-size:14px;">Aucun parent enregistré</span>
+                   </div>`
+                : parents.map((p, i) => {
+                    const sep = i > 0 ? 'border-top:1px solid var(--md-sys-color-outline-variant);padding-top:16px;margin-top:4px;' : '';
+                    const avBg  = p.isPrimary ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-secondary-container)';
+                    const avCol = p.isPrimary ? '#fff' : 'var(--md-sys-color-on-secondary-container)';
+                    const roleBadge = p.isPrimary
+                        ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);"><span class="material-icons" style="font-size:12px;">star</span>Principal</span>`
+                        : `<span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:12px;font-size:11px;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);">2e responsable</span>`;
+                    const statusBadge = p.activated
+                        ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);"><span class="material-icons" style="font-size:12px;">verified</span>Activé</span>`
+                        : `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 10px;border-radius:12px;font-size:11px;background:#fff3cd;color:#7c5800;"><span class="material-icons" style="font-size:12px;">schedule</span>Non activé</span>`;
+                    return `<div style="${sep}">
+                        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                            <div style="width:48px;height:48px;border-radius:50%;background:${avBg};color:${avCol};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;">${(p.prenom||'P')[0].toUpperCase()}</div>
+                            <div>
+                                <div style="font-size:16px;font-weight:700;color:var(--md-sys-color-on-surface);">${p.prenom||''} ${p.nom||''}</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;">${roleBadge}${statusBadge}${p.relation?`<span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:12px;font-size:11px;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);">${p.relation}</span>`:''}</div>
+                            </div>
+                        </div>
+                        ${infoRow('email','E-mail',p.email)}
+                        ${infoRow('phone','Téléphone',p.tel)}
+                        ${infoRow('home','Adresse',p.adresse)}
+                    </div>`;
+                }).join('');
+
+            // ── Section fratrie ──────────────────────────────────────────────
+            const siblingsSection = otherChildren.length === 0 ? '' : card(
+                'group','var(--md-sys-color-tertiary-container)','var(--md-sys-color-on-tertiary-container)',
+                'Fratrie',
+                otherChildren.length+' autre'+(otherChildren.length>1?'s':'')+' élève'+(otherChildren.length>1?'s':'')+' dans cette famille',
+                `<div style="margin:-16px -20px 0;padding:12px 16px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+                    ${otherChildren.map(c =>
+                        `<div onclick="showEleveDetails('${c.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;cursor:pointer;background:var(--md-sys-color-surface-container);transition:all .18s;" onmouseover="this.style.borderColor='var(--md-sys-color-primary)';this.style.background='var(--md-sys-color-primary-container)'" onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)';this.style.background='var(--md-sys-color-surface-container)'">
+                            <div style="width:38px;height:38px;border-radius:50%;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden;">${c.photo?`<img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;">`:(c.prenom||'E')[0].toUpperCase()}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:14px;font-weight:600;color:var(--md-sys-color-on-surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.prenom} ${c.nom}</div>
+                                <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${c.classe||'Sans classe'}</div>
+                            </div>
+                            <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);flex-shrink:0;">chevron_right</span>
+                        </div>`
+                    ).join('')}
+                </div>`
+            );
 
             const widgetCardContent = document.querySelector('#eleves .widget-card-content');
             widgetCardContent.innerHTML = `
 
-                <!-- ── Barre de navigation ── -->
-                <div class="fiche-header">
+                <!-- ── Nav ── -->
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
                     <button class="md-btn md-btn-tonal" onclick="backToElevesList()">
                         <span class="material-icons">arrow_back</span> Retour à la liste
                     </button>
-                    <div style="flex:1;"></div>
-                    ${canModifyData() ? `
-                    <button class="md-btn md-btn-filled" onclick="enterEditMode('${eleveId}')">
-                        <span class="material-icons">edit_note</span> Modifier la fiche
-                    </button>` : ''}
+                    ${canModifyData() ? `<button class="md-btn md-btn-filled" onclick="enterEditMode('${eleveId}')"><span class="material-icons">edit_note</span> Modifier</button>` : ''}
                 </div>
 
-                <!-- ── Profil élève ── -->
-                <div class="fiche-section" style="margin-bottom:20px; border-color:var(--md-sys-color-primary);">
-
-                    <!-- En-tête avec avatar + nom + badges -->
-                    <div style="display:flex; align-items:center; gap:24px; padding:28px 28px 20px;
-                                background:linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-surface-container) 100%);">
-                        <div class="md-avatar" style="width:80px; height:80px; font-size:36px; font-weight:700;
-                                    background:var(--md-sys-color-primary); color:white; flex-shrink:0; box-shadow:var(--md-sys-elevation-2);">
-                            ${eleve.photo
-                                ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-                                : (eleve.prenom || 'E')[0].toUpperCase()}
+                <!-- ── Hero ── -->
+                <div style="border-radius:16px;overflow:hidden;border:1px solid var(--md-sys-color-outline-variant);margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+                    <div style="height:5px;background:linear-gradient(90deg,var(--md-sys-color-primary),var(--md-sys-color-secondary));"></div>
+                    <div style="display:flex;align-items:center;gap:18px;padding:18px 22px;background:var(--md-sys-color-surface);flex-wrap:wrap;">
+                        <div style="width:68px;height:68px;border-radius:50%;background:var(--md-sys-color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;flex-shrink:0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18);border:3px solid var(--md-sys-color-surface-container);">
+                            ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%;height:100%;object-fit:cover;">` : (eleve.prenom||'E')[0].toUpperCase()}
                         </div>
-                        <div style="flex:1;">
-                            <h3 style="margin:0 0 10px 0; font-size:26px; color:var(--md-sys-color-on-primary-container);">
-                                ${eleve.prenom} ${eleve.nom}
-                            </h3>
-                            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-                                <span class="md-chip md-chip-filter"
-                                      style="background:var(--md-sys-color-primary); color:white; display:flex; align-items:center; gap:4px;">
-                                    <span class="material-icons" style="font-size:15px;">class</span> ${eleve.classe || 'Sans classe'}
-                                </span>
-                                ${eleve.anneeScolaire ? `
-                                <span class="md-chip md-chip-filter"
-                                      style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); display:flex; align-items:center; gap:4px;">
-                                    <span class="material-icons" style="font-size:15px;">calendar_today</span> ${eleve.anneeScolaire}
-                                </span>` : ''}
-                                ${eleve.fraisValide
-                                    ? `<span class="md-chip md-chip-filter"
-                                              style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; gap:4px;">
-                                           <span class="material-icons" style="font-size:15px;">check_circle</span> Frais réglés
-                                       </span>`
-                                    : `<span class="md-chip md-chip-filter"
-                                              style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); display:flex; align-items:center; gap:4px;">
-                                           <span class="material-icons" style="font-size:15px;">payments</span> ${nbPaieEffectues}/${nbPaie} versements
-                                       </span>`}
-                                ${parents.length === 0
-                                    ? `<span class="md-chip md-chip-filter"
-                                              style="background:var(--md-sys-color-surface-variant); color:var(--md-sys-color-on-surface-variant); display:flex; align-items:center; gap:4px;">
-                                           <span class="material-icons" style="font-size:15px;">person_off</span> Sans parent
-                                       </span>`
-                                    : parents.some(p => p.activated)
-                                        ? `<span class="md-chip md-chip-filter"
-                                                  style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; gap:4px;">
-                                               <span class="material-icons" style="font-size:15px;">how_to_reg</span> Compte parent actif
-                                           </span>`
-                                        : `<span class="md-chip md-chip-filter"
-                                                  style="background:#fff8e1; color:#7c5800; display:flex; align-items:center; gap:4px;">
-                                               <span class="material-icons" style="font-size:15px;">schedule</span> Compte à activer
-                                           </span>`}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Informations personnelles de l'élève -->
-                    <div class="fiche-section-content">
-                        <div class="fiche-info-grid">
-                            ${eleve.dateNaissance ? `
-                            <div class="fiche-info-item">
-                                <span class="material-icons fiche-info-icon">cake</span>
-                                <div>
-                                    <div class="fiche-info-label">Date de naissance</div>
-                                    <div class="fiche-info-value">${new Date(eleve.dateNaissance).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}</div>
-                                </div>
-                            </div>` : ''}
-                            ${eleve.email ? `
-                            <div class="fiche-info-item">
-                                <span class="material-icons fiche-info-icon">email</span>
-                                <div>
-                                    <div class="fiche-info-label">Email élève</div>
-                                    <div class="fiche-info-value" style="word-break:break-all;">${eleve.email}</div>
-                                </div>
-                            </div>` : ''}
-                            ${eleve.tel ? `
-                            <div class="fiche-info-item">
-                                <span class="material-icons fiche-info-icon">phone</span>
-                                <div>
-                                    <div class="fiche-info-label">Téléphone</div>
-                                    <div class="fiche-info-value">${eleve.tel}</div>
-                                </div>
-                            </div>` : ''}
-                            ${eleve.anneeScolaire ? `
-                            <div class="fiche-info-item">
-                                <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">calendar_today</span>
-                                <div>
-                                    <div class="fiche-info-label">Année scolaire</div>
-                                    <div class="fiche-info-value" style="color:var(--md-sys-color-secondary);font-weight:600;">${eleve.anneeScolaire}</div>
-                                </div>
-                            </div>` : ''}
-                            <div class="fiche-info-item">
-                                <span class="material-icons fiche-info-icon"
-                                      style="color:${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">payments</span>
-                                <div>
-                                    <div class="fiche-info-label">Frais d'inscription</div>
-                                    <div class="fiche-info-value">${fraisTotal > 0 ? fraisTotal.toFixed(2) + ' €' : 'Non renseigné'}</div>
-                                    <div style="font-size:12px; margin-top:2px;
-                                                color:${eleve.fraisValide ? 'var(--md-sys-color-tertiary)' : 'var(--md-sys-color-error)'};">
-                                        ${eleve.fraisValide ? '✓ Intégralement réglé' : nbPaieEffectues + ' / ' + nbPaie + ' versements effectués'}
-                                    </div>
-                                </div>
+                        <div style="flex:1;min-width:140px;">
+                            <div style="font-size:22px;font-weight:700;color:var(--md-sys-color-on-surface);margin-bottom:10px;">${eleve.prenom} ${eleve.nom}</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+                                ${chip('class', eleve.classe||'Sans classe', 'var(--md-sys-color-primary)', '#fff')}
+                                ${eleve.anneeScolaire ? chip('calendar_month', eleve.anneeScolaire, 'var(--md-sys-color-secondary-container)', 'var(--md-sys-color-on-secondary-container)') : ''}
+                                ${age !== null ? chip('cake', age+' ans', 'var(--md-sys-color-surface-variant)', 'var(--md-sys-color-on-surface-variant)') : ''}
+                                ${parentChip}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── Parents / Responsables ── -->
-                <div class="fiche-section" style="margin-bottom:20px;">
-                    <div class="fiche-section-header">
-                        <div class="fiche-section-icon"
-                             style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
-                            <span class="material-icons">family_restroom</span>
-                        </div>
-                        <div style="flex:1;">
-                            <h4 style="margin:0; font-size:18px;">
-                                Parent${parents.length > 1 ? 's' : ''} / Responsable${parents.length > 1 ? 's' : ''}
-                            </h4>
-                            <p style="margin:2px 0 0; font-size:13px; color:var(--md-sys-color-on-surface-variant);">
-                                ${parents.length === 0 ? 'Aucun parent associé' : parents.length + ' enregistré' + (parents.length > 1 ? 's' : '')}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="fiche-section-content">
-                        ${parents.length === 0 ? `
-                        <div style="text-align:center; padding:28px 16px; color:var(--md-sys-color-on-surface-variant);">
-                            <span class="material-icons" style="font-size:52px; opacity:0.35; display:block; margin-bottom:10px;">person_off</span>
-                            <p style="margin:0; font-size:15px;">Aucun parent enregistré pour cet élève</p>
-                        </div>` : parents.map((parent, idx) => `
-                        <div style="${idx > 0 ? 'margin-top:24px; padding-top:24px; border-top:1px solid var(--md-sys-color-outline-variant);' : ''}">
+                <!-- ── Infos élève ── -->
+                ${card('person','var(--md-sys-color-primary-container)','var(--md-sys-color-on-primary-container)',
+                    'Informations personnelles','Coordonnées et données de l\'élève',
+                    (() => {
+                        const rows = [
+                            infoRow('cake','Date de naissance', eleve.dateNaissance ? new Date(eleve.dateNaissance).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : null),
+                            infoRow('email','Adresse e-mail', eleve.email),
+                            infoRow('phone','Téléphone', eleve.tel),
+                            infoRow('home','Adresse', eleve.adresse)
+                        ].join('');
+                        return rows || '<div style="text-align:center;padding:20px;color:var(--md-sys-color-on-surface-variant);font-size:14px;"><span class=\"material-icons\" style=\"font-size:36px;opacity:.25;display:block;margin-bottom:6px;\">info</span>Aucune information renseignée</div>';
+                    })()
+                )}
 
-                            <!-- En-tête du parent -->
-                            <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; padding:14px 16px;
-                                        background:var(--md-sys-color-surface-container-low); border-radius:12px;">
-                                <div class="md-avatar"
-                                     style="width:50px; height:50px; font-size:20px; font-weight:700; flex-shrink:0;
-                                            background:${parent.isPrimary ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-secondary-container)'};
-                                            color:${parent.isPrimary ? 'white' : 'var(--md-sys-color-on-secondary-container)'};">
-                                    ${(parent.prenom || 'P')[0].toUpperCase()}
-                                </div>
-                                <div style="flex:1;">
-                                    <div style="font-weight:700; font-size:17px; color:var(--md-sys-color-on-surface);">
-                                        ${parent.prenom || ''} ${parent.nom || ''}
-                                    </div>
-                                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; align-items:center;">
-                                        ${parent.isPrimary
-                                            ? `<span class="md-chip md-chip-filter"
-                                                      style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);
-                                                             display:flex; align-items:center; gap:4px; font-size:12px; height:24px;">
-                                                   <span class="material-icons" style="font-size:14px;">star</span> Principal
-                                               </span>`
-                                            : `<span style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">2ᵉ parent</span>`}
-                                        ${parent.activated
-                                            ? `<span class="md-chip md-chip-filter"
-                                                      style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container);
-                                                             display:flex; align-items:center; gap:4px; font-size:12px; height:24px;">
-                                                   <span class="material-icons" style="font-size:14px;">verified</span> Compte activé
-                                               </span>`
-                                            : `<span class="md-chip md-chip-filter"
-                                                      style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container);
-                                                             display:flex; align-items:center; gap:4px; font-size:12px; height:24px;">
-                                                   <span class="material-icons" style="font-size:14px;">schedule</span> Non activé
-                                               </span>`}
-                                        ${parent.relation ? `<span style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">${parent.relation}</span>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Coordonnées du parent -->
-                            <div class="fiche-info-grid">
-                                <div class="fiche-info-item">
-                                    <span class="material-icons fiche-info-icon">email</span>
-                                    <div>
-                                        <div class="fiche-info-label">Email</div>
-                                        <div class="fiche-info-value" style="word-break:break-all;">${parent.email || '—'}</div>
-                                    </div>
-                                </div>
-                                <div class="fiche-info-item">
-                                    <span class="material-icons fiche-info-icon">phone</span>
-                                    <div>
-                                        <div class="fiche-info-label">Téléphone</div>
-                                        <div class="fiche-info-value">${parent.tel || '—'}</div>
-                                    </div>
-                                </div>
-                                <div class="fiche-info-item">
-                                    <span class="material-icons fiche-info-icon">home</span>
-                                    <div>
-                                        <div class="fiche-info-label">Adresse</div>
-                                        <div class="fiche-info-value">${parent.adresse || '—'}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`).join('')}
-                    </div>
-                </div>
+                <!-- ── Parents ── -->
+                ${card('family_restroom','var(--md-sys-color-secondary-container)','var(--md-sys-color-on-secondary-container)',
+                    'Parent'+(parents.length>1?'s':'')+' / Responsable'+(parents.length>1?'s':''),
+                    parents.length===0?'Aucun parent associé':parents.length+' responsable'+(parents.length>1?'s':'')+' enregistré'+(parents.length>1?'s':''),
+                    parentsBody
+                )}
 
                 <!-- ── Fratrie ── -->
-                ${otherChildren.length > 0 ? `
-                <div class="fiche-section" style="margin-bottom:20px;">
-                    <div class="fiche-section-header">
-                        <div class="fiche-section-icon"
-                             style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container);">
-                            <span class="material-icons">group</span>
-                        </div>
-                        <div>
-                            <h4 style="margin:0; font-size:18px;">Famille (${otherChildren.length} autre${otherChildren.length > 1 ? 's' : ''})</h4>
-                            <p style="margin:2px 0 0; font-size:13px; color:var(--md-sys-color-on-surface-variant);">
-                                Cliquez sur un élève pour voir sa fiche
-                            </p>
-                        </div>
-                    </div>
-                    <div class="fiche-section-content">
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px;">
-                            ${otherChildren.map(child => `
-                            <div class="family-member-card" onclick="showEleveDetails('${child.id}')">
-                                <div class="md-avatar"
-                                     style="width:44px; height:44px; font-size:18px;
-                                            background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
-                                    ${child.photo
-                                        ? `<img src="${child.photo}" alt="${child.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-                                        : (child.prenom || 'E')[0].toUpperCase()}
-                                </div>
-                                <div style="flex:1;">
-                                    <div style="font-weight:600; color:var(--md-sys-color-on-surface);">${child.prenom} ${child.nom}</div>
-                                    <div style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">${child.classe || 'Sans classe'}</div>
-                                </div>
-                                <span class="material-icons" style="color:var(--md-sys-color-primary);">chevron_right</span>
-                            </div>`).join('')}
-                        </div>
-                    </div>
-                </div>` : ''}
+                ${siblingsSection}
 
                 <!-- ── Actions ── -->
-                <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-end; padding:4px 0 8px;">
-                    ${canModifyData() && parents.length > 0 && !parents.some(p => p.activated)
-                        ? parents.filter(p => p.email).map(p => `
-                          <button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${p.id}','${p.email}','parent')">
-                              <span class="material-icons">mark_email_read</span> Activer compte : ${p.prenom}
-                          </button>`).join('')
-                        : ''}
-                    ${canModifyData() ? `
-                    <button class="md-btn md-btn-outlined"
-                            style="color:var(--md-sys-color-error); border-color:var(--md-sys-color-error);"
-                            onclick="deleteEleve('${eleve.id}')">
-                        <span class="material-icons">delete</span> Supprimer l'élève
-                    </button>` : ''}
-                </div>
-            `;
-        }
-
-        // Fonction pour revenir à la liste des élèves
-        function backToElevesList() {
-            if (window.eleveDetailsBackup) {
-                const needsReload = window.eleveDetailsBackup.needsReload;
-                const widgetCardContent = document.querySelector('#eleves .widget-card-content');
-                widgetCardContent.innerHTML = `
-                    <div class="topbar-search" style="width: 100%; margin-bottom: 16px;">
-                        <span class="material-icons">search</span>
-                        <input type="text" placeholder="Rechercher un élève..." id="searchEleve" oninput="filterEleves()" value="${window.eleveDetailsBackup.searchValue}">
+                ${canModifyData() ? `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:var(--md-sys-color-surface-container-low);border-radius:14px;border:1px solid var(--md-sys-color-outline-variant);flex-wrap:wrap;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        ${parents.length>0 && !parents.some(p=>p.activated)
+                            ? parents.filter(p=>p.email).map(p=>`<button class="md-btn md-btn-tonal" onclick="sendActivationEmail('${p.id}','${p.email}','parent')"><span class="material-icons">mark_email_read</span> Activer : ${p.prenom}</button>`).join('')
+                            : ''}
                     </div>
-                    <div id="elevesGrid" class="md-grid md-grid-auto">${needsReload ? '' : window.eleveDetailsBackup.gridContent}</div>
-                `;
-                window.eleveDetailsBackup = null;
-                if (needsReload) loadEleves();
-            }
-        }
-
-        // Naviguer vers la fiche d'un élève depuis un autre onglet (ex: classes)
-        function goToEleveFiche(eleveId) {
-            window._skipLoadElevesOnce = true;
-            window.eleveDetailsBackup = { searchValue: '', gridContent: '', needsReload: true };
-            switchTab('eleves');
-            showEleveDetails(eleveId);
+                    <button onclick="deleteEleve('${eleve.id}')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--md-sys-color-error);background:transparent;color:var(--md-sys-color-error);font-size:14px;font-weight:500;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='var(--md-sys-color-error-container)'" onmouseout="this.style.background='transparent'">
+                        <span class="material-icons" style="font-size:18px;">delete_outline</span> Supprimer l'élève
+                    </button>
+                </div>` : ''}
+            `;
         }
 
         // ─── MODE ÉDITION INLINE ─────────────────────────────────────────────
@@ -3551,6 +3418,10 @@
                             <div class="fiche-edit-item">
                                 <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
                                 <input type="tel" id="edit_eleveTel" class="fiche-edit-input" value="${eleve.tel||''}" placeholder="06 00 00 00 00">
+                            </div>
+                            <div class="fiche-edit-item" style="grid-column:1/-1;">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
+                                <input type="text" id="edit_eleveAdresse" class="fiche-edit-input" value="${eleve.adresse||''}" placeholder="Adresse complète">
                             </div>
                         </div>
                     </div>
@@ -3651,8 +3522,9 @@
                 prenom:        elevePrenom,
                 classe:        document.getElementById('edit_eleveClasse')?.value || null,
                 dateNaissance: document.getElementById('edit_eleveDateNaissance')?.value || null,
-                email:         document.getElementById('edit_eleveEmail')?.value?.trim() || null,
-                tel:           document.getElementById('edit_eleveTel')?.value?.trim()   || null
+                email:         document.getElementById('edit_eleveEmail')?.value?.trim()   || null,
+                tel:           document.getElementById('edit_eleveTel')?.value?.trim()     || null,
+                adresse:       document.getElementById('edit_eleveAdresse')?.value?.trim() || null
             };
             try {
                 const r = await fetch(`${API_URL}/eleves/${eleveId}`, {
@@ -3915,7 +3787,7 @@
 
         async function deleteEleve(id) {
             const eleve = allEleves.find(e => e.id === id);
-            const isPending = eleve && !eleve.parentsActivated;
+            const isPending = eleve && eleve.nbParents > 0 && !eleve.parentsActivated;
 
             const message = isPending
                 ? '<p>Voulez-vous vraiment supprimer ce dossier d\'inscription en attente ? Cette action est irréversible.</p>'
@@ -7368,7 +7240,8 @@
 
         async function loadInscriptions() {
             // Les inscriptions sont gérées via les élèves dont les parents ne sont pas activés
-            const pendingEleves = allEleves.filter(e => !e.parentsActivated);
+            // Un élève sans parent (nbParents === 0) n'est pas "en attente"
+            const pendingEleves = allEleves.filter(e => e.nbParents > 0 && !e.parentsActivated);
             
             // Grouper par familleLienId
             const familles = {};
