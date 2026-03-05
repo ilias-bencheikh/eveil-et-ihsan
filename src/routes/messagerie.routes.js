@@ -141,7 +141,7 @@ router.get('/destinataires', async (req, res) => {
                 GROUP BY p.id
             `, [userId, userId]);
             const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) != \'professeur\'');
-            const classes = await dbAll('SELECT nom FROM classes');
+            const classes = await dbAll('SELECT nom FROM classes WHERE professeurId = ?', [userId]);
 
             // Parents des élèves de ses classes
             const parents = await dbAll(`

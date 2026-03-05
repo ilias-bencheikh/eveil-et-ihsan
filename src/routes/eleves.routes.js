@@ -697,28 +697,34 @@ async function cleanupOrphanParents(parentIds) {
 // Supprimer un élève
 router.delete('/:id', checkPermission('delete'), async (req, res) => {
     try {
-        // Récupérer les parents liés avant suppression
+        // récupérer parents liés
         const parentLinks = await dbAll(db, 'SELECT parentId FROM eleve_parent WHERE eleveId = ?', [req.params.id]);
         const parentIds = parentLinks.map(l => l.parentId);
 
-        // Supprimer les liaisons élève-parent
+        // supprimer les liaisons élève‑parent
         await dbRun(db, 'DELETE FROM eleve_parent WHERE eleveId = ?', [req.params.id]);
-        
-        // Supprimer l'élève
+
+        // **nettoyage des tables dépendantes**
+        await dbRun(db, 'DELETE FROM absences WHERE eleveId = ?', [req.params.id]);
+        await dbRun(db, 'DELETE FROM appreciations WHERE eleveId = ?', [req.params.id]);
+        // paiements a déjà ON DELETE CASCADE mais on s'assure quand même
+        await dbRun(db, 'DELETE FROM paiements WHERE eleveId = ?', [req.params.id]);
+
+        // supprimer l'élève
         const result = await dbRun(db, 'DELETE FROM eleves WHERE id = ?', [req.params.id]);
-        
         if (result.changes === 0) {
             return res.status(404).json({ message: 'Élève non trouvé' });
         }
 
-        // Supprimer les parents qui n'ont plus d'enfants
+        // supprimer parents orphelins
         const deletedParents = await cleanupOrphanParents(parentIds);
-        
-        res.json({ 
+
+        res.json({
             message: 'Élève supprimé',
             deletedParents: deletedParents.length > 0 ? deletedParents : undefined
         });
     } catch (err) {
+        console.error('Erreur suppression élève', err);
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
