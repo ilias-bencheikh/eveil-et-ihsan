@@ -1257,6 +1257,10 @@
                         <span class="material-icons">payments</span>
                         <span>Gestion des frais</span>
                     </a>
+                    <a href="#" class="sidebar-nav-item" data-tab="accounts">
+                        <span class="material-icons">people</span>
+                        <span>Comptes</span>
+                    </a>
                     <a href="#" class="sidebar-nav-item" data-tab="maintenance" id="nav-maintenance">
                         <span class="material-icons">engineering</span>
                         <span>Maintenance</span>
@@ -2645,6 +2649,27 @@
                     </div>
                 </div>
 
+                <!-- ========== ACCOUNTS TAB (ADMIN) ========== -->
+                <div id="accounts" class="tab-content">
+                    <div class="widget-card">
+                        <div class="widget-card-header">
+                            <h3 class="widget-card-title">Administration — Comptes parents & enfants</h3>
+                        </div>
+                        <div class="widget-card-content">
+                            <div style="display:flex; flex-direction:column; gap:24px;">
+                                <div>
+                                    <h4 style="margin-bottom:12px;">Parents</h4>
+                                    <div id="parentsGrid" class="md-grid md-grid-auto"></div>
+                                </div>
+                                <div>
+                                    <h4 style="margin-bottom:12px;">Enfants</h4>
+                                    <div id="childrenGrid" class="md-grid md-grid-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ========== MAINTENANCE TAB ========== -->
                 <div id="maintenance" class="tab-content">
                     <div class="widget-card">
@@ -2780,10 +2805,7 @@
         let allClasses = [];
         let allProfesseurs = [];
         let allStaff = [];
-        let selectedDestinataires = [];
-        let allStaffMembers = []; // Tous les membres du staff (professeurs inclus)
-
-        // ==================== INITIALISATION ====================
+                let allParents = []; // ajout pour section comptes
         document.addEventListener('DOMContentLoaded', () => {
             initializeUI();
             loadDashboardData();
@@ -2826,6 +2848,11 @@
 
             if (['admin', 'directeur', 'secretariat'].includes(user.role)) {
                 document.getElementById('adminSection').style.display = 'block';
+            }
+            // ne montrer l'onglet Comptes que pour les administrateurs
+            if (user.role !== 'admin') {
+                const acctNav = document.querySelector('.sidebar-nav-item[data-tab="accounts"]');
+                if (acctNav) acctNav.style.display = 'none';
             }
 
             // Masquer la section maintenance pour les non-admin
@@ -2921,7 +2948,8 @@
                 dashboard: 'Tableau de bord', eleves: 'Gestion des élèves', classes: 'Gestion des classes',
                 appel: "Faire l'appel", absences: 'Suivi des absences', appreciations: 'Appréciations',
                 actualites: 'Actualités', messagerie: 'Messagerie', bureau: 'Gestion du bureau', inscriptions: "Dossiers d'inscription",
-                'frais-admin': 'Gestion des frais'
+                'frais-admin': 'Gestion des frais',
+                accounts: 'Comptes'
             };
             document.getElementById('pageTitle').textContent = titles[tabName] || tabName;
             loadTabData(tabName);
@@ -3373,6 +3401,151 @@
             }
         }
 
+        // =========================================
+        // SECTION COMPTES (ADMIN)
+        // =========================================
+        async function loadAccounts() {
+            // s'assurer que les élèves sont déjà chargés car on les utilise pour la partie enfants
+            if (allEleves.length === 0) await loadAllData();
+            try {
+                const res = await fetch(`${API_URL}/parents/all`, { headers: getHeaders() });
+                if (!res.ok) throw new Error('Erreur chargement parents');
+                allParents = await res.json();
+                renderParents(allParents);
+                renderChildren(allEleves);
+            } catch (e) {
+                console.error('loadAccounts error', e);
+                showSnackbar('Erreur lors du chargement des comptes');
+            }
+        }
+
+        function renderParents(parents) {
+            const grid = document.getElementById('parentsGrid');
+            if (!grid) return;
+            grid.innerHTML = parents.length ? parents.map(p => `
+                <div class="md-card md-card-elevated" style="padding:16px; cursor:pointer; transition:all 0.3s ease; position:relative;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <span class="material-icons">person</span>
+                        <div>
+                            <div>${p.prenom || ''} ${p.nom || ''}</div>
+                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${p.email || ''}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <span>${Array.isArray(p.enfants) ? p.enfants.length : 0} enfant(s)</span>
+                        <div style="display:flex;gap:4px;">
+                            <button class="md-btn md-btn-text" onclick="editParent('${p.id}')"><span class="material-icons">edit</span></button>
+                            <button class="md-btn md-btn-text" onclick="deleteParent('${p.id}')"><span class="material-icons">delete</span></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun parent enregistré</p>';
+        }
+
+        function renderChildren(eleves) {
+            const grid = document.getElementById('childrenGrid');
+            if (!grid) return;
+            grid.innerHTML = eleves.length ? eleves.map(e => `
+                <div class="md-card md-card-elevated" style="padding:16px; cursor:pointer; transition:all 0.3s ease; position:relative;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <span class="material-icons">school</span>
+                        <div>
+                            <div>${e.prenom || ''} ${e.nom || ''}</div>
+                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${e.classe || ''}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <span></span>
+                        <div style="display:flex;gap:4px;">
+                            <button class="md-btn md-btn-text" onclick="editEleve('${e.id}')"><span class="material-icons">edit</span></button>
+                            <button class="md-btn md-btn-text" onclick="deleteEleve('${e.id}')"><span class="material-icons">delete</span></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève enregistré</p>';
+        }
+
+        function editParent(id) {
+            const parent = allParents.find(p => p.id === id);
+            if (!parent) return;
+            const html = `
+                <form id="parentEditForm" style="display:flex;flex-direction:column;gap:16px;">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input id="edit_parentNom" type="text" value="${parent.nom||''}" placeholder="Nom">
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input id="edit_parentPrenom" type="text" value="${parent.prenom||''}" placeholder="Prénom">
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input id="edit_parentEmail" type="email" value="${parent.email||''}" placeholder="Email">
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input id="edit_parentTel" type="text" value="${parent.tel||''}" placeholder="Téléphone">
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input id="edit_parentAdresse" type="text" value="${parent.adresse||''}" placeholder="Adresse">
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input id="edit_parentProfession" type="text" value="${parent.profession||''}" placeholder="Profession">
+                        </div>
+                    </div>
+                </form>
+            `;
+            showDialog('Modifier le parent', html, async () => {
+                const data = {
+                    nom: document.getElementById('edit_parentNom')?.value?.trim() || null,
+                    prenom: document.getElementById('edit_parentPrenom')?.value?.trim() || null,
+                    email: document.getElementById('edit_parentEmail')?.value?.trim() || null,
+                    tel: document.getElementById('edit_parentTel')?.value?.trim() || null,
+                    adresse: document.getElementById('edit_parentAdresse')?.value?.trim() || null,
+                    profession: document.getElementById('edit_parentProfession')?.value?.trim() || null
+                };
+                try {
+                    const r = await fetch(`${API_URL}/parents/${id}`, {
+                        method: 'PUT', headers: getHeaders(), body: JSON.stringify(data)
+                    });
+                    if (r.ok) {
+                        showSnackbar('Parent mis à jour');
+                        await loadAccounts();
+                    } else {
+                        const err = await r.json();
+                        showSnackbar(err.error || 'Erreur mise à jour');
+                    }
+                } catch (e) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        function deleteParent(id) {
+            showDialog('Confirmer la suppression', '<p>Voulez-vous vraiment supprimer ce compte parent ?</p>', async () => {
+                try {
+                    const r = await fetch(`${API_URL}/parents/${id}`, { method: 'DELETE', headers: getHeaders() });
+                    if (r.ok) {
+                        showSnackbar('Parent supprimé');
+                        await loadAccounts();
+                    } else {
+                        showSnackbar('Erreur lors de la suppression');
+                    }
+                } catch (e) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        // fin section comptes
+
 
         async function loadTabData(tabName) {
             switch(tabName) {
@@ -3387,6 +3560,7 @@
                 case 'inscriptions': await loadInscriptions(); break;
                 case 'frais-admin': await adminFraisTabInit(); break;
                 case 'maintenance': await loadMaintenanceStatus(); break;
+                case 'accounts': await loadAccounts(); break;
                 case 'dashboard': await loadDashboardData(); break;
             }
         }

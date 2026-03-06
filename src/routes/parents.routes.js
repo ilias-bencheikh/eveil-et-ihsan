@@ -80,6 +80,76 @@ router.get('/enfants', requireAuth, async (req, res) => {
     }
 });
 
+// ================== ADMIN UTILITAIRES ==================
+
+// Récupérer tous les parents (avec enfants) - accessible uniquement aux admins
+router.get('/all', requireAuth, async (req, res) => {
+    if (req.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
+    }
+    try {
+        const rows = await dbAll(db, `
+            SELECT p.id, p.nom, p.prenom, p.email, p.tel, p.adresse, p.profession, p.activated,
+                   e.id AS eleveId, e.nom AS eleveNom, e.prenom AS elevePrenom, e.classe AS eleveClasse
+            FROM parents p
+            LEFT JOIN eleve_parent ep ON ep.parentId = p.id
+            LEFT JOIN eleves e ON e.id = ep.eleveId
+            ORDER BY p.nom, p.prenom
+        `);
+        const parents = {};
+        rows.forEach(r => {
+            if (!parents[r.id]) {
+                parents[r.id] = { id: r.id, nom: r.nom, prenom: r.prenom, email: r.email, tel: r.tel, adresse: r.adresse, profession: r.profession, activated: r.activated, enfants: [] };
+            }
+            if (r.eleveId) {
+                parents[r.id].enfants.push({ id: r.eleveId, nom: r.eleveNom, prenom: r.elevePrenom, classe: r.eleveClasse });
+            }
+        });
+        res.json(Object.values(parents));
+    } catch (err) {
+        console.error('Erreur récupération parents admin:', err);
+        res.status(500).json({ error: 'Erreur interne du serveur' });
+    }
+});
+
+// Mettre à jour un parent par l'administrateur
+router.put('/:id', requireAuth, async (req, res) => {
+    if (req.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
+    }
+    const { id } = req.params;
+    const { nom, prenom, email, tel, adresse, profession } = req.body;
+    try {
+        await dbRun(db, 'UPDATE parents SET nom = ?, prenom = ?, email = ?, tel = ?, adresse = ?, profession = ? WHERE id = ?', [nom || null, prenom || null, email || null, tel || null, adresse || null, profession || null, id]);
+        const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession, activated FROM parents WHERE id = ?', [id]);
+        if (!parent) return res.status(404).json({ error: 'Parent non trouvé' });
+        res.json({ message: 'Parent mis à jour', parent });
+    } catch (err) {
+        console.error('Erreur mise à jour parent admin:', err);
+        res.status(500).json({ error: 'Erreur interne du serveur' });
+    }
+});
+
+// Supprimer un parent (et éventuellement liaisons) par l'administrateur
+router.delete('/:id', requireAuth, async (req, res) => {
+    if (req.userRole !== 'admin') {
+        return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
+    }
+    const { id } = req.params;
+    try {
+        // Supprimer liaisons
+        await dbRun(db, 'DELETE FROM eleve_parent WHERE parentId = ?', [id]);
+        // Supprimer sessions
+        await dbRun(db, 'DELETE FROM sessions WHERE userId = ?', [id]).catch(() => {});
+        // Supprimer le parent
+        await dbRun(db, 'DELETE FROM parents WHERE id = ?', [id]);
+        res.json({ message: 'Parent supprimé' });
+    } catch (err) {
+        console.error('Erreur suppression parent admin:', err);
+        res.status(500).json({ error: 'Erreur interne du serveur' });
+    }
+});
+
 // ================== ACTIVATION PARENT ==================
 
 // Vérifier un token d'activation parent
