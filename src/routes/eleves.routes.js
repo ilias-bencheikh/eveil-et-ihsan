@@ -707,6 +707,8 @@ router.delete('/:id', checkPermission('delete'), async (req, res) => {
         // **nettoyage des tables dépendantes**
         await dbRun(db, 'DELETE FROM absences WHERE eleveId = ?', [req.params.id]);
         await dbRun(db, 'DELETE FROM appreciations WHERE eleveId = ?', [req.params.id]);
+        // supprimer les messages où l'élève apparait comme expéditeur ou destinataire
+        await dbRun(db, 'DELETE FROM messages WHERE expediteurId = ? OR destinataireId = ?', [req.params.id, req.params.id]);
         // paiements a déjà ON DELETE CASCADE mais on s'assure quand même
         await dbRun(db, 'DELETE FROM paiements WHERE eleveId = ?', [req.params.id]);
 

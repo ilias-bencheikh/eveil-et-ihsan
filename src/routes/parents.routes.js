@@ -139,6 +139,8 @@ router.delete('/:id', requireAuth, async (req, res) => {
     try {
         // Supprimer liaisons
         await dbRun(db, 'DELETE FROM eleve_parent WHERE parentId = ?', [id]);
+        // Supprimer messages envoyés ou reçus par ce parent
+        await dbRun(db, 'DELETE FROM messages WHERE expediteurId = ? OR destinataireId = ?', [id, id]);
         // Supprimer sessions
         await dbRun(db, 'DELETE FROM sessions WHERE userId = ?', [id]).catch(() => {});
         // Supprimer le parent

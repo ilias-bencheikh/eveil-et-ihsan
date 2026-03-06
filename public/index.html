@@ -2656,14 +2656,19 @@
                             <h3 class="widget-card-title">Administration — Comptes parents & enfants</h3>
                         </div>
                         <div class="widget-card-content">
-                            <div style="display:flex; flex-direction:column; gap:24px;">
-                                <div>
-                                    <h4 style="margin-bottom:12px;">Parents</h4>
-                                    <div id="parentsGrid" class="md-grid md-grid-auto"></div>
+                            <!-- unified search bar -->
+                            <div class="topbar-search" style="width:100%; margin-bottom:24px;">
+                                <span class="material-icons">search</span>
+                                <input id="searchAccounts" type="text" placeholder="Rechercher un compte..." oninput="filterAccounts()">
+                            </div>
+
+                        <!-- Accounts grid -->
+                            <div class="widget-card">
+                                <div class="widget-card-header">
+                                    <h4 class="widget-card-title" style="font-size:1.1rem;">Liste des comptes</h4>
                                 </div>
-                                <div>
-                                    <h4 style="margin-bottom:12px;">Enfants</h4>
-                                    <div id="childrenGrid" class="md-grid md-grid-auto"></div>
+                                <div class="widget-card-content">
+                                    <div id="accountsGrid" class="md-grid md-grid-auto"></div>
                                 </div>
                             </div>
                         </div>
@@ -3405,64 +3410,65 @@
         // SECTION COMPTES (ADMIN)
         // =========================================
         async function loadAccounts() {
-            // s'assurer que les élèves sont déjà chargés car on les utilise pour la partie enfants
+            // s'assurer que les élèves sont chargés car on les utilise pour les comptes
             if (allEleves.length === 0) await loadAllData();
             try {
                 const res = await fetch(`${API_URL}/parents/all`, { headers: getHeaders() });
                 if (!res.ok) throw new Error('Erreur chargement parents');
                 allParents = await res.json();
-                renderParents(allParents);
-                renderChildren(allEleves);
+                // construire le tableau unifié
+                allAccounts = [];
+                allParents.forEach(p => allAccounts.push({ ...p, type: 'parent' }));
+                allEleves.forEach(e => allAccounts.push({ ...e, type: 'eleve' }));
+                renderAccounts(allAccounts);
             } catch (e) {
                 console.error('loadAccounts error', e);
                 showSnackbar('Erreur lors du chargement des comptes');
             }
         }
 
-        function renderParents(parents) {
-            const grid = document.getElementById('parentsGrid');
+        // render unified account cards with badge indicating type
+        function renderAccounts(list) {
+            const grid = document.getElementById('accountsGrid');
             if (!grid) return;
-            grid.innerHTML = parents.length ? parents.map(p => `
+            grid.innerHTML = list.length ? list.map(item => {
+                const isParent = item.type === 'parent';
+                const badge = `<span class="account-badge" style="position:absolute;top:8px;right:8px;font-size:10px;padding:2px 6px;border-radius:12px;background:${isParent?'var(--md-sys-color-secondary-container)':'var(--md-sys-color-primary-container)'};color:${isParent?'var(--md-sys-color-on-secondary-container)':'var(--md-sys-color-on-primary-container)'};">${isParent?'Parent':'Élève'}</span>`;
+                const icon = isParent ? 'person' : 'school';
+                const subtitle = isParent ? (item.email||'') : (item.classe||'');
+                const actions = isParent
+                    ? `<button class="md-btn md-btn-text" onclick="editParent('${item.id}')"><span class="material-icons">edit</span></button>
+                       <button class="md-btn md-btn-text" onclick="deleteParent('${item.id}')"><span class="material-icons">delete</span></button>`
+                    : `<button class="md-btn md-btn-text" onclick="editEleve('${item.id}')"><span class="material-icons">edit</span></button>
+                       <button class="md-btn md-btn-text" onclick="deleteEleve('${item.id}')"><span class="material-icons">delete</span></button>`;
+                return `
                 <div class="md-card md-card-elevated" style="padding:16px; cursor:pointer; transition:all 0.3s ease; position:relative;">
+                    ${badge}
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                        <span class="material-icons">person</span>
+                        <span class="material-icons">${icon}</span>
                         <div>
-                            <div>${p.prenom || ''} ${p.nom || ''}</div>
-                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${p.email || ''}</div>
-                        </div>
-                    </div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                        <span>${Array.isArray(p.enfants) ? p.enfants.length : 0} enfant(s)</span>
-                        <div style="display:flex;gap:4px;">
-                            <button class="md-btn md-btn-text" onclick="editParent('${p.id}')"><span class="material-icons">edit</span></button>
-                            <button class="md-btn md-btn-text" onclick="deleteParent('${p.id}')"><span class="material-icons">delete</span></button>
-                        </div>
-                    </div>
-                </div>
-            `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun parent enregistré</p>';
-        }
-
-        function renderChildren(eleves) {
-            const grid = document.getElementById('childrenGrid');
-            if (!grid) return;
-            grid.innerHTML = eleves.length ? eleves.map(e => `
-                <div class="md-card md-card-elevated" style="padding:16px; cursor:pointer; transition:all 0.3s ease; position:relative;">
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                        <span class="material-icons">school</span>
-                        <div>
-                            <div>${e.prenom || ''} ${e.nom || ''}</div>
-                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${e.classe || ''}</div>
+                            <div><strong>${item.prenom||''} ${item.nom||''}</strong></div>
+                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${subtitle}</div>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
                         <span></span>
                         <div style="display:flex;gap:4px;">
-                            <button class="md-btn md-btn-text" onclick="editEleve('${e.id}')"><span class="material-icons">edit</span></button>
-                            <button class="md-btn md-btn-text" onclick="deleteEleve('${e.id}')"><span class="material-icons">delete</span></button>
+                            ${actions}
                         </div>
                     </div>
-                </div>
-            `).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun élève enregistré</p>';
+                </div>`;
+            }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun compte trouvé</p>';
+        }
+
+        // cette fonction devient obsolète mais conservée pour compat
+        function renderParents(parents) {
+            renderAccounts(parents.map(p => ({...p, type:'parent'})));
+        }
+
+        // wrapper
+        function renderChildren(eleves) {
+            renderAccounts(eleves.map(e => ({...e, type:'eleve'})));
         }
 
         function editParent(id) {
@@ -4542,6 +4548,27 @@
                 filteredCount.textContent = filteredClasses.length;
                 resultsInfo.style.display = filteredClasses.length !== allClasses.length ? 'block' : 'none';
             }
+        }
+
+        // filtres pour la section comptes
+        // unified filtering for accounts search; works on combined list
+        function filterAccounts() {
+            const term = document.getElementById('searchAccounts').value.toLowerCase();
+            const filtered = term ? allAccounts.filter(a =>
+                (a.nom||'').toLowerCase().includes(term) ||
+                (a.prenom||'').toLowerCase().includes(term) ||
+                (a.email||'').toLowerCase().includes(term) ||
+                (a.classe||'').toLowerCase().includes(term)
+            ) : allAccounts;
+            renderAccounts(filtered);
+        }
+
+        // keep legacy helpers but keep them in case they are used elsewhere
+        function filterParents() {
+            filterAccounts();
+        }
+        function filterChildren() {
+            filterAccounts();
         }
 
         // Effacer la recherche des classes
@@ -7736,7 +7763,15 @@
                         emailInput.removeAttribute('required');
                         accountToggle.style.display = 'block';
                         emailSection.querySelector('.email-required-note').style.display = 'none';
-                        // Garder l'état actuel du toggle (ne pas fermer si déjà ouvert)
+                        // fermer toujours le panneau email par défaut lorsque parent présent
+                        emailSection.style.display = 'none';
+                        const toggleBtn = accountToggle.querySelector('.toggle-account-btn');
+                        const toggleIcon = accountToggle.querySelector('.toggle-icon');
+                        if (toggleBtn) {
+                            toggleBtn.classList.remove('active');
+                            toggleBtn.querySelector('span:nth-child(2)').textContent = 'Créer un compte pour cet élève';
+                        }
+                        if (toggleIcon) toggleIcon.textContent = 'expand_more';
                     }
                 }
             });

@@ -3544,7 +3544,7 @@
                     }
                     <div class="msg-item-content">
                         <div class="msg-item-top">
-                            <span class="msg-item-contact">${contactName || 'Système'}</span>
+                            <span class="msg-item-contact">${contactName || 'InconnuS'}</span>
                             <span class="msg-item-date">${dateStr}</span>
                         </div>
                         <div class="msg-item-preview">
@@ -3582,12 +3582,12 @@
             const formattedDate = new Date(message.date).toLocaleString('fr-FR', {
                 weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
             });
-            const initials = (contactName || 'S').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            const initials = (contactName || 'Inconnu').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
             document.getElementById('parentMsgReadMeta').innerHTML = `
                 <div class="msg-read-avatar">${initials}</div>
                 <div>
-                    <div class="msg-read-contact">${isReceived ? 'De' : 'À'} : <strong>${contactName || 'Système'}</strong></div>
+                    <div class="msg-read-contact">${isReceived ? 'De' : 'À'} : <strong>${contactName || 'Inconnu'}</strong></div>
                     <div class="msg-read-date">${formattedDate}</div>
                 </div>`;
 

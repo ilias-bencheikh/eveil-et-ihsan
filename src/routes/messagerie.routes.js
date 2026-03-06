@@ -238,7 +238,7 @@ router.get('/', (req, res) => {
         if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
 
         const enrichedMessages = messages.map(m => {
-            let expediteurNom = 'Système';
+            let expediteurNom = 'Inconnu';
             if (m.expPrenomParent && m.expNomParent) {
                 // Parent : afficher "Parent de (enfant)" si enfantId présent
                 if (m.enfantPrenom && m.enfantNom) {
@@ -254,7 +254,7 @@ router.get('/', (req, res) => {
                 expediteurNom = `${m.expPrenomStaff || ''} ${m.expNomStaff}`.trim();
             }
 
-            let destinataireNom = 'Utilisateur';
+            let destinataireNom = 'Inconnu';
             if (m.destinataireId.startsWith('class_')) {
                 destinataireNom = `Classe ${m.destinataireId.replace('class_', '')}`;
             } else if (m.destPrenomParent && m.destNomParent) {
