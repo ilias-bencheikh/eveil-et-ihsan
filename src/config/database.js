@@ -14,7 +14,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('❌ Erreur de connexion à la base de données:', err);
     } else {
-        console.log('✅ Connecté à la base de données SQLite');
         // Sécurité et performance de la base de données
         db.run('PRAGMA synchronous = FULL');        // Intégrité maximale des données
         db.run('PRAGMA journal_mode = WAL');         // Write-Ahead Logging (meilleure performance)
@@ -328,8 +327,6 @@ function initDatabase() {
                     });
                 });
             });
-
-            console.log('✅ Tables créées avec succès');
             resolve();
         });
     });
@@ -343,7 +340,6 @@ function closeDatabase() {
                 console.error('❌ Erreur lors de la fermeture de la base de données:', err);
                 reject(err);
             } else {
-                console.log('✅ Base de données fermée proprement');
                 resolve();
             }
         });

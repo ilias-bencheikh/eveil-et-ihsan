@@ -132,18 +132,6 @@
             position: relative;
         }
 
-        .actualite-date-field .md-text-field-container::before {
-            content: '';
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            background: var(--md-sys-color-surface);
-            border-radius: 50%;
-            z-index: 1;
-        }
 
         .actualite-date-field .material-icons {
             position: absolute;
@@ -158,6 +146,12 @@
 
         .actualite-date-field .md-text-field-input {
             padding-left: 40px !important;
+        }
+
+        /* textarea that grows with content */
+        textarea.auto-resize {
+            overflow: hidden;
+            resize: none;
         }
 
         .actualite-info-text {
@@ -1868,7 +1862,8 @@
                                 </div>
                                 <div class="md-text-field" style="grid-column: 1 / -1;">
                                     <div class="md-text-field-container">
-                                        <textarea id="actualite_description" class="md-text-field-input" placeholder=" " rows="4" required></textarea>
+                                        <textarea id="actualite_description" class="md-text-field-input auto-resize" placeholder=" " rows="4" required
+                                            oninput="autoResize(this)"></textarea>
                                         <label class="md-text-field-label">Description</label>
                                     </div>
                                 </div>
@@ -1882,14 +1877,14 @@
                                     <div class="actualite-dates-grid">
                                         <div class="md-text-field actualite-date-field">
                                             <div class="md-text-field-container">
-                                                <span class="material-icons">today</span>
+                                                <span class="material-icons" style="margin-top: 5px;">event_available</span>
                                                 <input type="date" id="actualite_date" class="md-text-field-input" placeholder=" ">
                                                 <label class="md-text-field-label">Date de début</label>
                                             </div>
                                         </div>
                                         <div class="md-text-field actualite-date-field">
                                             <div class="md-text-field-container">
-                                                <span class="material-icons">event_busy</span>
+                                                <span class="material-icons " style="margin-top: 5px;">event_busy</span>
                                                 <input type="date" id="actualite_dateFin" class="md-text-field-input" placeholder=" ">
                                                 <label class="md-text-field-label">Date de fin (optionnel)</label>
                                             </div>
@@ -2804,12 +2799,20 @@
             return userRole && userRole !== 'professeur';
         }
         
+        // ajuste dynamiquement la hauteur d'une textarea
+        function autoResize(el) {
+            if (!el) return;
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+        
 
         // Variables globales
         let allEleves = [];
         let allClasses = [];
         let allProfesseurs = [];
         let allStaff = [];
+        let allStaffMembers = []; // combined professeur+staff for search
                 let allParents = []; // ajout pour section comptes
         document.addEventListener('DOMContentLoaded', () => {
             initializeUI();
@@ -2830,6 +2833,15 @@
                     });
                 });
             }
+
+            // Ensure messaging overlay is cleared when resizing past mobile breakpoint
+            window.addEventListener('resize', () => {
+                const layout = document.querySelector('.msg-layout');
+                if (window.innerWidth > 768 && layout && layout.classList.contains('overlay')) {
+                    layout.classList.remove('overlay');
+                    document.body.classList.remove('msg-overlay-lock');
+                }
+            });
         });
 
         function initializeUI() {
@@ -4499,7 +4511,7 @@
             try {
                 console.log('loadClasses: Début du chargement');
                 // S'assurer que toutes les données nécessaires sont chargées
-                if (allStaffMembers.length === 0 || allEleves.length === 0) {
+                if (!Array.isArray(allStaffMembers) || allStaffMembers.length === 0 || allEleves.length === 0) {
                     console.log('loadClasses: Chargement des données manquantes');
                     await loadAllData();
                 }
@@ -4711,7 +4723,7 @@
                                 <label class="fiche-edit-label"><span class="material-icons">school</span> Niveau</label>
                                 <select id="edit_classeNiveau" class="fiche-edit-input">
                                     <option value="">-- Sélectionner --</option>
-                                    ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
+                                    ${['Maternelle', 'Primaire', 'Secondaire', 'Lycée', 'Supérieur', 'Adultes'].map(n =>
                                         `<option value="${n}" ${n === classe.niveau ? 'selected' : ''}>${n}</option>`
                                     ).join('')}
                                 </select>
@@ -5162,7 +5174,7 @@
                                 <label class="fiche-edit-label"><span class="material-icons">school</span> Niveau</label>
                                 <select id="classeNiveau" class="fiche-edit-input">
                                     <option value="">-- Sélectionner --</option>
-                                    ${['Maternelle','CP','CE1','CE2','CM1','CM2','6ème','5ème','4ème','3ème'].map(n =>
+                                    ${['Maternelle', 'Primaire', 'Secondaire', 'Lycée', 'Supérieur', 'Adultes'].map(n =>
                                         `<option value="${n}">${n}</option>`
                                     ).join('')}
                                 </select>
@@ -7221,15 +7233,53 @@
 
         // ---- Helpers panneaux ----
         function showMsgPanel(mode) {
+            const layout = document.querySelector('.msg-layout');
             document.getElementById('msgPanelEmpty').style.display = 'none';
-            document.getElementById('msgReadView').style.display = mode === 'read' ? 'flex' : 'none';
-            document.getElementById('msgComposeView').style.display = mode === 'compose' ? 'flex' : 'none';
+            const read = document.getElementById('msgReadView');
+            const comp = document.getElementById('msgComposeView');
+            read.style.display = mode === 'read' ? 'flex' : 'none';
+            comp.style.display = mode === 'compose' ? 'flex' : 'none';
+
+            // add simple slide-up animation class for mobile
+            if (mode === 'read') {
+                read.classList.add('open');
+            } else {
+                read.classList.remove('open');
+            }
+            if (mode === 'compose') {
+                comp.classList.add('open');
+            } else {
+                comp.classList.remove('open');
+            }
+
+            // when a panel is open on small screens, hide sidebar via overlay class
+            if (window.innerWidth <= 768) {
+                if (mode === 'read' || mode === 'compose') {
+                    layout.classList.add('overlay');
+                    document.body.classList.add('msg-overlay-lock');
+                } else {
+                    layout.classList.remove('overlay');
+                    document.body.classList.remove('msg-overlay-lock');
+                }
+            }
         }
 
         function closeMsgPanel() {
             document.getElementById('msgPanelEmpty').style.display = '';
-            document.getElementById('msgReadView').style.display = 'none';
-            document.getElementById('msgComposeView').style.display = 'none';
+            const layout = document.querySelector('.msg-layout');
+            const read = document.getElementById('msgReadView');
+            const comp = document.getElementById('msgComposeView');
+            // animate panel slide down before hiding
+            read.classList.remove('open');
+            comp.classList.remove('open');
+            setTimeout(() => {
+                read.style.display = 'none';
+                comp.style.display = 'none';
+                if (window.innerWidth <= 768 && layout) {
+                layout.classList.remove('overlay');
+                document.body.classList.remove('msg-overlay-lock');
+            }
+            }, 300);
             // Réinitialiser le bouton d'envoi
             const sendBtn = document.getElementById('msgSendBtn');
             if (sendBtn) {
@@ -10519,6 +10569,7 @@
                 document.getElementById('actualiteEditId').value = '';
                 document.getElementById('actualite_titre').value = '';
                 document.getElementById('actualite_description').value = '';
+                autoResize(document.getElementById('actualite_description')); // reset height
                 document.getElementById('actualite_date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('actualite_dateFin').value = '';
                 document.getElementById('cible_tous').checked = true;
@@ -10622,6 +10673,7 @@
             document.getElementById('actualiteEditId').value = id;
             document.getElementById('actualite_titre').value = actu.titre;
             document.getElementById('actualite_description').value = actu.description;
+                autoResize(document.getElementById('actualite_description'));
             document.getElementById('actualite_date').value = actu.date || '';
             document.getElementById('actualite_dateFin').value = actu.dateFin || '';
 
@@ -11089,16 +11141,16 @@
             display: flex;
             height: calc(100vh - 200px);
             min-height: 580px;
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
             border: 1px solid var(--md-sys-color-outline-variant);
             background: var(--md-sys-color-surface);
-            box-shadow: 0 4px 24px rgba(0,0,0,.09);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
         }
 
         /* ===== SIDEBAR ===== */
         .msg-sidebar {
-            width: 340px;
+            width: 350px;
             min-width: 260px;
             max-width: 380px;
             border-right: 1px solid var(--md-sys-color-outline-variant);
@@ -11106,9 +11158,13 @@
             flex-direction: column;
             background: var(--md-sys-color-surface-container-low);
             flex-shrink: 0;
+            padding: 16px 12px;
         }
         .msg-sidebar-header {
-            padding: 16px 14px 0;
+            padding-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--md-sys-color-on-surface);
         }
         .msg-compose-btn {
             display: flex;
@@ -11116,75 +11172,72 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
-            padding: 13px 20px;
-            background: linear-gradient(135deg, var(--md-sys-color-primary), color-mix(in srgb, var(--md-sys-color-primary) 80%, #000));
+            padding: 14px 22px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
             color: var(--md-sys-color-on-primary);
             border: none;
-            border-radius: 28px;
-            font-size: 14px;
+            border-radius: 30px;
+            font-size: 15px;
             font-weight: 600;
-            letter-spacing: .02em;
+            letter-spacing: .015em;
             cursor: pointer;
             transition: box-shadow .25s, filter .2s, transform .15s;
-            box-shadow: 0 2px 10px rgba(30,90,168,.35);
+            box-shadow: 0 4px 16px rgba(30,90,168,0.3);
         }
         .msg-compose-btn:hover {
-            filter: brightness(1.08);
-            box-shadow: 0 5px 18px rgba(30,90,168,.45);
-            transform: translateY(-1px);
+            filter: brightness(1.1);
+            box-shadow: 0 6px 24px rgba(30,90,168,0.4);
+            transform: translateY(-2px);
         }
-        .msg-compose-btn:active { transform: scale(.97); }
+        .msg-compose-btn:active { transform: scale(.95); }
 
         .msg-tabs {
             display: flex;
-            gap: 4px;
-            margin: 12px 0 10px;
+            gap: 6px;
+            margin: 14px 0 12px;
             background: var(--md-sys-color-surface-variant);
-            border-radius: 22px;
-            padding: 4px;
+            border-radius: 24px;
+            padding: 6px;
         }
         .msg-tab {
             flex: 1;
-            padding: 7px 8px;
+            padding: 8px 10px;
             border: none;
-            border-radius: 18px;
+            border-radius: 20px;
             background: transparent;
             color: var(--md-sys-color-on-surface-variant);
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            transition: background .2s, color .2s, box-shadow .2s;
+            gap: 6px;
+            transition: background .25s, color .25s, box-shadow .25s;
         }
-        .msg-tab .material-icons { font-size: 16px; }
-        .msg-tab:hover { background: rgba(255,255,255,.5); }
+        .msg-tab .material-icons { font-size: 18px; }
+        .msg-tab:hover { background: rgba(255,255,255,.4); }
         .msg-tab.active {
             background: var(--md-sys-color-surface);
             color: var(--md-sys-color-primary);
             font-weight: 700;
-            box-shadow: 0 1px 6px rgba(0,0,0,.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
         }
         .msg-tab-count {
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
             border-radius: 10px;
             font-size: 10px;
             font-weight: 700;
             padding: 1px 6px;
             min-width: 18px;
             text-align: center;
-            transition: background .2s;
-        }
-        .msg-tab.active .msg-tab-count {
-            background: color-mix(in srgb, var(--md-sys-color-primary) 90%, #000);
+            transition: background .25s;
         }
 
-        /* Barre de recherche thématisée */
+        /* Barre de recherche */
         .msg-search-wrap {
-            padding: 8px 14px 12px;
+            padding: 10px 14px 14px;
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
         }
         .msg-search-box {
@@ -11193,32 +11246,32 @@
             gap: 0;
             background: var(--md-sys-color-surface);
             border: 1.5px solid var(--md-sys-color-outline-variant);
-            border-radius: 24px;
-            padding: 0 14px;
-            transition: border-color .2s, box-shadow .2s;
+            border-radius: 28px;
+            padding: 0 16px;
+            transition: border-color .25s, box-shadow .25s;
         }
         .msg-search-box:focus-within {
             border-color: var(--md-sys-color-primary);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
+            box-shadow: 0 0 0 4px rgba(30,90,168,0.15);
         }
         .msg-search-icon {
-            font-size: 18px !important;
+            font-size: 20px !important;
             color: var(--md-sys-color-on-surface-variant);
             flex-shrink: 0;
-            transition: color .2s;
+            transition: color .25s;
         }
         .msg-search-box:focus-within .msg-search-icon { color: var(--md-sys-color-primary); }
         .msg-search-input {
             flex: 1;
-            padding: 9px 8px;
+            padding: 10px 8px;
             border: none;
             background: transparent;
             color: var(--md-sys-color-on-surface);
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
             width: 100%;
         }
-        .msg-search-input::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: .7; }
+        .msg-search-input::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: .6; }
 
         .msg-list-scroll {
             flex: 1;
@@ -11232,35 +11285,38 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             padding: 48px 20px;
             color: var(--md-sys-color-on-surface-variant);
             font-size: 14px;
         }
         .msg-list-loading .material-icons,
-        .msg-list-empty .material-icons { font-size: 42px; opacity: .4; }
+        .msg-list-empty .material-icons { font-size: 48px; opacity: .3; }
 
         /* Items liste */
         .msg-list-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
+            padding: 14px 18px;
             cursor: pointer;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            transition: background .15s;
+            transition: background .15s, transform .15s, box-shadow .15s;
             position: relative;
             animation: msgItemIn .25s ease both;
+            border-radius: 14px;
+            background: var(--md-sys-color-surface-container-lowest);
+            margin: 6px 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
-        .msg-list-item:hover { background: rgba(30,90,168,.06); }
+        .msg-list-item:hover { background: rgba(30,90,168,.08); transform: translateX(2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
         .msg-list-item.unread {
-            background: color-mix(in srgb, var(--md-sys-color-primary-container) 60%, transparent);
-            border-left: 3px solid var(--md-sys-color-primary);
+            background: var(--md-sys-color-primary-container);
+            border-left: 4px solid var(--md-sys-color-primary);
         }
         .msg-list-item.unread:hover { filter: brightness(.97); }
         .msg-avatar {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--md-sys-color-secondary-container), var(--md-sys-color-primary-container));
             color: var(--md-sys-color-on-secondary-container);
@@ -11268,23 +11324,24 @@
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 14px;
+            font-size: 16px;
             flex-shrink: 0;
-            box-shadow: 0 1px 4px rgba(0,0,0,.12);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
         }
         .msg-item-content { flex: 1; min-width: 0; }
-        .msg-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-bottom: 3px; }
+        .msg-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-bottom: 4px; }
         .msg-item-contact {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
             color: var(--md-sys-color-on-surface);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .msg-item-date, .msg-item-preview { font-family: inherit; }
         .msg-item-date { font-size: 11px; color: var(--md-sys-color-on-surface-variant); white-space: nowrap; flex-shrink: 0; }
         .msg-item-preview {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--md-sys-color-on-surface-variant);
             white-space: nowrap;
             overflow: hidden;
@@ -11798,11 +11855,70 @@
         .msg-send-btn .material-icons { font-size: 18px; }
         .msg-send-btn.sending { pointer-events: none; opacity: .8; }
 
+        /* -------- messaging makeover overrides -------- */
+        /* clean modern look for list items and sidebar */
+        .msg-layout { border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.15); }
+        .msg-sidebar { background: var(--md-sys-color-surface-container); }
+        .msg-list-item { border-radius: 8px; margin: 4px 8px; }
+        .msg-list-item.unread { background: var(--md-sys-color-primary-container) !important; }
+        .msg-tab { font-weight: 600; }
+        .msg-search-box { border-radius: 24px; }
+        .msg-panel { background: var(--md-sys-color-surface); }
+        .msg-compose-header, .msg-read-header { background: var(--md-sys-color-surface); }
+
+        /* -------- messaging makeover overrides -------- */
+        /* clean modern look for list items and sidebar */
+        .msg-layout { border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.15); }
+        .msg-sidebar { background: var(--md-sys-color-surface-container); }
+        .msg-list-item { border-radius: 8px; margin: 4px 8px; }
+        .msg-list-item.unread { background: var(--md-sys-color-primary-container) !important; }
+        .msg-tab { font-weight: 600; }
+        .msg-search-box { border-radius: 24px; }
+        .msg-panel { background: var(--md-sys-color-surface); }
+        .msg-compose-header, .msg-read-header { background: var(--md-sys-color-surface); }
+        .msg-read-view, .msg-compose-view { padding: 0 16px; }
+        .msg-back-btn { background: none; }
+
         /* Responsive messagerie */
         @media (max-width: 768px) {
-            .msg-layout { flex-direction: column; height: auto; min-height: 80vh; border-radius: 12px; }
-            .msg-sidebar { width: 100%; max-width: none; border-right: none; border-bottom: 1px solid var(--md-sys-color-outline-variant); max-height: 340px; }
+            /* stack containers vertically but keep sidebar visible when scrolling */
+            .msg-layout { flex-direction: column; height: auto; min-height: 80vh; border-radius: 12px; position: relative; }
+            .msg-sidebar { width: 100%; max-width: none; border-right: none; border-bottom: 1px solid var(--md-sys-color-outline-variant); max-height: 340px; position: sticky; top: 0; z-index: 5; }
             .msg-panel { min-height: 380px; }
+
+            /* overlay mode hides sidebar and makes panel full screen */
+            .msg-layout.overlay .msg-sidebar { display: none; }
+            .msg-layout.overlay .msg-panel { width: 100%; }
+            /* ensure body doesn't scroll when overlay active on mobile */
+            body.msg-overlay-lock { overflow: hidden; }
+
+            /* compose/read views become fullscreen bottom sheets */
+            .msg-compose-view,
+            .msg-read-view {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: 0;
+                height: 100%;
+                max-height: 100%;
+                width: 100%;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+                box-shadow: none;
+                z-index: 10;
+                background: var(--md-sys-color-surface-container-lowest);
+                display: flex !important; /* keep flex when shown by JS */
+                flex-direction: column;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+            }
+            .msg-compose-view.open,
+            .msg-read-view.open {
+                transform: translateY(0);
+            }
+            .msg-compose-header,
+            .msg-read-header { position: sticky; top: 0; background: inherit; }
         }
     </style>
 

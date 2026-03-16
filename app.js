@@ -1,6 +1,5 @@
 /**
- * Server principal - Gestion École Eveil et Ihsan
- * Architecture modulaire et professionnelle
+ * Server principal - Eveil et Ihsan
  */
 
 const express = require('express');
@@ -284,17 +283,9 @@ async function startServer() {
             const localIp = getLocalIpAddress();
             
             console.log('\n╔════════════════════════════════════════════════════════════╗');
-            console.log('║     🎓 GESTION ÉCOLE - EVEIL ET IHSAN                      ║');
+            console.log('║          🎓 Serveur -  EVEIL ET IHSAN                      ║');
             console.log('╠════════════════════════════════════════════════════════════╣');
-            console.log('║  ✅ Serveur démarré avec succès!                           ║');
-            console.log('║  💾 Base de données: SQLite (data/ecole.db)                ║');
-            console.log('╠════════════════════════════════════════════════════════════╣');
-            console.log('║  🌐 Adresses disponibles:                                  ║');
-            console.log(`║     - Local:   http://localhost:${SERVER_CONFIG.PORT}                      ║`);
-            console.log(`║     - Réseau:  http://${localIp}:${SERVER_CONFIG.PORT}                  ║`);
-            console.log('╠════════════════════════════════════════════════════════════╣');
-            console.log('║  📱 Pour accéder depuis mobile:                            ║');
-            console.log(`║     Utilisez: http://${localIp}:${SERVER_CONFIG.PORT}                  ║`);
+            console.log('║     Serveur démarré avec succès!                           ║');
             console.log('╚════════════════════════════════════════════════════════════╝\n');
         });
     } catch (error) {
