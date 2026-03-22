@@ -2500,7 +2500,7 @@
                                 <div class="md-text-field" style="margin-bottom: 24px; max-width: 300px;">
                                     <div class="md-text-field-container">
                                         <select id="reinsc_anneeScolaire" class="md-text-field-input" style="padding: 16px 12px;"></select>
-                                        <label class="md-text-field-label" style="top: -10px; font-size: 12px;">Année scolaire *</label>
+                                        <label class="md-text-field-label" style="top: -0px; font-size: 12px;">Année scolaire *</label>
                                     </div>
                                 </div>
 
@@ -3149,7 +3149,7 @@
             container.innerHTML = `
                 ${slidesHtml}
                 <div class="ppt-widget-header"><span class="material-icons">newspaper</span> Dernières actualités</div>
-                <button class="ppt-see-all-btn" onclick="navigateParent('actualites')">
+                <button class="ppt-see-all-btn" onclick="switchTab('actualites')" aria-label="Voir toutes les actualités">
                     <span class="material-icons">open_in_new</span> Voir tout
                 </button>
                 ${_pptSlides.length > 1 ? `
