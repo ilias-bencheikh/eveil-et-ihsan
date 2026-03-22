@@ -22,7 +22,12 @@ function checkPermission(action) {
 // Middleware pour vérifier l'authentification via token de session
 // SÉCURITÉ : Le token Bearer est OBLIGATOIRE - pas de fallback sur les headers
 async function requireAuth(req, res, next) {
-    const token = req.headers['authorization']?.replace('Bearer ', '');
+    let token = req.headers['authorization']?.replace('Bearer ', '');
+    
+    // Support fallback pour le téléchargement de pièces jointes
+    if (!token && req.query.token) {
+        token = req.query.token;
+    }
     
     if (!token) {
         return res.status(401).json({ message: 'Authentification requise' });

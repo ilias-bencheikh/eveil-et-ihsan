@@ -4175,9 +4175,10 @@
 
             const attEl = document.getElementById('eleveMsgReadAttachments');
             if (attEl && m.piecesJointes?.length) {
+                const token = localStorage.getItem('token');
                 attEl.innerHTML = `<div class="msg-read-att-title"><span class="material-icons">attach_file</span> Piéces jointes</div>
                     <div class="msg-att-grid">${m.piecesJointes.map(f => `
-                        <a href="/uploads/messagerie/${f.filename}" target="_blank" class="msg-att-chip">
+                        <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(f.filename)}?token=${token}" target="_blank" class="msg-att-chip">
                             <span class="material-icons">${getEleveFileIcon(f.mimetype)}</span>
                             <span>${f.originalname||f.filename}</span>
                         </a>`).join('')}</div>`;

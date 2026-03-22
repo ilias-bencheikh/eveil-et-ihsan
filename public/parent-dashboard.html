@@ -3944,11 +3944,12 @@
 
             const attachEl = document.getElementById('parentMsgReadAttachments');
             if (message.piecesJointes && message.piecesJointes.length > 0) {
+                const token = localStorage.getItem('token');
                 attachEl.innerHTML = `
                     <div class="msg-attach-title"><span class="material-icons">attach_file</span> Pièces jointes (${message.piecesJointes.length})</div>
                     <div class="msg-attach-list">
                         ${message.piecesJointes.map(pj => `
-                            <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}" download="${pj.originalname}" target="_blank" class="msg-attach-item">
+                            <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}" download="${pj.originalname}" target="_blank" class="msg-attach-item">
                                 <span class="material-icons">${getParentFileIcon(pj.mimetype)}</span>
                                 <span class="msg-attach-name">${pj.originalname}</span>
                                 <span class="msg-attach-size">${(pj.size/1024).toFixed(0)} Ko</span>
