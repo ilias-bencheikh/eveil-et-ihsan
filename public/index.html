@@ -267,13 +267,6 @@
             transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
             position: relative;
         }
-        .actu-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
-        }
         .actu-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(30, 90, 168, 0.15), 0 0 0 1.5px var(--md-sys-color-primary); }
         .actu-card-cover {
             width: 100%; height: 200px;
@@ -1304,36 +1297,6 @@
                         <div class="db-welcome-left">
                             <div class="db-welcome-greeting" id="dashboardGreeting">Salam Aleykoum!</div>
                             <div class="db-welcome-date" id="dashboardDate">Bienvenue sur votre tableau de bord</div>
-                        </div>
-                        <div class="db-welcome-chips">
-                            <div class="db-welcome-chip" onclick="switchTab('eleves')">
-                                <span class="material-icons">school</span>
-                                <div>
-                                    <div class="db-welcome-chip-value" id="wc-eleves">0</div>
-                                    <div class="db-welcome-chip-label">Élèves</div>
-                                </div>
-                            </div>
-                            <div class="db-welcome-chip" onclick="switchTab('classes')">
-                                <span class="material-icons">class</span>
-                                <div>
-                                    <div class="db-welcome-chip-value" id="wc-classes">0</div>
-                                    <div class="db-welcome-chip-label">Classes</div>
-                                </div>
-                            </div>
-                            <div class="db-welcome-chip" onclick="switchTab('absences')">
-                                <span class="material-icons">event_busy</span>
-                                <div>
-                                    <div class="db-welcome-chip-value" id="wc-absences">0</div>
-                                    <div class="db-welcome-chip-label">Absences auj.</div>
-                                </div>
-                            </div>
-                            <div class="db-welcome-chip" onclick="switchTab('messagerie')" id="wc-msg-chip" style="display:none;">
-                                <span class="material-icons">mark_email_unread</span>
-                                <div>
-                                    <div class="db-welcome-chip-value" id="wc-messages">0</div>
-                                    <div class="db-welcome-chip-label">Non lus</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -7804,6 +7767,8 @@
         function updateParentFieldsVisibility() {
             const parentSection = document.querySelector('.parent-info-section');
             const isParentVisible = parentSection && parentSection.style.display !== 'none';
+            // Dans le cas d'une famille existante, un parent existe déjà
+            const hasParent = isParentVisible || inscriptionType === 'existante';
             
             const enfantFields = document.querySelectorAll('.enfant-field');
             enfantFields.forEach(field => {
@@ -7812,7 +7777,7 @@
                 const accountToggle = field.querySelector('.enfant-account-toggle');
                 
                 if (emailInput && emailSection && accountToggle) {
-                    if (!isParentVisible) {
+                    if (!hasParent) {
                         // Pas de parent : email obligatoire, toujours visible, toggle masqué
                         emailInput.required = true;
                         emailInput.setAttribute('required', 'required');
@@ -7840,9 +7805,13 @@
         }
 
         async function loadInscriptions() {
-            // Les inscriptions sont gérées via les élèves dont les parents ne sont pas activés
-            // Un élève sans parent (nbParents === 0) n'est pas "en attente"
-            const pendingEleves = allEleves.filter(e => e.nbParents > 0 && !e.parentsActivated);
+            // Un élève est en attente s'il a des parents non activés,
+            // OU s'il n'a pas de parents (nbParents === 0) et n'est pas lui-même activé.
+            const pendingEleves = allEleves.filter(e => {
+                const hasUnactivatedParents = e.nbParents > 0 && !e.parentsActivated;
+                const isUnactivatedNoParent = e.nbParents === 0 && !e.activated;
+                return hasUnactivatedParents || isUnactivatedNoParent;
+            });
             
             // Grouper par familleLienId
             const familles = {};

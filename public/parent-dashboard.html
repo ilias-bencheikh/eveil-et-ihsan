@@ -1942,29 +1942,6 @@
                             <div class="p-welcome-greeting" id="parentGreeting">Salam Aleykoum !</div>
                             <div class="p-welcome-date" id="parentDate">Bienvenue sur votre espace parent</div>
                         </div>
-                        <div class="p-welcome-chips">
-                            <div class="p-welcome-chip" onclick="navigateParent('enfants')">
-                                <span class="material-icons">child_care</span>
-                                <div>
-                                    <div class="p-welcome-chip-value" id="wc-enfants-count">0</div>
-                                    <div class="p-welcome-chip-label">Enfant(s)</div>
-                                </div>
-                            </div>
-                            <div class="p-welcome-chip" onclick="navigateParent('absences')">
-                                <span class="material-icons">event_busy</span>
-                                <div>
-                                    <div class="p-welcome-chip-value" id="wc-absences-count">0</div>
-                                    <div class="p-welcome-chip-label">Absence(s)</div>
-                                </div>
-                            </div>
-                            <div class="p-welcome-chip" onclick="navigateParent('messagerie')">
-                                <span class="material-icons">mark_email_unread</span>
-                                <div>
-                                    <div class="p-welcome-chip-value" id="wc-messages-count">0</div>
-                                    <div class="p-welcome-chip-label">Message(s)</div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Grille de contenu -->
@@ -1986,21 +1963,27 @@
                             </div>
                         </div>
 
-                        <!-- Mes Enfants — Résumé absences + appréciations -->
-                        <div class="widget-card" style="padding-bottom:0;">
+                        <!-- Derniers messages reçus -->
+                        <div class="widget-card" id="dashboardMessagesWidget">
                             <div class="widget-card-header">
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="info-card-icon ic-blue"><span class="material-icons">child_care</span></div>
-                                    <h3 class="widget-card-title">Mes Enfants</h3>
+                                    <div class="db-card-icon db-icon-messages"><span class="material-icons">mail</span></div>
+                                    <h3 class="widget-card-title">Derniers messages</h3>
+                                    <span class="db-unread-badge" id="dbUnreadBadge" style="display:none;">0</span>
                                 </div>
-                                <button class="p-btn-sm" onclick="navigateParent('enfants')">
-                                    Voir tout <span class="material-icons" style="font-size:16px;">chevron_right</span>
+                                <button class="p-btn-sm" onclick="navigateParent('messagerie')">
+                                    Voir tout <span class="material-icons" style="font-size:16px;">arrow_forward</span>
                                 </button>
                             </div>
-                            <div id="dashboardEnfantsResume">
-                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:10px;color:var(--md-sys-color-on-surface-variant);">
-                                    <span class="material-icons" style="font-size:32px;opacity:0.4;">hourglass_top</span>
-                                    <p style="margin:0;font-size:13px;font-weight:500;">Chargement...</p>
+                            <div class="widget-card-content" style="padding:0;">
+                                <div id="dashboardRecentMessages" class="db-messages-grid">
+                                    <div class="db-msg-item">
+                                        <div class="db-msg-avatar"><span class="material-icons" style="font-size:20px;">mail</span></div>
+                                        <div class="db-msg-body">
+                                            <div class="db-msg-sender">Chargement...</div>
+                                            <div class="db-msg-preview">Récupération des messages en cours</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2043,31 +2026,24 @@
                             </div>
                         </div>
 
-                        <!-- Derniers messages reçus -->
-                        <div class="widget-card" id="dashboardMessagesWidget">
+                        <!-- Mes Enfants — Résumé absences + appréciations -->
+                        <div class="widget-card" style="padding-bottom:0;">
                             <div class="widget-card-header">
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="db-card-icon db-icon-messages"><span class="material-icons">mail</span></div>
-                                    <h3 class="widget-card-title">Derniers messages</h3>
-                                    <span class="db-unread-badge" id="dbUnreadBadge" style="display:none;">0</span>
+                                    <div class="info-card-icon ic-blue"><span class="material-icons">child_care</span></div>
+                                    <h3 class="widget-card-title">Mes Enfants</h3>
                                 </div>
-                                <button class="p-btn-sm" onclick="navigateParent('messagerie')">
-                                    Voir tout <span class="material-icons" style="font-size:16px;">arrow_forward</span>
+                                <button class="p-btn-sm" onclick="navigateParent('enfants')">
+                                    Voir tout <span class="material-icons" style="font-size:16px;">chevron_right</span>
                                 </button>
                             </div>
-                            <div class="widget-card-content" style="padding:0;">
-                                <div id="dashboardRecentMessages" class="db-messages-grid">
-                                    <div class="db-msg-item">
-                                        <div class="db-msg-avatar"><span class="material-icons" style="font-size:20px;">mail</span></div>
-                                        <div class="db-msg-body">
-                                            <div class="db-msg-sender">Chargement...</div>
-                                            <div class="db-msg-preview">Récupération des messages en cours</div>
-                                        </div>
-                                    </div>
+                            <div id="dashboardEnfantsResume">
+                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:10px;color:var(--md-sys-color-on-surface-variant);">
+                                    <span class="material-icons" style="font-size:32px;opacity:0.4;">hourglass_top</span>
+                                    <p style="margin:0;font-size:13px;font-weight:500;">Chargement...</p>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </section>
 
@@ -2832,16 +2808,26 @@
                         apiRequest(`/api/absences/eleve/${enfant.id}`).catch(() => []),
                         apiRequest(`/api/appreciations/eleve/${enfant.id}`).catch(() => [])
                     ]);
-                    absences.forEach(a => allAbsences.push({ ...a, enfantPrenom: enfant.prenom }));
-                    appreciations.forEach(a => allAppreciations.push({ ...a, enfantPrenom: enfant.prenom }));
+                    
+                    // Récupérer uniquement la toute dernière absence de l'enfant
+                    if (absences && absences.length > 0) {
+                        const sortedAbsences = absences.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        allAbsences.push({ ...sortedAbsences[0], enfantPrenom: enfant.prenom });
+                    }
+                    
+                    // Récupérer uniquement la toute dernière appréciation de l'enfant
+                    if (appreciations && appreciations.length > 0) {
+                        const sortedAppreciations = appreciations.sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
+                        allAppreciations.push({ ...sortedAppreciations[0], enfantPrenom: enfant.prenom });
+                    }
                 }));
 
-                // Trier par date décroissante
+                // Trier globlament par date décroissante pour l'affichage final
                 allAbsences.sort((a, b) => new Date(b.date) - new Date(a.date));
                 allAppreciations.sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
 
-                const recentAbsences = allAbsences.slice(0, 4);
-                const recentAppreciations = allAppreciations.slice(0, 4);
+                const recentAbsences = allAbsences;
+                const recentAppreciations = allAppreciations;
 
                 let html = '';
 

@@ -335,6 +335,7 @@
         .msf-footer {
             display: grid; grid-template-columns: 1fr 1fr;
             border-top: 1px solid var(--md-sys-color-outline-variant);
+            margin-top: auto;
         }
         .msf-footer-btn {
             display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -1638,29 +1639,6 @@
                         <div class="p-welcome-left">
                             <div class="p-welcome-greeting" id="eleveGreeting">Salam Aleykoum !</div>
                             <div class="p-welcome-date" id="eleveDate">Bienvenue sur votre espace élève</div>
-                        </div>
-                        <div class="p-welcome-chips">
-                            <div class="p-welcome-chip" onclick="switchTab('absences')">
-                                <span class="material-icons">event_busy</span>
-                                <div>
-                                    <div class="p-welcome-chip-value" id="totalAbsences">0</div>
-                                    <div class="p-welcome-chip-label">Absence(s)</div>
-                                </div>
-                            </div>
-                            <div class="p-welcome-chip" onclick="switchTab('messages')">
-                                <span class="material-icons">mark_email_unread</span>
-                                <div>
-                                    <div class="p-welcome-chip-value" id="unreadMessages">0</div>
-                                    <div class="p-welcome-chip-label">Message(s)</div>
-                                </div>
-                            </div>
-                            <div class="p-welcome-chip" onclick="switchTab('appreciations')">
-                                <span class="material-icons">star</span>
-                                <div>
-                                    <div class="p-welcome-chip-value" id="totalAppreciations">0</div>
-                                    <div class="p-welcome-chip-label">Appréciation(s)</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -3140,45 +3118,12 @@
         }
 
         async function loadEleveData() {
-            console.log('loadEleveData called - modern layout');
-
-            // Réinitialiser les compteurs
-            totalAbsencesCount = 0;
-            totalAppreciationsCount = 0;
-            totalUnreadMessages = 0;
-
             // Setup welcome banner
             setupEleveWelcome();
 
             // Setup child tabs for absences and appreciations
             renderChildTabs('absencesChildSelector', loadChildAbsencesById);
             renderChildTabs('appreciationsChildSelector', loadChildAppreciationsById);
-
-            // Count total absences/appreciations for stats
-            const members = (familyMembers && familyMembers.length > 0) ? familyMembers : [currentChild];
-            for (const child of members) {
-                try {
-                    const [absResp, apprResp] = await Promise.all([
-                        fetch(`${API_URL}/absences/eleve/${child.id}`, {
-                            headers: { 'Authorization': `Bearer ${token}`, 'x-user-id': child.id, 'x-user-role': 'eleve' }
-                        }),
-                        fetch(`${API_URL}/appreciations/eleve/${child.id}`, {
-                            headers: { 'Authorization': `Bearer ${token}`, 'x-user-id': child.id, 'x-user-role': 'eleve' }
-                        })
-                    ]);
-                    if (absResp.ok) {
-                        const d = await absResp.json();
-                        totalAbsencesCount += (Array.isArray(d) ? d : (d.absences || [])).length;
-                    }
-                    if (apprResp.ok) {
-                        const d = await apprResp.json();
-                        totalAppreciationsCount += (Array.isArray(d) ? d : (d.appreciations || [])).length;
-                    }
-                } catch (e) { console.error(e); }
-            }
-
-            // Mettre • jour les statistiques globales (welcome banner chips)
-            updateGlobalStats();
 
             // Charger les actualités (communes • tous) + carousel
             await loadActualites();
@@ -3426,32 +3371,6 @@
             }
         }
 
-        // Mettre • jour les statistiques globales
-        function updateGlobalStats() {
-            // Mettre • jour le nombre total d'absences
-            const totalAbsencesEl = document.getElementById('totalAbsences');
-            if (totalAbsencesEl) {
-                totalAbsencesEl.textContent = totalAbsencesCount;
-            }
-
-            // Mettre • jour le nombre total d'appréciations
-            const totalAppreciationsEl = document.getElementById('totalAppreciations');
-            if (totalAppreciationsEl) {
-                totalAppreciationsEl.textContent = totalAppreciationsCount;
-            }
-
-            // Mettre • jour le nombre de messages non lus
-            const unreadMessagesEl = document.getElementById('unreadMessages');
-            if (unreadMessagesEl) {
-                unreadMessagesEl.textContent = totalUnreadMessages;
-            }
-
-            // Mettre • jour le nombre de membres de la famille
-            const familyMembersCountEl = document.getElementById('familyMembersCount');
-            if (familyMembersCountEl) {
-                familyMembersCountEl.textContent = familyMembers ? familyMembers.length : 0;
-            }
-        }
 
         // ===== ACTUALITES - Style Magazine =====
         let _allActualites = [];
@@ -3858,12 +3777,18 @@
                         if (absResp.ok) {
                             const absData = await absResp.json();
                             const list = Array.isArray(absData) ? absData : (absData.absences || []);
-                            list.forEach(a => allAbsences.push({ ...a, _type: 'abs', childPrenom: child.prenom }));
+                            if (list.length > 0) {
+                                list.sort((a, b) => new Date(b.date) - new Date(a.date));
+                                allAbsences.push({ ...list[0], _type: 'abs', childPrenom: child.prenom });
+                            }
                         }
                         if (apprResp.ok) {
                             const apprData = await apprResp.json();
                             const list = Array.isArray(apprData) ? apprData : (apprData.appreciations || []);
-                            list.forEach(a => allAppreciations.push({ ...a, _type: 'appr', childPrenom: child.prenom }));
+                            if (list.length > 0) {
+                                list.sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
+                                allAppreciations.push({ ...list[0], _type: 'appr', childPrenom: child.prenom });
+                            }
                         }
                     } catch (e) { console.error(e); }
                 }
