@@ -276,12 +276,10 @@ function initDatabase() {
                 if (!row) {
                     db.run('INSERT INTO staff (id, nom, prenom, email, role, password, activated) VALUES (?, ?, ?, ?, ?, ?, 1)',
                         ['admin1', 'Admin', '', 'admin@ecole.fr', 'admin', 'admin'], (err) => {
-                        if (err) {
-                            console.error('Erreur insertion admin:', err);
-                        } else {
-                            console.log('✅ Compte admin par défaut créé');
-                        }
-                    });
+                            if (err) {
+                                console.error('Erreur insertion admin:', err);
+                            }
+                        });
                 }
             });
 
@@ -325,7 +323,6 @@ function initDatabase() {
                                     db.run(`ALTER TABLE appreciations_new RENAME TO appreciations`, () => {
                                         db.run(`PRAGMA foreign_keys = ON`);
                                         db.run(`INSERT INTO migrations (id) VALUES ('rm_appreciations_professeurId_fk')`, () => {
-                                            console.log('✅ Migration rm_appreciations_professeurId_fk appliquée');
                                         });
                                     });
                                 });
