@@ -5,8 +5,8 @@ require('dotenv').config();
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER || 'no.reply.eveil.et.ihsan@gmail.com',
-        pass: process.env.EMAIL_PASSWORD || ''
+        user: process.env.EMAIL_USER ,
+        pass: process.env.EMAIL_PASSWORD
     }
 });
 
@@ -54,7 +54,7 @@ const emailTemplates = {
               Salam Aleykoum <strong>${userName}</strong>,
             </p>
             <p style="margin:0 0 32px;font-size:15px;color:#3c4043;line-height:1.7;">
-              Votre compte a été créé avec succès sur la plateforme <strong>Eveil et Ihsan</strong>.
+              Votre compte a été créé avec succès.
               Cliquez sur le bouton ci-dessous pour l'activer et définir votre mot de passe.
             </p>
           </td>
@@ -103,7 +103,7 @@ const emailTemplates = {
         <tr>
           <td style="padding:24px 0 0;text-align:center;">
             <p style="margin:0;font-size:12px;color:#80868b;line-height:1.8;">
-              © 2026 Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
+              © ${new Date().getFullYear()} Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
               Merci de ne pas répondre à cet email. Si vous avez besoin d'aide, contactez l'établissement scolaire ou l'administrateur de votre compte.
             </p>
           </td>
@@ -212,7 +212,7 @@ const emailTemplates = {
         <tr>
           <td style="padding:24px 0 0;text-align:center;">
             <p style="margin:0;font-size:12px;color:#80868b;line-height:1.8;">
-               © 2026 Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
+               © ${new Date().getFullYear()} Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
               Merci de ne pas répondre à cet email. Si vous avez besoin d'aide, contactez l'établissement scolaire ou l'administrateur de votre compte.
             </p>
           </td>
@@ -225,8 +225,81 @@ const emailTemplates = {
 
 </body>
 </html>`
+    }),
+    newMessage: (userName, senderName, messageContent, loginLink) => ({
+        subject: `Nouveau message de ${senderName} - Eveil et Ihsan`,
+        html: `<!DOCTYPE html>
+        <html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Nouveau message — Eveil et Ihsan</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f6f8fc;font-family:Roboto,'Segoe UI',Helvetica,Arial,sans-serif;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f8fc;">
+  <tr>
+    <td align="center" style="padding:32px 16px 48px;">
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0"
+             style="max-width:560px;width:100%;background:#ffffff;border-radius:8px;
+                    box-shadow:0 1px 3px rgba(60,64,67,.15),0 4px 8px rgba(60,64,67,.10);">
+        <tr>
+          <td style="height:4px;background:#1e5aa8;border-radius:8px 8px 0 0;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+        <tr>
+             <td style="padding:24px 0 16px;text-align:center;">
+            <span style="font-size:22px;font-weight:700;color:#1e5aa8;letter-spacing:-0.3px;">Eveil et Ihsan</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 48px 0;">
+            <h1 style="margin:0 0 8px;font-size:24px;font-weight:400;color:#202124;text-align:center;letter-spacing:0;">
+              Nouveau message reçu
+            </h1>
+            <p style="margin:0 0 16px;font-size:15px;color:#202124;line-height:1.6;">
+              Salam Aleykoum <strong>${userName}</strong>,
+            </p>
+            <p style="margin:0 0 16px;font-size:15px;color:#3c4043;line-height:1.7;">
+              Vous avez reçu un nouveau message de <strong>${senderName}</strong>.
+            </p>
+            
+            <!-- Zone de message stylisée -->
+            <div style="background:#f8f9fa; border-radius:12px; padding:24px; margin:28px 0; position:relative; border:1px solid #e8eaed; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+              <p style="margin:0; font-size:15px; color:#202124; line-height:1.6; white-space:pre-wrap; padding-left:16px; padding-top:4px; position:relative; z-index:1;">${messageContent}</p>
+            </div>
+            
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:0 48px 32px;">
+            <a href="${loginLink}"
+               style="display:inline-block;background:#1e5aa8;color:#ffffff;text-decoration:none;
+                      font-size:14px;font-weight:500;padding:10px 24px;border-radius:4px;
+                      letter-spacing:.25px;">
+              Répondre sur la plateforme
+            </a>
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+        <tr>
+          <td style="padding:24px 0 0;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#80868b;line-height:1.8;">
+              © ${new Date().getFullYear()} Eveil et Ihsan &bull; Cet email a été envoyé automatiquement<br>
+              Pour ne plus recevoir ces alertes, vous pouvez désactiver l'option dans les paramètres de votre compte.
+              <span style="display:none; font-size:0px; color:transparent; opacity:0;">Ref: ${Date.now()}</span>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`
     })
 };
+
 
 // Fonction d'envoi d'email
 // Signature : sendEmail(to, template, arg1, arg2, ..., [{ attachments: [...] }])
@@ -251,19 +324,10 @@ async function sendEmail(to, template, ...args) {
         html: emailContent.html,
         attachments
     };
-
-    console.log('Tentative d\'envoi d\'email à:', to);
-    console.log('Sujet:', emailContent.subject);
-    if (attachments.length > 0) {
-        console.log('Pièces jointes:', attachments.map(a => a.filename).join(', '));
-    }
-    
     try {
         const result = await transporter.sendMail(mailOptions);
-        console.log('Email envoyé avec succès à:', to);
         return result;
     } catch (error) {
-        console.error('Erreur lors de l\'envoi d\'email:', error);
         throw error;
     }
 }

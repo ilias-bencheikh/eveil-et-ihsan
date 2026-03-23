@@ -65,6 +65,7 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN status TEXT DEFAULT 'mineur'`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN anneeScolaire TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN adresse TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
 
             // Table paiements (historique des transactions)
             db.run(`CREATE TABLE IF NOT EXISTS paiements (
@@ -92,8 +93,10 @@ function initDatabase() {
                 activated INTEGER DEFAULT 0,
                 resetToken TEXT,
                 resetExpires INTEGER,
-                createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                notifEmailMessage INTEGER DEFAULT 1
             )`);
+            db.run(`ALTER TABLE parents ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
 
             // Table de liaison élève-parent (un élève peut avoir 2 parents)
             db.run(`CREATE TABLE IF NOT EXISTS eleve_parent (
@@ -118,8 +121,10 @@ function initDatabase() {
                 activationToken TEXT,
                 activated INTEGER DEFAULT 0,
                 resetToken TEXT,
-                resetExpires INTEGER
+                resetExpires INTEGER,
+                notifEmailMessage INTEGER DEFAULT 1
             )`);
+            db.run(`ALTER TABLE professeurs ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
 
             // Table classes
             db.run(`CREATE TABLE IF NOT EXISTS classes (
@@ -202,8 +207,10 @@ function initDatabase() {
                 activationToken TEXT,
                 activated INTEGER DEFAULT 0,
                 resetToken TEXT,
-                resetExpires INTEGER
+                resetExpires INTEGER,
+                notifEmailMessage INTEGER DEFAULT 1
             )`);
+            db.run(`ALTER TABLE staff ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
 
             // Table actualités
             db.run(`CREATE TABLE IF NOT EXISTS actualites (

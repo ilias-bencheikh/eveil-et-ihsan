@@ -5,6 +5,39 @@ const fs = require('fs');
 const multer = require('multer');
 const { db } = require('../config/database');
 const { generateId, formatDate } = require('../utils/helpers');
+const { sendEmail } = require('../config/email');
+
+function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
+    const getUserInfoQuery = `
+        SELECT nom, prenom, email, notifEmailMessage FROM eleves WHERE id = ?
+        UNION
+        SELECT nom, prenom, email, notifEmailMessage FROM parents WHERE id = ?
+        UNION
+        SELECT nom, prenom, email, notifEmailMessage FROM professeurs WHERE id = ?
+        UNION
+        SELECT nom, prenom, email, notifEmailMessage FROM staff WHERE id = ?
+    `;
+
+    db.get(getUserInfoQuery, [destinataireId, destinataireId, destinataireId, destinataireId], (err, receiver) => {
+        if (err || !receiver || !receiver.email || receiver.notifEmailMessage !== 1) return;
+
+        db.get(getUserInfoQuery, [expediteurId, expediteurId, expediteurId, expediteurId], (err, sender) => {
+            if (err || !sender) return;
+
+            const senderName = `${sender.prenom || ''} ${sender.nom}`.trim();
+            const loginLink = `http://${host}/login`;
+            
+            sendEmail(
+                receiver.email,
+                'newMessage',
+                receiver.prenom || receiver.nom,
+                senderName,
+                contenu,
+                loginLink
+            ).catch(e => console.error('Erreur expédition email notif message', e));
+        });
+    });
+}
 
 // Configuration de multer pour les pièces jointes des messages
 const uploadDir = path.join(__dirname, '../../public/uploads/messagerie');
@@ -395,6 +428,8 @@ router.post('/', (req, res, next) => {
                                     lu: false,
                                     piecesJointes: piecesJointesMeta
                                 });
+                                // Envoi de l'email de notification
+                                notifyMessageReceived(destId, expediteurId, contenu, req.headers.host);
                             }
                             classCompleted++;
                             if (classCompleted === classTotal) {
@@ -426,6 +461,9 @@ router.post('/', (req, res, next) => {
                         lu: false,
                         piecesJointes: piecesJointesMeta
                     });
+                    // Envoi de l'email de notification
+                    notifyMessageReceived(dest.id, expediteurId, contenu, req.headers.host);
+                    
                     completed++;
                     if (completed === total) res.status(201).json(sentMessages);
                 }

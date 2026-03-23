@@ -568,4 +568,71 @@ router.put('/change-password', requireAuth, async (req, res) => {
     }
 });
 
+// ----- RÉGLAGES NOTIFICATIONS -----
+
+router.get('/notifications/settings', requireAuth, async (req, res) => {
+    const userId = req.userId;
+    const userRole = req.userRole;
+    
+    // Déterminer la table selon le rôle
+    const roleTableMap = {
+        'parent': 'parents',
+        'eleve': 'eleves',
+        'professeur': 'professeurs',
+        'admin': 'staff',
+        'directeur': 'staff',
+        'secretaire': 'staff',
+        'secretariat': 'staff'
+    };
+    
+    const tableName = roleTableMap[userRole];
+    if (!tableName) {
+        return res.status(400).json({ error: 'Rôle utilisateur invalide' });
+    }
+    
+    try {
+        const userRow = await dbGet(db, `SELECT notifEmailMessage FROM ${tableName} WHERE id = ?`, [userId]);
+        if (!userRow) {
+            return res.status(404).json({ error: 'Utilisateur non trouvé' });
+        }
+        
+        res.json({ notifEmailMessage: userRow.notifEmailMessage === 1 });
+    } catch (err) {
+        console.error('Erreur get notif settings:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+router.put('/notifications/settings', requireAuth, async (req, res) => {
+    const { notifEmailMessage } = req.body;
+    const userId = req.userId;
+    const userRole = req.userRole;
+    
+    // Déterminer la table selon le rôle
+    const roleTableMap = {
+        'parent': 'parents',
+        'eleve': 'eleves',
+        'professeur': 'professeurs',
+        'admin': 'staff',
+        'directeur': 'staff',
+        'secretaire': 'staff',
+        'secretariat': 'staff'
+    };
+    
+    const tableName = roleTableMap[userRole];
+    if (!tableName) {
+        return res.status(400).json({ error: 'Rôle utilisateur invalide' });
+    }
+    
+    try {
+        const value = notifEmailMessage ? 1 : 0;
+        await dbRun(db, `UPDATE ${tableName} SET notifEmailMessage = ? WHERE id = ?`, [value, userId]);
+        
+        res.json({ success: true, message: 'Paramètres de notification mis à jour' });
+    } catch (err) {
+        console.error('Erreur update notif settings:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
 module.exports = router;
