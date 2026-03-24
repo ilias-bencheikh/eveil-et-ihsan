@@ -871,8 +871,6 @@ router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
 // Obtenir les frais d'un élève (avec historique des paiements)
 router.get('/frais/:id', requireAuth, async (req, res) => {
     const eleveId = req.params.id;
-    console.log('Requête frais pour élève:', eleveId, 'par utilisateur:', req.userId, 'rôle:', req.userRole);
-    
     try {
         // Vérifier les permissions
         if (req.userRole === 'eleve' && req.userId !== eleveId) {

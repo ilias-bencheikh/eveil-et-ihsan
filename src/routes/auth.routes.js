@@ -528,18 +528,28 @@ router.put('/change-password', requireAuth, async (req, res) => {
     const userId = req.userId;
     const userRole = req.userRole;
     
-    // Déterminer la table selon le rôle (whitelist stricte)
-    const roleTableMap = {
-        'parent': 'parents',
-        'eleve': 'eleves',
-        'professeur': 'professeurs',
-        'admin': 'staff',
-        'directeur': 'staff',
-        'secretaire': 'staff',
-        'secretariat': 'staff'
-    };
-    
-    const tableName = roleTableMap[userRole];
+    // Déterminer la table selon l'ID ou le rôle
+    let tableName;
+    if (userId === 'admin1' || String(userId).startsWith('staff_')) {
+        tableName = 'staff';
+    } else if (String(userId).startsWith('parent_')) {
+        tableName = 'parents';
+    } else if (String(userId).startsWith('eleve_')) {
+        tableName = 'eleves';
+    } else if (String(userId).startsWith('prof_') || String(userId).startsWith('professeur_')) {
+        tableName = 'professeurs';
+    } else {
+        const roleTableMap = {
+            'parent': 'parents',
+            'eleve': 'eleves',
+            'professeur': 'professeurs',
+            'admin': 'staff',
+            'directeur': 'staff',
+            'secretaire': 'staff',
+            'secretariat': 'staff'
+        };
+        tableName = roleTableMap[userRole];
+    }
     if (!tableName) {
         return res.status(400).json({ error: 'Rôle utilisateur invalide' });
     }
@@ -574,18 +584,28 @@ router.get('/notifications/settings', requireAuth, async (req, res) => {
     const userId = req.userId;
     const userRole = req.userRole;
     
-    // Déterminer la table selon le rôle
-    const roleTableMap = {
-        'parent': 'parents',
-        'eleve': 'eleves',
-        'professeur': 'professeurs',
-        'admin': 'staff',
-        'directeur': 'staff',
-        'secretaire': 'staff',
-        'secretariat': 'staff'
-    };
-    
-    const tableName = roleTableMap[userRole];
+    // Déterminer la table selon l'ID ou le rôle
+    let tableName;
+    if (userId === 'admin1' || String(userId).startsWith('staff_')) {
+        tableName = 'staff';
+    } else if (String(userId).startsWith('parent_')) {
+        tableName = 'parents';
+    } else if (String(userId).startsWith('eleve_')) {
+        tableName = 'eleves';
+    } else if (String(userId).startsWith('prof_') || String(userId).startsWith('professeur_')) {
+        tableName = 'professeurs';
+    } else {
+        const roleTableMap = {
+            'parent': 'parents',
+            'eleve': 'eleves',
+            'professeur': 'professeurs',
+            'admin': 'staff',
+            'directeur': 'staff',
+            'secretaire': 'staff',
+            'secretariat': 'staff'
+        };
+        tableName = roleTableMap[userRole];
+    }
     if (!tableName) {
         return res.status(400).json({ error: 'Rôle utilisateur invalide' });
     }
@@ -608,18 +628,28 @@ router.put('/notifications/settings', requireAuth, async (req, res) => {
     const userId = req.userId;
     const userRole = req.userRole;
     
-    // Déterminer la table selon le rôle
-    const roleTableMap = {
-        'parent': 'parents',
-        'eleve': 'eleves',
-        'professeur': 'professeurs',
-        'admin': 'staff',
-        'directeur': 'staff',
-        'secretaire': 'staff',
-        'secretariat': 'staff'
-    };
-    
-    const tableName = roleTableMap[userRole];
+    // Déterminer la table selon l'ID ou le rôle
+    let tableName;
+    if (userId === 'admin1' || String(userId).startsWith('staff_')) {
+        tableName = 'staff';
+    } else if (String(userId).startsWith('parent_')) {
+        tableName = 'parents';
+    } else if (String(userId).startsWith('eleve_')) {
+        tableName = 'eleves';
+    } else if (String(userId).startsWith('prof_') || String(userId).startsWith('professeur_')) {
+        tableName = 'professeurs';
+    } else {
+        const roleTableMap = {
+            'parent': 'parents',
+            'eleve': 'eleves',
+            'professeur': 'professeurs',
+            'admin': 'staff',
+            'directeur': 'staff',
+            'secretaire': 'staff',
+            'secretariat': 'staff'
+        };
+        tableName = roleTableMap[userRole];
+    }
     if (!tableName) {
         return res.status(400).json({ error: 'Rôle utilisateur invalide' });
     }

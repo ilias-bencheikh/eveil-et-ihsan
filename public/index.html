@@ -1139,6 +1139,61 @@
             .db-quick-actions-v2 { grid-template-columns: repeat(3, 1fr); }
             .db-messages-grid { flex-direction: column; }
         }
+
+        /* Account Cards V2 */
+        .account-card-v2 {
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s, border-color 0.25s !important;
+        }
+        .account-card-v2:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+            border-color: var(--md-sys-color-primary) !important;
+        }
+
+        /* Account Filters & View Toggle */
+        .acc-filter-pill {
+            background: transparent; border: none; padding: 6px 16px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer; transition: all 0.2s; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .acc-filter-pill:hover { background: rgba(0,0,0,0.05); }
+        .acc-filter-pill.active {
+            background: var(--md-sys-color-primary); color: white;
+            box-shadow: 0 2px 8px rgba(30,90,168,0.3);
+        }
+        
+        .acc-view-btn {
+            background: transparent; border: none; padding: 6px; border-radius: 10px;
+            color: var(--md-sys-color-on-surface-variant); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .acc-view-btn:hover { background: rgba(0,0,0,0.05); color: var(--md-sys-color-on-surface); }
+        .acc-view-btn.active {
+            background: white; color: var(--md-sys-color-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Account Table */
+        .acc-table-wrapper {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 16px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            overflow-x: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .acc-table {
+            width: 100%; border-collapse: collapse; text-align: left;
+        }
+        .acc-table th {
+            padding: 16px; font-size: 12px; font-weight: 700; color: var(--md-sys-color-on-surface-variant);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+        }
+        .acc-table td {
+            padding: 16px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            font-size: 14px; color: var(--md-sys-color-on-surface); vertical-align: middle;
+        }
+        .acc-table tbody tr { transition: background 0.2s; }
+        .acc-table tbody tr:hover { background: var(--md-sys-color-surface-container-low); }
+        .acc-table tbody tr:last-child td { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -1170,7 +1225,7 @@
                 </div>
                 <div class="sidebar-brand">
                     <h1>Eveil & Ihsan</h1>
-                    <span>Gestion Scolaire</span>
+                    <span>Espace Personnel</span>
                 </div>
             </div>
 
@@ -2616,28 +2671,81 @@
                 </div>
 
                 <!-- ========== ACCOUNTS TAB (ADMIN) ========== -->
-                <div id="accounts" class="tab-content">
-                    <div class="widget-card">
-                        <div class="widget-card-header">
-                            <h3 class="widget-card-title">Administration — Comptes parents & enfants</h3>
+                <div id="accounts" class="tab-content" style="padding: 0; max-width: 1200px; margin: 0 auto;">
+                    
+                    <!-- En-tête de la page -->
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <h2 style="margin:0 0 8px 0; font-size: 28px; color: var(--md-sys-color-on-surface); font-weight: 800; display: flex; align-items: center; gap: 12px;">
+                                <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 32px;">manage_accounts</span>
+                                Gestion des comptes
+                            </h2>
+                            <p style="margin:0; color: var(--md-sys-color-on-surface-variant); font-size: 15px;">Gérez les accès parents et élèves de la plateforme.</p>
                         </div>
-                        <div class="widget-card-content">
-                            <!-- unified search bar -->
-                            <div class="topbar-search" style="width:100%; margin-bottom:24px;">
-                                <span class="material-icons">search</span>
-                                <input id="searchAccounts" type="text" placeholder="Rechercher un compte..." oninput="filterAccounts()">
+                        <div style="display:flex; gap:12px;">
+                            <button class="md-btn md-btn-outlined" onclick="exportAccounts()" style="background: white;">
+                                <span class="material-icons" style="font-size:18px;">file_download</span>
+                                Exporter CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques (injectées via JS) -->
+                    <div id="accountsStats" style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
+                        <!-- Will be populated by JS -->
+                    </div>
+
+                    <!-- Barre de contrôles (Recherche, Filtres, Vue) -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; background: var(--md-sys-color-surface-container-lowest); padding: 12px 16px; border-radius: 16px; border: 1px solid var(--md-sys-color-outline-variant); flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                        
+                        <!-- Recherche -->
+                        <div class="topbar-search" style="flex: 1; min-width: 250px; margin: 0; max-width: 400px; background: var(--md-sys-color-surface-variant);">
+                            <span class="material-icons">search</span>
+                            <input id="searchAccounts" type="text" placeholder="Rechercher par nom, email, classe..." oninput="filterAccounts()">
+                        </div>
+
+                        <div style="display:flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                            <!-- Filtres type -->
+                            <div style="display:flex; background: var(--md-sys-color-surface-variant); padding: 4px; border-radius: 24px; gap: 4px;">
+                                <button class="acc-filter-pill active" onclick="setAccountFilter('all', this)">
+                                    <span class="material-icons" style="font-size: 16px;">people</span> Tous
+                                </button>
+                                <button class="acc-filter-pill" onclick="setAccountFilter('parent', this)">
+                                    <span class="material-icons" style="font-size: 16px;">escalator_warning</span> Parents
+                                </button>
+                                <button class="acc-filter-pill" onclick="setAccountFilter('eleve', this)">
+                                    <span class="material-icons" style="font-size: 16px;">school</span> Élèves
+                                </button>
                             </div>
 
-                        <!-- Accounts grid -->
-                            <div class="widget-card">
-                                <div class="widget-card-header">
-                                    <h4 class="widget-card-title" style="font-size:1.1rem;">Liste des comptes</h4>
-                                </div>
-                                <div class="widget-card-content">
-                                    <div id="accountsGrid" class="md-grid md-grid-auto"></div>
-                                </div>
+                            <div style="width: 1px; height: 32px; background: var(--md-sys-color-outline-variant);"></div>
+
+                            <!-- Tri -->
+                            <div style="display:flex; align-items:center; gap: 8px;">
+                                <span class="material-icons" style="color:var(--md-sys-color-on-surface-variant); font-size: 20px;">sort</span>
+                                <select id="sortAccountsSelect" onchange="filterAccounts()" style="padding:8px 12px; border-radius:8px; border:1px solid var(--md-sys-color-outline); background:var(--md-sys-color-surface); font-family:inherit; font-size:13px; color:var(--md-sys-color-on-surface); cursor:pointer; outline:none;">
+                                    <option value="nom-asc">Nom (A-Z)</option>
+                                    <option value="nom-desc">Nom (Z-A)</option>
+                                </select>
+                            </div>
+
+                            <div style="width: 1px; height: 32px; background: var(--md-sys-color-outline-variant);"></div>
+
+                            <!-- Toggle Vue Grid/Table -->
+                            <div style="display:flex; background: var(--md-sys-color-surface-variant); padding: 4px; border-radius: 12px; gap: 4px;">
+                                <button class="acc-view-btn active" onclick="setAccountViewMode('grid', this)" title="Vue grille">
+                                    <span class="material-icons">grid_view</span>
+                                </button>
+                                <button class="acc-view-btn" onclick="setAccountViewMode('table', this)" title="Vue liste">
+                                    <span class="material-icons">list</span>
+                                </button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Zone de contenu (Grille ou Tableau) -->
+                    <div id="accountsContent">
+                        <!-- Injecté par JS -->
                     </div>
                 </div>
 
@@ -3407,6 +3515,23 @@
         // =========================================
         // SECTION COMPTES (ADMIN)
         // =========================================
+        let currentAccountFilterType = 'all';
+        let currentAccountViewMode = 'grid';
+
+        function setAccountFilter(type, btnElement) {
+            currentAccountFilterType = type;
+            document.querySelectorAll('.acc-filter-pill').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            filterAccounts();
+        }
+
+        function setAccountViewMode(mode, btnElement) {
+            currentAccountViewMode = mode;
+            document.querySelectorAll('.acc-view-btn').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            filterAccounts();
+        }
+
         async function loadAccounts() {
             // s'assurer que les élèves sont chargés car on les utilise pour les comptes
             if (allEleves.length === 0) await loadAllData();
@@ -3418,95 +3543,370 @@
                 allAccounts = [];
                 allParents.forEach(p => allAccounts.push({ ...p, type: 'parent' }));
                 allEleves.forEach(e => allAccounts.push({ ...e, type: 'eleve' }));
-                renderAccounts(allAccounts);
+                
+                updateAccountsStats(allAccounts);
+                filterAccounts();
             } catch (e) {
                 console.error('loadAccounts error', e);
                 showSnackbar('Erreur lors du chargement des comptes');
             }
         }
 
-        // render unified account cards with badge indicating type
+        function updateAccountsStats(list) {
+            const statsDiv = document.getElementById('accountsStats');
+            if (!statsDiv) return;
+            const total = list.length;
+            const parents = list.filter(a => a.type === 'parent').length;
+            const eleves = list.filter(a => a.type === 'eleve').length;
+            
+            statsDiv.innerHTML = `
+                <div style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); padding:16px 20px; border-radius:16px; flex:1; min-width:200px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:24px;">people</span>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:800;line-height:1;">${total}</div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;font-weight:500;">Comptes au total</div>
+                    </div>
+                </div>
+                <div style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); padding:16px 20px; border-radius:16px; flex:1; min-width:200px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:24px;">escalator_warning</span>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:800;line-height:1;">${parents}</div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;font-weight:500;">Comptes Parents</div>
+                    </div>
+                </div>
+                <div style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); padding:16px 20px; border-radius:16px; flex:1; min-width:200px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:24px;">school</span>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:800;line-height:1;">${eleves}</div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;font-weight:500;">Comptes Élèves</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterAccounts() {
+            const term = document.getElementById('searchAccounts') ? document.getElementById('searchAccounts').value.toLowerCase() : '';
+            const sortOrder = document.getElementById('sortAccountsSelect') ? document.getElementById('sortAccountsSelect').value : 'nom-asc';
+            
+            const filtered = allAccounts.filter(a => {
+                const matchTerm = !term || 
+                    (a.nom||'').toLowerCase().includes(term) ||
+                    (a.prenom||'').toLowerCase().includes(term) ||
+                    (a.email||'').toLowerCase().includes(term) ||
+                    (a.classe||'').toLowerCase().includes(term);
+                
+                const matchType = currentAccountFilterType === 'all' || a.type === currentAccountFilterType;
+                
+                return matchTerm && matchType;
+            });
+            
+            // Tri
+            filtered.sort((a, b) => {
+                const nomA = (a.nom||'').toLowerCase();
+                const nomB = (b.nom||'').toLowerCase();
+                if (sortOrder === 'nom-asc') return nomA.localeCompare(nomB);
+                if (sortOrder === 'nom-desc') return nomB.localeCompare(nomA);
+                return 0;
+            });
+            
+            renderAccounts(filtered);
+        }
+
         function renderAccounts(list) {
-            const grid = document.getElementById('accountsGrid');
-            if (!grid) return;
-            grid.innerHTML = list.length ? list.map(item => {
-                const isParent = item.type === 'parent';
-                const badge = `<span class="account-badge" style="position:absolute;top:8px;right:8px;font-size:10px;padding:2px 6px;border-radius:12px;background:${isParent?'var(--md-sys-color-secondary-container)':'var(--md-sys-color-primary-container)'};color:${isParent?'var(--md-sys-color-on-secondary-container)':'var(--md-sys-color-on-primary-container)'};">${isParent?'Parent':'Élève'}</span>`;
-                const icon = isParent ? 'person' : 'school';
-                const subtitle = isParent ? (item.email||'') : (item.classe||'');
-                const actions = isParent
-                    ? `<button class="md-btn md-btn-text" onclick="editParent('${item.id}')"><span class="material-icons">edit</span></button>
-                       <button class="md-btn md-btn-text" onclick="deleteParent('${item.id}')"><span class="material-icons">delete</span></button>`
-                    : `<button class="md-btn md-btn-text" onclick="editEleve('${item.id}')"><span class="material-icons">edit</span></button>
-                       <button class="md-btn md-btn-text" onclick="deleteEleve('${item.id}')"><span class="material-icons">delete</span></button>`;
-                return `
-                <div class="md-card md-card-elevated" style="padding:16px; cursor:pointer; transition:all 0.3s ease; position:relative;">
-                    ${badge}
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                        <span class="material-icons">${icon}</span>
-                        <div>
-                            <div><strong>${item.prenom||''} ${item.nom||''}</strong></div>
-                            <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${subtitle}</div>
-                        </div>
+            const contentDiv = document.getElementById('accountsContent');
+            if (!contentDiv) return;
+
+            if (list.length === 0) {
+                contentDiv.innerHTML = `
+                    <div style="padding: 60px; text-align: center; background: var(--md-sys-color-surface-container-lowest); border-radius: 16px; border: 2px dashed var(--md-sys-color-outline-variant);">
+                        <span class="material-icons" style="font-size: 64px; color: var(--md-sys-color-on-surface-variant); opacity: 0.5; margin-bottom: 16px;">search_off</span>
+                        <h4 style="margin: 0 0 8px 0; color: var(--md-sys-color-on-surface); font-size:20px;">Aucun compte trouvé</h4>
+                        <p style="margin: 0; color: var(--md-sys-color-on-surface-variant); font-size: 15px;">Essayez de modifier vos critères de recherche ou vos filtres.</p>
+                    </div>`;
+                return;
+            }
+
+            if (currentAccountViewMode === 'grid') {
+                contentDiv.innerHTML = `
+                    <div class="md-grid md-grid-auto" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+                        ${list.map(item => generateAccountCardHTML(item)).join('')}
                     </div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                        <span></span>
-                        <div style="display:flex;gap:4px;">
-                            ${actions}
-                        </div>
+                `;
+            } else {
+                contentDiv.innerHTML = `
+                    <div class="acc-table-wrapper">
+                        <table class="acc-table">
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Type</th>
+                                    <th>Contact / Classe</th>
+                                    <th>Téléphone</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${list.map(item => generateAccountTableRowHTML(item)).join('')}
+                            </tbody>
+                        </table>
                     </div>
-                </div>`;
-            }).join('') : '<p style="color: var(--md-sys-color-on-surface-variant);">Aucun compte trouvé</p>';
+                `;
+            }
         }
 
-        // cette fonction devient obsolète mais conservée pour compat
-        function renderParents(parents) {
-            renderAccounts(parents.map(p => ({...p, type:'parent'})));
+        function generateAccountCardHTML(item) {
+            const isParent = item.type === 'parent';
+            const badgeStyle = isParent ? 
+                'background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);' : 
+                'background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);';
+            const badge = `<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;${badgeStyle}; letter-spacing:0.02em;">${isParent?'PARENT':'ÉLÈVE'}</span>`;
+            
+            // Initials avatar
+            const initials = ((item.prenom?.[0]||'') + (item.nom?.[0]||'')).toUpperCase() || '?';
+            const coverColor = isParent ? 'linear-gradient(135deg, var(--md-sys-color-secondary-container), #fce4ec)' : 'linear-gradient(135deg, var(--md-sys-color-primary-container), #e3f2fd)';
+            const avatarBg = isParent ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-primary)';
+            
+            const info1 = isParent ? 
+                (item.email ? `<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;"><span class="material-icons" style="font-size:15px;color:var(--md-sys-color-primary);">email</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.email}</span></div>` : '<div style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;font-style:italic;">Pas d\'email</div>') : 
+                (item.classe ? `<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;"><span class="material-icons" style="font-size:15px;color:var(--md-sys-color-primary);">class</span>Classe: <strong>${item.classe}</strong></div>` : '');
+            
+            const info2 = isParent && item.telephone ? `<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;"><span class="material-icons" style="font-size:15px;color:var(--md-sys-color-primary);">phone</span>${item.telephone}</div>` : '';
+
+            const editFunc = isParent ? `editParent('${item.id}')` : `editEleveAccount('${item.id}')`;
+            const deleteFunc = isParent ? `deleteParent('${item.id}')` : `deleteEleve('${item.id}')`;
+
+            return `
+            <div class="md-card md-card-elevated account-card-v2" style="padding:0; cursor:default; position:relative; overflow:hidden; display:flex; flex-direction:column; height:100%; border:1px solid var(--md-sys-color-outline-variant); border-radius:16px;">
+                <div style="height: 70px; background: ${coverColor}; position: relative; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <div style="position: absolute; top: 12px; right: 12px;">${badge}</div>
+                </div>
+                
+                <div style="padding: 0 20px 20px 20px; flex-grow:1; display:flex; flex-direction:column; position: relative;">
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: ${avatarBg}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; border: 4px solid var(--md-sys-color-surface); margin-top: -32px; margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        ${initials}
+                    </div>
+                    
+                    <div style="font-size:18px;font-weight:700;color:var(--md-sys-color-on-surface);line-height:1.2;margin-bottom:8px;">${item.prenom||''} ${item.nom||''}</div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1;">
+                        ${info1}
+                        ${info2}
+                    </div>
+                </div>
+                
+                <div style="background:var(--md-sys-color-surface-container-lowest); padding:12px 16px; border-top:1px solid var(--md-sys-color-outline-variant); display:flex; align-items:center; justify-content:flex-end; gap:8px;">
+                    <button class="md-btn md-btn-text" onclick="${editFunc}" style="color:var(--md-sys-color-primary); padding: 0 12px;">
+                        <span class="material-icons" style="margin-right:6px;font-size:18px;">edit</span> Éditer
+                    </button>
+                    <button class="md-btn md-btn-text" onclick="${deleteFunc}" style="color:var(--md-sys-color-error); padding: 0 8px;" title="Supprimer">
+                        <span class="material-icons" style="font-size:20px;">delete</span>
+                    </button>
+                </div>
+            </div>`;
         }
 
-        // wrapper
-        function renderChildren(eleves) {
-            renderAccounts(eleves.map(e => ({...e, type:'eleve'})));
+        function generateAccountTableRowHTML(item) {
+            const isParent = item.type === 'parent';
+            const badgeStyle = isParent ? 
+                'background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);' : 
+                'background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);';
+            const badge = `<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;${badgeStyle}; letter-spacing:0.02em;">${isParent?'Parent':'Élève'}</span>`;
+            
+            const initials = ((item.prenom?.[0]||'') + (item.nom?.[0]||'')).toUpperCase() || '?';
+            const avatarBg = isParent ? 'var(--md-sys-color-secondary)' : 'var(--md-sys-color-primary)';
+            
+            const contactInfo = isParent ? 
+                (item.email ? `<span style="color:var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">email</span>${item.email}</span>` : '<span style="color:var(--md-sys-color-on-surface-variant); font-style:italic;">Pas d\'email</span>') : 
+                (item.classe ? `<span style="color:var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">class</span>${item.classe}</span>` : '<span style="color:var(--md-sys-color-on-surface-variant); font-style:italic;">Sans classe</span>');
+            
+            const telInfo = (isParent && item.telephone) ? `<span style="color:var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">phone</span>${item.telephone}</span>` : '<span style="color:var(--md-sys-color-outline);">-</span>';
+
+            const editFunc = isParent ? `editParent('${item.id}')` : `editEleveAccount('${item.id}')`;
+            const deleteFunc = isParent ? `deleteParent('${item.id}')` : `deleteEleve('${item.id}')`;
+
+            return `
+            <tr>
+                <td>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:36px; height:36px; border-radius:50%; background:${avatarBg}; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">
+                            ${initials}
+                        </div>
+                        <div style="font-weight:600; color:var(--md-sys-color-on-surface);">
+                            ${item.prenom||''} ${item.nom||''}
+                        </div>
+                    </div>
+                </td>
+                <td>${badge}</td>
+                <td>${contactInfo}</td>
+                <td>${telInfo}</td>
+                <td style="text-align:right;">
+                    <button class="md-btn md-btn-text" onclick="${editFunc}" style="color:var(--md-sys-color-primary); padding: 8px; min-width:auto;" title="Éditer">
+                        <span class="material-icons" style="font-size:20px;">edit</span>
+                    </button>
+                    <button class="md-btn md-btn-text" onclick="${deleteFunc}" style="color:var(--md-sys-color-error); padding: 8px; min-width:auto;" title="Supprimer">
+                        <span class="material-icons" style="font-size:20px;">delete</span>
+                    </button>
+                </td>
+            </tr>`;
+        }
+
+        function exportAccounts() {
+            const term = document.getElementById('searchAccounts') ? document.getElementById('searchAccounts').value.toLowerCase() : '';
+            
+            const filtered = allAccounts.filter(a => {
+                const matchTerm = !term || 
+                    (a.nom||'').toLowerCase().includes(term) ||
+                    (a.prenom||'').toLowerCase().includes(term) ||
+                    (a.email||'').toLowerCase().includes(term) ||
+                    (a.classe||'').toLowerCase().includes(term);
+                const matchType = currentAccountFilterType === 'all' || a.type === currentAccountFilterType;
+                return matchTerm && matchType;
+            });
+            
+            let csv = 'Type,Nom,Prénom,Email,Classe,Téléphone\n';
+            filtered.forEach(a => {
+                const t = a.type === 'parent' ? 'Parent' : 'Élève';
+                csv += `"${t}","${a.nom||''}","${a.prenom||''}","${a.email||''}","${a.classe||''}","${a.telephone||''}"\n`;
+            });
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'comptes_eveil_ihsan.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function editParent(id) {
-            const parent = allParents.find(p => p.id === id);
+            const parent = allAccounts.find(a => a.id === id && a.type === 'parent');
             if (!parent) return;
+
             const html = `
-                <form id="parentEditForm" style="display:flex;flex-direction:column;gap:16px;">
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input id="edit_parentNom" type="text" value="${parent.nom||''}" placeholder="Nom">
+                <style>
+                    .edit-parent-form-group {
+                        background: var(--md-sys-color-surface-container-lowest);
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-bottom: 16px;
+                        border: 1px solid var(--md-sys-color-outline-variant);
+                    }
+                    .edit-parent-form-title {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: var(--md-sys-color-primary);
+                        margin-bottom: 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .edit-parent-input-wrapper {
+                        position: relative;
+                        background: var(--md-sys-color-surface);
+                        border: 1px solid var(--md-sys-color-outline-variant);
+                        border-radius: 8px;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        overflow: hidden;
+                    }
+                    .edit-parent-input-wrapper:focus-within {
+                        border-color: var(--md-sys-color-primary);
+                        box-shadow: 0 0 0 1px var(--md-sys-color-primary);
+                    }
+                    .edit-parent-input-wrapper .material-icons {
+                        padding: 0 12px;
+                        color: var(--md-sys-color-on-surface-variant);
+                        font-size: 20px;
+                    }
+                    .edit-parent-input-wrapper input {
+                        flex: 1;
+                        border: none;
+                        background: transparent;
+                        padding: 12px 12px 12px 0;
+                        font-size: 14px;
+                        color: var(--md-sys-color-on-surface);
+                        outline: none;
+                    }
+                    .edit-parent-label {
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: var(--md-sys-color-on-surface-variant);
+                        margin-bottom: 6px;
+                        display: block;
+                    }
+                </style>
+                
+                <div style="margin-bottom: 24px; text-align: center;">
+                    <div style="width: 64px; height: 64px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <span class="material-icons" style="font-size: 32px;">manage_accounts</span>
+                    </div>
+                    <h3 style="margin: 0; color: var(--md-sys-color-on-surface); font-size: 18px; font-weight: 600;">${parent.prenom||''} ${parent.nom||''}</h3>
+                    <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant); font-size: 13px;">Modification du compte parent</p>
+                </div>
+
+                <form id="editParentForm">
+                    <div class="edit-parent-form-group">
+                        <div class="edit-parent-form-title">
+                            <span class="material-icons" style="font-size: 18px;">badge</span> Identité
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label class="edit-parent-label">Nom</label>
+                                <div class="edit-parent-input-wrapper">
+                                    <span class="material-icons">person</span>
+                                    <input id="edit_parentNom" type="text" value="${parent.nom||''}" placeholder="Nom de famille">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="edit-parent-label">Prénom</label>
+                                <div class="edit-parent-input-wrapper">
+                                    <span class="material-icons">person_outline</span>
+                                    <input id="edit_parentPrenom" type="text" value="${parent.prenom||''}" placeholder="Prénom">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input id="edit_parentPrenom" type="text" value="${parent.prenom||''}" placeholder="Prénom">
+
+                    <div class="edit-parent-form-group">
+                        <div class="edit-parent-form-title">
+                            <span class="material-icons" style="font-size: 18px;">contact_mail</span> Coordonnées
                         </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input id="edit_parentEmail" type="email" value="${parent.email||''}" placeholder="Email">
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input id="edit_parentTel" type="text" value="${parent.tel||''}" placeholder="Téléphone">
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input id="edit_parentAdresse" type="text" value="${parent.adresse||''}" placeholder="Adresse">
-                        </div>
-                    </div>
-                    <div class="md-text-field">
-                        <div class="md-text-field-container">
-                            <input id="edit_parentProfession" type="text" value="${parent.profession||''}" placeholder="Profession">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                            <div>
+                                <label class="edit-parent-label">Email (Identifiant)</label>
+                                <div class="edit-parent-input-wrapper">
+                                    <span class="material-icons">email</span>
+                                    <input id="edit_parentEmail" type="email" value="${parent.email||''}" placeholder="adresse@email.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="edit-parent-label">Téléphone</label>
+                                <div class="edit-parent-input-wrapper">
+                                    <span class="material-icons">phone</span>
+                                    <input id="edit_parentTel" type="text" value="${parent.tel||''}" placeholder="Numéro de téléphone">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="edit-parent-label">Adresse</label>
+                                <div class="edit-parent-input-wrapper">
+                                    <span class="material-icons">home</span>
+                                    <input id="edit_parentAdresse" type="text" value="${parent.adresse||''}" placeholder="Adresse postale complète">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
             `;
-            showDialog('Modifier le parent', html, async () => {
+            showDialog('Modifier les informations du compte', html, async () => {
                 const data = {
                     nom: document.getElementById('edit_parentNom')?.value?.trim() || null,
                     prenom: document.getElementById('edit_parentPrenom')?.value?.trim() || null,
@@ -3541,6 +3941,169 @@
                         await loadAccounts();
                     } else {
                         showSnackbar('Erreur lors de la suppression');
+                    }
+                } catch (e) {
+                    showSnackbar('Erreur de connexion');
+                }
+            });
+        }
+
+        function editEleveAccount(id) {
+            const eleve = allAccounts.find(a => a.id === id && a.type === 'eleve');
+            if (!eleve) return;
+
+            const html = `
+                <style>
+                    .edit-eleve-form-group {
+                        background: var(--md-sys-color-surface-container-lowest);
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-bottom: 16px;
+                        border: 1px solid var(--md-sys-color-outline-variant);
+                    }
+                    .edit-eleve-form-title {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: var(--md-sys-color-primary);
+                        margin-bottom: 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .edit-eleve-input-wrapper {
+                        position: relative;
+                        background: var(--md-sys-color-surface);
+                        border: 1px solid var(--md-sys-color-outline-variant);
+                        border-radius: 8px;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        overflow: hidden;
+                    }
+                    .edit-eleve-input-wrapper:focus-within {
+                        border-color: var(--md-sys-color-primary);
+                        box-shadow: 0 0 0 1px var(--md-sys-color-primary);
+                    }
+                    .edit-eleve-input-wrapper .material-icons {
+                        padding: 0 12px;
+                        color: var(--md-sys-color-on-surface-variant);
+                        font-size: 20px;
+                    }
+                    .edit-eleve-input-wrapper input, .edit-eleve-input-wrapper select {
+                        flex: 1;
+                        border: none;
+                        background: transparent;
+                        padding: 12px 12px 12px 0;
+                        font-size: 14px;
+                        color: var(--md-sys-color-on-surface);
+                        outline: none;
+                    }
+                    .edit-eleve-label {
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: var(--md-sys-color-on-surface-variant);
+                        margin-bottom: 6px;
+                        display: block;
+                    }
+                </style>
+                
+                <div style="margin-bottom: 24px; text-align: center;">
+                    <div style="width: 64px; height: 64px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <span class="material-icons" style="font-size: 32px;">school</span>
+                    </div>
+                    <h3 style="margin: 0; color: var(--md-sys-color-on-surface); font-size: 18px; font-weight: 600;">${eleve.prenom||''} ${eleve.nom||''}</h3>
+                    <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant); font-size: 13px;">Modification du compte élève</p>
+                </div>
+
+                <form id="editEleveAccountForm">
+                    <div class="edit-eleve-form-group">
+                        <div class="edit-eleve-form-title">
+                            <span class="material-icons" style="font-size: 18px;">badge</span> Identité
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label class="edit-eleve-label">Nom</label>
+                                <div class="edit-eleve-input-wrapper">
+                                    <span class="material-icons">person</span>
+                                    <input id="edit_eleveAccNom" type="text" value="${eleve.nom||''}" placeholder="Nom de famille">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="edit-eleve-label">Prénom</label>
+                                <div class="edit-eleve-input-wrapper">
+                                    <span class="material-icons">person_outline</span>
+                                    <input id="edit_eleveAccPrenom" type="text" value="${eleve.prenom||''}" placeholder="Prénom">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="edit-eleve-form-group">
+                        <div class="edit-eleve-form-title">
+                            <span class="material-icons" style="font-size: 18px;">contact_mail</span> Coordonnées
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                            <div>
+                                <label class="edit-eleve-label">Email (Identifiant)</label>
+                                <div class="edit-eleve-input-wrapper">
+                                    <span class="material-icons">email</span>
+                                    <input id="edit_eleveAccEmail" type="email" value="${eleve.email||''}" placeholder="adresse@email.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="edit-eleve-label">Téléphone</label>
+                                <div class="edit-eleve-input-wrapper">
+                                    <span class="material-icons">phone</span>
+                                    <input id="edit_eleveAccTel" type="text" value="${eleve.tel||''}" placeholder="Numéro de téléphone">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="edit-eleve-form-group" style="margin-bottom: 0;">
+                        <div class="edit-eleve-form-title">
+                            <span class="material-icons" style="font-size: 18px;">class</span> Scolarité
+                        </div>
+                        <div>
+                            <label class="edit-eleve-label">Classe</label>
+                            <div class="edit-eleve-input-wrapper">
+                                <span class="material-icons">class</span>
+                                <select id="edit_eleveAccClasse">
+                                    <option value="">— Sans classe —</option>
+                                    ${allClasses.map(c => `<option value="${c.nom}" ${c.nom === eleve.classe ? 'selected' : ''}>${c.nom}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            `;
+
+            showDialog('Modifier les informations du compte', html, async () => {
+                const data = {
+                    nom: document.getElementById('edit_eleveAccNom')?.value?.trim() || null,
+                    prenom: document.getElementById('edit_eleveAccPrenom')?.value?.trim() || null,
+                    email: document.getElementById('edit_eleveAccEmail')?.value?.trim() || null,
+                    tel: document.getElementById('edit_eleveAccTel')?.value?.trim() || null,
+                    classe: document.getElementById('edit_eleveAccClasse')?.value || null,
+                    // garder la date de naissance pour ne pas l'écraser s'il y en a une existante non éditée
+                    dateNaissance: eleve.dateNaissance || null
+                };
+
+                try {
+                    const r = await fetch(`${API_URL}/eleves/${id}`, {
+                        method: 'PUT', headers: getHeaders(), body: JSON.stringify(data)
+                    });
+                    if (r.ok) {
+                        showSnackbar('Élève mis à jour');
+                        // Mettre à jour allEleves manuellement pour éviter un rechargement complet asynchrone qui pourrait ne pas marcher
+                        const eleveIndex = allEleves.findIndex(e => e.id === id);
+                        if (eleveIndex !== -1) {
+                            allEleves[eleveIndex] = { ...allEleves[eleveIndex], ...data };
+                        }
+                        await loadAccounts();
+                    } else {
+                        const err = await r.json();
+                        showSnackbar(err.error || 'Erreur mise à jour');
                     }
                 } catch (e) {
                     showSnackbar('Erreur de connexion');
@@ -4316,6 +4879,10 @@
                         window._skipLoadElevesOnce = false;
                         loadEleves();
                         loadDashboardData();
+                        // si on est dans l'onglet comptes, on le rafraîchit
+                        if (document.getElementById('accounts').classList.contains('active')) {
+                            loadAccounts();
+                        }
                     } else {
                         showSnackbar('Erreur lors de la suppression');
                     }
@@ -4550,15 +5117,95 @@
 
         // filtres pour la section comptes
         // unified filtering for accounts search; works on combined list
+        function updateAccountsStats(list) {
+            const statsDiv = document.getElementById('accountsStats');
+            if (!statsDiv) return;
+            const total = list.length;
+            const parents = list.filter(a => a.type === 'parent').length;
+            const eleves = list.filter(a => a.type === 'eleve').length;
+            
+            statsDiv.innerHTML = `
+                <div style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); padding:16px 20px; border-radius:16px; flex:1; min-width:200px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:24px;">people</span>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:800;line-height:1;">${total}</div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;font-weight:500;">Comptes au total</div>
+                    </div>
+                </div>
+                <div style="background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); padding:16px 20px; border-radius:16px; flex:1; min-width:200px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:24px;">escalator_warning</span>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:800;line-height:1;">${parents}</div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;font-weight:500;">Comptes Parents</div>
+                    </div>
+                </div>
+                <div style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); padding:16px 20px; border-radius:16px; flex:1; min-width:200px; display:flex; align-items:center; gap:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-icons" style="font-size:24px;">school</span>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:800;line-height:1;">${eleves}</div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;font-weight:500;">Comptes Élèves</div>
+                    </div>
+                </div>
+            `;
+        }
+
         function filterAccounts() {
-            const term = document.getElementById('searchAccounts').value.toLowerCase();
-            const filtered = term ? allAccounts.filter(a =>
-                (a.nom||'').toLowerCase().includes(term) ||
-                (a.prenom||'').toLowerCase().includes(term) ||
-                (a.email||'').toLowerCase().includes(term) ||
-                (a.classe||'').toLowerCase().includes(term)
-            ) : allAccounts;
+            const term = document.getElementById('searchAccounts') ? document.getElementById('searchAccounts').value.toLowerCase() : '';
+            const typeFilter = document.getElementById('filterAccountType') ? document.getElementById('filterAccountType').value : 'all';
+            
+            const filtered = allAccounts.filter(a => {
+                const matchTerm = !term || 
+                    (a.nom||'').toLowerCase().includes(term) ||
+                    (a.prenom||'').toLowerCase().includes(term) ||
+                    (a.email||'').toLowerCase().includes(term) ||
+                    (a.classe||'').toLowerCase().includes(term);
+                
+                const matchType = typeFilter === 'all' || a.type === typeFilter;
+                
+                return matchTerm && matchType;
+            });
+            
+            // Sort alphabetically by last name
+            filtered.sort((a, b) => (a.nom||'').localeCompare(b.nom||''));
+            
             renderAccounts(filtered);
+        }
+
+        function exportAccounts() {
+            const typeFilter = document.getElementById('filterAccountType') ? document.getElementById('filterAccountType').value : 'all';
+            const term = document.getElementById('searchAccounts') ? document.getElementById('searchAccounts').value.toLowerCase() : '';
+            
+            const filtered = allAccounts.filter(a => {
+                const matchTerm = !term || 
+                    (a.nom||'').toLowerCase().includes(term) ||
+                    (a.prenom||'').toLowerCase().includes(term) ||
+                    (a.email||'').toLowerCase().includes(term) ||
+                    (a.classe||'').toLowerCase().includes(term);
+                const matchType = typeFilter === 'all' || a.type === typeFilter;
+                return matchTerm && matchType;
+            });
+            
+            let csv = 'Type,Nom,Prénom,Email,Classe,Téléphone\n';
+            filtered.forEach(a => {
+                const t = a.type === 'parent' ? 'Parent' : 'Élève';
+                csv += `"${t}","${a.nom||''}","${a.prenom||''}","${a.email||''}","${a.classe||''}","${a.telephone||''}"\n`;
+            });
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); // \uFEFF for BOM (Excel compatibility)
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'comptes_eveil_ihsan.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // keep legacy helpers but keep them in case they are used elsewhere
@@ -6993,6 +7640,16 @@
             }
         }
 
+        function afficherole(role) {
+            switch (role) {
+                case 'directeur': return 'Directeur';
+                case 'professeur': return 'Enseignant';
+                case 'secretariat': return 'Secrétaire';
+                case 'admin': return 'Administrateur';
+                default: return role;
+            }
+        }
+
         function renderComposeDestList() {
             const search = (document.getElementById('composeSearchInput')?.value || '').toLowerCase();
             const listEl = document.getElementById('composeDestList');
@@ -7010,7 +7667,7 @@
                 groups[g].push(d);
             });
             listEl.innerHTML = Object.entries(groups).map(([role, items]) => `
-                <div class="msg-dest-group-label">${role}</div>
+                <div class="msg-dest-group-label">${afficherole(role)}</div>
                 ${items.map(d => {
                     const isSelected = selectedDestinatairesMessage.some(s => s.id === d.id);
                     const initials = d.nom.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
@@ -7018,7 +7675,7 @@
                         <div class="msg-dest-avatar ${isSelected ? 'sel' : ''}">${initials}</div>
                         <div class="msg-dest-info">
                             <div class="msg-dest-name">${d.nom}</div>
-                            <div class="msg-dest-role">${d.type === 'class' ? '🏫 Classe entière' : d.role}</div>
+                            <div class="msg-dest-role">${d.type === 'class' ? '🏫 Classe entière' : afficherole(d.role)}</div>
                         </div>
                         <span class="material-icons msg-dest-check" style="opacity:${isSelected?1:0}">check_circle</span>
                     </div>`;

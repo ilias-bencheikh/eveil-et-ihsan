@@ -508,6 +508,108 @@
             color: var(--md-sys-color-on-surface-variant);
         }
 
+        /* --- Info cards --- */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .info-card {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s;
+        }
+        .info-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+
+        .info-card h4 {
+            display: flex; align-items: center; gap: 8px;
+            margin: 0 0 16px;
+            font: var(--md-sys-typescale-title-small);
+            color: var(--md-sys-color-on-surface);
+        }
+        .info-card h4 .material-icons {
+            font-size: 20px;
+            color: var(--md-sys-color-primary);
+        }
+
+        /* --- Info cards additions --- */
+        .info-card-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .info-card-icon .material-icons { font-size: 18px; }
+        .ic-blue   { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+        .ic-green  { background: var(--md-sys-color-success-container); color: var(--md-sys-color-on-success-container); }
+        .ic-orange { background: var(--md-sys-color-warning-container); color: var(--md-sys-color-on-warning-container); }
+        .ic-red    { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+        .ic-purple { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+
+        /* --- Status badges --- */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 50px;
+            font-size: 11px; font-weight: 600;
+        }
+        .status-absent { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+        .status-retard { background: var(--md-sys-color-warning-container); color: var(--md-sys-color-on-warning-container); }
+        .status-present { background: var(--md-sys-color-success-container); color: var(--md-sys-color-on-success-container); }
+
+        /* --- Progress bar améliorée --- */
+        .frais-progress { margin-top: 12px; }
+        .progress-bar {
+            height: 10px;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--md-sys-color-primary), #4a90d9);
+            border-radius: 50px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .progress-bar-fill.complete {
+            background: linear-gradient(90deg, var(--md-sys-color-success), #2ecc71);
+        }
+
+        /* --- Stat cards pour frais --- */
+        .p-stat-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .p-stat-cards { grid-template-columns: 1fr; }
+        }
+        .p-stat-card {
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s;
+        }
+        .p-stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .p-stat-card-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--md-sys-color-on-surface-variant); margin-bottom: 8px; font-weight: 600;
+        }
+        .p-stat-card-value { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
+        .p-stat-card-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+        }
+        .p-stat-card-icon .material-icons { font-size: 22px; }
+
         /* Sélecteur de famille */
         .family-switcher {
             display: none;
@@ -3332,18 +3434,32 @@
             // Summary
             if (summaryEl) {
                 const globalProgress = totalFrais > 0 ? Math.round((totalPaye / totalFrais) * 100) : 0;
+                const isComplete = globalProgress >= 100;
                 summaryEl.innerHTML = `
                     <div class="p-stat-cards">
-                        <div class="p-stat-card"><div class="p-stat-icon" style="background:#dbeafe;color:#3b82f6;"><span class="material-icons">receipt_long</span></div><div class="p-stat-value">${formatCurrency(totalFrais)}</div><div class="p-stat-label">Total des frais</div></div>
-                        <div class="p-stat-card"><div class="p-stat-icon" style="background:#dcfce7;color:#22c55e;"><span class="material-icons">payments</span></div><div class="p-stat-value">${formatCurrency(totalPaye)}</div><div class="p-stat-label">Total payé</div></div>
-                        <div class="p-stat-card"><div class="p-stat-icon" style="background:#fef2f2;color:#ef4444;"><span class="material-icons">pending</span></div><div class="p-stat-value">${formatCurrency(totalReste)}</div><div class="p-stat-label">Reste • payer</div></div>
-                    </div>
-                    <div style="margin-top:16px;">
-                        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
-                            <span>Progression globale</span><span style="font-weight:600;">${globalProgress}%</span>
+                        <div class="p-stat-card">
+                            <div class="p-stat-card-icon ic-blue"><span class="material-icons">account_balance_wallet</span></div>
+                            <div class="p-stat-card-label">Total des frais</div>
+                            <div class="p-stat-card-value">${formatCurrency(totalFrais)}</div>
                         </div>
-                        <div class="progress-bar"><div class="progress-bar-fill" style="width:${globalProgress}%"></div></div>
-                    </div>`;
+                        <div class="p-stat-card">
+                            <div class="p-stat-card-icon ic-green"><span class="material-icons">check_circle</span></div>
+                            <div class="p-stat-card-label">Montant payé</div>
+                            <div class="p-stat-card-value" style="color:var(--md-sys-color-success);">${formatCurrency(totalPaye)}</div>
+                        </div>
+                        <div class="p-stat-card">
+                            <div class="p-stat-card-icon ${totalReste > 0 ? 'ic-red' : 'ic-green'}"><span class="material-icons">${totalReste > 0 ? 'warning' : 'done_all'}</span></div>
+                            <div class="p-stat-card-label">Reste à payer</div>
+                            <div class="p-stat-card-value" style="color:${totalReste > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)'};">${formatCurrency(totalReste)}</div>
+                        </div>
+                    </div>
+                    <div class="frais-progress">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill ${isComplete ? 'complete' : ''}" style="width: ${Math.min(globalProgress, 100)}%"></div>
+                        </div>
+                        <div style="text-align:center;font-size:13px;font-weight:600;color:var(--md-sys-color-primary);margin-top:8px;">${globalProgress}% payé</div>
+                    </div>
+                `;
             }
 
             // Details per child
@@ -3353,40 +3469,75 @@
                     return;
                 }
                 detailsEl.innerHTML = enfantsData.map(ed => {
-                    const paiementsHtml = ed.paiements.length > 0 ? ed.paiements.slice(0, 5).map(p => `
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--md-sys-color-surface-container);border-radius:8px;margin-bottom:4px;font-size:13px;">
-                            <span><strong>${formatCurrency(p.montant)}</strong> • ${new Date(p.date).toLocaleDateString('fr-FR')}</span>
-                            <span style="padding:2px 10px;border-radius:12px;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);font-size:12px;">${p.methodePaiement === 'carte' ? 'Carte' : p.methodePaiement === 'virement' ? 'Virement' : 'Espéce'}</span>
-                        </div>`).join('') : '<p style="font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun paiement enregistré</p>';
+                    const isEnfantComplete = ed.progress >= 100;
+                    
+                    let paiementsHtml = '';
+                    if (ed.paiements && ed.paiements.length > 0) {
+                        paiementsHtml = `
+                            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--md-sys-color-outline-variant);">
+                                <div style="font-weight:600;margin-bottom:10px;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--md-sys-color-on-surface);">
+                                    <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-primary);">receipt</span>
+                                    Historique des paiements (${ed.paiements.length})
+                                </div>
+                                ${ed.paiements.sort((a, b) => new Date(b.date) - new Date(a.date)).map(p => {
+                                    const methodeStr = p.methodePaiement === 'carte' ? '💳 Carte' : (p.methodePaiement === 'virement' ? '🏦 Virement' : (p.methodePaiement === 'espece' ? '💵 Espèce' : p.methodePaiement));
+                                    return `
+                                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;margin-bottom:6px;font-size:13px;border:1px solid var(--md-sys-color-outline-variant);">
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            <div class="info-card-icon ic-green" style="width:28px;height:28px;"><span class="material-icons" style="font-size:14px;">check</span></div>
+                                            <div>
+                                                <strong>${formatCurrency(p.montant)}</strong>
+                                                <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);">
+                                                    ${new Date(p.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}
+                                                    ${p.note ? ` — ${p.note}` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span style="padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);">
+                                            ${methodeStr}
+                                        </span>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                        `;
+                    }
+                    
 
-                    return `<div style="padding:16px;margin-bottom:12px;background:var(--md-sys-color-surface-container-low);border-radius:16px;border:1px solid var(--md-sys-color-outline-variant);">
-                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--md-sys-color-outline-variant);">
-                            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${ed.child.prenom ? ed.child.prenom.charAt(0).toUpperCase() : '?'}</div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700;font-size:15px;">${ed.child.prenom} ${ed.child.nom || ''}</div>
-                                <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">${ed.child.classe || 'Classe non définie'}</div>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:${ed.eleve.fraisValide ? '#dcfce7' : '#fef2f2'};">
-                                <span class="material-icons" style="font-size:16px;color:${ed.eleve.fraisValide ? '#22c55e' : '#ef4444'};">${ed.eleve.fraisValide ? 'check_circle' : 'error'}</span>
-                                <span style="font-size:12px;font-weight:600;color:${ed.eleve.fraisValide ? '#166534' : '#991b1b'};">${ed.eleve.fraisValide ? 'Validé' : 'Non validé'}</span>
-                            </div>
-                        </div>
-                        <div class="info-cards" style="margin-bottom:12px;">
-                            <div class="info-card"><div class="info-card-icon ic-blue"><span class="material-icons">receipt</span></div><div class="info-card-content"><div class="info-card-value">${formatCurrency(ed.total)}</div><div class="info-card-label">Total</div></div></div>
-                            <div class="info-card"><div class="info-card-icon ic-green"><span class="material-icons">check</span></div><div class="info-card-content"><div class="info-card-value">${formatCurrency(ed.paye)}</div><div class="info-card-label">Payé</div></div></div>
-                            <div class="info-card"><div class="info-card-icon ic-red"><span class="material-icons">pending</span></div><div class="info-card-content"><div class="info-card-value">${formatCurrency(ed.reste)}</div><div class="info-card-label">Reste</div></div></div>
-                        </div>
-                        <div style="margin-bottom:12px;">
-                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Progression</span><span style="font-weight:600;">${ed.progress}%</span></div>
-                            <div class="progress-bar"><div class="progress-bar-fill" style="width:${ed.progress}%"></div></div>
-                        </div>
-                        <div>
-                            <h4 style="font-size:13px;margin:0 0 8px;color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:6px;">
-                                <span class="material-icons" style="font-size:16px;">receipt_long</span>Historique des paiements
+                    return `
+                        <div class="info-card" style="margin-bottom:16px;">
+                            <h4>
+                                <div class="info-card-icon ic-blue"><span class="material-icons">person</span></div>
+                                ${ed.child.prenom} ${ed.child.nom || ''}
+                                <span style="margin-left:auto;">
+                                    <span class="status-badge ${ed.eleve.fraisValide ? 'status-present' : 'status-retard'}">
+                                        <span class="material-icons" style="font-size:12px;">${ed.eleve.fraisValide ? 'check_circle' : 'pending'}</span>
+                                        ${ed.eleve.fraisValide ? 'Validés' : 'En cours'}
+                                    </span>
+                                </span>
                             </h4>
+                            <div class="p-stat-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Total</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;">${formatCurrency(ed.total)}</div>
+                                </div>
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Payé</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;color:var(--md-sys-color-primary);">${formatCurrency(ed.paye)}</div>
+                                </div>
+                                <div class="p-stat-card" style="padding:12px;">
+                                    <div class="p-stat-card-label">Reste</div>
+                                    <div class="p-stat-card-value" style="font-size:1rem;color:${ed.reste > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-success)'};">${formatCurrency(ed.reste)}</div>
+                                </div>
+                            </div>
+                            <div class="frais-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill ${isEnfantComplete ? 'complete' : ''}" style="width: ${Math.min(ed.progress, 100)}%"></div>
+                                </div>
+                                <div style="text-align:center;font-size:12px;font-weight:600;color:var(--md-sys-color-primary);margin-top:6px;">${ed.progress}%</div>
+                            </div>
                             ${paiementsHtml}
                         </div>
-                    </div>`;
+                    `;
                 }).join('');
             }
         }
@@ -3462,10 +3613,9 @@
                             <p style="margin:0;font-size:15px;font-weight:500;">Aucune actualité pour le moment</p>
                             <p style="margin:0;font-size:13px;opacity:0.7;">Les actualités publiées s'afficheront ici</p>
                         </div>`;
-                        return;
-                    }
-                    const cs = getComputedStyle(document.documentElement);
-                    const clrPC = cs.getPropertyValue('--md-sys-color-primary-container').trim();
+                    } else {
+                        const cs = getComputedStyle(document.documentElement);
+                        const clrPC = cs.getPropertyValue('--md-sys-color-primary-container').trim();
                     const clrSC = cs.getPropertyValue('--md-sys-color-secondary-container').trim();
                     const clrTC = cs.getPropertyValue('--md-sys-color-tertiary-container').trim();
                     const bgPalette = [
@@ -3512,7 +3662,8 @@
                                     <span class="material-icons">arrow_forward</span>
                                 </div>
                             </div>`;
-                    }).join('');
+                        }).join('');
+                    }
                 }
 
                 // Charger le carousel sur le dashboard
@@ -5660,7 +5811,8 @@
             if(notifCheck) {
                 const token = localStorage.getItem('token');
                 fetch('/api/auth/notifications/settings', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
                 })
                 .then(r => r.json())
                 .then(data => {

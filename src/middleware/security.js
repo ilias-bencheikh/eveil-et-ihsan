@@ -14,10 +14,10 @@ const xssFilters = require('xss-filters');
 // RATE LIMITING
 // ==========================================
 
-// Rate limiter global : 100 requêtes par minute par IP
+// Rate limiter global : 1000 requêtes par minute par IP
 const globalLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 100,
+    max: 1000,
     message: { error: 'Trop de requêtes. Veuillez réessayer dans quelques instants.' },
     standardHeaders: true,
     legacyHeaders: false
