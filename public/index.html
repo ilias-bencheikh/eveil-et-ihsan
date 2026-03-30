@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -1360,13 +1360,9 @@
 
                 <div class="sidebar-nav-section">
                     <span class="sidebar-nav-section-title">Suivi</span>
-                    <a href="#" class="sidebar-nav-item" data-tab="appel" id="nav-appel">
-                        <span class="material-icons">fact_check</span>
-                        <span>Faire l'appel</span>
-                    </a>
                     <a href="#" class="sidebar-nav-item" data-tab="absences">
-                        <span class="material-icons">event_busy</span>
-                        <span>Absences</span>
+                        <span class="material-icons">fact_check</span>
+                        <span>Appels & Absences</span>
                     </a>
                     <a href="#" class="sidebar-nav-item" data-tab="appreciations">
                         <span class="material-icons">rate_review</span>
@@ -1485,13 +1481,8 @@
                             </div>
                         </div>
 
-                        <!-- Modale détail actualité -->
-                        <div class="actu-modal-overlay" id="actuModalOverlay" onclick="if(event.target===this)closeActuModal()">
-                            <div class="actu-modal" id="actuModal">
-                                <div id="actuModalContent"></div>
-                            </div>
-                        </div>
-
+                        <!-- Modale détail actualité (déplacée à la racine du body) -->
+                        
                         <!-- Derniers messages (colonne 2, admin seulement) -->
                         <div class="widget-card" id="messagesWidget" style="display:none;">
                             <div class="widget-card-header">
@@ -1528,9 +1519,9 @@
                             </div>
                             <div class="widget-card-content" style="padding:12px;">
                                 <div class="db-quick-actions-v2">
-                                    <button class="db-qa-btn db-qa-btn-blue" onclick="switchTab('appel')">
+                                    <button class="db-qa-btn db-qa-btn-blue" onclick="switchTab('absences')">
                                         <span class="material-icons">fact_check</span>
-                                        <span>Appel</span>
+                                        <span>Appels & Absences</span>
                                     </button>
                                     <button class="db-qa-btn db-qa-btn-green" onclick="switchTab('appreciations')">
                                         <span class="material-icons">rate_review</span>
@@ -1547,10 +1538,6 @@
                                     <button class="db-qa-btn db-qa-btn-teal" onclick="switchTab('classes'); setTimeout(showAddClasseForm, 300)">
                                         <span class="material-icons">add_circle</span>
                                         <span>Classe</span>
-                                    </button>
-                                    <button class="db-qa-btn db-qa-btn-red" onclick="switchTab('absences')">
-                                        <span class="material-icons">event_busy</span>
-                                        <span>Absences</span>
                                     </button>
                                 </div>
                             </div>
@@ -1605,123 +1592,17 @@
                     </div>
                 </div>
 
-                <!-- ========== APPEL TAB ========== -->
-                <div id="appel" class="tab-content">
-                    <!-- Section principale: Sélection de classe et actions -->
-                    <div class="widget-card" style="margin-bottom: 16px;">
-                        <div class="widget-card-header">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 28px;">fact_check</span>
-                                <div>
-                                    <h3 class="widget-card-title">Gestion des appels</h3>
-                                    <p style="margin: 0; font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Marquez la présence de vos élèves</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="widget-card-content">
-                            <!-- Sélecteur de classe amélioré -->
-                            <div style="margin-bottom: 24px;">
-                                <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--md-sys-color-on-surface);">
-                                    <span class="material-icons" style="color: var(--md-sys-color-primary);">class</span>
-                                    Sélectionnez une classe
-                                </h4>
-
-                                <!-- Barre de recherche -->
-                                <div style="margin-bottom: 16px;">
-                                    <div class="topbar-search" style="width: 100%;">
-                                        <span class="material-icons">search</span>
-                                        <input type="text" id="appelClassSearchInput" placeholder="Rechercher une classe..." oninput="filterAppelClasses()">
-                                        <button type="button" id="clearAppelSearchBtn" class="md-icon-btn clear-search-btn" onclick="clearAppelClassSearch()">
-                                            <span class="material-icons">clear</span>
-                                        </button>
-                                    </div>
-                                    <div id="appelSearchResultsInfo" style="margin-top: 8px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); display: none;">
-                                        <span id="appelFilteredCount">0</span> classe(s) trouvée(s)
-                                    </div>
-                                </div>
-
-                                <!-- Grille des classes -->
-                                <div id="appelClassesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
-                                    <!-- Les classes seront ajoutées dynamiquement ici -->
-                                </div>
-                            </div>
-
-                            <!-- Actions disponibles quand une classe est sélectionnée -->
-                            <div id="appelClassActions" style="display: none; padding: 20px; background: var(--md-sys-color-surface-container); border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant);">
-                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--md-sys-color-primary-container); display: flex; align-items: center; justify-content: center;">
-                                            <span class="material-icons" style="color: var(--md-sys-color-on-primary-container);">school</span>
-                                        </div>
-                                        <div>
-                                            <h4 style="margin: 0; color: var(--md-sys-color-on-surface);">Classe sélectionnée</h4>
-                                            <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant);" id="appelSelectedClassInfo">-</p>
-                                        </div>
-                                    </div>
-
-                                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                        <button class="md-btn md-btn-filled" onclick="showNewAppelForm()" id="btnNouvelAppel">
-                                            <span class="material-icons">add</span>
-                                            <span>Nouvel appel</span>
-                                        </button>
-                                        <button class="md-btn md-btn-outlined" onclick="deselectAppelClasse()">
-                                            <span class="material-icons">clear</span>
-                                            <span>Changer de classe</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section formulaire pour créer un nouvel appel -->
-                    <div class="widget-card" id="newAppelFormCard" style="display: none; margin-top: 16px;">
-                        <div class="widget-card-header">
-                            <h3 class="widget-card-title">Nouvel appel</h3>
-                            <button class="md-btn md-btn-text" onclick="hideNewAppelForm()">
-                                <span class="material-icons">close</span>
-                            </button>
-                        </div>
-                        <div class="widget-card-content">
-                            <!-- Informations de l'appel -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-                                <div class="md-text-field">
-                                    <div class="md-text-field-container">
-                                        <input type="date" id="newAppelDateInput" class="md-text-field-input" required placeholder=" " value="">
-                                        <label class="md-text-field-label">Date de l'appel *</label>
-                                    </div>
-                                </div>
-                                <div style="display: flex; align-items: center; padding: 16px; background: var(--md-sys-color-primary-container); border-radius: 8px;">
-                                    <span class="material-icons" style="color: var(--md-sys-color-on-primary-container); margin-right: 8px;">class</span>
-                                    <span style="color: var(--md-sys-color-on-primary-container); font-weight: 500;">Classe: <span id="newAppelClasseLabel">-</span></span>
-                                </div>
-                            </div>
-                            
-                            <!-- Liste des élèves avec statuts -->
-                            <div id="newElevesAppelContainer" style="max-height: 500px; overflow-y: auto;">
-                                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px;">Chargement des élèves...</p>
-                            </div>
-                            
-                            <!-- Actions -->
-                            <div style="display: flex; gap: 16px; margin-top: 24px; justify-content: flex-end;">
-                                <button class="md-btn md-btn-outlined" onclick="hideNewAppelForm()">
-                                    <span class="material-icons">close</span> Annuler
-                                </button>
-                                <button class="md-btn md-btn-filled" id="newAppelSaveBtn" onclick="saveNewAppelData()">
-                                    <span class="material-icons">save</span> Enregistrer l'appel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
                 <!-- ========== ABSENCES TAB ========== -->
                 <div id="absences" class="tab-content">
                     <!-- Historique des appels -->
                     <div class="widget-card" style="margin-top: 16px;">
-                        <div class="widget-card-header">
+                        <div class="widget-card-header" style="display: flex; justify-content: space-between; align-items: center;">
                             <h3 class="widget-card-title">Historique des appels</h3>
+                            <div class="widget-card-actions" id="absencesActions" style="display: none;">
+                                <button class="md-btn md-btn-filled" onclick="showNewAppelForm()">
+                                    <span class="material-icons">add</span> Nouvel appel
+                                </button>
+                            </div>
                         </div>
                         <div class="widget-card-content">
                             <!-- Sélecteur de classe -->
@@ -2948,6 +2829,13 @@
         </div>
     </div>
 
+    <!-- Modale détail actualité -->
+    <div class="actu-modal-overlay" id="actuModalOverlay" onclick="if(event.target===this)closeActuModal()">
+        <div class="actu-modal" id="actuModal">
+            <div id="actuModalContent"></div>
+        </div>
+    </div>
+
     <!-- Toast Notification (amélioré) -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -3158,7 +3046,7 @@
 
             const titles = {
                 dashboard: 'Tableau de bord', eleves: 'Gestion des élèves', classes: 'Gestion des classes',
-                appel: "Faire l'appel", absences: 'Suivi des absences', appreciations: 'Appréciations',
+                absences: 'Appels & Absences', appreciations: 'Appréciations',
                 actualites: 'Actualités', messagerie: 'Messagerie', bureau: 'Gestion du bureau', inscriptions: "Dossiers d'inscription",
                 'frais-admin': 'Gestion des frais',
                 accounts: 'Comptes',
@@ -3336,7 +3224,7 @@
                 const videoBadge = videoPj ? '<div class="ppt-video-indicator"><span class="material-icons">videocam</span></div>' : '';
                 
                 return `
-                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasMedia ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal(${globalIdx})">
+                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasMedia ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal('${actu.id}')">
                     <div class="ppt-slide-topbar"></div>
                     ${bgHtml}
                     <div class="ppt-slide-overlay" style="${overlayStyle}"></div>
@@ -3486,8 +3374,12 @@
             if (bar) { bar.classList.remove('running'); bar.style.transition = 'none'; bar.style.width = '0%'; }
         }
 
-        function openActuModal(idx) {
-            const a = _pptSlides[idx] || _allActualites[idx]; // Support for both lists depending on context
+        function openActuModal(id) {
+            let a = allActualites.find(x => x.id === id) || _pptSlides.find(x => x.id === id);
+            // Fallback for backward compatibility if an index was passed instead of an ID
+            if (!a && typeof id === 'number') {
+                a = allActualites[id] || _pptSlides[id];
+            }
             if (!a) return;
             const overlay = document.getElementById('actuModalOverlay');
             const content = document.getElementById('actuModalContent');
@@ -4335,7 +4227,6 @@
             switch(tabName) {
                 case 'eleves': await loadEleves(); break;
                 case 'classes': await loadClasses(); break;
-                case 'appel': await initAppelTab(); break;
                 case 'absences': await loadAvailableAbsencesClasses(); break;
                 case 'appreciations': await initAppreciationsTab(); break;
                 case 'actualites': await loadActualites(); break;
@@ -6931,20 +6822,22 @@
 
         // Afficher le formulaire de nouvel appel
         function showNewAppelForm() {
-            document.getElementById('newAppelFormCard').style.display = 'block';
+            document.getElementById('appelFormCard').style.display = 'block';
+            document.getElementById('editAppelBatchId').value = '';
+            document.getElementById('appelFormTitle').textContent = 'Nouvel appel';
+            document.getElementById('appelSaveBtn').innerHTML = '<span class="material-icons">save</span> Enregistrer l\'appel';
 
-            // Réinitialiser le formulaire
-            const appelDateInput = document.getElementById('newAppelDateInput');
+            const appelDateInput = document.getElementById('appelDateInput');
             if (appelDateInput) {
                 appelDateInput.value = new Date().toISOString().split('T')[0];
             }
-            const appelClasseLabel = document.getElementById('newAppelClasseLabel');
+            const appelClasseLabel = document.getElementById('appelClasseLabel');
             if (appelClasseLabel) {
                 appelClasseLabel.textContent = currentSelectedAppelClasse;
             }
 
             // Charger les élèves pour le nouvel appel
-            loadElevesForNewAppelForm();
+            loadElevesForAppelForm();
         }
 
         // Masquer le formulaire d'appel
@@ -6952,89 +6845,7 @@
             document.getElementById('appelFormCard').style.display = 'none';
         }
 
-        // Masquer le formulaire de nouvel appel
-        function hideNewAppelForm() {
-            document.getElementById('newAppelFormCard').style.display = 'none';
-        }
-
-        // Charger les élèves pour le formulaire de nouvel appel
-        async function loadElevesForNewAppelForm() {
-            try {
-                const response = await fetch(`${API_URL}/appreciations/eleves/classe/${currentSelectedAppelClasse}`, { headers: getHeaders() });
-                appelEleves = await response.json();
-
-                const container = document.getElementById('newElevesAppelContainer');
-                container.innerHTML = appelEleves.map(eleve => `
-                    <div class="appel-eleve-row" style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
-                        <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
-                            <div class="md-avatar" style="width: 32px; height: 32px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
-                                ${eleve.photo ? `<img src="${eleve.photo}" alt="${eleve.prenom}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : (eleve.prenom || 'E')[0].toUpperCase()}
-                            </div>
-                            <div>
-                                <div style="font-weight: 500;">${eleve.prenom} ${eleve.nom}</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                <input type="radio" name="new_appel_${eleve.id}" value="present" checked style="margin: 0;">
-                                <span style="font-size: 14px;">Présent</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                <input type="radio" name="new_appel_${eleve.id}" value="absent" style="margin: 0;">
-                                <span style="font-size: 14px;">Absent</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                <input type="radio" name="new_appel_${eleve.id}" value="retard" style="margin: 0;">
-                                <span style="font-size: 14px;">Retard</span>
-                            </label>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                showSnackbar('Erreur lors du chargement des élèves');
-            }
-        }
-
-        // Sauvegarder les données du nouvel appel
-        async function saveNewAppelData() {
-            const appelDateInput = document.getElementById('newAppelDateInput');
-            const date = appelDateInput ? appelDateInput.value : new Date().toISOString().split('T')[0];
-            const classe = currentSelectedAppelClasse;
-            const absences = [];
-
-            for (const eleve of appelEleves) {
-                const status = document.querySelector(`input[name="new_appel_${eleve.id}"]:checked`).value;
-                absences.push({
-                    eleveId: eleve.id,
-                    type: status,
-                    motif: '',
-                });
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/absences/appel`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ absences, classe, date, professeurId: user?.id })
-                });
-
-                if (response.ok) {
-                    showSnackbar('Appel enregistré avec succès');
-                    hideNewAppelForm();
-                    // Recharger les statistiques
-                    loadDashboardData();
-                    // Recharger l'historique des absences si on est dans cette section
-                    if (currentSelectedAbsencesClasse) {
-                        loadAbsencesHistorique(currentSelectedAbsencesClasse);
-                    }
-                } else {
-                    const error = await response.json();
-                    showSnackbar('Erreur lors de l\'enregistrement: ' + (error.error || 'Erreur inconnue'));
-                }
-            } catch (error) {
-                showSnackbar('Erreur réseau lors de l\'enregistrement');
-            }
-        }
+        // ==================== CHARGEMENT ÉLÈVES ====================
 
 
 
@@ -7113,6 +6924,9 @@
                     showSnackbar('Appel enregistré avec succès');
                     document.getElementById('appelFormCard').style.display = 'none';
                     loadDashboardData();
+                    if (currentSelectedAbsencesClasse) {
+                        loadAbsencesHistorique();
+                    }
                 } else {
                     throw new Error('Erreur lors de l\'enregistrement');
                 }
@@ -7382,7 +7196,12 @@
         // Sélectionner une classe pour absences
         function selectAbsencesClasse(nomClasse) {
             currentSelectedAbsencesClasse = nomClasse;
+            currentSelectedAppelClasse = nomClasse; // synchroniser avec appel
             renderAbsencesClassesGrid();
+            
+            // Afficher le bouton Nouvel appel
+            const actionsDiv = document.getElementById('absencesActions');
+            if (actionsDiv) actionsDiv.style.display = 'block';
             
             // Afficher le filtre de date et le mettre à aujourd'hui
             const dateFilter = document.getElementById('appelDateFilter');
@@ -11752,7 +11571,7 @@
                 const expireSoon = actu.dateFin && (new Date(actu.dateFin).getTime() - Date.now()) < 3 * 86400000 && new Date(actu.dateFin) > new Date();
 
                 return `
-                    <article class="fb-post" onclick="openActuModal(${idx})">
+                    <article class="fb-post" onclick="openActuModal('${actu.id}')">
                         <!-- Header -->
                         <div class="fb-post-header">
                             <div class="fb-post-avatar">${initials}</div>

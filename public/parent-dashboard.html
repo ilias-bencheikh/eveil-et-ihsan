@@ -5892,7 +5892,7 @@
                             : "";
 
                         return `
-                <div class="ppt-slide${i === 0 ? " active" : ""}${!hasMedia ? " ppt-light" : ""}" data-index="${i}" onclick="openActuModal(${globalIdx})">
+                <div class="ppt-slide${i === 0 ? " active" : ""}${!hasMedia ? " ppt-light" : ""}" data-index="${i}" onclick="openActuModal('${actu.id}')">
                     <div class="ppt-slide-topbar"></div>
                     ${bgHtml}
                     <div class="ppt-slide-overlay" style="${overlayStyle}"></div>
@@ -6990,7 +6990,7 @@
                                   }
 
                                   return `
-                        <article class="fb-post" style="animation-delay:${delay}ms;" onclick="openActuModal(${idx})">
+                        <article class="fb-post" style="animation-delay:${delay}ms;" onclick="openActuModal('${actu.id}')">
                             <!-- Header -->
                             <div class="fb-post-header">
                                 <div class="fb-post-avatar">${initials}</div>
@@ -7103,8 +7103,11 @@
             }
 
             // ── Ouvrir la modale de détail ──
-            function openActuModal(idx) {
-                const a = _allActualites[idx];
+            function openActuModal(id) {
+                let a = _allActualites.find(x => x.id === id);
+                if (!a && typeof id === 'number') {
+                    a = _allActualites[id];
+                }
                 if (!a) return;
                 const overlay = document.getElementById("actuModalOverlay");
                 const content = document.getElementById("actuModalContent");
