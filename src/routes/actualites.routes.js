@@ -21,9 +21,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10 Mo max par fichier
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100 Mo max par fichier (pour supporter les vidéos)
     fileFilter: (req, file, cb) => {
-        const allowedExts = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|webp|txt|zip|rar|csv)$/i;
+        const allowedExts = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|webp|txt|zip|rar|csv|mp4|webm|mov|avi|mkv|m4v)$/i;
         if (allowedExts.test(path.extname(file.originalname))) {
             cb(null, true);
         } else {

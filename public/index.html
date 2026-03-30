@@ -274,6 +274,29 @@
             display: block;
             background: var(--md-sys-color-surface-container);
         }
+        .actu-card-cover-video {
+            width: 100%; height: 200px;
+            position: relative;
+            background: var(--md-sys-color-surface-container);
+            overflow: hidden;
+        }
+        .actu-card-cover-video video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .actu-card-cover-video .actu-video-badge {
+            position: absolute;
+            bottom: 12px; left: 12px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex; align-items: center; gap: 5px;
+            backdrop-filter: blur(4px);
+        }
+        .actu-card-cover-video .actu-video-badge .material-icons { font-size: 16px; }
         .actu-card-cover-placeholder {
             width: 100%; height: 0;
         }
@@ -400,9 +423,10 @@
             z-index: 21; pointer-events: none;
         }
         @media (min-width: 640px) { .actu-modal::before { display: none; } }
-        .actu-modal::-webkit-scrollbar { width: 5px; }
-        .actu-modal::-webkit-scrollbar-track { background: transparent; }
-        .actu-modal::-webkit-scrollbar-thumb { background: var(--md-sys-color-outline-variant); border-radius: 10px; }
+        .actu-modal::-webkit-scrollbar { width: 8px; }
+        .actu-modal::-webkit-scrollbar-track { background: transparent; margin: 250px 0 20px 0; }
+        .actu-modal::-webkit-scrollbar-thumb { background: var(--md-sys-color-primary, #6b7280); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; opacity: 0.8; }
+        .actu-modal::-webkit-scrollbar-thumb:hover { background-color: var(--md-sys-color-primary, #4b5563); border-width: 1px; opacity: 1; }
         .actu-modal-close {
             position: absolute; top: 14px; right: 14px; z-index: 22;
             width: 38px; height: 38px; border-radius: 50%;
@@ -865,6 +889,32 @@
             transition: transform 8s ease;
         }
         .ppt-slide.active .ppt-slide-bg { transform: scale(1.06); }
+        
+        /* Vidéo de fond */
+        .ppt-slide-bg-video {
+            background: #000;
+        }
+        .ppt-slide-bg-video video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .ppt-slide.active .ppt-slide-bg-video { transform: scale(1.02); }
+        
+        /* Indicateur vidéo */
+        .ppt-video-indicator {
+            position: absolute;
+            top: 14px; right: 14px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex; align-items: center; gap: 5px;
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .ppt-video-indicator .material-icons { font-size: 16px; }
 
         /* Overlay dégradé */
         .ppt-slide-overlay {
@@ -1956,8 +2006,8 @@
                                 <div class="actu-pj-dropzone" id="actuPjDropzone" onclick="document.getElementById('actuPjInput').click()">
                                     <span class="material-icons">cloud_upload</span>
                                     <div style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Cliquez ou glissez-déposez vos fichiers ici</div>
-                                    <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">PDF, Word, Excel, images… (max 10 Mo par fichier, 5 fichiers)</div>
-                                    <input type="file" id="actuPjInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv" style="display:none;" onchange="onActuPjSelected(this.files)">
+                                    <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">PDF, Word, Excel, images, vidéos (max 100 Mo pour vidéos, 10 Mo autres, 5 fichiers)</div>
+                                    <input type="file" id="actuPjInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv,.mp4,.webm,.mov,.avi,.mkv,.m4v,video/*" style="display:none;" onchange="onActuPjSelected(this.files)">
                                 </div>
                                 <div class="actu-pj-list" id="actuPjList"></div>
                             </div>
@@ -2137,7 +2187,7 @@
                                                 <span>Cliquez ou déposez vos fichiers ici</span>
                                             </label>
                                             <input type="file" id="composePiecesJointes" multiple
-                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
+                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv,.mp4,.webm,.mov,.avi,.mkv,.m4v"
                                                 onchange="updateComposeAttachPreview()" style="display:none;">
                                             <div id="composeAttachPreview" class="msg-attach-preview"></div>
                                         </div>
@@ -3209,18 +3259,34 @@
 
             const slidesHtml = _pptSlides.map((actu, i) => {
                 const pj    = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
+                const videoPj = pj.find(f => f.type && f.type.startsWith('video/'));
                 const imgPj = pj.find(f => f.type && f.type.startsWith('image/'));
-                const bgStyle  = imgPj ? `background-image:url('${imgPj.url}');` : `background:${bgPalette[i % bgPalette.length]};`;
-                const hasImg   = !!imgPj;
+                const hasMedia = !!videoPj || !!imgPj;
                 const isNew    = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
                 const dateStr  = formatActualiteDate(actu.date);
                 const globalIdx = _pptSlides.findIndex(x => x.id === actu.id);
-                const overlayStyle = hasImg ? '' : 'background:transparent';
+                const overlayStyle = hasMedia ? '' : 'background:transparent';
+                
+                // Fond: vidéo en priorité, sinon image, sinon gradient
+                let bgHtml = '';
+                if (videoPj) {
+                    bgHtml = `<div class="ppt-slide-bg ppt-slide-bg-video">
+                        <video src="${videoPj.url}" muted loop playsinline autoplay preload="metadata"></video>
+                    </div>`;
+                } else if (imgPj) {
+                    bgHtml = `<div class="ppt-slide-bg" style="background-image:url('${imgPj.url}');"></div>`;
+                } else {
+                    bgHtml = `<div class="ppt-slide-bg" style="background:${bgPalette[i % bgPalette.length]};"></div>`;
+                }
+                
+                const videoBadge = videoPj ? '<div class="ppt-video-indicator"><span class="material-icons">videocam</span></div>' : '';
+                
                 return `
-                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasImg ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal(${globalIdx})">
+                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasMedia ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal(${globalIdx})">
                     <div class="ppt-slide-topbar"></div>
-                    <div class="ppt-slide-bg" style="${bgStyle}"></div>
+                    ${bgHtml}
                     <div class="ppt-slide-overlay" style="${overlayStyle}"></div>
+                    ${videoBadge}
                     <div class="ppt-slide-content">
                         <div class="ppt-slide-badge">
                             <span class="material-icons">campaign</span>
@@ -3313,8 +3379,10 @@
 
             const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
             const isImg  = f => f.type && f.type.startsWith('image/');
+            const isVideo = f => f.type && f.type.startsWith('video/');
             const images = pj.filter(isImg);
-            const files  = pj.filter(f => !isImg(f));
+            const videos = pj.filter(isVideo);
+            const files  = pj.filter(f => !isImg(f) && !isVideo(f));
             const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
             const dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : 'Non daté';
 
@@ -3326,10 +3394,12 @@
             const fileIcon  = f => isPdf(f)?'picture_as_pdf':isDoc(f)?'description':isXls(f)?'table_chart':isZip(f)?'folder_zip':'insert_drive_file';
             const fileLabel = f => isPdf(f)?'Document PDF':isDoc(f)?'Document Word':isXls(f)?'Feuille de calcul':isZip(f)?'Archive compressée':'Fichier';
 
-            // Hero
-            const coverImg = images.length > 0 ? images[0] : null;
-            const heroClass = coverImg ? '' : ' no-image';
-            const heroImgHtml = coverImg
+            // Hero - priorité à la vidéo
+            const coverVideo = videos.length > 0 ? videos[0] : null;
+            const coverImg = !coverVideo && images.length > 0 ? images[0] : null;
+            const heroImgHtml = coverVideo
+                ? `<video src="${coverVideo.url}" controls autoplay muted style="width:100%;height:100%;object-fit:cover;"></video>`
+                : coverImg
                 ? `<img src="${coverImg.url}" alt="${a.titre}">`
                 : `<div class="actu-modal-hero-icon"><span class="material-icons">newspaper</span></div>`;
 
@@ -3339,10 +3409,24 @@
                 ? `<span class="actu-expire-chip-inline"><span class="material-icons">schedule</span> Expire le ${new Date(a.dateFin).toLocaleDateString('fr-FR')}</span>`
                 : '';
 
-            // Galerie
+            // Galerie images
             const galleryHtml = images.length > 0 ? `
                 <div class="actu-modal-img-gallery">
                     ${images.map(f => `<div class="actu-modal-img-thumb"><a href="${f.url}" target="_blank"><img src="${f.url}" alt="${f.nom||''}" loading="lazy"></a></div>`).join('')}
+                </div>` : '';
+
+            // Galerie vidéos (sauf celle en hero)
+            const galleryVideos = coverVideo ? videos.slice(1) : videos;
+            const videosHtml = galleryVideos.length > 0 ? `
+                <div class="actu-modal-video-gallery" style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+                    ${galleryVideos.map(f => `
+                        <div class="actu-modal-video-item" style="border-radius:12px;overflow:hidden;background:var(--md-sys-color-surface-container-high);">
+                            <video src="${f.url}" controls preload="metadata" style="width:100%;max-height:400px;display:block;"></video>
+                            <div style="padding:10px 14px;font-size:13px;color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:8px;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">videocam</span>
+                                ${f.nom}
+                            </div>
+                        </div>`).join('')}
                 </div>` : '';
 
             // Fichiers
@@ -3364,7 +3448,7 @@
                         <div class="actu-pj-icon-wrap"><span class="material-icons">attach_file</span></div>
                         ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
                     </div>
-                    ${galleryHtml}${filesHtml}
+                    ${galleryHtml}${videosHtml}${filesHtml}
                 </div>` : '';
 
             content.innerHTML = `
@@ -3403,6 +3487,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeActuModal();
         });
+
 
         function formatActualiteDate(dateString) {
             const date = new Date(dateString);
@@ -4895,12 +4980,23 @@
         // ==================== CLASSES ====================
 
         // Afficher les détails d'une classe inline
-        function showClasseDetails(classeId) {
+        async function showClasseDetails(classeId) {
             const classe = allClasses.find(c => c.id === classeId);
             if (!classe) return;
 
             const professeur = allStaffMembers.find(p => p.id === classe.professeurId);
             const elevesClasse = allEleves.filter(e => e.classe === classe.nom);
+
+            // Charger l'emploi du temps de la classe
+            let emploiDuTemps = [];
+            try {
+                const response = await fetch(`${API_URL}/emplois-du-temps/classe/${classeId}`, { headers: getHeaders() });
+                if (response.ok) {
+                    emploiDuTemps = await response.json();
+                }
+            } catch (e) {
+                console.error('Erreur chargement emploi du temps:', e);
+            }
 
             if (!window.classeDetailsBackup) {
                 window.classeDetailsBackup = {
@@ -4912,6 +5008,21 @@
             const professeurDisplay = professeur
                 ? ((professeur.prenom || '') + ' ' + (professeur.nom || '')).trim() || professeur.displayName
                 : '—';
+
+            // Formater l'emploi du temps pour l'affichage
+            const joursOrdre = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+            const joursLabels = {
+                'lundi': 'Lundi', 'mardi': 'Mardi', 'mercredi': 'Mercredi',
+                'jeudi': 'Jeudi', 'vendredi': 'Vendredi', 'samedi': 'Samedi', 'dimanche': 'Dimanche'
+            };
+            const periodesLabels = { 'matin': 'Matin', 'apres-midi': 'Après-midi' };
+
+            // Grouper par jour
+            const edtParJour = {};
+            emploiDuTemps.forEach(c => {
+                if (!edtParJour[c.jour]) edtParJour[c.jour] = [];
+                edtParJour[c.jour].push(c.periode);
+            });
 
             const widgetCardContent = document.querySelector('#classes .widget-card-content');
             widgetCardContent.innerHTML = `
@@ -4971,6 +5082,53 @@
                     </div>
                 </div>
 
+                <!-- Emploi du temps -->
+                <div id="edtSection" class="fiche-section" style="margin-bottom:20px;">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-tertiary-container);">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-tertiary);color:white;">
+                            <span class="material-icons">schedule</span>
+                        </div>
+                        <div style="flex:1;">
+                            <h4 class="fiche-section-title">Emploi du temps</h4>
+                            <p class="fiche-section-subtitle">Jours et créneaux de cours</p>
+                        </div>
+                        ${canModifyData() ? `
+                        <button class="md-btn md-btn-tonal" onclick="openEdtModal('${classeId}')">
+                            <span class="material-icons">edit</span> Modifier
+                        </button>` : ''}
+                    </div>
+                    <div id="edtSectionContent" class="fiche-section-content">
+                        ${emploiDuTemps.length === 0
+                            ? `<div style="text-align:center;padding:28px 16px;color:var(--md-sys-color-on-surface-variant);">
+                                <span class="material-icons" style="font-size:40px;opacity:.4;">event_busy</span>
+                                <p style="margin:8px 0 0;">Aucun créneau défini</p>
+                                ${canModifyData() ? `<button class="md-btn md-btn-tonal" style="margin-top:12px;" onclick="openEdtModal('${classeId}')">
+                                    <span class="material-icons">add</span> Définir l'emploi du temps
+                                </button>` : ''}
+                               </div>`
+                            : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
+                                ${joursOrdre.filter(j => edtParJour[j]).map(jour => `
+                                <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:14px;
+                                            border:1px solid var(--md-sys-color-outline-variant);">
+                                    <div style="font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
+                                        ${joursLabels[jour]}
+                                    </div>
+                                    <div style="display:flex;flex-direction:column;gap:4px;">
+                                        ${edtParJour[jour].sort().map(periode => `
+                                        <span style="background:${periode === 'matin' ? 'var(--md-sys-color-primary-container)' : 'var(--md-sys-color-secondary-container)'};
+                                                     color:${periode === 'matin' ? 'var(--md-sys-color-on-primary-container)' : 'var(--md-sys-color-on-secondary-container)'};
+                                                     padding:4px 10px;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:4px;">
+                                            <span class="material-icons" style="font-size:14px;">${periode === 'matin' ? 'wb_sunny' : 'wb_twilight'}</span>
+                                            ${periodesLabels[periode]}
+                                        </span>`).join('')}
+                                    </div>
+                                </div>`).join('')}
+                               </div>`
+                        }
+                    </div>
+                </div>
+
                 <!-- Liste des élèves -->
                 <div class="fiche-section" style="margin-bottom:20px;">
                     <div class="fiche-section-header">
@@ -5013,6 +5171,214 @@
                     </div>
                 </div>
             `;
+        }
+
+        // ─── EMPLOI DU TEMPS - Modale et fonctions ───────────────────────────
+        window._edtClasseId = null;
+        window._edtCreneaux = [];
+
+        async function openEdtModal(classeId) {
+            window._edtClasseId = classeId;
+            const classe = allClasses.find(c => c.id === classeId);
+            if (!classe) return;
+
+            // Charger l'emploi du temps actuel
+            try {
+                const response = await fetch(`${API_URL}/emplois-du-temps/classe/${classeId}`, { headers: getHeaders() });
+                if (response.ok) {
+                    const data = await response.json();
+                    window._edtCreneaux = data.map(c => ({ jour: c.jour, periode: c.periode }));
+                } else {
+                    window._edtCreneaux = [];
+                }
+            } catch (e) {
+                window._edtCreneaux = [];
+            }
+
+            const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+            const joursLabels = {
+                'lundi': 'Lundi', 'mardi': 'Mardi', 'mercredi': 'Mercredi',
+                'jeudi': 'Jeudi', 'vendredi': 'Vendredi', 'samedi': 'Samedi', 'dimanche': 'Dimanche'
+            };
+
+            // Créer ou afficher la modale
+            let modal = document.getElementById('edtModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'edtModal';
+                modal.className = 'actu-modal-overlay';
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div class="actu-modal" style="max-width:600px;">
+                    <button class="actu-modal-close" onclick="closeEdtModal()">
+                        <span class="material-icons">close</span>
+                    </button>
+                    <div class="actu-modal-hero no-image" style="min-height:120px;">
+                        <div class="actu-modal-hero-grad"></div>
+                        <div class="actu-modal-hero-icon">
+                            <span class="material-icons">schedule</span>
+                        </div>
+                        <div class="actu-modal-hero-content">
+                            <div class="actu-modal-hero-title">Emploi du temps - ${classe.nom}</div>
+                            <div class="actu-modal-hero-meta">
+                                <span><span class="material-icons">info</span> Sélectionnez les jours et périodes de cours</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="actu-modal-body">
+                        <p style="margin-bottom:20px;color:var(--md-sys-color-on-surface-variant);font-size:14px;">
+                            Cochez les créneaux où cette classe a cours. Vous pouvez sélectionner le matin, l'après-midi, ou les deux pour chaque jour.
+                        </p>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            ${jours.map(jour => `
+                            <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:14px;
+                                        border:1px solid var(--md-sys-color-outline-variant);">
+                                <div style="font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                                    <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-tertiary);">today</span>
+                                    ${joursLabels[jour]}
+                                </div>
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;
+                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
+                                                  background:var(--md-sys-color-surface);transition:all .2s;"
+                                           onmouseover="this.style.borderColor='var(--md-sys-color-primary)'"
+                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
+                                        <input type="checkbox" id="edt_${jour}_matin" 
+                                               ${window._edtCreneaux.some(c => c.jour === jour && c.periode === 'matin') ? 'checked' : ''}
+                                               onchange="updateEdtCheckbox(this, '${jour}', 'matin')"
+                                               style="width:18px;height:18px;accent-color:var(--md-sys-color-primary);">
+                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">wb_sunny</span>
+                                        <span style="font-size:13px;">Matin</span>
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;
+                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
+                                                  background:var(--md-sys-color-surface);transition:all .2s;"
+                                           onmouseover="this.style.borderColor='var(--md-sys-color-secondary)'"
+                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
+                                        <input type="checkbox" id="edt_${jour}_apm" 
+                                               ${window._edtCreneaux.some(c => c.jour === jour && c.periode === 'apres-midi') ? 'checked' : ''}
+                                               onchange="updateEdtCheckbox(this, '${jour}', 'apres-midi')"
+                                               style="width:18px;height:18px;accent-color:var(--md-sys-color-secondary);">
+                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-secondary);">wb_twilight</span>
+                                        <span style="font-size:13px;">Après-midi</span>
+                                    </label>
+                                </div>
+                            </div>`).join('')}
+                        </div>
+                        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid var(--md-sys-color-outline-variant);">
+                            <button class="md-btn md-btn-text" onclick="closeEdtModal()">Annuler</button>
+                            <button class="md-btn md-btn-filled" onclick="saveEdtModal()">
+                                <span class="material-icons">save</span> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Afficher la modale
+            setTimeout(() => modal.classList.add('open'), 10);
+        }
+
+        function updateEdtCheckbox(checkbox, jour, periode) {
+            const exists = window._edtCreneaux.findIndex(c => c.jour === jour && c.periode === periode);
+            if (checkbox.checked && exists === -1) {
+                window._edtCreneaux.push({ jour, periode });
+            } else if (!checkbox.checked && exists !== -1) {
+                window._edtCreneaux.splice(exists, 1);
+            }
+        }
+
+        function closeEdtModal() {
+            const modal = document.getElementById('edtModal');
+            if (modal) {
+                modal.classList.remove('open');
+                setTimeout(() => modal.remove(), 300);
+            }
+            window._edtClasseId = null;
+            window._edtCreneaux = [];
+        }
+
+        async function saveEdtModal() {
+            if (!window._edtClasseId) return;
+            const classeId = window._edtClasseId;
+            const creneaux = [...window._edtCreneaux]; // Copie pour utiliser après fermeture
+
+            try {
+                const response = await fetch(`${API_URL}/emplois-du-temps/classe/${classeId}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ creneaux: creneaux })
+                });
+
+                if (response.ok) {
+                    showSnackbar('Emploi du temps mis à jour avec succès', 'success');
+                    closeEdtModal();
+                    // Mettre à jour uniquement la section emploi du temps
+                    updateEdtSection(classeId, creneaux);
+                } else {
+                    const err = await response.json();
+                    showSnackbar(err.error || 'Erreur lors de la mise à jour', 'error');
+                }
+            } catch (e) {
+                console.error('Erreur sauvegarde EDT:', e);
+                showSnackbar('Erreur lors de la sauvegarde', 'error');
+            }
+        }
+
+        // Fonction pour mettre à jour uniquement la section emploi du temps
+        function updateEdtSection(classeId, creneaux) {
+            const joursOrdre = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+            const joursLabels = {
+                'lundi': 'Lundi', 'mardi': 'Mardi', 'mercredi': 'Mercredi',
+                'jeudi': 'Jeudi', 'vendredi': 'Vendredi', 'samedi': 'Samedi', 'dimanche': 'Dimanche'
+            };
+            const periodesLabels = { 'matin': 'Matin', 'apres-midi': 'Après-midi' };
+
+            // Grouper par jour
+            const edtParJour = {};
+            creneaux.forEach(c => {
+                if (!edtParJour[c.jour]) edtParJour[c.jour] = [];
+                edtParJour[c.jour].push(c.periode);
+            });
+
+            // Trouver la section emploi du temps par ID
+            const sectionContent = document.getElementById('edtSectionContent');
+            if (!sectionContent) return;
+
+            // Mettre à jour le contenu
+            if (creneaux.length === 0) {
+                sectionContent.innerHTML = `
+                    <div style="text-align:center;padding:28px 16px;color:var(--md-sys-color-on-surface-variant);">
+                        <span class="material-icons" style="font-size:40px;opacity:.4;">event_busy</span>
+                        <p style="margin:8px 0 0;">Aucun créneau défini</p>
+                        ${canModifyData() ? `<button class="md-btn md-btn-tonal" style="margin-top:12px;" onclick="openEdtModal('${classeId}')">
+                            <span class="material-icons">add</span> Définir l'emploi du temps
+                        </button>` : ''}
+                    </div>`;
+            } else {
+                sectionContent.innerHTML = `
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
+                        ${joursOrdre.filter(j => edtParJour[j]).map(jour => `
+                        <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:14px;
+                                    border:1px solid var(--md-sys-color-outline-variant);">
+                            <div style="font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
+                                ${joursLabels[jour]}
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                ${edtParJour[jour].sort().map(periode => `
+                                <span style="background:${periode === 'matin' ? 'var(--md-sys-color-primary-container)' : 'var(--md-sys-color-secondary-container)'};
+                                             color:${periode === 'matin' ? 'var(--md-sys-color-on-primary-container)' : 'var(--md-sys-color-on-secondary-container)'};
+                                             padding:4px 10px;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:4px;">
+                                    <span class="material-icons" style="font-size:14px;">${periode === 'matin' ? 'wb_sunny' : 'wb_twilight'}</span>
+                                    ${periodesLabels[periode]}
+                                </span>`).join('')}
+                            </div>
+                        </div>`).join('')}
+                    </div>`;
+            }
         }
 
         // Revenir à la liste des classes
@@ -5770,6 +6136,13 @@
 
             // Initialiser l'état
             window._createClasseProfesseurId = null;
+            window._createClasseEdtCreneaux = []; // Emploi du temps pour la création
+
+            const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+            const joursLabels = {
+                'lundi': 'Lundi', 'mardi': 'Mardi', 'mercredi': 'Mercredi',
+                'jeudi': 'Jeudi', 'vendredi': 'Vendredi', 'samedi': 'Samedi', 'dimanche': 'Dimanche'
+            };
 
             const widgetCardContent = document.querySelector('#classes .widget-card-content');
             widgetCardContent.innerHTML = `
@@ -5842,6 +6215,58 @@
                     </div>
                 </div>
 
+                <!-- Emploi du temps -->
+                <div class="fiche-section" style="margin-bottom:20px;border-color:var(--md-sys-color-tertiary);">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-tertiary-container);">
+                        <div class="stat-widget-icon" style="width:52px;height:52px;flex-shrink:0;border-radius:14px;background:var(--md-sys-color-tertiary);color:white;display:flex;align-items:center;justify-content:center;">
+                            <span class="material-icons" style="font-size:26px;">schedule</span>
+                        </div>
+                        <div style="flex:1;">
+                            <h4 class="fiche-section-title">Emploi du temps</h4>
+                            <p class="fiche-section-subtitle">Jours et créneaux de cours (optionnel)</p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <p style="margin-bottom:16px;color:var(--md-sys-color-on-surface-variant);font-size:13px;">
+                            Cochez les créneaux où cette classe a cours. Vous pourrez modifier cela plus tard.
+                        </p>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+                            ${jours.map(jour => `
+                            <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:12px 14px;
+                                        border:1px solid var(--md-sys-color-outline-variant);display:flex;align-items:center;gap:12px;">
+                                <div style="font-weight:600;font-size:13px;color:var(--md-sys-color-on-surface);min-width:80px;display:flex;align-items:center;gap:6px;">
+                                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
+                                    ${joursLabels[jour]}
+                                </div>
+                                <div style="display:flex;gap:8px;flex:1;">
+                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;
+                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
+                                                  background:var(--md-sys-color-surface);transition:all .2s;flex:1;justify-content:center;"
+                                           onmouseover="this.style.borderColor='var(--md-sys-color-primary)'"
+                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
+                                        <input type="checkbox" id="create_edt_${jour}_matin" 
+                                               onchange="updateCreateClasseEdt('${jour}', 'matin', this.checked)"
+                                               style="width:16px;height:16px;accent-color:var(--md-sys-color-primary);">
+                                        <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-primary);">wb_sunny</span>
+                                        <span style="font-size:12px;">Matin</span>
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;
+                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
+                                                  background:var(--md-sys-color-surface);transition:all .2s;flex:1;justify-content:center;"
+                                           onmouseover="this.style.borderColor='var(--md-sys-color-secondary)'"
+                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
+                                        <input type="checkbox" id="create_edt_${jour}_apm" 
+                                               onchange="updateCreateClasseEdt('${jour}', 'apres-midi', this.checked)"
+                                               style="width:16px;height:16px;accent-color:var(--md-sys-color-secondary);">
+                                        <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-secondary);">wb_twilight</span>
+                                        <span style="font-size:12px;">Après-midi</span>
+                                    </label>
+                                </div>
+                            </div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Barre Créer / Annuler -->
                 <div class="fiche-edit-actions">
                     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:900px;margin:0 auto;width:100%;">
@@ -5857,6 +6282,17 @@
             `;
         }
 
+        // Fonction pour mettre à jour l'emploi du temps lors de la création
+        function updateCreateClasseEdt(jour, periode, checked) {
+            if (!window._createClasseEdtCreneaux) window._createClasseEdtCreneaux = [];
+            const idx = window._createClasseEdtCreneaux.findIndex(c => c.jour === jour && c.periode === periode);
+            if (checked && idx === -1) {
+                window._createClasseEdtCreneaux.push({ jour, periode });
+            } else if (!checked && idx !== -1) {
+                window._createClasseEdtCreneaux.splice(idx, 1);
+            }
+        }
+
         // Soumission du formulaire de création de classe (pleine page)
         async function submitNewClasse() {
             const btn = document.getElementById('createClasseBtn');
@@ -5868,6 +6304,7 @@
             const nom = document.getElementById('classeNom')?.value?.trim();
             const niveau = document.getElementById('classeNiveau')?.value || null;
             const professeurId = document.getElementById('selectedProfesseurId')?.value || null;
+            const edtCreneaux = window._createClasseEdtCreneaux || [];
 
             if (!nom) {
                 showSnackbar('Le nom de la classe est requis');
@@ -5876,13 +6313,32 @@
             }
 
             try {
+                // 1. Créer la classe
                 const response = await fetch(`${API_URL}/classes`, {
                     method: 'POST',
                     headers: getHeaders(),
                     body: JSON.stringify({ nom, niveau, professeurId })
                 });
+                
                 if (response.ok) {
+                    const newClasse = await response.json();
+                    
+                    // 2. Si des créneaux ont été définis, les enregistrer
+                    if (edtCreneaux.length > 0 && newClasse.id) {
+                        try {
+                            await fetch(`${API_URL}/emplois-du-temps/classe/${newClasse.id}`, {
+                                method: 'PUT',
+                                headers: getHeaders(),
+                                body: JSON.stringify({ creneaux: edtCreneaux })
+                            });
+                        } catch (edtErr) {
+                            console.error('Erreur lors de l\'enregistrement de l\'emploi du temps:', edtErr);
+                            // On continue quand même, la classe est créée
+                        }
+                    }
+                    
                     showSnackbar('Classe créée avec succès');
+                    window._createClasseEdtCreneaux = []; // Reset
                     await loadAllData();
                     loadClasses();
                     loadDashboardData();
@@ -7591,10 +8047,44 @@
             const attachEl = document.getElementById('msgReadAttachments');
             if (message.piecesJointes && message.piecesJointes.length > 0) {
                 const token = localStorage.getItem('token');
-                attachEl.innerHTML = `
-                    <div class="msg-attach-title"><span class="material-icons">attach_file</span> Pièces jointes (${message.piecesJointes.length})</div>
+                
+                // Séparer médias (vidéos/images) et autres fichiers
+                const mediaFiles = message.piecesJointes.filter(pj => isMsgVideo(pj) || isMsgImage(pj));
+                const otherFiles = message.piecesJointes.filter(pj => !isMsgVideo(pj) && !isMsgImage(pj));
+                
+                let mediaHtml = '';
+                if (mediaFiles.length > 0) {
+                    mediaHtml = `<div class="msg-media-gallery" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                        ${mediaFiles.map(pj => {
+                            const url = `/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}`;
+                            if (isMsgVideo(pj)) {
+                                return `<div class="msg-media-item" style="flex:1;min-width:200px;max-width:400px;">
+                                    <video controls style="width:100%;border-radius:12px;background:#000;" preload="metadata">
+                                        <source src="${url}" type="${pj.mimetype || 'video/mp4'}">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:4px;display:flex;align-items:center;gap:4px;">
+                                        <span class="material-icons" style="font-size:14px;">videocam</span>
+                                        ${pj.originalname} (${(pj.size/1024/1024).toFixed(1)} Mo)
+                                    </div>
+                                </div>`;
+                            } else {
+                                return `<div class="msg-media-item" style="flex:0 0 auto;">
+                                    <a href="${url}" target="_blank">
+                                        <img src="${url}" alt="${pj.originalname}" style="max-width:200px;max-height:200px;border-radius:12px;object-fit:cover;cursor:pointer;">
+                                    </a>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:4px;">${pj.originalname}</div>
+                                </div>`;
+                            }
+                        }).join('')}
+                    </div>`;
+                }
+                
+                let filesHtml = '';
+                if (otherFiles.length > 0) {
+                    filesHtml = `<div class="msg-attach-title"><span class="material-icons">attach_file</span> Autres fichiers (${otherFiles.length})</div>
                     <div class="msg-attach-list">
-                        ${message.piecesJointes.map(pj => `
+                        ${otherFiles.map(pj => `
                             <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}" download="${pj.originalname}" target="_blank" class="msg-attach-item">
                                 <span class="material-icons">${getFileIcon(pj.mimetype)}</span>
                                 <span class="msg-attach-name">${pj.originalname}</span>
@@ -7603,6 +8093,9 @@
                             </a>
                         `).join('')}
                     </div>`;
+                }
+                
+                attachEl.innerHTML = mediaHtml + filesHtml;
             } else {
                 attachEl.innerHTML = '';
             }
@@ -7961,12 +8454,27 @@
         // Renvoie l'icône Material selon le type MIME
         function getFileIcon(mimetype) {
             if (!mimetype) return 'insert_drive_file';
+            if (mimetype.startsWith('video/')) return 'videocam';
             if (mimetype.startsWith('image/')) return 'image';
             if (mimetype === 'application/pdf') return 'picture_as_pdf';
             if (mimetype.includes('spreadsheet') || mimetype.includes('excel') || mimetype.includes('csv')) return 'table_chart';
             if (mimetype.includes('word') || mimetype.includes('document')) return 'description';
             if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('compressed')) return 'folder_zip';
             return 'insert_drive_file';
+        }
+
+        // Vérifie si le fichier est une vidéo (par mimetype ou extension)
+        function isMsgVideo(pj) {
+            if (pj.mimetype && pj.mimetype.startsWith('video/')) return true;
+            const ext = (pj.originalname || pj.filename || '').split('.').pop().toLowerCase();
+            return ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v'].includes(ext);
+        }
+
+        // Vérifie si le fichier est une image
+        function isMsgImage(pj) {
+            if (pj.mimetype && pj.mimetype.startsWith('image/')) return true;
+            const ext = (pj.originalname || pj.filename || '').split('.').pop().toLowerCase();
+            return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext);
         }
 
         // ==================== BUREAU (STAFF) ====================
@@ -11001,6 +11509,7 @@
             const isAdmin = ['admin', 'directeur', 'secretariat'].includes(user.role);
 
             const isImg = f => f.type && f.type.startsWith('image/');
+            const isVideo = f => f.type && f.type.startsWith('video/');
             const isPdf = f => !!(f.nom||'').match(/\.pdf$/i);
             const isDoc = f => !!(f.nom||'').match(/\.(doc|docx)$/i);
             const isXls = f => !!(f.nom||'').match(/\.(xls|xlsx|csv)$/i);
@@ -11008,6 +11517,7 @@
 
             const filePreviewHtml = (f) => {
                 if (isImg(f)) return ''; // handled in gallery
+                if (isVideo(f)) return ''; // handled in video section
                 if (isPdf(f)) return `
                     <a href="${f.url}" target="_blank" class="actu-pdf-preview" title="${f.nom}">
                         <div class="actu-pdf-icon"><span class="material-icons">picture_as_pdf</span></div>
@@ -11063,22 +11573,41 @@
 
                 const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
                 const images = pj.filter(isImg);
-                const others = pj.filter(f => !isImg(f));
+                const videos = pj.filter(isVideo);
+                const others = pj.filter(f => !isImg(f) && !isVideo(f));
 
-                // Image de couverture (1ère image)
-                const coverHtml = images.length > 0
+                // Image ou vidéo de couverture (priorité à la vidéo)
+                const coverVideo = videos.length > 0 ? videos[0] : null;
+                const coverImg = !coverVideo && images.length > 0 ? images[0] : null;
+                const coverHtml = coverVideo
+                    ? `<div class="actu-card-cover-video"><video src="${coverVideo.url}" muted loop playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0;"></video><div class="actu-video-badge"><span class="material-icons">play_circle</span></div></div>`
+                    : images.length > 0
                     ? `<a href="${images[0].url}" target="_blank"><img class="actu-card-cover" src="${images[0].url}" alt="${images[0].nom}" loading="lazy"></a>`
                     : `<div class="actu-card-cover-placeholder"></div>`;
 
-                // Galerie des images restantes
-                const extraImages = images.slice(1);
-                const galleryHtml = extraImages.length > 0 ? `
+                // Galerie des images (sans la couverture si pas de vidéo)
+                const galleryImages = coverVideo ? images : images.slice(1);
+                const galleryHtml = galleryImages.length > 0 ? `
                     <div class="actu-img-gallery">
-                        ${extraImages.map(f => `
+                        ${galleryImages.map(f => `
                             <div class="actu-img-thumb">
                                 <a href="${f.url}" target="_blank">
                                     <img src="${f.url}" alt="${f.nom}" loading="lazy" title="${f.nom}">
                                 </a>
+                            </div>`).join('')}
+                    </div>` : '';
+
+                // Section vidéos (sans la couverture)
+                const galleryVideos = coverVideo ? videos.slice(1) : videos;
+                const videosHtml = galleryVideos.length > 0 ? `
+                    <div class="actu-video-gallery" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                        ${galleryVideos.map(f => `
+                            <div class="actu-video-item" style="border-radius:12px;overflow:hidden;background:var(--md-sys-color-surface-container);">
+                                <video src="${f.url}" controls preload="metadata" style="width:100%;max-height:300px;display:block;"></video>
+                                <div style="padding:8px 12px;font-size:12px;color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:6px;">
+                                    <span class="material-icons" style="font-size:16px;">videocam</span>
+                                    ${f.nom}
+                                </div>
                             </div>`).join('')}
                     </div>` : '';
 
@@ -11096,6 +11625,7 @@
                             ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
                         </div>
                         ${galleryHtml}
+                        ${videosHtml}
                         ${othersHtml}
                     </div>` : '';
 
@@ -11160,8 +11690,11 @@
                 if (actuPjNewFiles.length + actuPjExistingFiles.length >= 5) {
                     showToast('Maximum 5 pièces jointes', 'warning'); return;
                 }
-                if (f.size > 10 * 1024 * 1024) {
-                    showToast(`Fichier trop lourd : ${f.name}`, 'warning'); return;
+                // 100 Mo pour les vidéos, 10 Mo pour les autres fichiers
+                const isVideoFile = f.type && f.type.startsWith('video/');
+                const maxSize = isVideoFile ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (f.size > maxSize) {
+                    showToast(`Fichier trop lourd : ${f.name} (max ${isVideoFile ? '100' : '10'} Mo)`, 'warning'); return;
                 }
                 actuPjNewFiles.push(f);
             });
@@ -11173,6 +11706,7 @@
             const list = document.getElementById('actuPjList');
             const getIcon = (type, name) => {
                 if (type && type.startsWith('image/')) return 'image';
+                if (type && type.startsWith('video/')) return 'videocam';
                 if (name.match(/\.pdf$/i)) return 'picture_as_pdf';
                 if (name.match(/\.(doc|docx)$/i)) return 'description';
                 if (name.match(/\.(xls|xlsx|csv)$/i)) return 'table_chart';

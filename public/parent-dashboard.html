@@ -828,9 +828,10 @@
             z-index: 21; pointer-events: none;
         }
         @media (min-width: 640px) { .actu-modal::before { display: none; } }
-        .actu-modal::-webkit-scrollbar { width: 5px; }
-        .actu-modal::-webkit-scrollbar-track { background: transparent; }
-        .actu-modal::-webkit-scrollbar-thumb { background: var(--md-sys-color-outline-variant); border-radius: 10px; }
+        .actu-modal::-webkit-scrollbar { width: 8px; }
+        .actu-modal::-webkit-scrollbar-track { background: transparent; margin: 250px 0 20px 0; }
+        .actu-modal::-webkit-scrollbar-thumb { background: var(--md-sys-color-primary, #6b7280); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; opacity: 0.8; }
+        .actu-modal::-webkit-scrollbar-thumb:hover { background-color: var(--md-sys-color-primary, #4b5563); border-width: 1px; opacity: 1; }
         .actu-modal-close {
             position: absolute; top: 14px; right: 14px; z-index: 22;
             width: 38px; height: 38px; border-radius: 50%;
@@ -1027,6 +1028,33 @@
             transition: transform 8s ease;
         }
         .ppt-slide.active .ppt-slide-bg { transform: scale(1.06); }
+        
+        /* Vidéo de fond dans le carousel */
+        .ppt-slide-bg-video {
+            background: #000;
+        }
+        .ppt-slide-bg-video video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .ppt-slide.active .ppt-slide-bg-video { transform: scale(1.02); }
+        
+        /* Indicateur vidéo */
+        .ppt-video-indicator {
+            position: absolute;
+            top: 14px; right: 14px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex; align-items: center; gap: 5px;
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .ppt-video-indicator .material-icons { font-size: 16px; }
+        
         .ppt-slide-overlay {
             position: absolute; inset: 0;
             background: linear-gradient(180deg, rgba(5,15,40,0.25) 0%, rgba(5,15,40,0.55) 45%, rgba(5,15,40,0.93) 100%);
@@ -2283,7 +2311,7 @@
                                                 <span>Cliquez ou déposez vos fichiers ici</span>
                                             </label>
                                             <input type="file" id="parentPiecesJointes" multiple
-                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv"
+                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv,.mp4,.webm,.mov,.avi,.mkv,.m4v"
                                                 onchange="updateParentAttachmentPreview()" style="display:none;">
                                             <div id="parentAttachmentPreview" class="msg-attach-preview"></div>
                                         </div>
@@ -2765,18 +2793,34 @@
 
             const slidesHtml = _pptSlides.map((actu, i) => {
                 const pj    = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
+                const videoPj = pj.find(f => f.type && f.type.startsWith('video/'));
                 const imgPj = pj.find(f => f.type && f.type.startsWith('image/'));
-                const bgStyle  = imgPj ? `background-image:url('${imgPj.url}');` : `background:${bgPalette[i % bgPalette.length]};`;
-                const hasImg   = !!imgPj;
+                const hasMedia = !!imgPj || !!videoPj;
                 const isNew    = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
                 const dateStr  = formatActualiteDate(actu.date);
                 const globalIdx = _allActualites.findIndex(x => x.id === actu.id);
-                const overlayStyle = hasImg ? '' : 'background:transparent';
+                const overlayStyle = hasMedia ? '' : 'background:transparent';
+                
+                // Fond: vidéo en priorité, sinon image, sinon gradient
+                let bgHtml = '';
+                if (videoPj) {
+                    bgHtml = `<div class="ppt-slide-bg ppt-slide-bg-video">
+                        <video src="${videoPj.url}" muted loop playsinline autoplay preload="metadata"></video>
+                    </div>`;
+                } else if (imgPj) {
+                    bgHtml = `<div class="ppt-slide-bg" style="background-image:url('${imgPj.url}');"></div>`;
+                } else {
+                    bgHtml = `<div class="ppt-slide-bg" style="background:${bgPalette[i % bgPalette.length]};"></div>`;
+                }
+                
+                const videoBadge = videoPj ? '<div class="ppt-video-indicator"><span class="material-icons">videocam</span></div>' : '';
+                
                 return `
-                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasImg ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal(${globalIdx})">
+                <div class="ppt-slide${i === 0 ? ' active' : ''}${!hasMedia ? ' ppt-light' : ''}" data-index="${i}" onclick="openActuModal(${globalIdx})">
                     <div class="ppt-slide-topbar"></div>
-                    <div class="ppt-slide-bg" style="${bgStyle}"></div>
+                    ${bgHtml}
                     <div class="ppt-slide-overlay" style="${overlayStyle}"></div>
+                    ${videoBadge}
                     <div class="ppt-slide-content">
                         <div class="ppt-slide-badge">
                             <span class="material-icons">campaign</span>
@@ -3413,6 +3457,7 @@
                 }
 
                 const isImg = f => f.type && f.type.startsWith('image/');
+                const isVideo = f => f.type && f.type.startsWith('video/');
 
                 const cs = getComputedStyle(document.documentElement);
                 const clrPrimCont = cs.getPropertyValue('--md-sys-color-primary-container').trim();
@@ -3429,14 +3474,23 @@
                 const html = actualites.length ? actualites.map((actu, idx) => {
                     const pj     = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
                     const images = pj.filter(isImg);
+                    const videos = pj.filter(isVideo);
                     const isNew  = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
                     const dateStr = actu.date ? new Date(actu.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : 'Non daté';
                     const delay   = Math.min(idx * 70, 400);
 
-                    // Cover image ou placeholder gradient
-                    const coverImg = images.length > 0 ? images[0] : null;
+                    // Cover video ou image ou placeholder gradient
+                    const coverVideo = videos.length > 0 ? videos[0] : null;
+                    const coverImg = !coverVideo && images.length > 0 ? images[0] : null;
                     const bgGrad   = bgPalette[idx % bgPalette.length];
-                    const mediaHtml = coverImg
+                    const mediaHtml = coverVideo
+                        ? `<div class="actu-card-media" style="position:relative;">
+                            <video src="${coverVideo.url}" muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;" onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0;"></video>
+                            <div class="actu-video-badge" style="position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 10px;border-radius:16px;font-size:12px;display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:16px;">play_circle</span> Vidéo</div>
+                            ${isNew ? '<div class="actu-new-pill"><span class="material-icons">fiber_new</span> Nouveau</div>' : ''}
+                            ${pj.length > 0 ? `<div class="actu-pj-pill"><span class="material-icons">attach_file</span> ${pj.length}</div>` : ''}
+                          </div>`
+                        : coverImg
                         ? `<div class="actu-card-media">
                             <img src="${coverImg.url}" alt="${coverImg.nom}" loading="lazy">
                             ${isNew ? '<div class="actu-new-pill"><span class="material-icons">fiber_new</span> Nouveau</div>' : ''}
@@ -3492,8 +3546,10 @@
 
             const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
             const isImg  = f => f.type && f.type.startsWith('image/');
+            const isVideo = f => f.type && f.type.startsWith('video/');
             const images = pj.filter(isImg);
-            const files  = pj.filter(f => !isImg(f));
+            const videos = pj.filter(isVideo);
+            const files  = pj.filter(f => !isImg(f) && !isVideo(f));
             const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
             const dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : 'Non daté';
 
@@ -3505,10 +3561,12 @@
             const fileIcon  = f => isPdf(f)?'picture_as_pdf':isDoc(f)?'description':isXls(f)?'table_chart':isZip(f)?'folder_zip':'insert_drive_file';
             const fileLabel = f => isPdf(f)?'Document PDF':isDoc(f)?'Document Word':isXls(f)?'Feuille de calcul':isZip(f)?'Archive compressée':'Fichier';
 
-            // Hero
-            const coverImg = images.length > 0 ? images[0] : null;
-            const heroClass = coverImg ? '' : ' no-image';
-            const heroImgHtml = coverImg
+            // Hero - priorité à la vidéo
+            const coverVideo = videos.length > 0 ? videos[0] : null;
+            const coverImg = !coverVideo && images.length > 0 ? images[0] : null;
+            const heroImgHtml = coverVideo
+                ? `<video src="${coverVideo.url}" controls autoplay muted style="width:100%;height:100%;object-fit:cover;"></video>`
+                : coverImg
                 ? `<img src="${coverImg.url}" alt="${a.titre}">`
                 : `<div class="actu-modal-hero-icon"><span class="material-icons">newspaper</span></div>`;
 
@@ -3518,10 +3576,24 @@
                 ? `<span class="actu-expire-chip-inline"><span class="material-icons">schedule</span> Expire le ${new Date(a.dateFin).toLocaleDateString('fr-FR')}</span>`
                 : '';
 
-            // Galerie
+            // Galerie images
             const galleryHtml = images.length > 0 ? `
                 <div class="actu-modal-img-gallery">
                     ${images.map(f => `<div class="actu-modal-img-thumb"><a href="${f.url}" target="_blank"><img src="${f.url}" alt="${f.nom||''}" loading="lazy"></a></div>`).join('')}
+                </div>` : '';
+
+            // Galerie vidéos (sauf celle en hero)
+            const galleryVideos = coverVideo ? videos.slice(1) : videos;
+            const videosHtml = galleryVideos.length > 0 ? `
+                <div class="actu-modal-video-gallery" style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+                    ${galleryVideos.map(f => `
+                        <div class="actu-modal-video-item" style="border-radius:12px;overflow:hidden;background:var(--md-sys-color-surface-container-high);">
+                            <video src="${f.url}" controls preload="metadata" style="width:100%;max-height:400px;display:block;"></video>
+                            <div style="padding:10px 14px;font-size:13px;color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:8px;">
+                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">videocam</span>
+                                ${f.nom}
+                            </div>
+                        </div>`).join('')}
                 </div>` : '';
 
             // Fichiers
@@ -3543,7 +3615,7 @@
                         <div class="actu-pj-icon-wrap"><span class="material-icons">attach_file</span></div>
                         ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
                     </div>
-                    ${galleryHtml}${filesHtml}
+                    ${galleryHtml}${videosHtml}${filesHtml}
                 </div>` : '';
 
             content.innerHTML = `
@@ -4007,10 +4079,44 @@
             const attachEl = document.getElementById('parentMsgReadAttachments');
             if (message.piecesJointes && message.piecesJointes.length > 0) {
                 const token = localStorage.getItem('token');
-                attachEl.innerHTML = `
-                    <div class="msg-attach-title"><span class="material-icons">attach_file</span> Pièces jointes (${message.piecesJointes.length})</div>
+                
+                // Séparer médias (vidéos/images) et autres fichiers
+                const mediaFiles = message.piecesJointes.filter(pj => isParentMsgVideo(pj) || isParentMsgImage(pj));
+                const otherFiles = message.piecesJointes.filter(pj => !isParentMsgVideo(pj) && !isParentMsgImage(pj));
+                
+                let mediaHtml = '';
+                if (mediaFiles.length > 0) {
+                    mediaHtml = `<div class="msg-media-gallery" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                        ${mediaFiles.map(pj => {
+                            const url = `/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}`;
+                            if (isParentMsgVideo(pj)) {
+                                return `<div class="msg-media-item" style="flex:1;min-width:200px;max-width:400px;">
+                                    <video controls style="width:100%;border-radius:12px;background:#000;" preload="metadata">
+                                        <source src="${url}" type="${pj.mimetype || 'video/mp4'}">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:4px;display:flex;align-items:center;gap:4px;">
+                                        <span class="material-icons" style="font-size:14px;">videocam</span>
+                                        ${pj.originalname} (${(pj.size/1024/1024).toFixed(1)} Mo)
+                                    </div>
+                                </div>`;
+                            } else {
+                                return `<div class="msg-media-item" style="flex:0 0 auto;">
+                                    <a href="${url}" target="_blank">
+                                        <img src="${url}" alt="${pj.originalname}" style="max-width:200px;max-height:200px;border-radius:12px;object-fit:cover;cursor:pointer;">
+                                    </a>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:4px;">${pj.originalname}</div>
+                                </div>`;
+                            }
+                        }).join('')}
+                    </div>`;
+                }
+                
+                let filesHtml = '';
+                if (otherFiles.length > 0) {
+                    filesHtml = `<div class="msg-attach-title"><span class="material-icons">attach_file</span> Autres fichiers (${otherFiles.length})</div>
                     <div class="msg-attach-list">
-                        ${message.piecesJointes.map(pj => `
+                        ${otherFiles.map(pj => `
                             <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}" download="${pj.originalname}" target="_blank" class="msg-attach-item">
                                 <span class="material-icons">${getParentFileIcon(pj.mimetype)}</span>
                                 <span class="msg-attach-name">${pj.originalname}</span>
@@ -4019,6 +4125,9 @@
                             </a>
                         `).join('')}
                     </div>`;
+                }
+                
+                attachEl.innerHTML = mediaHtml + filesHtml;
             } else {
                 attachEl.innerHTML = '';
             }
@@ -4288,12 +4397,27 @@
 
         function getParentFileIcon(mimetype) {
             if (!mimetype) return 'insert_drive_file';
+            if (mimetype.startsWith('video/')) return 'videocam';
             if (mimetype.startsWith('image/')) return 'image';
             if (mimetype === 'application/pdf') return 'picture_as_pdf';
             if (mimetype.includes('spreadsheet') || mimetype.includes('excel') || mimetype.includes('csv')) return 'table_chart';
             if (mimetype.includes('word') || mimetype.includes('document')) return 'description';
             if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('compressed')) return 'folder_zip';
             return 'insert_drive_file';
+        }
+
+        // Vérifie si le fichier est une vidéo (par mimetype ou extension)
+        function isParentMsgVideo(pj) {
+            if (pj.mimetype && pj.mimetype.startsWith('video/')) return true;
+            const ext = (pj.originalname || pj.filename || '').split('.').pop().toLowerCase();
+            return ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v'].includes(ext);
+        }
+
+        // Vérifie si le fichier est une image
+        function isParentMsgImage(pj) {
+            if (pj.mimetype && pj.mimetype.startsWith('image/')) return true;
+            const ext = (pj.originalname || pj.filename || '').split('.').pop().toLowerCase();
+            return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext);
         }
 
         // ========== GESTION PHOTO ENFANT ==========

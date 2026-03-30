@@ -10,6 +10,7 @@ const emailRoutes = require('./email.routes');
 const actualitesRoutes = require('./actualites.routes');
 const parentsRoutes = require('./parents.routes');
 const maintenanceRoutes = require('./maintenance.routes');
+const emploisDuTempsRoutes = require('./emploisDuTemps.routes');
 
 module.exports = {
     authRoutes,
@@ -23,5 +24,6 @@ module.exports = {
     emailRoutes,
     actualitesRoutes,
     parentsRoutes,
-    maintenanceRoutes
+    maintenanceRoutes,
+    emploisDuTempsRoutes
 };

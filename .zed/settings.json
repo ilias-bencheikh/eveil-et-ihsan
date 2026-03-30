@@ -1,0 +1,8 @@
+{
+  "terminal": {
+    "shell": {
+      "program": "wsl.exe"
+    }
+  },
+  "project_name": "Eveil et Ihsan"
+}

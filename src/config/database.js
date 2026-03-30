@@ -134,6 +134,16 @@ function initDatabase() {
                 professeurId TEXT
             )`);
 
+            // Table emplois du temps (créneaux horaires par classe)
+            db.run(`CREATE TABLE IF NOT EXISTS emplois_du_temps (
+                id TEXT PRIMARY KEY,
+                classeId TEXT NOT NULL,
+                jour TEXT NOT NULL,
+                periode TEXT NOT NULL,
+                FOREIGN KEY (classeId) REFERENCES classes(id) ON DELETE CASCADE,
+                UNIQUE(classeId, jour, periode)
+            )`);
+
             // Table absences
             db.run(`CREATE TABLE IF NOT EXISTS absences (
                 id TEXT PRIMARY KEY,
