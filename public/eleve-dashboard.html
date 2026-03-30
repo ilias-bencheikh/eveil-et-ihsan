@@ -3615,13 +3615,14 @@
                             <p class="fb-feed-empty-text">Les actualités publiées s'afficheront ici</p>
                         </div>`;
                     } else {
+                        const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
                         listEl.innerHTML = _allActualites.map((a, idx) => {
                             const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
                             const images = pj.filter(f => f.type && f.type.startsWith('image/'));
                             const videos = pj.filter(f => f.type && f.type.startsWith('video/'));
                             const files = pj.filter(f => f.type && !f.type.startsWith('image/') && !f.type.startsWith('video/'));
                             const allMedia = [...videos, ...images];
-                            const isNew = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
+                            const isNew = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000 && !viewedActus.includes(a.id);
                             const delay = Math.min(idx * 70, 400);
                             
                             // Date relative style Facebook
@@ -3721,7 +3722,7 @@
                                             <div class="fb-post-meta">
                                                 <span>${dateRelative}</span>
                                                 <span class="material-icons">public</span>
-                                                ${isNew ? '<span class="fb-post-new-badge">Nouveau</span>' : ''}
+                                                ${isNew ? `<span class="fb-post-new-badge" data-actu-id="${a.id}">Nouveau</span>` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -3738,22 +3739,40 @@
                                     
                                     <!-- Fichiers joints -->
                                     ${filesHtml}
-                                    
-                                    <!-- Footer -->
-                                    <div class="fb-post-footer">
-                                        <div class="fb-post-actions">
-                                            <button class="fb-post-action-btn primary">
-                                                <span class="material-icons">visibility</span>
-                                                <span>Voir le détail</span>
-                                            </button>
-                                            ${allMedia.length > 0 ? `<button class="fb-post-action-btn">
-                                                <span class="material-icons">photo_library</span>
-                                                <span>${allMedia.length} média${allMedia.length > 1 ? 's' : ''}</span>
-                                            </button>` : ''}
-                                        </div>
-                                    </div>
                                 </article>`;
                         }).join('');
+                        
+                        // Observer pour les badges "Nouveau"
+                        setTimeout(() => {
+                            if ('IntersectionObserver' in window) {
+                                const observer = new IntersectionObserver((entries) => {
+                                    entries.forEach(entry => {
+                                        if (entry.isIntersecting) {
+                                            const badge = entry.target;
+                                            const actuId = badge.getAttribute('data-actu-id');
+                                            
+                                            setTimeout(() => {
+                                                if (document.body.contains(badge)) {
+                                                    const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
+                                                    if (!viewedActus.includes(actuId)) {
+                                                        viewedActus.push(actuId);
+                                                        localStorage.setItem('viewedActus', JSON.stringify(viewedActus));
+                                                    }
+                                                    badge.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                                                    badge.style.opacity = '0';
+                                                    badge.style.transform = 'scale(0.8)';
+                                                    setTimeout(() => badge.remove(), 500);
+                                                }
+                                            }, 1500);
+                                            
+                                            observer.unobserve(badge);
+                                        }
+                                    });
+                                }, { threshold: 0.5 });
+                                
+                                document.querySelectorAll('.fb-post-new-badge').forEach(b => observer.observe(b));
+                            }
+                        }, 100);
                     }
                 }
 
@@ -3782,7 +3801,8 @@
             const images = pj.filter(isImg);
             const videos = pj.filter(isVideo);
             const files  = pj.filter(f => !isImg(f) && !isVideo(f));
-            const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
+            const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
+            const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000 && !viewedActus.includes(a.id);
             const dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : 'Non daté';
 
             const isPdf = f => !!(f.nom||'').match(/\.pdf$/i);
@@ -3927,12 +3947,14 @@
                 `linear-gradient(135deg,${clrSecCont} 0%,${clrTertCont} 60%,${clrPrimCont} 100%)`,
             ];
 
+            const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
+            
             const slidesHtml = _pptSlides.map((actu, i) => {
                 const pj    = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
                 const videoPj = pj.find(f => f.type && f.type.startsWith('video/'));
                 const imgPj = pj.find(f => f.type && f.type.startsWith('image/'));
-                const hasMedia = !!imgPj || !!videoPj;
-                const isNew    = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
+                const hasMedia = !!videoPj || !!imgPj;
+                const isNew    = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000 && !viewedActus.includes(actu.id);
                 const dateStr  = formatActualiteDate(actu.date);
                 const globalIdx = _allActualites.findIndex(x => x.id === actu.id);
                 const overlayStyle = hasMedia ? '' : 'background:transparent';
