@@ -3728,23 +3728,17 @@
                                     </div>
                                     
                                     <!-- Contenu texte -->
-                                    <div class="fb-post-body-wrapper">
-                                        <div class="fb-post-content ${textClass}">
-                                            <h3 class="fb-post-title">${a.titre}</h3>
-                                            ${a.description ? `<p class="fb-post-text ${a.description.length > 300 ? 'truncated' : ''}">${a.description}</p>` : ''}
-                                            ${a.description && a.description.length > 300 ? '<span class="fb-post-see-more" onclick="event.stopPropagation(); this.previousElementSibling.classList.remove(\'truncated\'); this.style.display=\'none\';">Voir plus</span>' : ''}
-                                        </div>
-                                        
-                                        <!-- Médias -->
-                                        ${mediaHtml}
-                                        
-                                        <!-- Fichiers joints -->
-                                        ${filesHtml}
-
-                                        <div class="fb-post-fade-overlay">
-                                            <span>Voir l'actualité</span>
-                                        </div>
+                                    <div class="fb-post-content ${textClass}">
+                                        <h3 class="fb-post-title">${a.titre}</h3>
+                                        ${a.description ? `<p class="fb-post-text ${a.description.length > 300 ? 'truncated' : ''}">${a.description}</p>` : ''}
+                                        ${a.description && a.description.length > 300 ? '<span class="fb-post-see-more" onclick="event.stopPropagation(); this.previousElementSibling.classList.remove(\'truncated\'); this.style.display=\'none\';">Voir plus</span>' : ''}
                                     </div>
+                                    
+                                    <!-- Médias -->
+                                    ${mediaHtml}
+                                    
+                                    <!-- Fichiers joints -->
+                                    ${filesHtml}
                                 </article>`;
                         }).join('');
                         
