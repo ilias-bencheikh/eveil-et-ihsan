@@ -3514,7 +3514,7 @@
             const images = pj.filter(isImg);
             const videos = pj.filter(isVideo);
             const files  = pj.filter(f => !isImg(f) && !isVideo(f));
-            const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
+            const isNew  = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000 && !viewedActus.includes(a.id);
             const dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : 'Non daté';
 
             const isPdf = f => !!(f.nom||'').match(/\.pdf$/i);
