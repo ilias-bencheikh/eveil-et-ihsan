@@ -131,7 +131,7 @@ router.post('/', (req, res) => {
     upload.array('piecesJointes', 5)(req, res, (uploadErr) => {
         if (uploadErr) return res.status(400).json({ error: 'Erreur lors de l\'upload des fichiers' });
 
-        const { titre, description, date, auteurId, auteurNom, cible, dateFin } = req.body;
+        const { titre, description, date, auteurId, auteurNom, auteurRole, cible, dateFin } = req.body;
         const id = generateId();
 
         const cibleStr = Array.isArray(cible) ? JSON.stringify(cible) : (cible || 'tous');
@@ -146,8 +146,8 @@ router.post('/', (req, res) => {
         const piecesJointesJson = piecesJointesMeta.length > 0 ? JSON.stringify(piecesJointesMeta) : null;
 
         db.run(
-            'INSERT INTO actualites (id, titre, description, date, auteurId, auteurNom, cible, dateFin, piecesJointes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, titre, description, date, auteurId || null, auteurNom || 'Système', cibleStr, dateFin || null, piecesJointesJson],
+            'INSERT INTO actualites (id, titre, description, date, auteurId, auteurNom, auteurRole, cible, dateFin, piecesJointes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, titre, description, date, auteurId || null, auteurNom || 'Système', auteurRole || 'Administration', cibleStr, dateFin || null, piecesJointesJson],
             function(err) {
                 if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
                 res.status(201).json({ id, titre, description, date, auteurId, auteurNom, cible: cibleStr, dateFin, piecesJointes: piecesJointesMeta });

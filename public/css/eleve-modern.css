@@ -724,27 +724,29 @@
 }
 
 .fb-post-media-grid {
-    display: grid;
-    gap: 4px; /* Slightly larger gap */
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-sys-color-outline-variant) transparent;
 }
-.fb-post-media-grid.grid-2 {
-    grid-template-columns: 1fr 1fr;
+.fb-post-media-grid::-webkit-scrollbar {
+    height: 6px;
 }
-.fb-post-media-grid.grid-3 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-.fb-post-media-grid.grid-3 .media-item:first-child {
-    grid-row: span 2;
-}
-.fb-post-media-grid.grid-4 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+.fb-post-media-grid::-webkit-scrollbar-thumb {
+    background-color: var(--md-sys-color-outline-variant);
+    border-radius: 10px;
 }
 .fb-post-media-grid .media-item {
     position: relative;
     overflow: hidden;
-    aspect-ratio: 1;
+    flex: 0 0 auto;
+    width: 200px;
+    height: 200px;
+    border-radius: 8px;
+    background: var(--md-sys-color-surface-variant);
 }
 .fb-post-media-grid .media-item img,
 .fb-post-media-grid .media-item video {
@@ -1112,29 +1114,29 @@
 
 /* Grille pour plusieurs médias */
 .fb-post-media-grid {
-    display: grid;
-    gap: 4px;
-    border-radius: 16px;
-    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-sys-color-outline-variant) transparent;
 }
-.fb-post-media-grid.grid-2 {
-    grid-template-columns: 1fr 1fr;
+.fb-post-media-grid::-webkit-scrollbar {
+    height: 6px;
 }
-.fb-post-media-grid.grid-3 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-.fb-post-media-grid.grid-3 .media-item:first-child {
-    grid-row: span 2;
-}
-.fb-post-media-grid.grid-4 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+.fb-post-media-grid::-webkit-scrollbar-thumb {
+    background-color: var(--md-sys-color-outline-variant);
+    border-radius: 10px;
 }
 .fb-post-media-grid .media-item {
     position: relative;
     overflow: hidden;
-    aspect-ratio: 1;
+    flex: 0 0 auto;
+    width: 200px;
+    height: 200px;
+    border-radius: 8px;
+    background: var(--md-sys-color-surface-variant);
 }
 .fb-post-media-grid .media-item img,
 .fb-post-media-grid .media-item video {
