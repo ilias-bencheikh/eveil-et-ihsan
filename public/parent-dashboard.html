@@ -2878,7 +2878,7 @@
                     <div class="ppt-slide-content">
                         <div class="ppt-slide-badge">
                             <span class="material-icons">campaign</span>
-                            ${isNew ? 'Nouveau · ' : ''}Actualité
+                            ${isNew ? `<span class="ppt-new-badge" data-actu-id="${actu.id}">Nouveau · </span>` : ''}Actualité
                         </div>
                         <div class="ppt-slide-title">${actu.titre}</div>
                         ${actu.description ? `<div class="ppt-slide-desc">${actu.description}</div>` : ''}
@@ -2914,6 +2914,68 @@
 
             _pptIndex = 0;
             if (_pptSlides.length > 1) _pptStartAuto();
+
+            // Observer pour les badges "Nouveau" du carousel
+            setTimeout(() => {
+                if ('IntersectionObserver' in window) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                // Vérifier si le slide est bien visible (opacity > 0 via class active)
+                                const slide = entry.target.closest('.ppt-slide');
+                                if (slide && !slide.classList.contains('active')) return; // On ignore si le slide n'est pas actif
+                                
+                                const badge = entry.target;
+                                const actuId = badge.getAttribute('data-actu-id');
+                                
+                                setTimeout(() => {
+                                    if (document.body.contains(badge) && slide && slide.classList.contains('active')) {
+                                        const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
+                                        if (!viewedActus.includes(actuId)) {
+                                            viewedActus.push(actuId);
+                                            localStorage.setItem('viewedActus', JSON.stringify(viewedActus));
+                                        }
+                                        badge.style.transition = 'opacity 0.5s ease';
+                                        badge.style.opacity = '0';
+                                        setTimeout(() => badge.remove(), 500);
+                                    }
+                                }, 1500);
+                                
+                                // On ne l'unobserve que s'il a été vraiment traité (quand il est actif)
+                                if (slide && slide.classList.contains('active')) {
+                                    observer.unobserve(badge);
+                                }
+                            }
+                        });
+                    }, { threshold: 0.1 });
+                    
+                    // On observe tous les badges et on ré-évalue à chaque changement de slide
+                    document.querySelectorAll('.ppt-new-badge').forEach(b => observer.observe(b));
+                    
+                    // Ajouter un petit hook sur le changement de slide pour déclencher l'observer
+                    const originalGoTo = _pptGoTo;
+                    _pptGoTo = function(idx, dir) {
+                        originalGoTo(idx, dir);
+                        // Forcer une revérification des badges après un changement de slide
+                        setTimeout(() => {
+                            document.querySelectorAll('.ppt-new-badge').forEach(b => {
+                                const slide = b.closest('.ppt-slide');
+                                if (slide && slide.classList.contains('active')) {
+                                    const actuId = b.getAttribute('data-actu-id');
+                                    const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
+                                    if (!viewedActus.includes(actuId)) {
+                                        viewedActus.push(actuId);
+                                        localStorage.setItem('viewedActus', JSON.stringify(viewedActus));
+                                    }
+                                    b.style.transition = 'opacity 0.5s ease';
+                                    b.style.opacity = '0';
+                                    setTimeout(() => b.remove(), 500);
+                                }
+                            });
+                        }, 1500);
+                    };
+                }
+            }, 100);
         }
 
         function _pptGoTo(idx, dir = 'next') {
@@ -3706,6 +3768,22 @@
             const overlay = document.getElementById('actuModalOverlay');
             const content = document.getElementById('actuModalContent');
             if (!overlay || !content) return;
+            
+            // Marquer comme vu
+            const viewedActus = JSON.parse(localStorage.getItem('viewedActus') || '[]');
+            if (!viewedActus.includes(a.id)) {
+                viewedActus.push(a.id);
+                localStorage.setItem('viewedActus', JSON.stringify(viewedActus));
+                // On peut aussi déclencher l'animation sur la pill de la modale elle-même si elle s'affiche
+                setTimeout(() => {
+                    const pill = document.getElementById('modalActuNewPill');
+                    if (pill) {
+                        pill.style.transition = 'opacity 0.5s ease';
+                        pill.style.opacity = '0';
+                        setTimeout(() => pill.remove(), 500);
+                    }
+                }, 1500);
+            }
 
             if (overlay.parentElement !== document.body) {
                 document.body.appendChild(overlay);
@@ -3739,7 +3817,7 @@
                 : `<div class="actu-modal-hero-icon"><span class="material-icons">newspaper</span></div>`;
 
             // Chips
-            const chipsHtml = isNew ? '<span class="actu-new-pill" style="font-size:11px;padding:4px 10px;">Nouveau</span>' : '';
+            const chipsHtml = isNew ? `<span class="actu-new-pill" id="modalActuNewPill" data-actu-id="${a.id}" style="font-size:11px;padding:4px 10px;">Nouveau</span>` : '';
             const expireChip = a.dateFin
                 ? `<span class="actu-expire-chip-inline"><span class="material-icons">schedule</span> Expire le ${new Date(a.dateFin).toLocaleDateString('fr-FR')}</span>`
                 : '';
