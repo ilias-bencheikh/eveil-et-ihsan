@@ -253,115 +253,158 @@
         /* ── Grille actualités ── */
         #actualitesList {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 22px;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 24px;
+            padding: 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start;
         }
-        @media (max-width: 960px) { #actualitesList { grid-template-columns: 1fr; } }
 
-        /* ── Cartes actualités enrichies ── */
-        .actu-card {
-            border-radius: 20px;
-            overflow: hidden;
+        @media (max-width: 800px) {
+            #actualitesList {
+                grid-template-columns: 1fr;
+                max-width: 720px;
+            }
+        }
+
+        /* ── Post/Publication (Facebook style) ── */
+        .fb-post {
             background: var(--md-sys-color-surface-container-lowest);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.07), 0 0 0 1px var(--md-sys-color-outline-variant);
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
-            position: relative;
-        }
-        .actu-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(30, 90, 168, 0.15), 0 0 0 1.5px var(--md-sys-color-primary); }
-        .actu-card-cover {
-            width: 100%; height: 200px;
-            object-fit: cover;
-            display: block;
-            background: var(--md-sys-color-surface-container);
-        }
-        .actu-card-cover-video {
-            width: 100%; height: 200px;
-            position: relative;
-            background: var(--md-sys-color-surface-container);
+            border-radius: 12px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             overflow: hidden;
+            animation: actu-slide-in 0.4s ease both;
         }
-        .actu-card-cover-video video {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
+
+        @keyframes actu-slide-in {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .actu-card-cover-video .actu-video-badge {
-            position: absolute;
-            bottom: 12px; left: 12px;
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: flex; align-items: center; gap: 5px;
-            backdrop-filter: blur(4px);
+
+        .fb-post-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
         }
-        .actu-card-cover-video .actu-video-badge .material-icons { font-size: 16px; }
-        .actu-card-cover-placeholder {
-            width: 100%; height: 0;
+        .fb-post-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 16px; flex-shrink: 0;
         }
-        .actu-card-head {
-            padding: 20px 22px 14px;
-            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, rgba(247, 216, 255, 0.5) 100%);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+        .fb-post-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .fb-post-info { flex: 1; min-width: 0; }
+        .fb-post-author {
+            font-size: 15px; font-weight: 600; color: var(--md-sys-color-on-surface);
+            display: flex; align-items: center; gap: 6px;
         }
-        .actu-card-title {
-            font-size: 17px; font-weight: 700;
-            color: var(--md-sys-color-on-surface);
-            margin: 0 0 10px; line-height: 1.35;
+        .fb-post-author .verified-badge { color: var(--md-sys-color-primary); font-size: 16px; }
+        .fb-post-meta {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-top: 2px;
         }
-        .actu-card-meta {
-            display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+        .fb-post-meta .material-icons { font-size: 14px; }
+        .fb-post-new-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            background: var(--md-sys-color-primary); color: white;
+            padding: 2px 8px; border-radius: 100px; font-size: 10px;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
         }
-        .actu-card-meta .material-icons { font-size: 13px; vertical-align: middle; }
-        .actu-meta-chip {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 4px 10px; border-radius: 20px;
-            background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
-            font-size: 11px; font-weight: 500;
+        .fb-post-menu {
+            padding: 8px; border-radius: 50%; cursor: pointer; transition: background 0.2s;
             color: var(--md-sys-color-on-surface-variant);
+        }
+        .fb-post-menu:hover { background: var(--md-sys-color-surface-container-high); }
+        
+        .fb-post-dropdown {
+            position: absolute; right: 0; top: 100%; z-index: 100;
+            background: var(--md-sys-color-surface-container-lowest);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 8px; min-width: 180px;
             border: 1px solid var(--md-sys-color-outline-variant);
         }
-        .actu-meta-chip .material-icons { font-size: 13px; }
-        .actu-meta-chip-warning { background: var(--md-sys-color-warning-container); color: var(--md-sys-color-on-warning-container); border-color: var(--md-sys-color-warning); }
-        .actu-badge-new {
-            display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
-            padding: 4px 10px; border-radius: 20px;
-            background: var(--md-sys-color-primary); color: white;
-            font-size: 11px; font-weight: 700; line-height: 1;
-            box-shadow: 0 2px 8px rgba(30, 90, 168, 0.4);
-            animation: pulseBadge 2.5s ease-in-out infinite;
+        .fb-post-dropdown-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: 500; color: var(--md-sys-color-on-surface);
+            transition: background 0.2s;
         }
-        @keyframes pulseBadge {
-            0%, 100% { box-shadow: 0 2px 8px rgba(30, 90, 168, 0.4); }
-            50% { box-shadow: 0 2px 18px rgba(30, 90, 168, 0.7); }
+        .fb-post-dropdown-item:hover { background: var(--md-sys-color-surface-container-high); }
+        .fb-post-dropdown-item.danger { color: var(--md-sys-color-error); }
+        .fb-post-dropdown-item.danger:hover { background: var(--md-sys-color-error-container); }
+
+        .fb-post-content { padding: 0 16px 12px; }
+        .fb-post-title { font-size: 16px; font-weight: 700; color: var(--md-sys-color-on-surface); margin: 0 0 8px; line-height: 1.4; }
+        .fb-post-text {
+            font-size: 15px; line-height: 1.5; color: var(--md-sys-color-on-surface);
+            margin: 0; white-space: pre-wrap; word-wrap: break-word;
         }
-        .actu-card-body { padding: 18px 22px 16px; }
-        .actu-card-desc {
-            font-size: 14px; line-height: 1.7;
-            color: var(--md-sys-color-on-surface);
-            white-space: pre-wrap; margin: 0 0 14px;
+        .fb-post-text.truncated {
+            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
         }
-        /* Galerie d'images */
-        .actu-img-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 8px;
-            margin-top: 12px;
+        .fb-post-see-more {
+            color: var(--md-sys-color-primary); font-weight: 600; cursor: pointer;
+            font-size: 14px; margin-top: 4px; display: inline-block;
         }
-        .actu-img-thumb {
-            position: relative; border-radius: 10px; overflow: hidden;
-            aspect-ratio: 1 / 1; background: var(--md-sys-color-surface-container);
-            cursor: pointer;
+        .fb-post-see-more:hover { text-decoration: underline; }
+
+        .fb-post-media { position: relative; background: var(--md-sys-color-surface-container); cursor: pointer; }
+        .fb-post-media.single img, .fb-post-media.single video { width: 100%; max-height: 500px; object-fit: cover; display: block; }
+        .fb-post-media-grid { display: grid; gap: 2px; }
+        .fb-post-media-grid.grid-2 { grid-template-columns: 1fr 1fr; }
+        .fb-post-media-grid.grid-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .fb-post-media-grid.grid-3 .media-item:first-child { grid-row: span 2; }
+        .fb-post-media-grid.grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .fb-post-media-grid .media-item { position: relative; overflow: hidden; aspect-ratio: 1; }
+        .fb-post-media-grid .media-item img, .fb-post-media-grid .media-item video { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
+        .fb-post-media-grid .media-item:hover img, .fb-post-media-grid .media-item:hover video { transform: scale(1.02); }
+        .fb-post-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 700; }
+        .fb-video-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: rgba(0,0,0,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; transition: transform 0.2s, background 0.2s; }
+        .fb-video-badge .material-icons { font-size: 32px; }
+        .media-item:hover .fb-video-badge { transform: translate(-50%, -50%) scale(1.1); background: var(--md-sys-color-primary); }
+
+        .fb-post-video-container { position: relative; background: #000; }
+        .fb-post-video-container video { width: 100%; max-height: 500px; display: block; }
+
+        .fb-post-footer { padding: 8px 16px 12px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+        .fb-post-actions { display: flex; gap: 4px; padding-top: 8px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+        .fb-post-action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); cursor: pointer; transition: background 0.2s; border: none; background: none; }
+        .fb-post-action-btn:hover { background: var(--md-sys-color-surface-container-high); }
+        .fb-post-action-btn .material-icons { font-size: 20px; }
+        .fb-post-action-btn.primary { color: var(--md-sys-color-primary); }
+
+        .fb-post-attachments { padding: 8px 16px 12px; }
+        .fb-post-attachment { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--md-sys-color-surface-container); border-radius: 8px; margin-top: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; color: inherit; }
+        .fb-post-attachment:hover { background: var(--md-sys-color-surface-container-high); }
+        .fb-post-attachment-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+        .fb-post-attachment-info { flex: 1; min-width: 0; }
+        .fb-post-attachment-name { font-size: 14px; font-weight: 500; color: var(--md-sys-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fb-post-attachment-size { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+
+        .fb-post-text-only { padding: 32px 20px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; text-align: center; background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-tertiary-container) 100%); }
+        .fb-post-text-only .fb-post-title { font-size: 20px; color: var(--md-sys-color-on-primary-container); }
+        .fb-post-text-only .fb-post-text { font-size: 16px; color: var(--md-sys-color-on-primary-container); opacity: 0.9; }
+
+        .fb-feed-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 16px; color: var(--md-sys-color-on-surface-variant); }
+        .fb-feed-empty-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--md-sys-color-surface-container); display: flex; align-items: center; justify-content: center; }
+        .fb-feed-empty-icon .material-icons { font-size: 40px; color: var(--md-sys-color-outline); }
+        .fb-feed-empty-title { font-size: 16px; font-weight: 600; margin: 0; }
+        .fb-feed-empty-text { font-size: 14px; opacity: 0.7; margin: 0; }
+
+        @media (max-width: 700px) {
+            #actualitesList { padding: 12px; gap: 12px; }
+            .fb-post-header { padding: 10px 14px; }
+            .fb-post-content { padding: 0 14px 10px; }
+            .fb-post-title { font-size: 15px; }
+            .fb-post-text { font-size: 14px; }
+            .fb-post-footer { padding: 6px 14px 10px; }
+            .fb-post-action-btn { font-size: 13px; padding: 8px; }
+            .fb-post-text-only { padding: 24px 16px; min-height: 140px; }
+            .fb-post-text-only .fb-post-title { font-size: 17px; }
         }
-        .actu-img-thumb img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.25s;
-        }
-        .actu-img-thumb:hover img { transform: scale(1.06); }
-        .actu-img-thumb a {
-            display: block; width: 100%; height: 100%;
-        }
+
         .actu-modal-pj-section {
             border-top: 1px solid var(--md-sys-color-outline-variant);
             padding-top: 22px;
@@ -2034,7 +2077,7 @@
                             </div>
                         </div>
                         <div class="widget-card-content">
-                            <div id="actualitesList" class="md-grid md-grid-auto"></div>
+                            <div id="actualitesList"></div>
                         </div>
                     </div>
                 </div>
@@ -11515,53 +11558,7 @@
             const isXls = f => !!(f.nom||'').match(/\.(xls|xlsx|csv)$/i);
             const isZip = f => !!(f.nom||'').match(/\.(zip|rar|7z)$/i);
 
-            const filePreviewHtml = (f) => {
-                if (isImg(f)) return ''; // handled in gallery
-                if (isVideo(f)) return ''; // handled in video section
-                if (isPdf(f)) return `
-                    <a href="${f.url}" target="_blank" class="actu-pdf-preview" title="${f.nom}">
-                        <div class="actu-pdf-icon"><span class="material-icons">picture_as_pdf</span></div>
-                        <div style="min-width:0;flex:1;">
-                            <div class="actu-pdf-name">${f.nom}</div>
-                            <div class="actu-pdf-sub">Cliquer pour ouvrir le PDF</div>
-                        </div>
-                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">open_in_new</span>
-                    </a>`;
-                if (isDoc(f)) return `
-                    <a href="${f.url}" target="_blank" class="actu-pdf-preview actu-file-doc" title="${f.nom}">
-                        <div class="actu-pdf-icon"><span class="material-icons">description</span></div>
-                        <div style="min-width:0;flex:1;">
-                            <div class="actu-pdf-name">${f.nom}</div>
-                            <div class="actu-pdf-sub">Document Word</div>
-                        </div>
-                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">open_in_new</span>
-                    </a>`;
-                if (isXls(f)) return `
-                    <a href="${f.url}" target="_blank" class="actu-pdf-preview actu-file-xls" title="${f.nom}">
-                        <div class="actu-pdf-icon"><span class="material-icons">table_chart</span></div>
-                        <div style="min-width:0;flex:1;">
-                            <div class="actu-pdf-name">${f.nom}</div>
-                            <div class="actu-pdf-sub">Feuille de calcul</div>
-                        </div>
-                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">open_in_new</span>
-                    </a>`;
-                if (isZip(f)) return `
-                    <a href="${f.url}" target="_blank" class="actu-pdf-preview actu-file-zip" title="${f.nom}">
-                        <div class="actu-pdf-icon"><span class="material-icons">folder_zip</span></div>
-                        <div style="min-width:0;flex:1;">
-                            <div class="actu-pdf-name">${f.nom}</div>
-                            <div class="actu-pdf-sub">Archive compressée</div>
-                        </div>
-                        <span class="material-icons" style="font-size:18px;flex-shrink:0;">download</span>
-                    </a>`;
-                return `
-                    <a href="${f.url}" target="_blank" class="actu-pj-read-chip" download="${f.nom}">
-                        <span class="material-icons" style="font-size:16px;">insert_drive_file</span>
-                        <span style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.nom}</span>
-                    </a>`;
-            };
-
-            const html = allActualites.length ? allActualites.map(actu => {
+            const html = allActualites.length ? allActualites.map((actu, idx) => {
                 const canManage = isAdmin || (user.role === 'professeur' && actu.auteurId === String(user.id));
                 let cibleLabel = 'Tous';
                 if (actu.cible && actu.cible !== 'tous') {
@@ -11574,109 +11571,176 @@
                 const pj = Array.isArray(actu.piecesJointes) ? actu.piecesJointes : [];
                 const images = pj.filter(isImg);
                 const videos = pj.filter(isVideo);
-                const others = pj.filter(f => !isImg(f) && !isVideo(f));
-
-                // Image ou vidéo de couverture (priorité à la vidéo)
-                const coverVideo = videos.length > 0 ? videos[0] : null;
-                const coverImg = !coverVideo && images.length > 0 ? images[0] : null;
-                const coverHtml = coverVideo
-                    ? `<div class="actu-card-cover-video"><video src="${coverVideo.url}" muted loop playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0;"></video><div class="actu-video-badge"><span class="material-icons">play_circle</span></div></div>`
-                    : images.length > 0
-                    ? `<a href="${images[0].url}" target="_blank"><img class="actu-card-cover" src="${images[0].url}" alt="${images[0].nom}" loading="lazy"></a>`
-                    : `<div class="actu-card-cover-placeholder"></div>`;
-
-                // Galerie des images (sans la couverture si pas de vidéo)
-                const galleryImages = coverVideo ? images : images.slice(1);
-                const galleryHtml = galleryImages.length > 0 ? `
-                    <div class="actu-img-gallery">
-                        ${galleryImages.map(f => `
-                            <div class="actu-img-thumb">
-                                <a href="${f.url}" target="_blank">
-                                    <img src="${f.url}" alt="${f.nom}" loading="lazy" title="${f.nom}">
-                                </a>
-                            </div>`).join('')}
-                    </div>` : '';
-
-                // Section vidéos (sans la couverture)
-                const galleryVideos = coverVideo ? videos.slice(1) : videos;
-                const videosHtml = galleryVideos.length > 0 ? `
-                    <div class="actu-video-gallery" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
-                        ${galleryVideos.map(f => `
-                            <div class="actu-video-item" style="border-radius:12px;overflow:hidden;background:var(--md-sys-color-surface-container);">
-                                <video src="${f.url}" controls preload="metadata" style="width:100%;max-height:300px;display:block;"></video>
-                                <div style="padding:8px 12px;font-size:12px;color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;gap:6px;">
-                                    <span class="material-icons" style="font-size:16px;">videocam</span>
-                                    ${f.nom}
-                                </div>
-                            </div>`).join('')}
-                    </div>` : '';
-
-                // Autres fichiers (PDF, doc, etc.)
-                const othersHtml = others.length > 0 ? `
-                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
-                        ${others.map(filePreviewHtml).join('')}
-                    </div>` : '';
-
-                const hasAttachments = pj.length > 0;
-                const pjSection = hasAttachments ? `
-                    <div class="actu-pj-section">
-                        <div class="actu-pj-section-title">
-                            <span class="material-icons" style="font-size:15px;">attach_file</span>
-                            ${pj.length} pièce${pj.length > 1 ? 's' : ''} jointe${pj.length > 1 ? 's' : ''}
-                        </div>
-                        ${galleryHtml}
-                        ${videosHtml}
-                        ${othersHtml}
-                    </div>` : '';
-
+                const files = pj.filter(f => !isImg(f) && !isVideo(f));
+                const allMedia = [...videos, ...images];
                 const isNew = actu.date && (Date.now() - new Date(actu.date).getTime()) < 7 * 86400000;
+                
+                // Date relative style Facebook
+                const dateObj = new Date(actu.date || Date.now());
+                const now = new Date();
+                const diff = now - dateObj;
+                const hrs = Math.floor(diff / 3600000);
+                let dateRelative = '';
+                if (hrs < 1) dateRelative = "À l'instant";
+                else if (hrs < 24) dateRelative = `Il y a ${hrs}h`;
+                else {
+                    const days = Math.floor(hrs / 24);
+                    if (days < 7) dateRelative = `Il y a ${days}j`;
+                    else dateRelative = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                }
+                
+                // Avatar initiales
+                const authorName = actu.auteurNom || 'Système';
+                const initials = authorName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+                
+                // HTML Médias
+                let mediaHtml = '';
+                if (allMedia.length === 1) {
+                    const m = allMedia[0];
+                    if (m.type.startsWith('video/')) {
+                        mediaHtml = `<div class="fb-post-video-container" onclick="event.stopPropagation();">
+                            <video controls preload="metadata">
+                                <source src="${m.url}" type="${m.type}">
+                            </video>
+                        </div>`;
+                    } else {
+                        mediaHtml = `<div class="fb-post-media single">
+                            <a href="${m.url}" target="_blank" onclick="event.stopPropagation();">
+                                <img src="${m.url}" alt="${m.nom || ''}" loading="lazy">
+                            </a>
+                        </div>`;
+                    }
+                } else if (allMedia.length > 1) {
+                    const gridClass = allMedia.length === 2 ? 'grid-2' : allMedia.length === 3 ? 'grid-3' : 'grid-4';
+                    const displayMedia = allMedia.slice(0, 4);
+                    const remaining = allMedia.length - 4;
+                    mediaHtml = `<div class="fb-post-media">
+                        <div class="fb-post-media-grid ${gridClass}">
+                            ${displayMedia.map((m, i) => {
+                                const isVideo = m.type.startsWith('video/');
+                                const isLast = i === 3 && remaining > 0;
+                                const content = isVideo 
+                                    ? `<video src="${m.url}" muted preload="metadata"></video><div class="fb-video-badge"><span class="material-icons">play_arrow</span></div>`
+                                    : `<img src="${m.url}" alt="${m.nom || ''}" loading="lazy">`;
+                                
+                                return `<div class="media-item">
+                                    <a href="${m.url}" target="_blank" onclick="event.stopPropagation();" style="display:block;width:100%;height:100%;">
+                                        ${content}
+                                    </a>
+                                    ${isLast ? `<div class="fb-post-media-more">+${remaining}</div>` : ''}
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+                }
+
+                // Fichiers
+                let filesHtml = '';
+                if (files.length > 0) {
+                    filesHtml = `<div class="fb-post-attachments">
+                        ${files.map(f => {
+                            let icon = 'insert_drive_file';
+                            if (isPdf(f)) icon = 'picture_as_pdf';
+                            else if (isDoc(f)) icon = 'description';
+                            else if (isXls(f)) icon = 'table_chart';
+                            else if (isZip(f)) icon = 'folder_zip';
+                            
+                            return `<a href="${f.url}" target="_blank" class="fb-post-attachment" onclick="event.stopPropagation();">
+                                <div class="fb-post-attachment-icon"><span class="material-icons">${icon}</span></div>
+                                <div class="fb-post-attachment-info">
+                                    <div class="fb-post-attachment-name">${f.nom || 'Fichier'}</div>
+                                    <div class="fb-post-attachment-size">${f.taille ? (f.taille/1024).toFixed(0) + ' Ko' : 'Télécharger'}</div>
+                                </div>
+                                <span class="material-icons" style="color:var(--md-sys-color-primary);">download</span>
+                            </a>`;
+                        }).join('')}
+                    </div>`;
+                }
+
+                const textClass = allMedia.length === 0 && actu.description && actu.description.length < 200 ? 'fb-post-text-only' : '';
                 const expireSoon = actu.dateFin && (new Date(actu.dateFin).getTime() - Date.now()) < 3 * 86400000 && new Date(actu.dateFin) > new Date();
 
                 return `
-                    <div class="actu-card">
-                        ${coverHtml}
-                        <div class="actu-card-head">
-                            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
-                                <h3 class="actu-card-title">${actu.titre}</h3>
-                                ${isNew ? '<span class="actu-badge-new"><span class="material-icons" style="font-size:12px;line-height:1;">fiber_new</span> Nouveau</span>' : ''}
-                            </div>
-                            <div class="actu-card-meta">
-                                <span class="actu-meta-chip"><span class="material-icons">calendar_today</span> ${actu.date ? new Date(actu.date).toLocaleDateString('fr-FR') : 'Non daté'}</span>
-                                <span class="actu-meta-chip"><span class="material-icons">person</span> ${actu.auteurNom || 'Système'}</span>
-                                ${actu.dateFin ? `<span class="actu-meta-chip${expireSoon ? ' actu-meta-chip-warning' : ''}"><span class="material-icons">schedule</span> Expire le ${new Date(actu.dateFin).toLocaleDateString('fr-FR')}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="actu-card-body">
-                            <p class="actu-card-desc">${actu.description}</p>
-                            ${pjSection}
-                            ${canManage ? `
-                                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--md-sys-color-outline-variant);">
-                                    <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:var(--md-sys-color-surface-container);font-size:11px;font-weight:600;color:var(--md-sys-color-on-surface-variant);border:1px solid var(--md-sys-color-outline-variant);">
-                                        <span class="material-icons" style="font-size:14px;">groups</span> ${cibleLabel}
-                                    </span>
-                                    <div style="flex:1;"></div>
-                                    <button class="md-btn md-btn-outlined" style="padding:6px 14px;font-size:13px;gap:4px;" onclick="editActualite('${actu.id}')">
-                                        <span class="material-icons" style="font-size:16px;">edit</span> Modifier
-                                    </button>
-                                    <button class="md-btn md-btn-outlined" style="padding:6px 14px;font-size:13px;gap:4px;color:var(--md-sys-color-error);border-color:var(--md-sys-color-error);" onclick="deleteActualite('${actu.id}')">
-                                        <span class="material-icons" style="font-size:16px;">delete</span> Supprimer
-                                    </button>
+                    <article class="fb-post">
+                        <!-- Header -->
+                        <div class="fb-post-header">
+                            <div class="fb-post-avatar">${initials}</div>
+                            <div class="fb-post-info">
+                                <div class="fb-post-author">
+                                    ${authorName}
+                                    <span class="material-icons verified-badge">verified</span>
                                 </div>
-                            ` : ''}
+                                <div class="fb-post-meta">
+                                    <span>${dateRelative}</span>
+                                    <span class="material-icons">public</span>
+                                    ${isNew ? '<span class="fb-post-new-badge">Nouveau</span>' : ''}
+                                    ${actu.dateFin ? `<span style="margin-left:8px;color:${expireSoon ? 'var(--md-sys-color-error)' : 'inherit'}"><span class="material-icons" style="font-size:14px;vertical-align:text-bottom;">schedule</span> Expire le ${new Date(actu.dateFin).toLocaleDateString('fr-FR')}</span>` : ''}
+                                </div>
+                            </div>
+                            ${canManage ? `
+                            <div style="position:relative;">
+                                <div class="fb-post-menu" onclick="event.stopPropagation(); toggleActuMenu(${idx})" title="Options">
+                                    <span class="material-icons">more_horiz</span>
+                                </div>
+                                <div id="actuMenu-${idx}" class="fb-post-dropdown" style="display:none;">
+                                    <div class="fb-post-dropdown-item" onclick="editActualite('${actu.id}')">
+                                        <span class="material-icons">edit</span> Modifier
+                                    </div>
+                                    <div class="fb-post-dropdown-item danger" onclick="deleteActualite('${actu.id}')">
+                                        <span class="material-icons">delete</span> Supprimer
+                                    </div>
+                                </div>
+                            </div>` : ''}
                         </div>
-                    </div>
-                `;
+                        
+                        <!-- Contenu texte -->
+                        <div class="fb-post-content ${textClass}">
+                            <h3 class="fb-post-title">${actu.titre}</h3>
+                            ${actu.description ? `<p class="fb-post-text ${actu.description.length > 300 ? 'truncated' : ''}">${actu.description}</p>` : ''}
+                            ${actu.description && actu.description.length > 300 ? '<span class="fb-post-see-more" onclick="event.stopPropagation(); this.previousElementSibling.classList.remove(\'truncated\'); this.style.display=\'none\';">Voir plus</span>' : ''}
+                        </div>
+                        
+                        <!-- Médias -->
+                        ${mediaHtml}
+                        
+                        <!-- Fichiers joints -->
+                        ${filesHtml}
+                        
+                        <!-- Cible / Tags -->
+                        ${cibleLabel !== 'Tous' ? `
+                        <div style="padding:0 16px 12px;">
+                            <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--md-sys-color-surface-container);font-size:11px;font-weight:600;color:var(--md-sys-color-on-surface-variant);">
+                                <span class="material-icons" style="font-size:14px;">groups</span> Cible : ${cibleLabel}
+                            </span>
+                        </div>` : ''}
+                    </article>`;
             }).join('') : `
-                <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;color:var(--md-sys-color-on-surface-variant);">
-                    <div style="width:72px;height:72px;border-radius:50%;background:var(--md-sys-color-surface-container);display:flex;align-items:center;justify-content:center;">
-                        <span class="material-icons" style="font-size:36px;color:var(--md-sys-color-outline);">newspaper</span>
+                <div class="fb-feed-empty">
+                    <div class="fb-feed-empty-icon">
+                        <span class="material-icons">newspaper</span>
                     </div>
-                    <p style="margin:0;font-size:15px;font-weight:500;">Aucune actualité pour le moment</p>
-                    <p style="margin:0;font-size:13px;opacity:0.7;">Les actualités publiées s'afficheront ici</p>
+                    <p class="fb-feed-empty-title">Aucune actualité pour le moment</p>
+                    <p class="fb-feed-empty-text">Les actualités publiées s'afficheront ici</p>
                 </div>`;
 
             document.getElementById('actualitesList').innerHTML = html;
         }
+
+        function toggleActuMenu(idx) {
+            // Fermer tous les autres menus
+            document.querySelectorAll('[id^="actuMenu-"]').forEach(el => {
+                if (el.id !== `actuMenu-${idx}`) el.style.display = 'none';
+            });
+            const menu = document.getElementById(`actuMenu-${idx}`);
+            if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Fermer les menus si clic ailleurs
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.fb-post-menu')) {
+                document.querySelectorAll('[id^="actuMenu-"]').forEach(el => el.style.display = 'none');
+            }
+        });
         
         // --- Gestion pièces jointes actualités ---
         // Fichiers en attente d'upload (File objects)

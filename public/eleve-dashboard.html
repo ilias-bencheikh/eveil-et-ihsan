@@ -3603,75 +3603,156 @@
                 }
                 if (badgeText) badgeText.textContent = _allActualites.length + (_allActualites.length > 1 ? ' publications' : ' publication');
 
-                // Générer les cartes magazine
+                // Générer les posts style Facebook
                 const listEl = document.getElementById('actualitesList');
                 if (listEl) {
                     if (_allActualites.length === 0) {
-                        listEl.innerHTML = `<div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;color:var(--md-sys-color-on-surface-variant);">
-                            <div style="width:72px;height:72px;border-radius:50%;background:var(--md-sys-color-surface-container);display:flex;align-items:center;justify-content:center;">
-                                <span class="material-icons" style="font-size:36px;color:var(--md-sys-color-outline);">newspaper</span>
+                        listEl.innerHTML = `<div class="fb-feed-empty">
+                            <div class="fb-feed-empty-icon">
+                                <span class="material-icons">newspaper</span>
                             </div>
-                            <p style="margin:0;font-size:15px;font-weight:500;">Aucune actualité pour le moment</p>
-                            <p style="margin:0;font-size:13px;opacity:0.7;">Les actualités publiées s'afficheront ici</p>
+                            <p class="fb-feed-empty-title">Aucune actualité pour le moment</p>
+                            <p class="fb-feed-empty-text">Les actualités publiées s'afficheront ici</p>
                         </div>`;
                     } else {
-                        const cs = getComputedStyle(document.documentElement);
-                        const clrPC = cs.getPropertyValue('--md-sys-color-primary-container').trim();
-                    const clrSC = cs.getPropertyValue('--md-sys-color-secondary-container').trim();
-                    const clrTC = cs.getPropertyValue('--md-sys-color-tertiary-container').trim();
-                    const bgPalette = [
-                        `linear-gradient(135deg,${clrPC} 0%,${clrSC} 100%)`,
-                        `linear-gradient(135deg,${clrSC} 0%,${clrTC} 100%)`,
-                        `linear-gradient(135deg,${clrTC} 0%,${clrPC} 100%)`,
-                        `linear-gradient(135deg,${clrPC} 0%,${clrTC} 60%,${clrSC} 100%)`,
-                        `linear-gradient(135deg,${clrSC} 0%,${clrPC} 60%,${clrTC} 100%)`,
-                    ];
-                    listEl.innerHTML = _allActualites.map((a, idx) => {
-                        const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
-                        const images = pj.filter(f => f.type && f.type.startsWith('image/'));
-                        const videos = pj.filter(f => f.type && f.type.startsWith('video/'));
-                        const isNew = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
-                        const dateStr = a.date ? new Date(a.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : 'Non daté';
-                        const delay = Math.min(idx * 70, 400);
-                        const coverVideo = videos.length > 0 ? videos[0] : null;
-                        const coverImg = !coverVideo && images.length > 0 ? images[0] : null;
-                        const bgGrad = bgPalette[idx % bgPalette.length];
-                        const mediaHtml = coverVideo
-                            ? `<div class="actu-card-media" style="position:relative;">
-                                <video src="${coverVideo.url}" muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;" onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0;"></video>
-                                <div class="actu-video-badge" style="position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 10px;border-radius:16px;font-size:12px;display:flex;align-items:center;gap:4px;"><span class="material-icons" style="font-size:16px;">play_circle</span> Vidéo</div>
-                                ${isNew ? '<div class="actu-new-pill"><span class="material-icons">fiber_new</span> Nouveau</div>' : ''}
-                                ${pj.length > 0 ? `<div class="actu-pj-pill"><span class="material-icons">attach_file</span> ${pj.length}</div>` : ''}
-                              </div>`
-                            : coverImg
-                            ? `<div class="actu-card-media">
-                                <img src="${coverImg.url}" alt="${coverImg.nom}" loading="lazy">
-                                ${isNew ? '<div class="actu-new-pill"><span class="material-icons">fiber_new</span> Nouveau</div>' : ''}
-                                ${pj.length > 0 ? `<div class="actu-pj-pill"><span class="material-icons">attach_file</span> ${pj.length}</div>` : ''}
-                              </div>`
-                            : `<div class="actu-card-media-placeholder" style="background:${bgGrad};">
-                                <span class="material-icons">newspaper</span>
-                                ${isNew ? '<div class="actu-new-pill"><span class="material-icons">fiber_new</span> Nouveau</div>' : ''}
-                                ${pj.length > 0 ? `<div class="actu-pj-pill"><span class="material-icons">attach_file</span> ${pj.length}</div>` : ''}
-                              </div>`;
-                        return `
-                            <div class="actu-card" style="animation-delay:${delay}ms;" onclick="openActuModal(${idx})">
-                                ${mediaHtml}
-                                <div class="actu-card-head">
-                                    <div class="actu-card-meta-row">
-                                        <span class="actu-meta-chip"><span class="material-icons">calendar_today</span> ${dateStr}</span>
-                                        ${a.auteurNom ? `<span class="actu-meta-chip actu-meta-chip-author"><span class="material-icons">person</span> ${a.auteurNom}</span>` : ''}
+                        listEl.innerHTML = _allActualites.map((a, idx) => {
+                            const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
+                            const images = pj.filter(f => f.type && f.type.startsWith('image/'));
+                            const videos = pj.filter(f => f.type && f.type.startsWith('video/'));
+                            const files = pj.filter(f => f.type && !f.type.startsWith('image/') && !f.type.startsWith('video/'));
+                            const allMedia = [...videos, ...images];
+                            const isNew = a.date && (Date.now() - new Date(a.date).getTime()) < 7 * 86400000;
+                            const delay = Math.min(idx * 70, 400);
+                            
+                            // Date relative style Facebook
+                            const dateObj = new Date(a.date || Date.now());
+                            const now = new Date();
+                            const diff = now - dateObj;
+                            const hrs = Math.floor(diff / 3600000);
+                            let dateRelative = '';
+                            if (hrs < 1) dateRelative = "À l'instant";
+                            else if (hrs < 24) dateRelative = `Il y a ${hrs}h`;
+                            else {
+                                const days = Math.floor(hrs / 24);
+                                if (days < 7) dateRelative = `Il y a ${days}j`;
+                                else dateRelative = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                            }
+                            
+                            // Avatar initiales de l'auteur
+                            const authorName = a.auteurNom || 'École';
+                            const initials = authorName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+                            
+                            // Générer le HTML des médias
+                            let mediaHtml = '';
+                            if (allMedia.length === 1) {
+                                const m = allMedia[0];
+                                if (m.type.startsWith('video/')) {
+                                    mediaHtml = `<div class="fb-post-video-container" onclick="event.stopPropagation();">
+                                        <video controls preload="metadata" poster="">
+                                            <source src="${m.url}" type="${m.type}">
+                                        </video>
+                                    </div>`;
+                                } else {
+                                    mediaHtml = `<div class="fb-post-media single">
+                                        <img src="${m.url}" alt="${m.nom || ''}" loading="lazy">
+                                    </div>`;
+                                }
+                            } else if (allMedia.length > 1) {
+                                const gridClass = allMedia.length === 2 ? 'grid-2' : allMedia.length === 3 ? 'grid-3' : 'grid-4';
+                                const displayMedia = allMedia.slice(0, 4);
+                                const remaining = allMedia.length - 4;
+                                mediaHtml = `<div class="fb-post-media">
+                                    <div class="fb-post-media-grid ${gridClass}">
+                                        ${displayMedia.map((m, i) => {
+                                            const isVideo = m.type.startsWith('video/');
+                                            const isLast = i === 3 && remaining > 0;
+                                            return `<div class="media-item">
+                                                ${isVideo 
+                                                    ? `<video src="${m.url}" muted preload="metadata"></video>
+                                                       <div class="fb-video-badge"><span class="material-icons">play_arrow</span></div>`
+                                                    : `<img src="${m.url}" alt="${m.nom || ''}" loading="lazy">`
+                                                }
+                                                ${isLast ? `<div class="fb-post-media-more">+${remaining}</div>` : ''}
+                                            </div>`;
+                                        }).join('')}
                                     </div>
-                                    <h3 class="actu-card-title">${a.titre}</h3>
-                                </div>
-                                <div class="actu-card-body">
-                                    <p class="actu-card-desc">${a.description || ''}</p>
-                                </div>
-                                <div class="actu-card-read-indicator">
-                                    <span>Lire l'article</span>
-                                    <span class="material-icons">arrow_forward</span>
-                                </div>
-                            </div>`;
+                                </div>`;
+                            }
+                            
+                            // Si pas de média mais du texte, afficher en mode "post texte"
+                            const hasMedia = allMedia.length > 0;
+                            const textClass = !hasMedia && a.description && a.description.length < 200 ? 'fb-post-text-only' : '';
+                            
+                            // Fichiers non-média (PDF, DOC, etc.)
+                            let filesHtml = '';
+                            if (files.length > 0) {
+                                filesHtml = `<div class="fb-post-attachments">
+                                    ${files.map(f => {
+                                        // Déterminer l'icône
+                                        let icon = 'insert_drive_file';
+                                        const n = (f.nom || f.type || '').toLowerCase();
+                                        if (n.match(/\.pdf$/)) icon = 'picture_as_pdf';
+                                        else if (n.match(/\.(doc|docx)$/)) icon = 'description';
+                                        else if (n.match(/\.(xls|xlsx|csv)$/)) icon = 'table_chart';
+                                        else if (n.match(/\.(zip|rar|7z)$/)) icon = 'folder_zip';
+                                        
+                                        return `<a href="${f.url}" target="_blank" class="fb-post-attachment" onclick="event.stopPropagation();">
+                                            <div class="fb-post-attachment-icon"><span class="material-icons">${icon}</span></div>
+                                            <div class="fb-post-attachment-info">
+                                                <div class="fb-post-attachment-name">${f.nom || 'Fichier'}</div>
+                                                <div class="fb-post-attachment-size">${f.taille ? (f.taille/1024).toFixed(0) + ' Ko' : 'Télécharger'}</div>
+                                            </div>
+                                            <span class="material-icons" style="color:var(--md-sys-color-primary);">download</span>
+                                        </a>`;
+                                    }).join('')}
+                                </div>`;
+                            }
+                            
+                            return `
+                                <article class="fb-post" style="animation-delay:${delay}ms;" onclick="openActuModal(${idx})">
+                                    <!-- Header -->
+                                    <div class="fb-post-header">
+                                        <div class="fb-post-avatar">${initials}</div>
+                                        <div class="fb-post-info">
+                                            <div class="fb-post-author">
+                                                ${authorName}
+                                                <span class="material-icons verified-badge">verified</span>
+                                            </div>
+                                            <div class="fb-post-meta">
+                                                <span>${dateRelative}</span>
+                                                <span class="material-icons">public</span>
+                                                ${isNew ? '<span class="fb-post-new-badge">Nouveau</span>' : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Contenu texte -->
+                                    <div class="fb-post-content ${textClass}">
+                                        <h3 class="fb-post-title">${a.titre}</h3>
+                                        ${a.description ? `<p class="fb-post-text ${a.description.length > 300 ? 'truncated' : ''}">${a.description}</p>` : ''}
+                                        ${a.description && a.description.length > 300 ? '<span class="fb-post-see-more" onclick="event.stopPropagation(); this.previousElementSibling.classList.remove(\'truncated\'); this.style.display=\'none\';">Voir plus</span>' : ''}
+                                    </div>
+                                    
+                                    <!-- Médias -->
+                                    ${mediaHtml}
+                                    
+                                    <!-- Fichiers joints -->
+                                    ${filesHtml}
+                                    
+                                    <!-- Footer -->
+                                    <div class="fb-post-footer">
+                                        <div class="fb-post-actions">
+                                            <button class="fb-post-action-btn primary">
+                                                <span class="material-icons">visibility</span>
+                                                <span>Voir le détail</span>
+                                            </button>
+                                            ${allMedia.length > 0 ? `<button class="fb-post-action-btn">
+                                                <span class="material-icons">photo_library</span>
+                                                <span>${allMedia.length} média${allMedia.length > 1 ? 's' : ''}</span>
+                                            </button>` : ''}
+                                        </div>
+                                    </div>
+                                </article>`;
                         }).join('');
                     }
                 }
@@ -3690,6 +3771,10 @@
             const overlay = document.getElementById('actuModalOverlay');
             const content = document.getElementById('actuModalContent');
             if (!overlay || !content) return;
+
+            if (overlay.parentElement !== document.body) {
+                document.body.appendChild(overlay);
+            }
 
             const pj = Array.isArray(a.piecesJointes) ? a.piecesJointes : [];
             const isImg  = f => f.type && f.type.startsWith('image/');
