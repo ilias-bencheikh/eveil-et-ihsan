@@ -66,22 +66,136 @@ router.delete('/:id', checkPermission('delete'), (req, res) => {
 });
 
 // Nouvelle année : vider toutes les classes (retirer les élèves sans supprimer les classes)
-router.post('/nouvelle-annee', checkPermission('update'), (req, res) => {
+// Et supprimer les parents (et leurs données liées) qui n'ont pas réinscrit leurs enfants dans les 2 dernières années
+router.post('/nouvelle-annee', checkPermission('update'), async (req, res) => {
     const { anneeScolaire } = req.body;
     if (!anneeScolaire) {
         return res.status(400).json({ error: 'L\'année scolaire est requise' });
     }
 
-    // Mettre la classe de tous les élèves à NULL
-    db.run('UPDATE eleves SET classe = NULL', function(err) {
-        if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
-        const nbEleves = this.changes;
+    // Extraire l'année de début (ex: "2026-2027" -> 2026)
+    const newYearStart = parseInt(anneeScolaire.split('-')[0], 10);
+    if (isNaN(newYearStart)) {
+        return res.status(400).json({ error: 'Format d\'année scolaire invalide (attendu YYYY-YYYY)' });
+    }
+
+    try {
+        const thresholdYear = newYearStart - 2;
+
+        // Mettre la classe de tous les élèves à NULL
+        await new Promise((resolve, reject) => {
+            db.run('UPDATE eleves SET classe = NULL', function(err) {
+                if (err) return reject(err);
+                resolve(this.changes);
+            });
+        });
+
+        // Trouver les parents qui n'ont AUCUN enfant avec anneeScolaire >= thresholdYear
+        // i.e., pour tous leurs enfants, anneeScolaire est < thresholdYear ou NULL
+        const queryParents = `
+            SELECT p.id 
+            FROM parents p
+            WHERE NOT EXISTS (
+                SELECT 1 
+                FROM eleve_parent ep
+                JOIN eleves e ON ep.eleveId = e.id
+                WHERE ep.parentId = p.id 
+                AND e.anneeScolaire IS NOT NULL
+                AND CAST(substr(e.anneeScolaire, 1, 4) AS INTEGER) >= ?
+            )
+        `;
+
+        const parentsToDelete = await new Promise((resolve, reject) => {
+            db.all(queryParents, [thresholdYear], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows.map(r => r.id));
+            });
+        });
+
+        let parentsDeleted = 0;
+        let elevesDeleted = 0;
+
+        if (parentsToDelete.length > 0) {
+            const placeholders = parentsToDelete.map(() => '?').join(',');
+
+            // Trouver les élèves de ces parents qui n'ont pas d'autres parents gardés
+            const queryEleves = `
+                SELECT DISTINCT ep.eleveId 
+                FROM eleve_parent ep
+                WHERE ep.parentId IN (${placeholders})
+                AND NOT EXISTS (
+                    SELECT 1 
+                    FROM eleve_parent ep2 
+                    WHERE ep2.eleveId = ep.eleveId 
+                    AND ep2.parentId NOT IN (${placeholders})
+                )
+            `;
+
+            const elevesToDelete = await new Promise((resolve, reject) => {
+                db.all(queryEleves, [...parentsToDelete, ...parentsToDelete], (err, rows) => {
+                    if (err) return reject(err);
+                    resolve(rows.map(r => r.eleveId));
+                });
+            });
+
+            // Supprimer les élèves orphelins (qui vont de toute façon être supprimés logiquement si leurs parents partent)
+            if (elevesToDelete.length > 0) {
+                const elevesPlaceholders = elevesToDelete.map(() => '?').join(',');
+                
+                // Nettoyer d'abord les tables qui n'ont pas de ON DELETE CASCADE
+                await new Promise((resolve, reject) => {
+                    db.run(`DELETE FROM absences WHERE eleveId IN (${elevesPlaceholders})`, elevesToDelete, function(err) {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+                
+                await new Promise((resolve, reject) => {
+                    db.run(`DELETE FROM appreciations WHERE eleveId IN (${elevesPlaceholders})`, elevesToDelete, function(err) {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+
+                await new Promise((resolve, reject) => {
+                    db.run(`DELETE FROM eleves WHERE id IN (${elevesPlaceholders})`, elevesToDelete, function(err) {
+                        if (err) return reject(err);
+                        elevesDeleted = this.changes;
+                        resolve();
+                    });
+                });
+            }
+
+            // Supprimer les messages des parents (envoyés ou reçus)
+            await new Promise((resolve, reject) => {
+                db.run(`DELETE FROM messages WHERE expediteurId IN (${placeholders}) OR destinataireId IN (${placeholders})`, [...parentsToDelete, ...parentsToDelete], function(err) {
+                    if (err) return reject(err);
+                    resolve();
+                });
+            });
+
+            // Supprimer les parents
+            await new Promise((resolve, reject) => {
+                db.run(`DELETE FROM parents WHERE id IN (${placeholders})`, parentsToDelete, function(err) {
+                    if (err) return reject(err);
+                    parentsDeleted = this.changes;
+                    resolve();
+                });
+            });
+        }
+
         res.json({
             success: true,
-            message: `Nouvelle année ${anneeScolaire} initialisée. ${nbEleves} élève(s) retirés de leurs classes.`,
-            elevesModifies: nbEleves
+            message: `Nouvelle année ${anneeScolaire} initialisée. ${parentsDeleted} parent(s) inactif(s) et ${elevesDeleted} élève(s) ont été supprimés.`,
+            elevesModifies: true,
+            parentsSupprimes: parentsDeleted,
+            elevesSupprimes: elevesDeleted
         });
-    });
+
+    } catch (err) {
+        console.error("Erreur lors de la nouvelle année:", err);
+        return res.status(500).json({ error: 'Erreur interne du serveur' });
+    }
 });
 
 module.exports = router;
