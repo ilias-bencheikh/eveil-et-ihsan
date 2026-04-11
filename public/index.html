@@ -4537,21 +4537,37 @@
                                                     >
                                                 </div>
                                                 <!-- Barre filtre destinataires -->
-                                                <div
-                                                    class="msg-dest-search-wrap"
-                                                >
-                                                    <span class="material-icons"
-                                                        >search</span
-                                                    >
-                                                    <input
-                                                        type="text"
-                                                        id="composeSearchInput"
-                                                        class="msg-dest-search-input"
-                                                        placeholder="Filtrer par nom ou rôle..."
-                                                        oninput="
-                                                            filterComposeDestinataires()
-                                                        "
-                                                    />
+                                                <div class="msg-dest-filter-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
+                                                    <div class="msg-dest-search-wrap">
+                                                        <span class="material-icons">search</span>
+                                                        <input
+                                                            type="text"
+                                                            id="composeSearchInput"
+                                                            class="msg-dest-search-input"
+                                                            placeholder="Filtrer par nom ou rôle..."
+                                                            oninput="filterComposeDestinataires()"
+                                                        />
+                                                    </div>
+                                                    <div class="msg-dest-advanced-filters" style="display: flex; gap: 8px; flex-wrap: wrap;" id="msgDestAdvancedFilters">
+                                                        <select id="composeTypeFilter" class="msg-select-filter" onchange="onTypeFilterChange()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: inherit; font-size: 0.9rem;">
+                                                            <option value="">Tous les types</option>
+                                                            <option value="user">Staff / Profs / Élèves</option>
+                                                            <option value="parents">Parents</option>
+                                                            <option value="class">Classes</option>
+                                                        </select>
+                                                        <select id="composeNiveauFilter" class="msg-select-filter" onchange="filterComposeDestinataires()" style="display: none; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: inherit; font-size: 0.9rem;">
+                                                            <option value="">Tous les niveaux</option>
+                                                            <option value="Maternelle">Maternelle</option>
+                                                            <option value="Primaire">Primaire</option>
+                                                            <option value="Collège">Collège</option>
+                                                            <option value="Lycée">Lycée</option>
+                                                        </select>
+                                                        <select id="composeHoraireFilter" class="msg-select-filter" onchange="filterComposeDestinataires()" style="display: none; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: inherit; font-size: 0.9rem;">
+                                                            <option value="">Tous les horaires</option>
+                                                            <option value="Matin">Matin</option>
+                                                            <option value="Soir">Soir / Après-midi</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <!-- Liste destinataires -->
                                                 <div
@@ -7030,6 +7046,7 @@
             let allStaff = [];
             let allStaffMembers = []; // combined professeur+staff for search
             let allParents = []; // ajout pour section comptes
+            let dataLoadedOnce = false;
             document.addEventListener("DOMContentLoaded", () => {
                 initializeUI();
                 loadDashboardData();
@@ -8953,6 +8970,7 @@
                         ? professeurs
                         : [];
                     allStaff = Array.isArray(staff) ? staff : [];
+                    dataLoadedOnce = true;
 
                     // Combiner professeurs et staff pour la recherche
                     const profIds2 = new Set(allProfesseurs.map((p) => p.id));
@@ -10815,7 +10833,7 @@
 
             function showAddClasseForm() {
                 // S'assurer que les données des professeurs sont chargées
-                if (allStaffMembers.length === 0) {
+                if (!dataLoadedOnce) {
                     loadAllData().then(() => {
                         showClasseForm();
                     });
@@ -10869,7 +10887,7 @@
             async function enterClasseEditMode(classeId) {
                 let classe = allClasses.find((c) => c.id === classeId);
                 if (!classe) return;
-                if (allStaffMembers.length === 0 || allEleves.length === 0)
+                if (!dataLoadedOnce)
                     await loadAllData();
 
                 if (!window.classeDetailsBackup) {
@@ -11408,7 +11426,7 @@
 
             function showClasseForm(classe = null) {
                 // S'assurer que les données des professeurs sont chargées
-                if (allStaffMembers.length === 0) {
+                if (!dataLoadedOnce) {
                     loadAllData().then(() => {
                         showClasseFormInternal(classe);
                     });
@@ -11418,11 +11436,6 @@
             }
 
             function showClasseFormInternal(classe = null) {
-                if (allStaffMembers.length === 0 || allEleves.length === 0) {
-                    loadAllData().then(() => showClasseFormInternal(classe));
-                    return;
-                }
-
                 // Sauvegarder la grille actuelle pour pouvoir y revenir
                 if (!window.classeDetailsBackup) {
                     window.classeDetailsBackup = {
@@ -13853,18 +13866,74 @@
                 }
             }
 
+            function onTypeFilterChange() {
+                const typeFilter = document.getElementById("composeTypeFilter").value;
+                const niveauFilter = document.getElementById("composeNiveauFilter");
+                const horaireFilter = document.getElementById("composeHoraireFilter");
+                
+                if (typeFilter === "class") {
+                    niveauFilter.style.display = "";
+                    horaireFilter.style.display = "";
+                } else {
+                    niveauFilter.style.display = "none";
+                    horaireFilter.style.display = "none";
+                    niveauFilter.value = "";
+                    horaireFilter.value = "";
+                }
+                filterComposeDestinataires();
+            }
+
             function renderComposeDestList() {
                 const search = (
                     document.getElementById("composeSearchInput")?.value || ""
                 ).toLowerCase();
+                const typeFilter = document.getElementById("composeTypeFilter")?.value || "";
+                const niveauFilter = document.getElementById("composeNiveauFilter")?.value || "";
+                const horaireFilter = document.getElementById("composeHoraireFilter")?.value || "";
+                
                 const listEl = document.getElementById("composeDestList");
-                const filtered = allDestinataires.filter(
-                    (d) =>
+                const filtered = allDestinataires.filter((d) => {
+                    // Filter by Search
+                    const matchSearch =
                         !search ||
                         d.nom.toLowerCase().includes(search) ||
                         (d.role || "").toLowerCase().includes(search) ||
-                        (d.group || "").toLowerCase().includes(search),
-                );
+                        (d.group || "").toLowerCase().includes(search);
+                        
+                    // Filter by Type
+                    let matchType = true;
+                    if (typeFilter) {
+                        if (typeFilter === "user") {
+                            // Staff, Profs, Eleves
+                            matchType = d.type === "user";
+                        } else {
+                            matchType = d.type === typeFilter;
+                        }
+                    }
+                    
+                    // Filter by Class details (Niveau, Horaire)
+                    let matchNiveau = true;
+                    let matchHoraire = true;
+                    if (typeFilter === "class") {
+                        if (niveauFilter && d.niveau !== niveauFilter) matchNiveau = false;
+                        if (horaireFilter) {
+                            if (!d.horaires) {
+                                matchHoraire = false;
+                            } else {
+                                const horaires = d.horaires.toLowerCase();
+                                const searchHor = horaireFilter.toLowerCase();
+                                // if Soir -> match 'soir' or 'après-midi'
+                                if (searchHor === "soir" || searchHor === "après-midi") {
+                                    matchHoraire = horaires.includes("soir") || horaires.includes("après-midi");
+                                } else {
+                                    matchHoraire = horaires.includes(searchHor);
+                                }
+                            }
+                        }
+                    }
+
+                    return matchSearch && matchType && matchNiveau && matchHoraire;
+                });
                 if (filtered.length === 0) {
                     listEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
                     return;
