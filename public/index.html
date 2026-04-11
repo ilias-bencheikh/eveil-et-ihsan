@@ -2615,7 +2615,97 @@
                 backdrop-filter: blur(4px);
             }
         </style>
-    </head>
+
+    <style>
+        .edt-container {
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 16px;
+            background: var(--md-sys-color-surface);
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .edt-day-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background-color 0.2s;
+        }
+        .edt-day-row:last-child {
+            border-bottom: none;
+        }
+        .edt-day-row:hover {
+            background-color: var(--md-sys-color-surface-container-lowest);
+        }
+        .edt-day-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--md-sys-color-on-surface);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 150px;
+        }
+        .edt-day-toggles {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .edt-toggle-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--md-sys-color-outline);
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 130px;
+            justify-content: center;
+        }
+        .edt-toggle-label:hover {
+            background: var(--md-sys-color-surface-container-highest);
+            border-color: var(--md-sys-color-outline-variant);
+        }
+        .edt-toggle-input {
+            display: none;
+        }
+        .edt-toggle-input:checked + .edt-toggle-label {
+            background: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary-container);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .edt-toggle-input:checked + .edt-toggle-label .material-icons {
+            color: var(--md-sys-color-primary);
+        }
+        @media (max-width: 600px) {
+            .edt-day-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 16px;
+            }
+            .edt-day-toggles {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .edt-toggle-label {
+                flex: 1;
+                min-width: auto;
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
     <body>
         <script>
             // Appliquer immédiatement l'onglet sauvegardé pour éviter le flash visuel
@@ -4537,35 +4627,177 @@
                                                     >
                                                 </div>
                                                 <!-- Barre filtre destinataires -->
-                                                <div class="msg-dest-filter-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
-                                                    <div class="msg-dest-search-wrap">
-                                                        <span class="material-icons">search</span>
+                                                <div
+                                                    class="msg-dest-filter-container"
+                                                    style="
+                                                        display: flex;
+                                                        flex-direction: column;
+                                                        gap: 8px;
+                                                        margin-bottom: 8px;
+                                                    "
+                                                >
+                                                    <div
+                                                        class="msg-dest-search-wrap"
+                                                    >
+                                                        <span
+                                                            class="material-icons"
+                                                            >search</span
+                                                        >
                                                         <input
                                                             type="text"
                                                             id="composeSearchInput"
                                                             class="msg-dest-search-input"
                                                             placeholder="Filtrer par nom ou rôle..."
-                                                            oninput="filterComposeDestinataires()"
+                                                            oninput="
+                                                                filterComposeDestinataires()
+                                                            "
                                                         />
                                                     </div>
-                                                    <div class="msg-dest-advanced-filters" style="display: flex; gap: 8px; flex-wrap: wrap;" id="msgDestAdvancedFilters">
-                                                        <select id="composeTypeFilter" class="msg-select-filter" onchange="onTypeFilterChange()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: inherit; font-size: 0.9rem;">
-                                                            <option value="">Tous les types</option>
-                                                            <option value="user">Staff / Profs / Élèves</option>
-                                                            <option value="parents">Parents</option>
-                                                            <option value="class">Classes</option>
+                                                    <div
+                                                        class="msg-dest-advanced-filters"
+                                                        style="
+                                                            display: flex;
+                                                            gap: 8px;
+                                                            flex-wrap: wrap;
+                                                        "
+                                                        id="msgDestAdvancedFilters"
+                                                    >
+                                                        <select
+                                                            id="composeTypeFilter"
+                                                            class="msg-select-filter"
+                                                            onchange="
+                                                                onTypeFilterChange()
+                                                            "
+                                                            style="
+                                                                padding: 6px
+                                                                    12px;
+                                                                border-radius: 8px;
+                                                                border: 1px
+                                                                    solid
+                                                                    var(
+                                                                        --md-sys-color-outline-variant
+                                                                    );
+                                                                background: var(
+                                                                    --md-sys-color-surface
+                                                                );
+                                                                color: var(
+                                                                    --md-sys-color-on-surface
+                                                                );
+                                                                font-family: inherit;
+                                                                font-size: 0.9rem;
+                                                            "
+                                                        >
+                                                            <option value="">
+                                                                Tous les types
+                                                            </option>
+                                                            <option
+                                                                value="user"
+                                                            >
+                                                                Staff /
+                                                                Profs</option>
+                                                            </option>
+                                                            <option
+                                                                value="parents"
+                                                            >
+                                                                Parents
+                                                            </option>
+                                                            <option
+                                                                value="class"
+                                                            >
+                                                                Classes
+                                                            </option>
                                                         </select>
-                                                        <select id="composeNiveauFilter" class="msg-select-filter" onchange="filterComposeDestinataires()" style="display: none; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: inherit; font-size: 0.9rem;">
-                                                            <option value="">Tous les niveaux</option>
-                                                            <option value="Maternelle">Maternelle</option>
-                                                            <option value="Primaire">Primaire</option>
-                                                            <option value="Collège">Collège</option>
-                                                            <option value="Lycée">Lycée</option>
+                                                        <select
+                                                            id="composeNiveauFilter"
+                                                            class="msg-select-filter"
+                                                            onchange="
+                                                                filterComposeDestinataires()
+                                                            "
+                                                            style="
+                                                                display: none;
+                                                                padding: 6px
+                                                                    12px;
+                                                                border-radius: 8px;
+                                                                border: 1px
+                                                                    solid
+                                                                    var(
+                                                                        --md-sys-color-outline-variant
+                                                                    );
+                                                                background: var(
+                                                                    --md-sys-color-surface
+                                                                );
+                                                                color: var(
+                                                                    --md-sys-color-on-surface
+                                                                );
+                                                                font-family: inherit;
+                                                                font-size: 0.9rem;
+                                                            "
+                                                        >
+                                                            <option value="">
+                                                                Tous les niveaux
+                                                            </option>
+                                                            <option
+                                                                value="Maternelle"
+                                                            >
+                                                                Maternelle
+                                                            </option>
+                                                            <option
+                                                                value="Primaire"
+                                                            >
+                                                                Primaire
+                                                            </option>
+                                                            <option
+                                                                value="Collège"
+                                                            >
+                                                                Collège
+                                                            </option>
+                                                            <option
+                                                                value="Lycée"
+                                                            >
+                                                                Lycée
+                                                            </option>
                                                         </select>
-                                                        <select id="composeHoraireFilter" class="msg-select-filter" onchange="filterComposeDestinataires()" style="display: none; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); font-family: inherit; font-size: 0.9rem;">
-                                                            <option value="">Tous les horaires</option>
-                                                            <option value="Matin">Matin</option>
-                                                            <option value="Soir">Soir / Après-midi</option>
+                                                        <select
+                                                            id="composeHoraireFilter"
+                                                            class="msg-select-filter"
+                                                            onchange="
+                                                                filterComposeDestinataires()
+                                                            "
+                                                            style="
+                                                                display: none;
+                                                                padding: 6px
+                                                                    12px;
+                                                                border-radius: 8px;
+                                                                border: 1px
+                                                                    solid
+                                                                    var(
+                                                                        --md-sys-color-outline-variant
+                                                                    );
+                                                                background: var(
+                                                                    --md-sys-color-surface
+                                                                );
+                                                                color: var(
+                                                                    --md-sys-color-on-surface
+                                                                );
+                                                                font-family: inherit;
+                                                                font-size: 0.9rem;
+                                                            "
+                                                        >
+                                                            <option value="">
+                                                                Tous les
+                                                                horaires
+                                                            </option>
+                                                            <option
+                                                                value="Matin"
+                                                            >
+                                                                Matin
+                                                            </option>
+                                                            <option
+                                                                value="Soir"
+                                                            >
+                                                                Soir /
+                                                                Après-midi
+                                                            </option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -10306,46 +10538,31 @@
                         <p style="margin-bottom:20px;color:var(--md-sys-color-on-surface-variant);font-size:14px;">
                             Cochez les créneaux où cette classe a cours. Vous pouvez sélectionner le matin, l'après-midi, ou les deux pour chaque jour.
                         </p>
-                        <div style="display:flex;flex-direction:column;gap:12px;">
-                            ${jours
-                                .map(
-                                    (jour) => `
-                            <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:14px;
-                                        border:1px solid var(--md-sys-color-outline-variant);">
-                                <div style="font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-                                    <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-tertiary);">today</span>
+                        <div class="edt-container">
+                            ${jours.map(jour => `
+                            <div class="edt-day-row">
+                                <div class="edt-day-name">
+                                    <span class="material-icons" style="color:var(--md-sys-color-tertiary); font-size: 20px;">today</span>
                                     ${joursLabels[jour]}
                                 </div>
-                                <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;
-                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
-                                                  background:var(--md-sys-color-surface);transition:all .2s;"
-                                           onmouseover="this.style.borderColor='var(--md-sys-color-primary)'"
-                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
-                                        <input type="checkbox" id="edt_${jour}_matin"
-                                               ${window._edtCreneaux.some((c) => c.jour === jour && c.periode === "matin") ? "checked" : ""}
-                                               onchange="updateEdtCheckbox(this, '${jour}', 'matin')"
-                                               style="width:18px;height:18px;accent-color:var(--md-sys-color-primary);">
-                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-primary);">wb_sunny</span>
-                                        <span style="font-size:13px;">Matin</span>
+                                <div class="edt-day-toggles">
+                                    <input class="edt-toggle-input" type="checkbox" id="edt_${jour}_matin"
+                                           ${window._edtCreneaux.some((c) => c.jour === jour && c.periode === "matin") ? "checked" : ""}
+                                           onchange="updateEdtCheckbox(this, '${jour}', 'matin')">
+                                    <label class="edt-toggle-label" for="edt_${jour}_matin" title="Matin - ${joursLabels[jour]}">
+                                        <span class="material-icons" style="font-size: 18px;">wb_sunny</span> Matin
                                     </label>
-                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;
-                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
-                                                  background:var(--md-sys-color-surface);transition:all .2s;"
-                                           onmouseover="this.style.borderColor='var(--md-sys-color-secondary)'"
-                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
-                                        <input type="checkbox" id="edt_${jour}_apm"
-                                               ${window._edtCreneaux.some((c) => c.jour === jour && c.periode === "apres-midi") ? "checked" : ""}
-                                               onchange="updateEdtCheckbox(this, '${jour}', 'apres-midi')"
-                                               style="width:18px;height:18px;accent-color:var(--md-sys-color-secondary);">
-                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-secondary);">wb_twilight</span>
-                                        <span style="font-size:13px;">Après-midi</span>
+
+                                    <input class="edt-toggle-input" type="checkbox" id="edt_${jour}_apm"
+                                           ${window._edtCreneaux.some((c) => c.jour === jour && c.periode === "apres-midi") ? "checked" : ""}
+                                           onchange="updateEdtCheckbox(this, '${jour}', 'apres-midi')">
+                                    <label class="edt-toggle-label" for="edt_${jour}_apm" title="Après-midi - ${joursLabels[jour]}">
+                                        <span class="material-icons" style="font-size: 18px;">wb_twilight</span> Après-midi
                                     </label>
                                 </div>
-                            </div>`,
-                                )
-                                .join("")}
+                            </div>`).join("")}
                         </div>
+
                         <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid var(--md-sys-color-outline-variant);">
                             <button class="md-btn md-btn-text" onclick="closeEdtModal()">Annuler</button>
                             <button class="md-btn md-btn-filled" onclick="saveEdtModal()">
@@ -10887,8 +11104,7 @@
             async function enterClasseEditMode(classeId) {
                 let classe = allClasses.find((c) => c.id === classeId);
                 if (!classe) return;
-                if (!dataLoadedOnce)
-                    await loadAllData();
+                if (!dataLoadedOnce) await loadAllData();
 
                 if (!window.classeDetailsBackup) {
                     window.classeDetailsBackup = {
@@ -11569,43 +11785,27 @@
                         <p style="margin-bottom:16px;color:var(--md-sys-color-on-surface-variant);font-size:13px;">
                             Cochez les créneaux où cette classe a cours. Vous pourrez modifier cela plus tard.
                         </p>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
-                            ${jours
-                                .map(
-                                    (jour) => `
-                            <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:12px 14px;
-                                        border:1px solid var(--md-sys-color-outline-variant);display:flex;align-items:center;gap:12px;">
-                                <div style="font-weight:600;font-size:13px;color:var(--md-sys-color-on-surface);min-width:80px;display:flex;align-items:center;gap:6px;">
-                                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
+                        <div class="edt-container">
+                            ${jours.map(jour => `
+                            <div class="edt-day-row">
+                                <div class="edt-day-name">
+                                    <span class="material-icons" style="color:var(--md-sys-color-tertiary); font-size: 20px;">today</span>
                                     ${joursLabels[jour]}
                                 </div>
-                                <div style="display:flex;gap:8px;flex:1;">
-                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;
-                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
-                                                  background:var(--md-sys-color-surface);transition:all .2s;flex:1;justify-content:center;"
-                                           onmouseover="this.style.borderColor='var(--md-sys-color-primary)'"
-                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
-                                        <input type="checkbox" id="create_edt_${jour}_matin"
-                                               onchange="updateCreateClasseEdt('${jour}', 'matin', this.checked)"
-                                               style="width:16px;height:16px;accent-color:var(--md-sys-color-primary);">
-                                        <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-primary);">wb_sunny</span>
-                                        <span style="font-size:12px;">Matin</span>
+                                <div class="edt-day-toggles">
+                                    <input class="edt-toggle-input" type="checkbox" id="create_edt_${jour}_matin"
+                                           onchange="updateCreateClasseEdt('${jour}', 'matin', this.checked)">
+                                    <label class="edt-toggle-label" for="create_edt_${jour}_matin" title="Matin - ${joursLabels[jour]}">
+                                        <span class="material-icons" style="font-size: 18px;">wb_sunny</span> Matin
                                     </label>
-                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;
-                                                  border-radius:8px;border:1px solid var(--md-sys-color-outline-variant);
-                                                  background:var(--md-sys-color-surface);transition:all .2s;flex:1;justify-content:center;"
-                                           onmouseover="this.style.borderColor='var(--md-sys-color-secondary)'"
-                                           onmouseout="this.style.borderColor='var(--md-sys-color-outline-variant)'">
-                                        <input type="checkbox" id="create_edt_${jour}_apm"
-                                               onchange="updateCreateClasseEdt('${jour}', 'apres-midi', this.checked)"
-                                               style="width:16px;height:16px;accent-color:var(--md-sys-color-secondary);">
-                                        <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-secondary);">wb_twilight</span>
-                                        <span style="font-size:12px;">Après-midi</span>
+
+                                    <input class="edt-toggle-input" type="checkbox" id="create_edt_${jour}_apm"
+                                           onchange="updateCreateClasseEdt('${jour}', 'apres-midi', this.checked)">
+                                    <label class="edt-toggle-label" for="create_edt_${jour}_apm" title="Après-midi - ${joursLabels[jour]}">
+                                        <span class="material-icons" style="font-size: 18px;">wb_twilight</span> Après-midi
                                     </label>
                                 </div>
-                            </div>`,
-                                )
-                                .join("")}
+                            </div>`).join("")}
                         </div>
                     </div>
                 </div>
@@ -11625,7 +11825,6 @@
             `;
             }
 
-            // Fonction pour mettre à jour l'emploi du temps lors de la création
             function updateCreateClasseEdt(jour, periode, checked) {
                 if (!window._createClasseEdtCreneaux)
                     window._createClasseEdtCreneaux = [];
@@ -13867,10 +14066,15 @@
             }
 
             function onTypeFilterChange() {
-                const typeFilter = document.getElementById("composeTypeFilter").value;
-                const niveauFilter = document.getElementById("composeNiveauFilter");
-                const horaireFilter = document.getElementById("composeHoraireFilter");
-                
+                const typeFilter =
+                    document.getElementById("composeTypeFilter").value;
+                const niveauFilter = document.getElementById(
+                    "composeNiveauFilter",
+                );
+                const horaireFilter = document.getElementById(
+                    "composeHoraireFilter",
+                );
+
                 if (typeFilter === "class") {
                     niveauFilter.style.display = "";
                     horaireFilter.style.display = "";
@@ -13887,10 +14091,14 @@
                 const search = (
                     document.getElementById("composeSearchInput")?.value || ""
                 ).toLowerCase();
-                const typeFilter = document.getElementById("composeTypeFilter")?.value || "";
-                const niveauFilter = document.getElementById("composeNiveauFilter")?.value || "";
-                const horaireFilter = document.getElementById("composeHoraireFilter")?.value || "";
-                
+                const typeFilter =
+                    document.getElementById("composeTypeFilter")?.value || "";
+                const niveauFilter =
+                    document.getElementById("composeNiveauFilter")?.value || "";
+                const horaireFilter =
+                    document.getElementById("composeHoraireFilter")?.value ||
+                    "";
+
                 const listEl = document.getElementById("composeDestList");
                 const filtered = allDestinataires.filter((d) => {
                     // Filter by Search
@@ -13899,7 +14107,7 @@
                         d.nom.toLowerCase().includes(search) ||
                         (d.role || "").toLowerCase().includes(search) ||
                         (d.group || "").toLowerCase().includes(search);
-                        
+
                     // Filter by Type
                     let matchType = true;
                     if (typeFilter) {
@@ -13910,12 +14118,13 @@
                             matchType = d.type === typeFilter;
                         }
                     }
-                    
+
                     // Filter by Class details (Niveau, Horaire)
                     let matchNiveau = true;
                     let matchHoraire = true;
                     if (typeFilter === "class") {
-                        if (niveauFilter && d.niveau !== niveauFilter) matchNiveau = false;
+                        if (niveauFilter && d.niveau !== niveauFilter)
+                            matchNiveau = false;
                         if (horaireFilter) {
                             if (!d.horaires) {
                                 matchHoraire = false;
@@ -13923,8 +14132,13 @@
                                 const horaires = d.horaires.toLowerCase();
                                 const searchHor = horaireFilter.toLowerCase();
                                 // if Soir -> match 'soir' or 'après-midi'
-                                if (searchHor === "soir" || searchHor === "après-midi") {
-                                    matchHoraire = horaires.includes("soir") || horaires.includes("après-midi");
+                                if (
+                                    searchHor === "soir" ||
+                                    searchHor === "après-midi"
+                                ) {
+                                    matchHoraire =
+                                        horaires.includes("soir") ||
+                                        horaires.includes("après-midi");
                                 } else {
                                     matchHoraire = horaires.includes(searchHor);
                                 }
@@ -13932,7 +14146,9 @@
                         }
                     }
 
-                    return matchSearch && matchType && matchNiveau && matchHoraire;
+                    return (
+                        matchSearch && matchType && matchNiveau && matchHoraire
+                    );
                 });
                 if (filtered.length === 0) {
                     listEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--md-sys-color-on-surface-variant);">Aucun résultat</div>`;
