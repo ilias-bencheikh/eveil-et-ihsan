@@ -2705,6 +2705,8 @@
             }
         }
     </style>
+    <!-- SheetJS for Excel Import/Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
     <body>
         <script>
@@ -5504,7 +5506,7 @@
                                                 >person_add</span
                                             >
                                             <span
-                                                >Ajouter un 2�à parent /
+                                                >Ajouter un 2<sup>ème</sup> parent /
                                                 tuteur</span
                                             >
                                             <span
@@ -5556,7 +5558,7 @@
                                                                 );
                                                             "
                                                         >
-                                                            2�à Parent / Tuteur
+                                                            2<sup>ème</sup> Parent / Tuteur
                                                         </div>
                                                         <div
                                                             style="
@@ -6658,7 +6660,32 @@
                                     plateforme.
                                 </p>
                             </div>
-                            <div style="display: flex; gap: 12px">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="file" id="importExcelInput" accept=".xlsx, .xls" style="display: none;" onchange="importElevesExcel(event)">
+                                <button
+                                    class="md-btn md-btn-outlined"
+                                    onclick="document.getElementById('importExcelInput').click()"
+                                    style="background: white"
+                                >
+                                    <span
+                                        class="material-icons"
+                                        style="font-size: 18px"
+                                        >file_upload</span
+                                    >
+                                    Importer Excel (Élèves)
+                                </button>
+                                <button
+                                    class="md-btn md-btn-outlined"
+                                    onclick="exportElevesExcel()"
+                                    style="background: white"
+                                >
+                                    <span
+                                        class="material-icons"
+                                        style="font-size: 18px"
+                                        >file_download</span
+                                    >
+                                    Exporter Excel (Élèves)
+                                </button>
                                 <button
                                     class="md-btn md-btn-outlined"
                                     onclick="exportAccounts()"
@@ -6669,7 +6696,7 @@
                                         style="font-size: 18px"
                                         >file_download</span
                                     >
-                                    Exporter CSV
+                                    Exporter CSV (Tout)
                                 </button>
                             </div>
                         </div>
@@ -8602,8 +8629,8 @@
                       : "";
 
                 const info2 =
-                    isParent && item.telephone
-                        ? `<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;"><span class="material-icons" style="font-size:15px;color:var(--md-sys-color-primary);">phone</span>${item.telephone}</div>`
+                    isParent && item.tel
+                        ? `<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:6px;"><span class="material-icons" style="font-size:15px;color:var(--md-sys-color-primary);">phone</span>${item.tel}</div>`
                         : "";
 
                 const editFunc = isParent
@@ -8667,8 +8694,8 @@
                       : '<span style="color:var(--md-sys-color-on-surface-variant); font-style:italic;">Sans classe</span>';
 
                 const telInfo =
-                    isParent && item.telephone
-                        ? `<span style="color:var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">phone</span>${item.telephone}</span>`
+                    isParent && item.tel
+                        ? `<span style="color:var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px;">phone</span>${item.tel}</span>`
                         : '<span style="color:var(--md-sys-color-outline);">-</span>';
 
                 const editFunc = isParent
@@ -8727,7 +8754,7 @@
                 let csv = "Type,Nom,Prénom,Email,Classe,Téléphone\n";
                 filtered.forEach((a) => {
                     const t = a.type === "parent" ? "Parent" : "Élève";
-                    csv += `"${t}","${a.nom || ""}","${a.prenom || ""}","${a.email || ""}","${a.classe || ""}","${a.telephone || ""}"\n`;
+                    csv += `"${t}","${a.nom || ""}","${a.prenom || ""}","${a.email || ""}","${a.classe || ""}","${a.tel || ""}"\n`;
                 });
 
                 const blob = new Blob(["\uFEFF" + csv], {
@@ -8741,6 +8768,97 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }
+
+            async function exportElevesExcel() {
+                try {
+                    showSnackbar("Préparation de l'export Excel...");
+                    // Refresh data
+                    await Promise.all([loadEleves(), loadAccounts()]);
+
+                    const rows = allEleves.map(e => {
+                        const parents = allParents.filter(p => p.enfants && p.enfants.some(enf => enf.id === e.id));
+                        const p1 = parents[0] || {};
+                        const p2 = parents[1] || {};
+
+                        return {
+                            "Nom": e.nom || "",
+                            "Prénom": e.prenom || "",
+                            "Classe": e.classe || "",
+                            "Date de Naissance": e.dateNaissance || "",
+                            "Téléphone Élève": e.tel || "",
+                            "Email Élève": e.email || "",
+                            "Année Scolaire": e.anneeScolaire || "",
+                            "Parent 1 Nom": p1.nom || "",
+                            "Parent 1 Prénom": p1.prenom || "",
+                            "Parent 1 Téléphone": p1.tel || "",
+                            "Parent 1 Email": p1.email || "",
+                            "Parent 1 Adresse": p1.adresse || "",
+                            "Parent 2 Nom": p2.nom || "",
+                            "Parent 2 Prénom": p2.prenom || "",
+                            "Parent 2 Téléphone": p2.tel || "",
+                            "Parent 2 Email": p2.email || "",
+                            "Parent 2 Adresse": p2.adresse || "",
+                            "Frais Inscription": parseFloat(e.fraisInscription) || 0,
+                            "Frais Déjà Payé": parseFloat(e.montantPaye) || 0,
+                            "Nombre de Paiements Prévus": parseInt(e.nbPaiements) || 1,
+                            "Paiements Effectués": parseInt(e.paiementsEffectues) || 0,
+                            "Frais Valide": e.fraisValide ? "Oui" : "Non"
+                        };
+                    });
+
+                    const ws = XLSX.utils.json_to_sheet(rows);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Élèves");
+                    XLSX.writeFile(wb, "Liste_Eleves_Eveil_Ihsan.xlsx");
+                    showSnackbar("Export Excel réussi !");
+                } catch (error) {
+                    console.error(error);
+                    showSnackbar("Erreur lors de l'export");
+                }
+            }
+
+            async function importElevesExcel(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                        if (jsonData.length === 0) {
+                            showSnackbar("Le fichier Excel est vide.");
+                            return;
+                        }
+
+                        showSnackbar("Importation en cours...");
+                        const response = await fetch(`${API_URL}/eleves/import`, {
+                            method: "POST",
+                            headers: getHeaders(),
+                            body: JSON.stringify({ elevesData: jsonData })
+                        });
+
+                        if (response.ok) {
+                            const resData = await response.json();
+                            showSnackbar(resData.message || "Importation réussie");
+                            await loadEleves();
+                            await loadAccounts();
+                        } else {
+                            const err = await response.json();
+                            showSnackbar(err.error || "Erreur lors de l'importation");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showSnackbar("Erreur de lecture du fichier Excel");
+                    }
+                    // Reset input
+                    event.target.value = "";
+                };
+                reader.readAsArrayBuffer(file);
             }
 
             function editParent(id) {
@@ -9730,7 +9848,7 @@
                         </div>
                         <div>
                             <h4 style="margin:0;font-size:17px;color:${parent.isPrimary ? "var(--md-sys-color-on-secondary-container)" : "var(--md-sys-color-on-surface)"};">
-                                ${parent.isPrimary ? "Parent principal" : "2�à parent / tuteur"}
+                                ${parent.isPrimary ? "Parent principal" : "2<sup>ème</sup> parent / tuteur"}
                             </h4>
                             <p style="margin:2px 0 0;font-size:13px;opacity:0.75;">${parent.prenom || ""} ${parent.nom || ""}</p>
                         </div>
@@ -9944,7 +10062,7 @@
                                 ${(parent.prenom || "P")[0].toUpperCase()}
                             </div>
                             <div>
-                                <h5 style="margin: 0; font-size: 15px;">${parent.isPrimary ? "�à " : ""}Parent ${idx + 1}</h5>
+                                <h5 style="margin: 0; font-size: 15px;">${parent.isPrimary ? "<sup>ème</sup> " : ""}Parent ${idx + 1}</h5>
                                 <span style="font-size: 12px; color: var(--md-sys-color-on-surface-variant);">${parent.isPrimary ? "Principal" : "Secondaire"}</span>
                             </div>
                         </div>
@@ -10948,7 +11066,7 @@
                 let csv = "Type,Nom,Prénom,Email,Classe,Téléphone\n";
                 filtered.forEach((a) => {
                     const t = a.type === "parent" ? "Parent" : "Élève";
-                    csv += `"${t}","${a.nom || ""}","${a.prenom || ""}","${a.email || ""}","${a.classe || ""}","${a.telephone || ""}"\n`;
+                    csv += `"${t}","${a.nom || ""}","${a.prenom || ""}","${a.email || ""}","${a.classe || ""}","${a.tel || ""}"\n`;
                 });
 
                 const blob = new Blob(["\uFEFF" + csv], {
@@ -15952,13 +16070,13 @@
                     section.style.display = "block";
                     btn.classList.add("active");
                     btn.querySelector("span:nth-child(2)").textContent =
-                        "2�à parent ajouté";
+                        "2ème parent ajouté";
                     btn.querySelector("span:last-child").textContent = "check";
                 } else {
                     section.style.display = "none";
                     btn.classList.remove("active");
                     btn.querySelector("span:nth-child(2)").textContent =
-                        "Ajouter un 2�à parent / tuteur";
+                        "Ajouter un 2ème parent / tuteur";
                     btn.querySelector("span:last-child").textContent = "add";
                 }
             }
@@ -18040,7 +18158,7 @@
                         let html = "";
 
                         if (parents.length > 0) {
-                            html += `<div style="font-size:0.78rem; font-weight:600; color:var(--md-sys-color-on-surface-variant); text-transform:uppercase; letter-spacing:.05em; padding:6px 4px 2px;">à&#172217;à&#15733;à��à&#15733;à��à&#15733;Familles</div>`;
+                            html += `<div style="font-size:0.78rem; font-weight:600; color:var(--md-sys-color-on-surface-variant); text-transform:uppercase; letter-spacing:.05em; padding:6px 4px 2px;">Familles</div>`;
                             html += parents
                                 .map((p) => {
                                     const enfantsData = JSON.stringify(
@@ -18123,7 +18241,7 @@
                 document.getElementById("adminFraisSearchResults").innerHTML =
                     "";
                 document.getElementById("adminFraisSelectedName").textContent =
-                    `à&#172217;à&#15733;à��à&#15733;à��à&#15733;Famille ${parentNom}`;
+                    `Famille ${parentNom}`;
 
                 // Résumé enfants dans adminFraisSelectedInfo
                 const infoEl = document.getElementById(

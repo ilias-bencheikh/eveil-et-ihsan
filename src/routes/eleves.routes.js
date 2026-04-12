@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
     fileFilter: (req, file, cb) => {
@@ -109,14 +109,14 @@ router.get('/classe/:nomClasse', (req, res) => {
 router.get('/profil', requireAuth, async (req, res) => {
     try {
         let eleveId = req.userId;
-        
+
         // Si c'est un parent, on doit spécifier l'ID de l'enfant
         if (req.userRole === 'parent') {
             const enfantId = req.query.enfantId;
             if (!enfantId) {
                 return res.status(400).json({ message: 'Paramètre enfantId requis pour les parents' });
             }
-            
+
             // Vérifier que l'enfant appartient bien à ce parent
             const lien = await dbGet(db, 'SELECT id FROM eleve_parent WHERE parentId = ? AND eleveId = ?', [req.userId, enfantId]);
             if (!lien) {
@@ -127,15 +127,15 @@ router.get('/profil', requireAuth, async (req, res) => {
             return res.status(403).json({ message: 'Accès réservé aux élèves et parents' });
         }
 
-        const eleve = await dbGet(db, 
-            'SELECT id, nom, prenom, email, photo, tel, status, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, classe FROM eleves WHERE id = ?', 
+        const eleve = await dbGet(db,
+            'SELECT id, nom, prenom, email, photo, tel, status, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, classe FROM eleves WHERE id = ?',
             [eleveId]
         );
-        
+
         if (!eleve) {
             return res.status(404).json({ message: 'Élève non trouvé' });
         }
-        
+
         // Récupérer les parents de l'élève
         const parents = await dbAll(db, `
             SELECT p.id, p.nom, p.prenom, p.email, p.tel, ep.relation, ep.isPrimary
@@ -144,12 +144,12 @@ router.get('/profil', requireAuth, async (req, res) => {
             WHERE ep.eleveId = ?
             ORDER BY ep.isPrimary DESC
         `, [eleveId]);
-        
+
         res.json({
             ...eleve,
             parents
         });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -159,14 +159,14 @@ router.get('/profil', requireAuth, async (req, res) => {
 router.put('/profil', requireAuth, uploadMiddleware, async (req, res) => {
     try {
         let eleveId = req.userId;
-        
+
         // Si c'est un parent, vérifier l'accès à l'enfant
         if (req.userRole === 'parent') {
             const enfantId = req.body.enfantId || req.query.enfantId;
             if (!enfantId) {
                 return res.status(400).json({ error: 'Paramètre enfantId requis pour les parents' });
             }
-            
+
             const lien = await dbGet(db, 'SELECT id FROM eleve_parent WHERE parentId = ? AND eleveId = ?', [req.userId, enfantId]);
             if (!lien) {
                 return res.status(403).json({ error: 'Cet enfant n\'est pas lié à votre compte' });
@@ -182,7 +182,7 @@ router.put('/profil', requireAuth, uploadMiddleware, async (req, res) => {
         const { email, tel, deletePhoto } = req.body;
         const deletePhotoValue = Array.isArray(deletePhoto) ? deletePhoto[0] : deletePhoto;
         const photo = req.file ? `/uploads/profile/${req.file.filename}` : null;
-        
+
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return res.status(400).json({ error: 'Email invalide' });
         }
@@ -252,10 +252,10 @@ router.put('/profil', requireAuth, uploadMiddleware, async (req, res) => {
         const query = `UPDATE eleves SET ${updateFields.join(', ')} WHERE id = ?`;
 
         await dbRun(db, query, updateValues);
-        
+
         // Récupérer les données mises à jour
         const updatedEleve = await dbGet(db, 'SELECT id, nom, prenom, email, photo, tel FROM eleves WHERE id = ?', [eleveId]);
-        
+
         // Récupérer les parents
         const parents = await dbAll(db, `
             SELECT p.id, p.nom, p.prenom, p.email, p.tel
@@ -263,9 +263,9 @@ router.put('/profil', requireAuth, uploadMiddleware, async (req, res) => {
             INNER JOIN eleve_parent ep ON p.id = ep.parentId
             WHERE ep.eleveId = ?
         `, [eleveId]);
-        
-        res.json({ 
-            message: 'Profil mis à jour avec succès', 
+
+        res.json({
+            message: 'Profil mis à jour avec succès',
             eleve: {
                 ...updatedEleve,
                 parents
@@ -284,11 +284,11 @@ router.get('/:id', async (req, res) => {
     if (req.params.id === 'check-token' || req.params.id === 'activate' || req.params.id === 'inscription' || req.params.id === 'famille-by-email') {
         return res.status(404).json({ message: 'Route non trouvée' });
     }
-    
+
     try {
         const eleve = await dbGet(db, 'SELECT * FROM eleves WHERE id = ?', [req.params.id]);
         if (!eleve) return res.status(404).json({ message: 'Élève non trouvé' });
-        
+
         // Récupérer les parents de l'élève
         const parents = await dbAll(db, `
             SELECT p.id, p.nom, p.prenom, p.email, p.tel, p.adresse, p.profession, p.activated, ep.relation, ep.isPrimary
@@ -297,10 +297,10 @@ router.get('/:id', async (req, res) => {
             WHERE ep.eleveId = ?
             ORDER BY ep.isPrimary DESC
         `, [req.params.id]);
-        
+
         // Vérifier si au moins un parent a activé son compte
         const parentsActivated = parents.length > 0 && parents.some(p => p.activated === 1);
-        
+
         res.json({ ...eleve, parents, parentsActivated });
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -312,7 +312,7 @@ router.get('/:id/famille', (req, res) => {
     db.get('SELECT familleLienId, enFamille, email FROM eleves WHERE id = ?', [req.params.id], (err, eleve) => {
         if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
         if (!eleve) return res.status(404).json({ message: 'Élève non trouvé' });
-        
+
         if (!eleve.enFamille || !eleve.familleLienId) {
             db.get('SELECT * FROM eleves WHERE id = ?', [req.params.id], (err, row) => {
                 if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -330,9 +330,9 @@ router.get('/:id/famille', (req, res) => {
 // Obtenir la famille par email (pour le switch d'élève)
 router.get('/famille-by-email/:email', (req, res) => {
     const email = decodeURIComponent(req.params.email);
-    
-    db.all('SELECT id, nom, prenom, classe, photo, enFamille, familleLienId FROM eleves WHERE email = ? AND activated = 1', 
-        [email], 
+
+    db.all('SELECT id, nom, prenom, classe, photo, enFamille, familleLienId FROM eleves WHERE email = ? AND activated = 1',
+        [email],
         (err, rows) => {
             if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             res.json(rows || []);
@@ -345,50 +345,50 @@ router.get('/famille-by-email/:email', (req, res) => {
 // Route d'inscription publique pour élèves sans parents
 router.post('/inscription', async (req, res) => {
     const { nom, prenom, email, tel, dateNaissance, classe, fraisInscription, nbPaiements, anneeScolaire } = req.body;
-    
+
     if (!email || !nom || !prenom) {
         return res.status(400).json({ error: 'Email, nom et prénom requis' });
     }
-    
+
     try {
         // Vérifier que l'email n'est pas déjà utilisé
         const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [email]);
         if (existingEleve) {
             return res.status(400).json({ error: 'Cet email est déjà utilisé' });
         }
-        
+
         const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [email]);
         if (existingParent) {
             return res.status(400).json({ error: 'Cet email est déjà utilisé' });
         }
-        
+
         const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [email]);
         if (existingProf) {
             return res.status(400).json({ error: 'Cet email est déjà utilisé' });
         }
-        
+
         const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [email]);
         if (existingStaff) {
             return res.status(400).json({ error: 'Cet email est déjà utilisé' });
         }
-        
+
         const id = generateId('eleve');
         const activationToken = generateToken();
         const frais = parseFloat(fraisInscription || 0) || 0;
         const nb = parseInt(nbPaiements || 1, 10) || 1;
-        
+
         await dbRun(db, `
-            INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, 
+            INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated,
                                enFamille, nombreFamille, familleLienId, tel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire)
             VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, ?, 0, 0, ?)
         `, [id, nom, prenom, dateNaissance || null, classe || null, email, activationToken, tel || null, frais, nb, anneeScolaire || null]);
-        
-        res.status(201).json({ 
+
+        res.status(201).json({
             success: true,
             message: 'Inscription réussie. En attente de validation.',
             eleve: { id, nom, prenom }
         });
-        
+
     } catch (error) {
         console.error('Erreur inscription élève:', error);
         res.status(500).json({ error: 'Erreur lors de l\'inscription' });
@@ -398,7 +398,7 @@ router.post('/inscription', async (req, res) => {
 // Créer un élève (admin/secretariat)
 router.post('/', checkPermission('create'), async (req, res) => {
     const { nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, tel, anneeScolaire } = req.body;
-    
+
     try {
         // Vérifier que l'email n'est pas déjà utilisé si fourni
         if (email) {
@@ -406,44 +406,44 @@ router.post('/', checkPermission('create'), async (req, res) => {
             if (existingEleve) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un élève' });
             }
-            
+
             const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [email]);
             if (existingParent) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un parent' });
             }
-            
+
             const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [email]);
             if (existingProf) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
             }
-            
+
             const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [email]);
             if (existingStaff) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du bureau' });
             }
         }
-        
+
         const id = req.body.id || generateId('eleve');
         const activationToken = email ? generateToken() : null;
         const frais = parseFloat(fraisInscription || 0) || 0;
         const nb = parseInt(nbPaiements || 1, 10) || 1;
-        
+
         await dbRun(db, `
-            INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated, 
-                               enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements, 
+            INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated,
+                               enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements,
                                fraisValide, paiementsEffectues, tel, anneeScolaire)
             VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
-        `, [id, nom, prenom, dateNaissance || null, classe || null, email || null, activationToken, 
+        `, [id, nom, prenom, dateNaissance || null, classe || null, email || null, activationToken,
             enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, tel || null, anneeScolaire || null]);
-        
+
         const activationLink = email ? `http://${req.headers.host}/activation.html?token=${activationToken}` : null;
-        
-        res.status(201).json({ 
+
+        res.status(201).json({
             id, nom, prenom, dateNaissance, classe, email, enFamille, nombreFamille, familleLienId, photo,
             activationLink,
             message: email ? 'Élève créé. Envoyez le lien d\'activation.' : 'Élève créé (sans compte propre).'
         });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -488,7 +488,7 @@ router.post('/:id/paiement', checkPermission('update'), async (req, res) => {
         const nouveauNbPaiements = (parseInt(eleve.paiementsEffectues || 0, 10)) + 1;
         const fraisValide = nouveauMontantPaye >= totalFrais - 0.01 ? 1 : 0;
 
-        await dbRun(db, 
+        await dbRun(db,
             'UPDATE eleves SET montantPaye = ?, paiementsEffectues = ?, fraisValide = ? WHERE id = ?',
             [nouveauMontantPaye, nouveauNbPaiements, fraisValide, eleveId]
         );
@@ -647,30 +647,30 @@ router.put('/:id', checkPermission('update'), async (req, res) => {
             if (existingEleve) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un autre élève' });
             }
-            
+
             const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [email]);
             if (existingParent) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un parent' });
             }
-            
+
             const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [email]);
             if (existingProf) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
             }
-            
+
             const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [email]);
             if (existingStaff) {
                 return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du bureau' });
             }
         }
-        
-        await dbRun(db, 
+
+        await dbRun(db,
             'UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, tel = ? WHERE id = ?',
             [nom, prenom, dateNaissance || null, classe || null, email || null, photo || null, tel || null, req.params.id]
         );
-        
+
         res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, tel });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -734,37 +734,37 @@ router.delete('/:id', checkPermission('delete'), async (req, res) => {
 // Activer un compte élève (avec hashage bcrypt et rate limiting)
 router.post('/activate', activationLimiter, async (req, res) => {
     const { token, password } = req.body;
-    
+
     if (!token || !password) {
         return res.status(400).json({ error: 'Token et mot de passe requis' });
     }
-    
+
     // Validation du mot de passe avec règles de complexité
     const passwordCheck = validatePassword(password);
     if (!passwordCheck.valid) {
         return res.status(400).json({ error: passwordCheck.message });
     }
-    
+
     try {
         const eleve = await dbGet(db, 'SELECT * FROM eleves WHERE activationToken = ? AND activated = 0', [token]);
-        
+
         if (!eleve) {
             return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
         }
-        
+
         // Hasher le mot de passe avec bcrypt
         const hashedPassword = await hashPassword(password);
-        
-        await dbRun(db, 
+
+        await dbRun(db,
             'UPDATE eleves SET password = ?, activated = 1, activationToken = NULL WHERE id = ?',
             [hashedPassword, eleve.id]
         );
-        
-        res.json({ 
+
+        res.json({
             message: 'Compte activé avec succès! Vous pouvez maintenant vous connecter.',
             email: eleve.email
         });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -774,11 +774,11 @@ router.post('/activate', activationLimiter, async (req, res) => {
 router.get('/check-token/:token', async (req, res) => {
     try {
         const eleve = await dbGet(db, 'SELECT nom, prenom, email FROM eleves WHERE activationToken = ? AND activated = 0', [req.params.token]);
-        
+
         if (!eleve) {
             return res.status(404).json({ error: 'Token invalide ou compte déjà activé' });
         }
-        
+
         res.json(eleve);
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -792,10 +792,10 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
     if (req.userRole !== 'parent') {
         return res.status(403).json({ message: 'Accès réservé aux parents' });
     }
-    
+
     try {
         const enfants = await dbAll(db, `
-            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye 
+            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye
             FROM eleves e
             INNER JOIN eleve_parent ep ON e.id = ep.eleveId
             WHERE ep.parentId = ?
@@ -803,17 +803,17 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
 
         // Récupérer les paiements pour chaque enfant
         for (const enfant of enfants) {
-            enfant.paiements = await dbAll(db, 
+            enfant.paiements = await dbAll(db,
                 'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
                 [enfant.id]
             );
             enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
         }
-        
+
         const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
         const totalMontantPaye = enfants.reduce((sum, e) => sum + (e.montantPaye || 0), 0);
         const resteAPayer = Math.max(0, totalFrais - totalMontantPaye);
-        
+
         res.json({
             enfants,
             totalFrais,
@@ -822,7 +822,7 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
             totalNbPaiements: enfants.reduce((sum, e) => sum + (e.nbPaiements || 0), 0),
             resteAPayer
         });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -831,38 +831,38 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
 // Obtenir les frais d'une famille (admin)
 router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
     const { parentId } = req.params;
-    
+
     if (!['admin', 'secretaire', 'secretariat', 'directeur'].includes(req.userRole)) {
         return res.status(403).json({ message: 'Accès non autorisé' });
     }
-    
+
     try {
         const enfants = await dbAll(db, `
-            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye 
+            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye
             FROM eleves e
             INNER JOIN eleve_parent ep ON e.id = ep.eleveId
             WHERE ep.parentId = ?
         `, [parentId]);
 
         for (const enfant of enfants) {
-            enfant.paiements = await dbAll(db, 
+            enfant.paiements = await dbAll(db,
                 'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
                 [enfant.id]
             );
             enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
         }
-        
+
         const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
         const totalMontantPaye = enfants.reduce((sum, e) => sum + (e.montantPaye || 0), 0);
         const resteAPayer = Math.max(0, totalFrais - totalMontantPaye);
-        
+
         res.json({
             enfants,
             totalFrais,
             totalMontantPaye,
             resteAPayer
         });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -876,7 +876,7 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
         if (req.userRole === 'eleve' && req.userId !== eleveId) {
             return res.status(403).json({ message: 'Accès non autorisé' });
         }
-        
+
         // Si c'est un parent, vérifier que l'enfant lui appartient
         if (req.userRole === 'parent') {
             const lien = await dbGet(db, 'SELECT id FROM eleve_parent WHERE parentId = ? AND eleveId = ?', [req.userId, eleveId]);
@@ -884,33 +884,33 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
                 return res.status(403).json({ message: 'Cet enfant n\'est pas lié à votre compte' });
             }
         }
-        
-        const eleve = await dbGet(db, 
-            'SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, montantPaye FROM eleves WHERE id = ?', 
+
+        const eleve = await dbGet(db,
+            'SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, montantPaye FROM eleves WHERE id = ?',
             [eleveId]
         );
-        
+
         if (!eleve) {
             return res.status(404).json({ message: 'Élève non trouvé' });
         }
 
         // Récupérer l'historique des paiements
-        const paiements = await dbAll(db, 
-            'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC', 
+        const paiements = await dbAll(db,
+            'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
             [eleveId]
         );
-        
+
         const montantPaye = parseFloat(eleve.montantPaye || 0);
         const fraisParPaiement = eleve.nbPaiements > 0 ? eleve.fraisInscription / eleve.nbPaiements : eleve.fraisInscription;
         const resteAPayer = Math.max(0, eleve.fraisInscription - montantPaye);
-        
+
         res.json({
             eleve: { ...eleve, montantPaye },
             fraisParPaiement,
             resteAPayer,
             paiements
         });
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
@@ -938,7 +938,7 @@ router.post('/:id/reinscription', checkPermission('update'), async (req, res) =>
 
         // Mettre à jour l'élève avec la nouvelle année scolaire, la classe, les frais réinitialisés
         await dbRun(db, `
-            UPDATE eleves SET 
+            UPDATE eleves SET
                 anneeScolaire = ?,
                 classe = ?,
                 fraisInscription = ?,
@@ -988,7 +988,7 @@ router.post('/reinscription/batch', checkPermission('update'), async (req, res) 
             const nb = parseInt(e.nbPaiements || 1, 10) || 1;
 
             await dbRun(db, `
-                UPDATE eleves SET 
+                UPDATE eleves SET
                     anneeScolaire = ?,
                     classe = ?,
                     fraisInscription = ?,
@@ -1012,6 +1012,92 @@ router.post('/reinscription/batch', checkPermission('update'), async (req, res) 
     } catch (err) {
         console.error('Erreur réinscription batch:', err);
         res.status(500).json({ error: 'Erreur lors de la réinscription' });
+    }
+});
+
+// Import bulk depuis Excel
+router.post('/import', checkPermission('create'), async (req, res) => {
+    const { elevesData } = req.body;
+    if (!Array.isArray(elevesData)) {
+        return res.status(400).json({ error: 'Format de données invalide' });
+    }
+
+    try {
+        let importedCount = 0;
+        for (const data of elevesData) {
+            const eNom = data["Nom"] || "";
+            const ePrenom = data["Prénom"] || "";
+            if (!eNom || !ePrenom) continue; // Skip invalid rows
+
+            const eClasse = data["Classe"] || null;
+            const eDateNaiss = data["Date de Naissance"] || null;
+            const eTel = data["Téléphone Élève"] || null;
+            const eEmail = data["Email Élève"] || null;
+            const eAnnee = data["Année Scolaire"] || null;
+
+            const fraisIns = parseFloat(data["Frais Inscription"]) || 0;
+            const nbPaie = parseInt(data["Nombre de Paiements Prévus"]) || 1;
+
+            const p1Nom = data["Parent 1 Nom"] || "";
+            const p1Prenom = data["Parent 1 Prénom"] || "";
+            const p1Tel = data["Parent 1 Téléphone"] || null;
+            const p1Email = data["Parent 1 Email"] || null;
+            const p1Adresse = data["Parent 1 Adresse"] || null;
+
+            const p2Nom = data["Parent 2 Nom"] || "";
+            const p2Prenom = data["Parent 2 Prénom"] || "";
+            const p2Tel = data["Parent 2 Téléphone"] || null;
+            const p2Email = data["Parent 2 Email"] || null;
+            const p2Adresse = data["Parent 2 Adresse"] || null;
+
+            const eleveId = generateId('e');
+            const activationToken = eEmail ? generateToken() : null;
+
+            await dbRun(db, `
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated,
+                                   enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements,
+                                   fraisValide, paiementsEffectues, anneeScolaire, montantPaye)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, 0, 0, ?, 0)
+            `, [eleveId, eNom, ePrenom, eDateNaiss, eClasse, eEmail, eTel, activationToken, fraisIns, nbPaie, eAnnee]);
+
+            const handleParent = async (pNom, pPrenom, pTel, pEmail, pAdresse, isPrimary) => {
+                if (!pNom && !pPrenom && !pEmail && !pTel) return;
+
+                let parentId = null;
+                if (pEmail) {
+                    const existing = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [pEmail]);
+                    if (existing) parentId = existing.id;
+                }
+                if (!parentId && pNom && pPrenom) {
+                    const existing = await dbGet(db, 'SELECT id FROM parents WHERE nom = ? AND prenom = ? COLLATE NOCASE', [pNom, pPrenom]);
+                    if (existing) parentId = existing.id;
+                }
+
+                if (!parentId) {
+                    parentId = generateId('p');
+                    const pToken = pEmail ? generateToken() : null;
+                    await dbRun(db, `
+                        INSERT INTO parents (id, nom, prenom, email, tel, adresse, activationToken, activated)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                    `, [parentId, pNom, pPrenom, pEmail, pTel, pAdresse, pToken]);
+                }
+
+                await dbRun(db, `
+                    INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+                    VALUES (?, ?, ?, 'parent', ?)
+                `, [generateId('ep'), eleveId, parentId, isPrimary ? 1 : 0]);
+            };
+
+            await handleParent(p1Nom, p1Prenom, p1Tel, p1Email, p1Adresse, true);
+            await handleParent(p2Nom, p2Prenom, p2Tel, p2Email, p2Adresse, false);
+
+            importedCount++;
+        }
+
+        res.status(200).json({ message: `Import réussi de ${importedCount} élèves` });
+    } catch (err) {
+        console.error('Erreur import Excel:', err);
+        res.status(500).json({ error: 'Erreur lors de l\'import des élèves' });
     }
 });
 
