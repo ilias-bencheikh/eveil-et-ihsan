@@ -24,6 +24,9 @@ router.post('/send-activation-email', checkPermission('create'), async (req, res
         } else if (type === 'staff') {
             table = 'staff';
             queryParams = '&type=staff';
+        } else if (type === 'parent') {
+            table = 'parents';
+            queryParams = '&type=parent';
         } else {
             return res.status(400).json({ error: 'Type utilisateur invalide' });
         }

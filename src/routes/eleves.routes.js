@@ -1022,6 +1022,14 @@ router.post('/import', checkPermission('create'), async (req, res) => {
         return res.status(400).json({ error: 'Format de données invalide' });
     }
 
+    let sendEmail;
+    try {
+        const emailConfig = require('../config/email');
+        sendEmail = emailConfig.sendEmail;
+    } catch(e) {
+        console.error("sendEmail introuvable", e);
+    }
+
     try {
         let importedCount = 0;
         for (const data of elevesData) {
@@ -1060,6 +1068,12 @@ router.post('/import', checkPermission('create'), async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, 0, 0, ?, 0)
             `, [eleveId, eNom, ePrenom, eDateNaiss, eClasse, eEmail, eTel, activationToken, fraisIns, nbPaie, eAnnee]);
 
+            if (eEmail && activationToken && sendEmail) {
+                const host = req.get('host');
+                const link = `http://${host}/activation.html?token=${activationToken}`;
+                sendEmail(eEmail, 'activation', `${ePrenom} ${eNom}`, link).catch(e => console.error(e));
+            }
+
             const handleParent = async (pNom, pPrenom, pTel, pEmail, pAdresse, isPrimary) => {
                 if (!pNom && !pPrenom && !pEmail && !pTel) return;
 
@@ -1080,6 +1094,7 @@ router.post('/import', checkPermission('create'), async (req, res) => {
                         INSERT INTO parents (id, nom, prenom, email, tel, adresse, activationToken, activated)
                         VALUES (?, ?, ?, ?, ?, ?, ?, 0)
                     `, [parentId, pNom, pPrenom, pEmail, pTel, pAdresse, pToken]);
+                    // Mails aux parents commentés par rapport à votre demande (le dashboard gérera l'envoi)
                 }
 
                 await dbRun(db, `

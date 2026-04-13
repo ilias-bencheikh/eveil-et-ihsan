@@ -5072,7 +5072,7 @@
                                         style="
                                             display: grid;
                                             grid-template-columns: repeat(
-                                                3,
+                                                2,
                                                 1fr
                                             );
                                             gap: 16px;
@@ -5080,9 +5080,9 @@
                                     >
                                         <div
                                             class="inscription-type-card selected"
-                                            data-type="seul"
+                                            data-type="famille"
                                             onclick="
-                                                selectInscriptionType('seul')
+                                                selectInscriptionType('famille')
                                             "
                                         >
                                             <span
@@ -5094,10 +5094,10 @@
                                                     );
                                                     margin-bottom: 12px;
                                                 "
-                                                >person</span
+                                                >person_add</span
                                             >
                                             <h4 style="margin-bottom: 4px">
-                                                Élève seul
+                                                Nouvelle Inscription
                                             </h4>
                                             <p
                                                 style="
@@ -5107,39 +5107,7 @@
                                                     );
                                                 "
                                             >
-                                                Un seul enfant
-                                            </p>
-                                        </div>
-                                        <div
-                                            class="inscription-type-card"
-                                            data-type="famille"
-                                            onclick="
-                                                selectInscriptionType('famille')
-                                            "
-                                        >
-                                            <span
-                                                class="material-icons"
-                                                style="
-                                                    font-size: 44px;
-                                                    color: var(
-                                                        --md-sys-color-secondary
-                                                    );
-                                                    margin-bottom: 12px;
-                                                "
-                                                >groups</span
-                                            >
-                                            <h4 style="margin-bottom: 4px">
-                                                Famille
-                                            </h4>
-                                            <p
-                                                style="
-                                                    font-size: 13px;
-                                                    color: var(
-                                                        --md-sys-color-on-surface-variant
-                                                    );
-                                                "
-                                            >
-                                                Plusieurs enfants
+                                                Inscription d'un ou plusieurs élèves
                                             </p>
                                         </div>
                                         <div
@@ -15254,7 +15222,7 @@
             }
 
             // ==================== INSCRIPTIONS ====================
-            let inscriptionType = "seul";
+            let inscriptionType = "famille";
             let inscriptionEnfantCount = 1;
 
             // Calculer l'année scolaire courante (ex: "2026-2027")
@@ -15617,7 +15585,7 @@
                 document.getElementById("inscriptionsListCard").style.display =
                     "none";
                 currentInscriptionStep = 1;
-                inscriptionType = "seul";
+                inscriptionType = "famille";
                 inscriptionEnfantCount = 1;
                 selectedExistingFamily = null;
                 inscriptionEditMode = null;
@@ -15673,7 +15641,7 @@
                     .forEach((card) => {
                         card.classList.toggle(
                             "selected",
-                            card.dataset.type === "seul",
+                            card.dataset.type === "famille",
                         );
                     });
                 document.getElementById("existingFamilySearch").style.display =
@@ -15683,9 +15651,9 @@
                 document.getElementById("selectedFamilleInfo").style.display =
                     "none";
 
-                document.getElementById("addEnfantBtn").style.display = "none";
+                document.getElementById("addEnfantBtn").style.display = "inline-flex";
                 document.getElementById("inscriptionEnfantsTitle").textContent =
-                    "Informations de l'élève";
+                    "Informations des élèves";
 
                 renderEnfantFields();
                 updateParentFieldsVisibility();
@@ -16703,10 +16671,7 @@
                             '<span class="material-icons">save</span> Enregistrer les modifications';
 
                     // Sélectionner le type sans appeler renderEnfantFields (on va le faire manuellement)
-                    const type =
-                        data.enFamille && data.familleLienId
-                            ? "famille"
-                            : "seul";
+                    const type = "famille"; // always famille mode now
                     inscriptionType = type;
                     document
                         .querySelectorAll(".inscription-type-card")
@@ -16719,13 +16684,8 @@
                     document.getElementById(
                         "existingFamilySearch",
                     ).style.display = "none";
-                    if (type === "famille") {
-                        document.getElementById("addEnfantBtn").style.display =
-                            "inline-flex";
-                        document.getElementById(
-                            "inscriptionEnfantsTitle",
-                        ).textContent = "Informations des élèves";
-                    }
+                    document.getElementById("addEnfantBtn").style.display = "none"; // Hide add child when editing
+                    document.getElementById("inscriptionEnfantsTitle").textContent = "Informations des élèves";
 
                     // Remplir les parents
                     if (parents.length > 0) {
