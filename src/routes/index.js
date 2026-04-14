@@ -25,5 +25,5 @@ module.exports = {
     actualitesRoutes,
     parentsRoutes,
     maintenanceRoutes,
-    emploisDuTempsRoutes
+    emploisDuTempsRoutes,
 };
