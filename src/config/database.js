@@ -76,8 +76,10 @@ function initDatabase() {
                 date TEXT NOT NULL,
                 note TEXT,
                 createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                staffNom TEXT,
                 FOREIGN KEY (eleveId) REFERENCES eleves(id) ON DELETE CASCADE
             )`);
+            db.run(`ALTER TABLE paiements ADD COLUMN staffNom TEXT`, () => {});
 
             // Table parents (nouveau système - comptes séparés)
             db.run(`CREATE TABLE IF NOT EXISTS parents (

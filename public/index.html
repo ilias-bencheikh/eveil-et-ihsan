@@ -3266,9 +3266,13 @@
                     </div>
 
                     <!-- ========== ABSENCES TAB ========== -->
-                    <div id="absences" class="tab-content">
+                    <div id="absences" class="tab-content" style="position: relative">
                         <!-- Historique des appels -->
-                        <div class="widget-card" style="margin-top: 16px">
+                        <div
+                            class="widget-card"
+                            id="absencesHistoriqueWidget"
+                            style="margin-top: 16px"
+                        >
                             <div
                                 class="widget-card-header"
                                 style="
@@ -3449,7 +3453,7 @@
                         <div
                             class="widget-card"
                             id="appelFormCard"
-                            style="display: none; margin-top: 16px"
+                            style="display: none; position: absolute; left: 0; right: 0; z-index: 30"
                         >
                             <div class="widget-card-header">
                                 <h3
@@ -12561,9 +12565,27 @@
             }
 
             // Afficher le formulaire de nouvel appel
+            function positionAppelFormOverlay() {
+                const absencesTab = document.getElementById("absences");
+                const historiqueWidget = document.getElementById(
+                    "absencesHistoriqueWidget",
+                );
+                const formCard = document.getElementById("appelFormCard");
+
+                if (!absencesTab || !historiqueWidget || !formCard) {
+                    return formCard;
+                }
+
+                formCard.style.top = `${historiqueWidget.offsetTop}px`;
+                return formCard;
+            }
+
             function showNewAppelForm() {
-                document.getElementById("appelFormCard").style.display =
-                    "block";
+                const formCard = positionAppelFormOverlay();
+                if (!formCard) return;
+
+                formCard.style.display = "block";
+                document.getElementById("absencesHistoriqueWidget").style.display = "none"; // Masquer l'historique
                 document.getElementById("editAppelBatchId").value = "";
                 document.getElementById("appelFormTitle").textContent =
                     "Nouvel appel";
@@ -12590,7 +12612,16 @@
             // Masquer le formulaire d'appel
             function hideAppelForm() {
                 document.getElementById("appelFormCard").style.display = "none";
+                document.getElementById("absencesHistoriqueWidget").style.display =
+                    "block"; // Réafficher l'historique
             }
+
+            window.addEventListener("resize", () => {
+                const formCard = document.getElementById("appelFormCard");
+                if (formCard && formCard.style.display !== "none") {
+                    positionAppelFormOverlay();
+                }
+            });
 
             // ==================== CHARGEMENT ÉlèveS ====================
 
@@ -12718,8 +12749,10 @@
                     }
 
                     // Afficher le formulaire d'édition (dans la section absences)
-                    document.getElementById("appelFormCard").style.display =
-                        "block";
+                    const formCard = positionAppelFormOverlay();
+                    if (formCard) {
+                        formCard.style.display = "block";
+                    }
 
                     // Marquer comme édition
                     document.getElementById("editAppelBatchId").value = batchId;
@@ -18004,9 +18037,10 @@
 
             function getMethodeLabel(methode) {
                 const labels = {
-                    carte: "💳​ Carte",
-                    virement: "🏦​ Virement",
-                    espece: "💶​ Espèce",
+                    carte: "💳 Carte",
+                    virement: "🏦 Virement",
+                    espece: "💵 Espèce",
+                    ajustement: "⚙️ Ajustement",
                 };
                 return labels[methode] || methode;
             }
@@ -18455,7 +18489,7 @@
                 );
 
                 let enfantsHtml = "";
-                if (enfants && enfants.length > 1) {
+                if (enfants && enfants.length > 0) {
                     enfantsHtml =
                         `<div style="margin-top:16px;"><strong>Détail par enfant</strong></div>` +
                         enfants
@@ -18473,8 +18507,15 @@
                                     ${e.fraisValide ? "Validé" : "En cours"}
                                 </span>
                             </div>
-                            <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant); margin-top:4px;">
-                                Total: ${formatCurrency(e.fraisInscription)} Payé: ${formatCurrency(ePaye)} Reste: ${formatCurrency(eReste)}
+                            <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant); margin-top:4px; display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <span>Total: <b>${formatCurrency(e.fraisInscription)}</b></span>
+                                    <button onclick="adminModifierTotalFrais('${e.id}', ${e.fraisInscription || 0})" style="background:none; border:none; cursor:pointer; color:var(--md-sys-color-primary); padding:0; display:flex; align-items:center;" title="Modifier le total">
+                                        <span class="material-icons" style="font-size:16px;">edit</span>
+                                    </button>
+                                </div>
+                                <span style="margin-left:8px;">Payé: ${formatCurrency(ePaye)}</span>
+                                <span>Reste: ${formatCurrency(eReste)}</span>
                             </div>
                         </div>`;
                             })
@@ -18522,6 +18563,7 @@
                                             ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
                                             ${p.eleveNom ? ` ${p.eleveNom}` : ""}
                                             ${p.note ? ` <em>${p.note}</em>` : ""}
+                                            ${p.staffNom ? ` • 👤 <b>${p.staffNom}</b>` : ""}
                                         </div>
                                     </div>
                                     <div style="display:flex; align-items:center; gap:6px;">
@@ -18537,6 +18579,51 @@
                     </div>
                 </div>
             `;
+            }
+
+            function adminModifierTotalFrais(eleveId, currentTotal) {
+                showDialog(
+                    "Modifier le total des frais",
+                    `
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <p style="margin: 0; color: var(--md-sys-color-on-surface-variant);">
+                            Entrez le nouveau montant total des frais pour cet élève.
+                        </p>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="number" id="nouveauTotalInput" class="md-text-field-input" placeholder=" " value="${currentTotal}" step="0.01" min="0" required>
+                                <label class="md-text-field-label">Nouveau total (€)</label>
+                            </div>
+                        </div>
+                    </div>
+                    `,
+                    async () => {
+                        const input = document.getElementById("nouveauTotalInput");
+                        if (!input) return;
+                        
+                        const nouveauTotal = input.value;
+                        const parsed = parseFloat(nouveauTotal.replace(',', '.'));
+                        
+                        if (isNaN(parsed) || parsed < 0) {
+                            return showSnackbar("Montant invalide");
+                        }
+                        
+                        try {
+                            const resp = await fetch(`${API_URL}/eleves/${eleveId}/frais-total`, {
+                                method: "PUT",
+                                headers: getHeaders(),
+                                body: JSON.stringify({ nouveauTotal: parsed })
+                            });
+                            if (!resp.ok) throw new Error("Erreur lors de la modification");
+                            showSnackbar("Total modifié avec succès");
+                            await adminLoadSelectedFrais();
+                        } catch (err) {
+                            console.error(err);
+                            showSnackbar("Erreur lors de la modification du total");
+                        }
+                    },
+                    "Enregistrer"
+                );
             }
 
             async function adminEnregistrerPaiement() {
@@ -19252,7 +19339,6 @@
                             <div class="fb-post-info">
                                 <div class="fb-post-author">
                                     ${authorName}
-                                    <span class="material-icons verified-badge">verified</span>
                                     <span style="margin-left: 8px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: ${roleBg}; color: ${roleText}; letter-spacing: 0.03em; vertical-align: middle;">${roleLabel}</span>
                                 </div>
                                 <div class="fb-post-meta">

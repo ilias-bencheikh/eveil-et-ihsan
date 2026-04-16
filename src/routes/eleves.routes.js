@@ -449,6 +449,59 @@ router.post('/', checkPermission('create'), async (req, res) => {
     }
 });
 
+// Endpoint pour modifier le total des frais d'inscription
+router.put('/:id/frais-total', checkPermission('update'), async (req, res) => {
+    const eleveId = req.params.id;
+    const { nouveauTotal } = req.body;
+
+    if (nouveauTotal === undefined || isNaN(nouveauTotal) || parseFloat(nouveauTotal) < 0) {
+        return res.status(400).json({ error: 'Nouveau total invalide' });
+    }
+
+    try {
+        const eleve = await dbGet(db, 'SELECT id, fraisInscription, montantPaye FROM eleves WHERE id = ?', [eleveId]);
+        if (!eleve) return res.status(404).json({ error: 'Élève non trouvé' });
+
+        const totalFrais = parseFloat(nouveauTotal);
+        const dejaPaye = parseFloat(eleve.montantPaye || 0);
+        const fraisValide = dejaPaye >= totalFrais - 0.01 && totalFrais > 0 ? 1 : 0;
+
+        await dbRun(db, 'UPDATE eleves SET fraisInscription = ?, fraisValide = ? WHERE id = ?', [totalFrais, fraisValide, eleveId]);
+
+        // Ajouter une trace dans l'historique
+        const paiementId = generateId('paie');
+        const datePaiement = new Date().toISOString();
+        
+        let staffNom = 'Staff';
+        try {
+            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+                const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
+                if (s) staffNom = s.prenom + ' ' + s.nom;
+            } else if (req.userRole === 'professeur') {
+                const p = await dbGet(db, 'SELECT nom, prenom FROM professeurs WHERE id = ?', [req.userId]);
+                if (p) staffNom = p.prenom + ' ' + p.nom;
+            }
+        } catch (e) {}
+
+        const note = `Ajustement du total à ${totalFrais} €`;
+
+        await dbRun(db, `
+            INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note, staffNom)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [paiementId, eleveId, 0, 'ajustement', datePaiement, note, staffNom]);
+
+        res.json({
+            message: 'Total des frais mis à jour',
+            fraisInscription: totalFrais,
+            fraisValide,
+            resteAPayer: Math.max(0, totalFrais - dejaPaye)
+        });
+    } catch (err) {
+        console.error('Erreur mise à jour total:', err);
+        res.status(500).json({ error: 'Erreur interne' });
+    }
+});
+
 // Endpoint pour enregistrer un paiement partiel avec méthode de paiement
 router.post('/:id/paiement', checkPermission('update'), async (req, res) => {
     const { montant, methodePaiement, date, note } = req.body;
@@ -479,10 +532,21 @@ router.post('/:id/paiement', checkPermission('update'), async (req, res) => {
         const paiementId = generateId('paie');
         const datePaiement = date || new Date().toISOString();
 
+        let staffNom = 'Staff';
+        try {
+            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+                const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
+                if (s) staffNom = s.prenom + ' ' + s.nom;
+            } else if (req.userRole === 'professeur') {
+                const p = await dbGet(db, 'SELECT nom, prenom FROM professeurs WHERE id = ?', [req.userId]);
+                if (p) staffNom = p.prenom + ' ' + p.nom;
+            }
+        } catch (e) {}
+
         await dbRun(db, `
-            INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `, [paiementId, eleveId, montantPaiement, methodePaiement, datePaiement, note || null]);
+            INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note, staffNom)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [paiementId, eleveId, montantPaiement, methodePaiement, datePaiement, note || null, staffNom]);
 
         const nouveauMontantPaye = dejaPaye + montantPaiement;
         const nouveauNbPaiements = (parseInt(eleve.paiementsEffectues || 0, 10)) + 1;
@@ -550,6 +614,17 @@ router.post('/paiement-famille', checkPermission('update'), async (req, res) => 
             return res.status(400).json({ error: `Le montant dépasse le reste total à payer (${totalReste.toFixed(2)} €)` });
         }
 
+        let staffNom = 'Staff';
+        try {
+            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+                const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
+                if (s) staffNom = s.prenom + ' ' + s.nom;
+            } else if (req.userRole === 'professeur') {
+                const p = await dbGet(db, 'SELECT nom, prenom FROM professeurs WHERE id = ?', [req.userId]);
+                if (p) staffNom = p.prenom + ' ' + p.nom;
+            }
+        } catch (e) {}
+
         for (const eleve of eleves) {
             if (montantRestant <= 0) break;
             const part = totalReste > 0 ? Math.min(eleve.reste, (eleve.reste / totalReste) * montantTotal) : 0;
@@ -557,8 +632,8 @@ router.post('/paiement-famille', checkPermission('update'), async (req, res) => 
             if (montantEleve <= 0) continue;
 
             const paiementId = generateId('paie');
-            await dbRun(db, `INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note) VALUES (?, ?, ?, ?, ?, ?)`,
-                [paiementId, eleve.id, montantEleve, methodePaiement, datePaiement, note || null]);
+            await dbRun(db, `INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note, staffNom) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [paiementId, eleve.id, montantEleve, methodePaiement, datePaiement, note || null, staffNom]);
 
             const nouveauMontantPaye = (eleve.montantPaye || 0) + montantEleve;
             const nouveauNb = (eleve.paiementsEffectues || 0) + 1;
@@ -804,7 +879,7 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
         // Récupérer les paiements pour chaque enfant
         for (const enfant of enfants) {
             enfant.paiements = await dbAll(db,
-                'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
+                'SELECT id, montant, methodePaiement, date, note, staffNom, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
                 [enfant.id]
             );
             enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
@@ -846,7 +921,7 @@ router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
 
         for (const enfant of enfants) {
             enfant.paiements = await dbAll(db,
-                'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
+                'SELECT id, montant, methodePaiement, date, note, staffNom, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
                 [enfant.id]
             );
             enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
@@ -896,7 +971,7 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
 
         // Récupérer l'historique des paiements
         const paiements = await dbAll(db,
-            'SELECT id, montant, methodePaiement, date, note, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
+            'SELECT id, montant, methodePaiement, date, note, staffNom, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
             [eleveId]
         );
 
