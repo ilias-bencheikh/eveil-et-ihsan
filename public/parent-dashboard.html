@@ -6,8 +6,8 @@
         <title>Espace Parent - Eveil & Ihsan</title>
 
         <!-- logo -->
-        <link rel="icon" type="image/png" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png" />
+        <link rel="apple-touch-icon" href="/uploads/logo/logo_onglet.png" />
 
         <link rel="stylesheet" href="/css/dashboard.css" />
         <link
@@ -4026,7 +4026,7 @@
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <img
-                            src="/logo.png"
+                            src="/uploads/logo/logo.png"
                             alt="Eveil & Ihsan"
                             onerror="
                                 this.style.display = 'none';
@@ -8174,6 +8174,21 @@
                 }
             }
 
+            function renderRole(role) {
+                switch (role) {
+                    case "professeur":
+                        return "Ensaignant";
+                    case "secretaire":
+                        return "Secrétariat";
+                    case "directeur":
+                        return "Directeur";
+                    case "admin":
+                        return "Administrateur";
+                    default:
+                        return role ? role.charAt(0).toUpperCase() + role.slice(1) : "";
+                }
+            }
+
             function renderParentComposeDestList() {
                 const search = (
                     document.getElementById("parentComposeSearchInput")
@@ -8199,7 +8214,7 @@
                 listEl.innerHTML = Object.entries(groups)
                     .map(
                         ([role, items]) => `
-                <div class="msg-dest-group-label">${role}</div>
+                <div class="msg-dest-group-label">${renderRole(role)}</div>
                 ${items
                     .map((d) => {
                         const isSel = selectedParentDest.some(
@@ -8215,7 +8230,7 @@
                         <div class="msg-dest-avatar ${isSel ? "sel" : ""}">${initials}</div>
                         <div class="msg-dest-info">
                             <div class="msg-dest-name">${d.nom}</div>
-                            <div class="msg-dest-role">${d.role}</div>
+                            <div class="msg-dest-role">${renderRole(d.role)}</div>
                         </div>
                         <span class="material-icons msg-dest-check" style="opacity:${isSel ? 1 : 0}">check_circle</span>
                     </div>`;

@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activation de compte - Eveil & Ihsan</title>
-    
+
     <!-- logo -->
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png">
+    <link rel="apple-touch-icon" href="/uploads/logo/logo_onglet.png">
+
+    <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <style>
@@ -23,59 +23,59 @@
             border-radius: 50%;
             background: var(--md-sys-color-primary-container);
         }
-        
+
         .activation-icon .material-icons {
             font-size: 40px;
             color: var(--md-sys-color-on-primary-container);
         }
-        
+
         .activation-icon.success {
             background: var(--md-extended-color-green-container);
         }
-        
+
         .activation-icon.success .material-icons {
             color: var(--md-extended-color-green);
         }
-        
+
         .activation-icon.error {
             background: var(--md-sys-color-error-container);
         }
-        
+
         .activation-icon.error .material-icons {
             color: var(--md-sys-color-error);
         }
-        
+
         .password-requirements {
             margin-top: var(--spacing-md);
             padding: var(--spacing-md);
             background: var(--md-sys-color-surface-container);
             border-radius: var(--md-sys-shape-corner-medium);
         }
-        
+
         .password-requirements h4 {
             font: var(--md-sys-typescale-label-large);
             color: var(--md-sys-color-on-surface);
             margin-bottom: var(--spacing-sm);
         }
-        
+
         .password-requirements ul {
             list-style: none;
             font: var(--md-sys-typescale-body-small);
             color: var(--md-sys-color-on-surface-variant);
         }
-        
+
         .password-requirements li {
             display: flex;
             align-items: center;
             gap: var(--spacing-xs);
             margin-bottom: 4px;
         }
-        
+
         .password-requirements li .material-icons {
             font-size: 16px;
             color: var(--md-sys-color-on-surface-variant);
         }
-        
+
         .password-requirements li.valid .material-icons {
             color: var(--md-extended-color-green);
         }
@@ -102,7 +102,7 @@
                         <div class="activation-icon">
                             <span class="material-icons">lock_reset</span>
                         </div>
-                        <h2>Bienvenue !</h2>
+                        <h2>Activation du compte</h2>
                         <p>Créez votre mot de passe pour activer votre compte</p>
                     </div>
 
@@ -217,12 +217,12 @@
                 }
 
                 const response = await fetch(checkUrl);
-                
+
                 if (response.ok) {
                     const userData = await response.json();
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('setPasswordState').style.display = 'block';
-                    
+
                     // Afficher le nom de l'utilisateur dans le message de bienvenue
                     const headerP = document.querySelector('#setPasswordState .login-card-header p');
                     headerP.textContent = `Salam Aleykoum ${userData.prenom} ${userData.nom}, créez votre mot de passe pour activer votre compte`;
@@ -238,7 +238,7 @@
         // Vérification en temps réel du mot de passe
         document.getElementById('password').addEventListener('input', function() {
             const password = this.value;
-            
+
             updateRequirement('req-length', password.length >= 8);
             updateRequirement('req-upper', /[A-Z]/.test(password));
             updateRequirement('req-lower', /[a-z]/.test(password));
@@ -248,7 +248,7 @@
         function updateRequirement(id, isValid) {
             const element = document.getElementById(id);
             const icon = element.querySelector('.material-icons');
-            
+
             if (isValid) {
                 element.classList.add('valid');
                 icon.textContent = 'check_circle';
@@ -260,10 +260,10 @@
 
         document.getElementById('activationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
+
             if (password !== confirmPassword) {
                 showFormError('Les mots de passe ne correspondent pas.');
                 return;
@@ -327,7 +327,7 @@
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
             const button = input.parentElement.querySelector('.md-text-field-toggle .material-icons');
-            
+
             if (input.type === 'password') {
                 input.type = 'text';
                 button.textContent = 'visibility_off';

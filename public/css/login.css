@@ -29,7 +29,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: 
+    background:
         radial-gradient(circle at 20% 80%, rgba(30, 90, 168, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(98, 91, 113, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(121, 89, 57, 0.05) 0%, transparent 50%);
@@ -200,6 +200,11 @@
 .login-logo-small img {
     width: 60px;
     height: 60px;
+    border-radius: 20%;
+    object-fit: cover;
+    background-color: var(--md-sys-color-surface, #ffffff);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 4px;
 }
 
 .login-card-header h2 {
@@ -527,11 +532,11 @@
     .login-branding {
         display: none;
     }
-    
+
     .login-form-container {
         max-width: 100%;
     }
-    
+
     .login-card {
         max-width: 450px;
     }
@@ -541,15 +546,15 @@
     .login-page {
         padding: var(--spacing-md);
     }
-    
+
     .login-card {
         padding: var(--spacing-lg);
     }
-    
+
     .login-demo-accounts {
         grid-template-columns: 1fr;
     }
-    
+
     .login-options {
         flex-direction: column;
         gap: var(--spacing-sm);

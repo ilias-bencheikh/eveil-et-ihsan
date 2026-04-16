@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - Eveil & Ihsan</title>
-    
+
     <!-- logo -->
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png">
+    <link rel="apple-touch-icon" href="/uploads/logo/logo_apple.png">
+
+    <link rel="stylesheet" href="/css/login.css">
     <style>
         /* ===== MODAL MOT DE PASSE OUBLIÉ ===== */
         .forgot-modal-overlay {
@@ -166,10 +166,10 @@
 
                 <div class="login-card-header">
                     <div class="login-logo-small">
-                        <img src="logo.png" alt="Eveil & Ihsan" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <img src="/uploads/logo/logo.png" alt="Eveil & Ihsan" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <div style="display: none; font-size: 32px; font-weight: bold; color: var(--md-sys-color-primary);">E&I</div>
                     </div>
-                    <h2>Bienvenue</h2>
+                    <h2>Eveil & Ihsan</h2>
                     <p>Connectez-vous pour accéder à votre espace</p>
                 </div>
 
@@ -362,17 +362,17 @@
         togglePassword.addEventListener('click', () => {
             const type = passwordInput.type === 'password' ? 'text' : 'password';
             passwordInput.type = type;
-            togglePassword.querySelector('.material-icons').textContent = 
+            togglePassword.querySelector('.material-icons').textContent =
                 type === 'password' ? 'visibility' : 'visibility_off';
         });
 
         // Gestion de la soumission
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             // Cacher l'erreur précédente
             loginError.classList.remove('show');
-            
+
             // Afficher le chargement
             loginSubmitBtn.classList.add('loading');
             loginSubmitBtn.querySelector('.login-submit-text').textContent = 'Connexion en cours…';
@@ -381,9 +381,9 @@
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: emailInput.value, 
-                        password: passwordInput.value 
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        password: passwordInput.value
                     })
                 });
 
@@ -392,13 +392,13 @@
                 if (response.ok) {
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('token', data.token);
-                    
+
                     // Animation de succès puis redirection
                     loginSubmitBtn.classList.remove('loading');
                     loginSubmitBtn.classList.add('success');
                     loginSubmitBtn.querySelector('.login-submit-text').textContent = 'Connexion réussie !';
                     loginSubmitBtn.querySelector('.login-submit-icon').textContent = 'check_circle';
-                    
+
                     setTimeout(() => {
                         // Redirection selon le rôle de l'utilisateur
                         if (data.user.role === 'eleve') {
