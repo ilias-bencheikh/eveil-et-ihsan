@@ -6358,7 +6358,6 @@
                     <div
                         id="accounts"
                         class="tab-content"
-                        style="padding: 0; max-width: 1200px; margin: 0 auto"
                     >
                         <!-- En-tête de la page -->
                         <div
@@ -6406,7 +6405,7 @@
                                     plateforme.
                                 </p>
                             </div>
-                            <div style="display: flex; gap: 12px; align-items: center;">
+                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                                 <input type="file" id="importExcelInput" accept=".xlsx, .xls" style="display: none;" onchange="importElevesExcel(event)">
                                 <button
                                     class="md-btn md-btn-outlined"
@@ -6460,212 +6459,208 @@
                             <!-- Will be populated by JS -->
                         </div>
 
-                        <!-- Barre de contrôles (Recherche, Filtres, Vue) -->
-                        <div
-                            style="
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                margin-bottom: 24px;
-                                background: var(
-                                    --md-sys-color-surface-container-lowest
-                                );
-                                padding: 12px 16px;
-                                border-radius: 16px;
-                                border: 1px solid
-                                    var(--md-sys-color-outline-variant);
-                                flex-wrap: wrap;
-                                gap: 16px;
-                                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-                            "
-                        >
-                            <!-- Recherche -->
-                            <div
-                                class="topbar-search"
-                                style="
-                                    flex: 1;
-                                    min-width: 250px;
-                                    margin: 0;
-                                    max-width: 400px;
-                                    background: var(
-                                        --md-sys-color-surface-variant
-                                    );
-                                "
-                            >
-                                <span class="material-icons">search</span>
-                                <input
-                                    id="searchAccounts"
-                                    type="text"
-                                    placeholder="Rechercher par nom, email, classe..."
-                                    oninput="filterAccounts()"
-                                />
-                            </div>
-
-                            <div
-                                style="
-                                    display: flex;
-                                    gap: 16px;
-                                    align-items: center;
-                                    flex-wrap: wrap;
-                                "
-                            >
-                                <!-- Filtres type -->
+                        <div class="widget-card">
+                            <div class="widget-card-content">
+                                <!-- Barre de contrôles (Recherche, Filtres, Vue) -->
                                 <div
                                     style="
                                         display: flex;
-                                        background: var(
-                                            --md-sys-color-surface-variant
-                                        );
-                                        padding: 4px;
-                                        border-radius: 24px;
-                                        gap: 4px;
-                                    "
-                                >
-                                    <button
-                                        class="acc-filter-pill active"
-                                        onclick="setAccountFilter('all', this)"
-                                    >
-                                        <span
-                                            class="material-icons"
-                                            style="font-size: 16px"
-                                            >people</span
-                                        >
-                                        Tous
-                                    </button>
-                                    <button
-                                        class="acc-filter-pill"
-                                        onclick="
-                                            setAccountFilter('parent', this)
-                                        "
-                                    >
-                                        <span
-                                            class="material-icons"
-                                            style="font-size: 16px"
-                                            >escalator_warning</span
-                                        >
-                                        Parents
-                                    </button>
-                                    <button
-                                        class="acc-filter-pill"
-                                        onclick="
-                                            setAccountFilter('eleve', this)
-                                        "
-                                    >
-                                        <span
-                                            class="material-icons"
-                                            style="font-size: 16px"
-                                            >school</span
-                                        >
-                                        Élèves
-                                    </button>
-                                </div>
-
-                                <div
-                                    style="
-                                        width: 1px;
-                                        height: 32px;
-                                        background: var(
-                                            --md-sys-color-outline-variant
-                                        );
-                                    "
-                                ></div>
-
-                                <!-- Tri -->
-                                <div
-                                    style="
-                                        display: flex;
+                                        justify-content: space-between;
                                         align-items: center;
-                                        gap: 8px;
+                                        margin-bottom: 24px;
+                                        flex-wrap: wrap;
+                                        gap: 16px;
                                     "
                                 >
-                                    <span
-                                        class="material-icons"
+                                    <!-- Recherche -->
+                                    <div
+                                        class="topbar-search"
                                         style="
-                                            color: var(
-                                                --md-sys-color-on-surface-variant
-                                            );
-                                            font-size: 20px;
-                                        "
-                                        >sort</span
-                                    >
-                                    <select
-                                        id="sortAccountsSelect"
-                                        onchange="filterAccounts()"
-                                        style="
-                                            padding: 8px 12px;
-                                            border-radius: 8px;
-                                            border: 1px solid
-                                                var(--md-sys-color-outline);
+                                            flex: 1;
+                                            min-width: 250px;
+                                            margin: 0;
+                                            max-width: 400px;
                                             background: var(
-                                                --md-sys-color-surface
+                                                --md-sys-color-surface-variant
                                             );
-                                            font-family: inherit;
-                                            font-size: 13px;
-                                            color: var(
-                                                --md-sys-color-on-surface
-                                            );
-                                            cursor: pointer;
-                                            outline: none;
                                         "
                                     >
-                                        <option value="nom-asc">
-                                            Nom (A-Z)
-                                        </option>
-                                        <option value="nom-desc">
-                                            Nom (Z-A)
-                                        </option>
-                                    </select>
+                                        <span class="material-icons">search</span>
+                                        <input
+                                            id="searchAccounts"
+                                            type="text"
+                                            placeholder="Rechercher par nom, email, classe..."
+                                            oninput="filterAccounts()"
+                                        />
+                                    </div>
+
+                                    <div
+                                        style="
+                                            display: flex;
+                                            gap: 16px;
+                                            align-items: center;
+                                            flex-wrap: wrap;
+                                        "
+                                    >
+                                        <!-- Filtres type -->
+                                        <div
+                                            style="
+                                                display: flex;
+                                                background: var(
+                                                    --md-sys-color-surface-variant
+                                                );
+                                                padding: 4px;
+                                                border-radius: 24px;
+                                                gap: 4px;
+                                            "
+                                        >
+                                            <button
+                                                class="acc-filter-pill active"
+                                                onclick="setAccountFilter('all', this)"
+                                            >
+                                                <span
+                                                    class="material-icons"
+                                                    style="font-size: 16px"
+                                                    >people</span
+                                                >
+                                                Tous
+                                            </button>
+                                            <button
+                                                class="acc-filter-pill"
+                                                onclick="
+                                                    setAccountFilter('parent', this)
+                                                "
+                                            >
+                                                <span
+                                                    class="material-icons"
+                                                    style="font-size: 16px"
+                                                    >escalator_warning</span
+                                                >
+                                                Parents
+                                            </button>
+                                            <button
+                                                class="acc-filter-pill"
+                                                onclick="
+                                                    setAccountFilter('eleve', this)
+                                                "
+                                            >
+                                                <span
+                                                    class="material-icons"
+                                                    style="font-size: 16px"
+                                                    >school</span
+                                                >
+                                                Élèves
+                                            </button>
+                                        </div>
+
+                                        <div
+                                            style="
+                                                width: 1px;
+                                                height: 32px;
+                                                background: var(
+                                                    --md-sys-color-outline-variant
+                                                );
+                                            "
+                                        ></div>
+
+                                        <!-- Tri -->
+                                        <div
+                                            style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 8px;
+                                            "
+                                        >
+                                            <span
+                                                class="material-icons"
+                                                style="
+                                                    color: var(
+                                                        --md-sys-color-on-surface-variant
+                                                    );
+                                                    font-size: 20px;
+                                                "
+                                                >sort</span
+                                            >
+                                            <select
+                                                id="sortAccountsSelect"
+                                                onchange="filterAccounts()"
+                                                style="
+                                                    padding: 8px 12px;
+                                                    border-radius: 8px;
+                                                    border: 1px solid
+                                                        var(--md-sys-color-outline);
+                                                    background: var(
+                                                        --md-sys-color-surface
+                                                    );
+                                                    font-family: inherit;
+                                                    font-size: 13px;
+                                                    color: var(
+                                                        --md-sys-color-on-surface
+                                                    );
+                                                    cursor: pointer;
+                                                    outline: none;
+                                                "
+                                            >
+                                                <option value="nom-asc">
+                                                    Nom (A-Z)
+                                                </option>
+                                                <option value="nom-desc">
+                                                    Nom (Z-A)
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div
+                                            style="
+                                                width: 1px;
+                                                height: 32px;
+                                                background: var(
+                                                    --md-sys-color-outline-variant
+                                                );
+                                            "
+                                        ></div>
+
+                                        <!-- Toggle Vue Grid/Table -->
+                                        <div
+                                            style="
+                                                display: flex;
+                                                background: var(
+                                                    --md-sys-color-surface-variant
+                                                );
+                                                padding: 4px;
+                                                border-radius: 12px;
+                                                gap: 4px;
+                                            "
+                                        >
+                                            <button
+                                                class="acc-view-btn active"
+                                                onclick="
+                                                    setAccountViewMode('grid', this)
+                                                "
+                                                title="Vue grille"
+                                            >
+                                                <span class="material-icons"
+                                                    >grid_view</span
+                                                >
+                                            </button>
+                                            <button
+                                                class="acc-view-btn"
+                                                onclick="
+                                                    setAccountViewMode('table', this)
+                                                "
+                                                title="Vue liste"
+                                            >
+                                                <span class="material-icons">list</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div
-                                    style="
-                                        width: 1px;
-                                        height: 32px;
-                                        background: var(
-                                            --md-sys-color-outline-variant
-                                        );
-                                    "
-                                ></div>
-
-                                <!-- Toggle Vue Grid/Table -->
-                                <div
-                                    style="
-                                        display: flex;
-                                        background: var(
-                                            --md-sys-color-surface-variant
-                                        );
-                                        padding: 4px;
-                                        border-radius: 12px;
-                                        gap: 4px;
-                                    "
-                                >
-                                    <button
-                                        class="acc-view-btn active"
-                                        onclick="
-                                            setAccountViewMode('grid', this)
-                                        "
-                                        title="Vue grille"
-                                    >
-                                        <span class="material-icons"
-                                            >grid_view</span
-                                        >
-                                    </button>
-                                    <button
-                                        class="acc-view-btn"
-                                        onclick="
-                                            setAccountViewMode('table', this)
-                                        "
-                                        title="Vue liste"
-                                    >
-                                        <span class="material-icons">list</span>
-                                    </button>
+                                <!-- Zone de contenu (Grille ou Tableau) -->
+                                <div id="accountsContent">
+                                    <!-- Injecté par JS -->
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Zone de contenu (Grille ou Tableau) -->
-                        <div id="accountsContent">
-                            <!-- Injecté par JS -->
                         </div>
                     </div>
 
@@ -6945,7 +6940,7 @@
         </div>
 
         <!-- Dialog Container -->
-        <div class="md-dialog-overlay" id="dialogOverlay">
+        <div class="md-dialog-overlay" id="dialogOverlay" onclick="if (event.target === this) closeDialog();">
             <div class="md-dialog" id="dialogBox" style="max-width: 600px">
                 <div class="md-dialog-header">
                     <h2 class="md-dialog-title" id="dialogTitle">Titre</h2>
@@ -10755,42 +10750,8 @@
             `;
             }
 
-            function filterAccounts() {
-                const term = document.getElementById("searchAccounts")
-                    ? document
-                          .getElementById("searchAccounts")
-                          .value.toLowerCase()
-                    : "";
-                const typeFilter = document.getElementById("filterAccountType")
-                    ? document.getElementById("filterAccountType").value
-                    : "all";
-
-                const filtered = allAccounts.filter((a) => {
-                    const matchTerm =
-                        !term ||
-                        (a.nom || "").toLowerCase().includes(term) ||
-                        (a.prenom || "").toLowerCase().includes(term) ||
-                        (a.email || "").toLowerCase().includes(term) ||
-                        (a.classe || "").toLowerCase().includes(term);
-
-                    const matchType =
-                        typeFilter === "all" || a.type === typeFilter;
-
-                    return matchTerm && matchType;
-                });
-
-                // Sort alphabetically by last name
-                filtered.sort((a, b) =>
-                    (a.nom || "").localeCompare(b.nom || ""),
-                );
-
-                renderAccounts(filtered);
-            }
-
             function exportAccounts() {
-                const typeFilter = document.getElementById("filterAccountType")
-                    ? document.getElementById("filterAccountType").value
-                    : "all";
+                const typeFilter = currentAccountFilterType;
                 const term = document.getElementById("searchAccounts")
                     ? document
                           .getElementById("searchAccounts")

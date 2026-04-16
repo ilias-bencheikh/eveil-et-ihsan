@@ -513,6 +513,8 @@ body {
     transform: scale(0.9);
     opacity: 0;
     transition: all var(--md-sys-motion-duration-medium3) var(--md-sys-motion-easing-emphasized-decelerate);
+    display: flex;
+    flex-direction: column;
 }
 
 .md-dialog-overlay.show .md-dialog {
@@ -523,6 +525,7 @@ body {
 .md-dialog-header {
     padding: var(--spacing-lg);
     padding-bottom: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .md-dialog-title {
@@ -534,6 +537,7 @@ body {
     padding: 0 var(--spacing-lg);
     overflow-y: auto;
     color: var(--md-sys-color-on-surface-variant);
+    flex-grow: 1;
 }
 
 .md-dialog-actions {
@@ -541,6 +545,7 @@ body {
     justify-content: flex-end;
     gap: var(--spacing-sm);
     padding: var(--spacing-lg);
+    flex-shrink: 0;
 }
 
 /* ===== PROGRESS ===== */
