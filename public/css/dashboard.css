@@ -800,7 +800,7 @@
         display: flex;
     }
 
-    .topbar-search {
+    .dashboard-topbar .topbar-search {
         display: none;
     }
 }

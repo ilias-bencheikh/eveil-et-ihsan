@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="fr">
     <head>
         <meta charset="UTF-8" />
@@ -8504,8 +8504,31 @@
                         <strong>Historique des paiements</strong>
                         <div style="margin-top:8px;">
                             ${paiements
+                                .sort((a, b) => new Date(b.date) - new Date(a.date))
                                 .map(
-                                    (p) => `
+                                    (p) => {
+                                        if (p.methodePaiement === 'ajustement') {
+                                            return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px dashed var(--md-sys-color-outline); border-radius: 12px; margin-bottom: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-surface-variant); display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-on-surface-variant); font-size: 16px;">tune</span>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                                            <div style="font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);">Réajustement des frais</div>
+                                            <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);">
+                                                ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.9rem; font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface); padding: 4px 12px; border-radius: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                        ${p.note || 'Ajustement manuel'}
+                                    </div>
+                                </div>
+                                            `;
+                                        }
+
+                                        return `
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:6px;">
                                     <div>
                                         <span style="font-weight:600;">${formatCurrency(p.montant)}</span>
@@ -8515,11 +8538,10 @@
                                         ${p.note ? `<span style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);"> • ${p.note}</span>` : ""}
                                     </div>
                                     <span style="padding:3px 8px; border-radius:16px; font-size:0.75rem; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
-                                        ${p.methodePaiement === "carte" ? "?? Carte" : p.methodePaiement === "virement" ? "?? Virement" : "?? Espéce"}
+                                        ${p.methodePaiement === "carte" ? "💳 Carte" : p.methodePaiement === "virement" ? "🏦 Virement" : "💵 Espèce"}
                                     </span>
                                 </div>
-                            `,
-                                )
+                            `})
                                 .join("")}
                         </div>
                     </div>
@@ -9115,7 +9137,29 @@
                                 ? '<p class="text-on-surface-variant" style="text-align:center; padding:16px;">Aucun paiement enregistré</p>'
                                 : allPaiements
                                       .map(
-                                          (p) => `
+                                          (p) => {
+                                              if (p.methodePaiement === 'ajustement') {
+                                                  return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px dashed var(--md-sys-color-outline); border-radius: 12px; margin-bottom: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-surface-variant); display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-on-surface-variant); font-size: 16px;">tune</span>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                                            <div style="font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);">Réajustement des frais</div>
+                                            <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);">
+                                                ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.9rem; font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface); padding: 4px 12px; border-radius: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                        ${p.note || 'Ajustement manuel'}
+                                    </div>
+                                </div>
+                                                  `;
+                                              }
+
+                                              return `
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:6px;">
                                     <div style="display:flex; flex-direction:column; gap:2px;">
                                         <div style="font-weight:600; font-size:1rem;">${formatCurrency(p.montant)}</div>
@@ -9131,7 +9175,8 @@
                                         </span>
                                     </div>
                                 </div>
-                            `,
+                            `;
+                                          }
                                       )
                                       .join("")
                         }

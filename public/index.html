@@ -6223,358 +6223,132 @@
                     </div>
 
                     <!-- ========== FRAIS ADMIN TAB ========== -->
-                    <div id="frais-admin" class="tab-content">
-                        <div class="widget-card">
-                            <div class="widget-card-header">
-                                <h3 class="widget-card-title">
+                    <div id="frais-admin" class="tab-content" style="position: relative">
+                        <div class="widget-card" id="fraisMainWidget" style="margin-top: 16px">
+                            <div class="widget-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="widget-card-title" style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="material-icons" style="color: var(--md-sys-color-primary);">payments</span>
                                     Gestion des frais
                                 </h3>
+                                <div class="widget-card-actions">
+                                    <button class="md-btn md-btn-outlined" onclick="adminLoadSelectedFrais()">
+                                        <span class="material-icons">refresh</span>
+                                        Actualiser
+                                    </button>
+                                </div>
                             </div>
+
                             <div class="widget-card-content">
-                                <div
-                                    style="
-                                        display: flex;
-                                        flex-direction: column;
-                                        gap: 12px;
-                                    "
-                                >
+                                <!-- Recherche de profil -->
+                                <div style="margin-bottom: 24px">
+                                    <h4 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--md-sys-color-on-surface);">
+                                        <span class="material-icons" style="color: var(--md-sys-color-primary);">person_search</span>
+                                        Rechercher un parent ou un élève
+                                    </h4>
+
                                     <!-- Barre de recherche unifiée -->
-                                    <div id="adminFraisSearchBlock">
-                                        <label
-                                            style="
-                                                font-weight: 500;
-                                                margin-bottom: 4px;
-                                                display: block;
-                                            "
-                                            >Rechercher un parent ou un
-                                            élève</label
-                                        >
-                                        <input
-                                            id="adminFraisSearch"
-                                            class="md-text-field-input"
-                                            style="
-                                                width: 100%;
-                                                padding: 10px;
-                                                border: 1px solid
-                                                    var(--md-sys-color-outline);
-                                                border-radius: 8px;
-                                                background: var(
-                                                    --md-sys-color-surface
-                                                );
-                                            "
-                                            placeholder="Nom d'un parent, prénom d'un élève..."
-                                            oninput="adminSearchFrais()"
-                                        />
+                                    <div style="margin-bottom: 16px;">
+                                        <div class="topbar-search" style="width: 100%">
+                                            <span class="material-icons">search</span>
+                                            <input
+                                                type="text"
+                                                id="adminFraisSearch"
+                                                placeholder="Tapez un nom ou prénom..."
+                                                oninput="adminSearchFrais()"
+                                            />
+                                            <button
+                                                type="button"
+                                                class="md-icon-btn clear-search-btn"
+                                                onclick="document.getElementById('adminFraisSearch').value=''; adminSearchFrais();"
+                                            >
+                                                <span class="material-icons">clear</span>
+                                            </button>
+                                        </div>
                                         <div
                                             id="adminFraisSearchResults"
-                                            style="
-                                                max-height: 300px;
-                                                overflow-y: auto;
-                                                margin-top: 8px;
-                                            "
+                                            style="max-height: 350px; overflow-y: auto; margin-top: 8px; border-radius: 12px; background: var(--md-sys-color-surface); width: 100%; transition: all 0.3s ease;"
                                         ></div>
                                     </div>
+                                </div>
 
-                                    <!-- Sélection courante -->
-                                    <div
-                                        id="adminFraisSelected"
-                                        style="
-                                            display: none;
-                                            padding: 12px;
-                                            background: var(
-                                                --md-sys-color-surface-container
-                                            );
-                                            border-radius: 12px;
-                                            border: 2px solid
-                                                var(--md-sys-color-primary);
-                                        "
-                                    >
-                                        <div
-                                            style="
-                                                display: flex;
-                                                justify-content: space-between;
-                                                align-items: center;
-                                                margin-bottom: 8px;
-                                            "
-                                        >
-                                            <strong
-                                                id="adminFraisSelectedName"
-                                                style="font-size: 1rem"
-                                            ></strong>
-                                            <button
-                                                class="md-btn md-btn-text"
-                                                onclick="adminDeselectFrais()"
-                                                style="
-                                                    padding: 4px 8px;
-                                                    font-size: 0.8rem;
-                                                "
-                                            >
-                                                Changer
-                                            </button>
+                                <!-- Sélection courante -->
+                                <div id="adminFraisSelected" style="display: none; padding: 16px; background: var(--md-sys-color-surface-container); border-radius: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons">person</span>
                                         </div>
-                                        <div
-                                            id="adminFraisSelectedInfo"
-                                            style="
-                                                font-size: 0.85rem;
-                                                color: var(
-                                                    --md-sys-color-on-surface-variant
-                                                );
-                                            "
-                                        ></div>
-                                        <!-- Sélecteur enfant (famille seulement) -->
-                                        <div
-                                            id="adminFraisEnfantBlock"
-                                            style="
-                                                display: none;
-                                                margin-top: 10px;
-                                            "
-                                        >
-                                            <label
-                                                style="
-                                                    font-weight: 500;
-                                                    margin-bottom: 4px;
-                                                    display: block;
-                                                "
-                                                >Payer pour :</label
-                                            >
-                                            <select
-                                                id="adminFamilleTargetEnfant"
-                                                class="md-text-field-input"
-                                                style="
-                                                    width: 100%;
-                                                    padding: 10px;
-                                                    border: 1px solid
-                                                        var(
-                                                            --md-sys-color-outline
-                                                        );
-                                                    border-radius: 8px;
-                                                    background: var(
-                                                        --md-sys-color-surface
-                                                    );
-                                                "
-                                                onchange="
-                                                    adminLoadSelectedFrais()
-                                                "
-                                            ></select>
+                                        <div>
+                                            <strong id="adminFraisSelectedName" style="font-size: 1.1rem; color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;"></strong>
+                                            <div id="adminFraisSelectedInfo" style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);"></div>
                                         </div>
                                     </div>
+                                    <button class="md-btn md-btn-text" onclick="adminDeselectFrais()">
+                                        <span class="material-icons">close</span>
+                                        Changer de sélection
+                                    </button>
 
-                                    <!-- Section Enregistrer un paiement -->
-                                    <div
-                                        id="adminPaiementSection"
-                                        style="
-                                            display: none;
-                                            border: 1px solid
-                                                var(--md-sys-color-primary);
-                                            border-radius: 12px;
-                                            padding: 16px;
-                                            background: var(
-                                                --md-sys-color-surface-container-low
-                                            );
-                                        "
-                                    >
-                                        <h4
-                                            style="
-                                                margin: 0 0 12px 0;
-                                                color: var(
-                                                    --md-sys-color-primary
-                                                );
-                                            "
-                                        >
-                                            <span
-                                                class="material-icons"
-                                                style="
-                                                    vertical-align: middle;
-                                                    margin-right: 4px;
-                                                "
-                                                >payments</span
-                                            >
-                                            Enregistrer un paiement
-                                        </h4>
-                                        <div
-                                            style="
-                                                display: flex;
-                                                gap: 12px;
-                                                flex-wrap: wrap;
-                                            "
-                                        >
-                                            <div
-                                                style="
-                                                    flex: 1;
-                                                    min-width: 150px;
-                                                "
-                                            >
-                                                <label
-                                                    style="
-                                                        font-weight: 500;
-                                                        margin-bottom: 4px;
-                                                        display: block;
-                                                    "
-                                                    >Montant</label
-                                                >
-                                                <input
-                                                    id="adminPaiementMontant"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0.01"
-                                                    class="md-text-field-input"
-                                                    style="
-                                                        width: 100%;
-                                                        padding: 10px;
-                                                        border: 1px solid
-                                                            var(
-                                                                --md-sys-color-outline
-                                                            );
-                                                        border-radius: 8px;
-                                                    "
-                                                    placeholder="Ex: 50"
-                                                />
-                                            </div>
-                                            <div
-                                                style="
-                                                    flex: 1;
-                                                    min-width: 150px;
-                                                "
-                                            >
-                                                <label
-                                                    style="
-                                                        font-weight: 500;
-                                                        margin-bottom: 4px;
-                                                        display: block;
-                                                    "
-                                                    >Méthode de paiement</label
-                                                >
-                                                <select
-                                                    id="adminPaiementMethode"
-                                                    class="md-text-field-input"
-                                                    style="
-                                                        width: 100%;
-                                                        padding: 10px;
-                                                        border: 1px solid
-                                                            var(
-                                                                --md-sys-color-outline
-                                                            );
-                                                        border-radius: 8px;
-                                                        background: var(
-                                                            --md-sys-color-surface
-                                                        );
-                                                    "
-                                                >
-                                                    <option value="espece">
-                                                        💶​Espèce
-                                                    </option>
-                                                    <option value="carte">
-                                                         💳​Carte
-                                                    </option>
-                                                    <option value="virement">
-                                                         🏦​Virement
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div
-                                                style="
-                                                    flex: 1;
-                                                    min-width: 150px;
-                                                "
-                                            >
-                                                <label
-                                                    style="
-                                                        font-weight: 500;
-                                                        margin-bottom: 4px;
-                                                        display: block;
-                                                    "
-                                                    >Date</label
-                                                >
-                                                <input
-                                                    id="adminPaiementDate"
-                                                    type="date"
-                                                    class="md-text-field-input"
-                                                    style="
-                                                        width: 100%;
-                                                        padding: 10px;
-                                                        border: 1px solid
-                                                            var(
-                                                                --md-sys-color-outline
-                                                            );
-                                                        border-radius: 8px;
-                                                    "
-                                                />
+                                    <!-- Sélecteur enfant (famille seulement) -->
+                                    <div id="adminFraisEnfantBlock" style="display: none; width: 100%; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                                        <label style="font-weight: 500; font-size: 14px; margin-bottom: 8px; display: block; color: var(--md-sys-color-on-surface);">Payer pour l'enfant :</label>
+                                        <select
+                                            id="adminFamilleTargetEnfant"
+                                            class="md-text-field-input"
+                                            style="width: 100%; padding: 10px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; background: var(--md-sys-color-surface);"
+                                            onchange="adminLoadSelectedFrais()"
+                                        ></select>
+                                    </div>
+                                </div>
+
+                                <!-- Section Enregistrer un paiement -->
+                                <div id="adminPaiementSection" style="display: none; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; padding: 20px; background: var(--md-sys-color-surface-container-lowest); margin-bottom: 24px;">
+                                    <h4 style="margin: 0 0 16px 0; color: var(--md-sys-color-primary); font-size: 16px; display: flex; align-items: center;">
+                                        <span class="material-icons" style="margin-right: 8px; font-size: 20px;">add_circle</span>
+                                        Nouveau paiement
+                                    </h4>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                                        <div style="flex: 1; min-width: 150px;">
+                                            <div class="md-text-field">
+                                                <div class="md-text-field-container">
+                                                    <input id="adminPaiementMontant" type="number" step="0.01" min="0.01" class="md-text-field-input" placeholder=" " />
+                                                    <label class="md-text-field-label">Montant</label>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div style="margin-top: 27px">
-                                            <label
-                                                style="
-                                                    font-weight: 500;
-                                                    margin-bottom: 4px;
-                                                    display: block;
-                                                "
-                                                >Note (optionnel)</label
-                                            >
-                                            <input
-                                                id="adminPaiementNote"
-                                                type="text"
-                                                class="md-text-field-input"
-                                                style="
-                                                    width: 100%;
-                                                    padding: 10px;
-                                                    border: 1px solid
-                                                        var(
-                                                            --md-sys-color-outline
-                                                        );
-                                                    border-radius: 8px;
-                                                "
-                                                placeholder="Ex: Paiement 1er trimestre"
-                                            />
+                                        <div style="flex: 1; min-width: 150px;">
+                                            <select id="adminPaiementMethode" class="md-text-field-input" style="width: 100%; padding: 10px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; background: var(--md-sys-color-surface);">
+                                                <option value="espece">💶 Espèce</option>
+                                                <option value="carte">💳 Carte</option>
+                                                <option value="virement">🏦 Virement</option>
+                                            </select>
                                         </div>
-                                        <div
-                                            style="
-                                                margin-top: 12px;
-                                                display: flex;
-                                                gap: 8px;
-                                            "
-                                        >
-                                            <button
-                                                class="md-btn md-btn-filled"
-                                                onclick="
-                                                    adminEnregistrerPaiement()
-                                                "
-                                            >
-                                                <span
-                                                    class="material-icons"
-                                                    style="
-                                                        font-size: 18px;
-                                                        vertical-align: middle;
-                                                        margin-right: 4px;
-                                                    "
-                                                    >check</span
-                                                >
-                                                Enregistrer le paiement
-                                            </button>
+                                        <div style="flex: 1; min-width: 150px;">
+                                            <div class="md-text-field">
+                                                <div class="md-text-field-container">
+                                                    <input id="adminPaiementDate" type="date" class="md-text-field-input" placeholder=" " />
+                                                    <label class="md-text-field-label">Date</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div style="display: flex; gap: 8px">
-                                        <button
-                                            class="md-btn md-btn-text"
-                                            onclick="adminLoadSelectedFrais()"
-                                        >
-                                            <span
-                                                class="material-icons"
-                                                style="
-                                                    font-size: 18px;
-                                                    vertical-align: middle;
-                                                    margin-right: 4px;
-                                                "
-                                                >refresh</span
-                                            >
-                                            Actualiser
+                                    <div style="margin-top: 16px">
+                                        <div class="md-text-field">
+                                            <div class="md-text-field-container">
+                                                <input id="adminPaiementNote" type="text" class="md-text-field-input" placeholder=" " />
+                                                <label class="md-text-field-label">Note ou référence (optionnel)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+                                        <button class="md-btn md-btn-filled" onclick="adminEnregistrerPaiement()">
+                                            <span class="material-icons">check</span>
+                                            Enregistrer
                                         </button>
                                     </div>
+                                </div>
 
-                                    <div
-                                        id="adminFraisResult"
-                                        style="margin-top: 12px"
-                                    ></div>
+                                <!-- État vide et Résultats -->
+                                <div id="adminFraisResult">
+                                    <!-- Injecté via JS -->
                                 </div>
                             </div>
                         </div>
@@ -18152,7 +17926,7 @@
                         let html = "";
 
                         if (parents.length > 0) {
-                            html += `<div style="font-size:0.78rem; font-weight:600; color:var(--md-sys-color-on-surface-variant); text-transform:uppercase; letter-spacing:.05em; padding:6px 4px 2px;">Familles</div>`;
+                            html += `<div style="font-size:0.75rem; font-weight:700; color:var(--md-sys-color-primary); text-transform:uppercase; letter-spacing:1px; padding:12px 16px 8px; border-bottom: 1px solid var(--md-sys-color-surface-container-high); margin-bottom: 8px;">Familles</div>`;
                             html += parents
                                 .map((p) => {
                                     const enfantsData = JSON.stringify(
@@ -18161,25 +17935,27 @@
                                         .replace(/\\/g, "\\\\")
                                         .replace(/'/g, "\\'")
                                         .replace(/"/g, "&quot;");
-                                    return `<div style="padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:10px; margin-bottom:6px; cursor:pointer; transition:background 0.2s;"
-                                     onmouseover="this.style.background='var(--md-sys-color-surface-container-high)'"
-                                     onmouseout="this.style.background='var(--md-sys-color-surface-container)'"
+                                    return `<div style="padding:12px 16px; background:transparent; border-bottom: 1px solid var(--md-sys-color-surface-container); cursor:pointer; transition:all 0.2s ease;"
+                                     onmouseover="this.style.background='var(--md-sys-color-surface-container-low)'; this.style.paddingLeft='20px'"
+                                     onmouseout="this.style.background='transparent'; this.style.paddingLeft='16px'"
                                      onclick="adminSelectFraisFamille('${p.id}', '${(p.prenom + " " + p.nom).replace(/'/g, "\\'")}', '${enfantsData}')">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="width:36px; height:36px; border-radius:50%; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.9rem;">${(p.prenom || "P")[0].toUpperCase()}</div>
+                                <div style="display:flex; align-items:center; gap:16px;">
+                                    <div style="width:40px; height:40px; border-radius:50%; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1.1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${(p.prenom || "P")[0].toUpperCase()}</div>
                                     <div style="flex:1;">
-                                        <div style="font-weight:600;">${p.prenom} ${p.nom}</div>
-                                        <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">${p.email} ${p.nbEnfants || 0} enfant(s)</div>
+                                        <div style="font-weight:700; font-size:1.05rem; color:var(--md-sys-color-on-surface);">${p.prenom} ${p.nom}</div>
+                                        <div style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); display: flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="material-icons" style="font-size: 14px;">family_restroom</span> ${p.nbEnfants || 0} enfant(s) ${p.email ? `• ${p.email}` : ''}</div>
                                     </div>
                                     ${
                                         (p.enfants || []).length > 0
-                                            ? `<div style="display:flex; gap:4px; flex-wrap:wrap;">${p.enfants
-                                                  .slice(0, 3)
+                                            ? `<div style="display:flex; gap:6px; flex-wrap:wrap; justify-content: flex-end;">${p.enfants
+                                                  .slice(0, 2)
                                                   .map(
                                                       (e) =>
-                                                          `<span style="padding:2px 8px; border-radius:12px; font-size:0.75rem; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">${e.prenom} ${e.nom}</span>`,
+                                                          `<span style="padding:4px 10px; border-radius:16px; font-size:0.75rem; font-weight: 500; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">${e.prenom} ${e.nom}</span>`,
                                                   )
-                                                  .join("")}</div>`
+                                                  .join("")}
+                                                  ${p.enfants.length > 2 ? `<span style="padding:4px 10px; border-radius:16px; font-size:0.75rem; font-weight: 500; background:var(--md-sys-color-surface-variant); color:var(--md-sys-color-on-surface-variant);">+${p.enfants.length - 2}</span>` : ''}
+                                                </div>`
                                             : ""
                                     }
                                 </div>
@@ -18189,21 +17965,21 @@
                         }
 
                         if (elevesSansParent.length > 0) {
-                            html += `<div style="font-size:0.78rem; font-weight:600; color:var(--md-sys-color-on-surface-variant); text-transform:uppercase; letter-spacing:.05em; padding:8px 4px 2px;">Élèves sans parent</div>`;
+                            html += `<div style="font-size:0.75rem; font-weight:700; color:var(--md-sys-color-secondary); text-transform:uppercase; letter-spacing:1px; padding:16px 16px 8px; border-bottom: 1px solid var(--md-sys-color-surface-container-high); margin-bottom: 8px; ${parents.length > 0 ? 'border-top: 1px solid var(--md-sys-color-outline-variant); margin-top: 8px;' : ''}">Élèves sans parent</div>`;
                             html += elevesSansParent
                                 .map(
                                     (e) => `
-                            <div style="padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:10px; margin-bottom:6px; cursor:pointer; transition:background 0.2s;"
-                                 onmouseover="this.style.background='var(--md-sys-color-surface-container-high)'"
-                                 onmouseout="this.style.background='var(--md-sys-color-surface-container)'"
+                            <div style="padding:12px 16px; background:transparent; border-bottom: 1px solid var(--md-sys-color-surface-container); cursor:pointer; transition:all 0.2s ease;"
+                                 onmouseover="this.style.background='var(--md-sys-color-surface-container-low)'; this.style.paddingLeft='20px'"
+                                 onmouseout="this.style.background='transparent'; this.style.paddingLeft='16px'"
                                  onclick="adminSelectFraisEleve('${e.id}','${(e.prenom + " " + e.nom).replace(/'/g, "\\'")}','${(e.classe || "").replace(/'/g, "\\'")}',${e.fraisInscription || 0},${parseFloat(e.montantPaye || 0)})">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="width:36px; height:36px; border-radius:50%; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.9rem;">${(e.prenom || "E")[0].toUpperCase()}</div>
+                                <div style="display:flex; align-items:center; gap:16px;">
+                                    <div style="width:40px; height:40px; border-radius:50%; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1.1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${(e.prenom || "E")[0].toUpperCase()}</div>
                                     <div style="flex:1;">
-                                        <div style="font-weight:600;">${e.prenom} ${e.nom}</div>
-                                        <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">Classe : ${e.classe || ""}</div>
+                                        <div style="font-weight:700; font-size:1.05rem; color:var(--md-sys-color-on-surface);">${e.prenom} ${e.nom}</div>
+                                        <div style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); display: flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="material-icons" style="font-size: 14px;">school</span> Classe : ${e.classe || "Non assignée"}</div>
                                     </div>
-                                    <div style="font-size:0.8rem; color:${Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)) > 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-primary)"}; font-weight:600;">Reste : ${formatCurrency(Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)))}</div>
+                                    <div style="font-size:0.9rem; padding: 6px 12px; border-radius: 20px; background: ${Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)) > 0 ? 'rgba(var(--md-sys-color-error-rgb), 0.1)' : 'rgba(var(--md-sys-color-primary-rgb), 0.1)'}; color:${Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)) > 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-primary)"}; font-weight:700;">Reste : ${formatCurrency(Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)))}</div>
                                 </div>
                             </div>`,
                                 )
@@ -18336,12 +18112,18 @@
                     "adminPaiementSection",
                 );
                 resultEl.innerHTML =
-                    '<p style="color:var(--md-sys-color-on-surface-variant);">Chargement...</p>';
+                    '<div style="text-align: center; padding: 48px 24px; color: var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size: 32px; display: block; margin-bottom: 12px; animation: spin 1s linear infinite;">autorenew</span>Chargement des données...</div>';
                 paiementSection.style.display = "none";
 
                 if (!_fraisSelection) {
                     resultEl.innerHTML =
-                        '<p style="color:var(--md-sys-color-on-surface-variant);">Recherchez et sélectionnez un parent ou un élève.</p>';
+                        `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 24px; background: var(--md-sys-color-surface-container-lowest); border-radius: 16px; border: 1px dashed var(--md-sys-color-outline-variant); text-align: center;">
+                            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                                <span class="material-icons" style="font-size: 32px;">person_search</span>
+                            </div>
+                            <h3 style="margin: 0 0 8px 0; font-size: 18px; color: var(--md-sys-color-on-surface);">Aucun profil sélectionné</h3>
+                            <p style="margin: 0; color: var(--md-sys-color-on-surface-variant); max-width: 400px;">Utilisez la barre de recherche ci-dessus pour trouver un parent ou un élève et gérer ses paiements.</p>
+                        </div>`;
                     return;
                 }
 
@@ -18491,7 +18273,10 @@
                 let enfantsHtml = "";
                 if (enfants && enfants.length > 0) {
                     enfantsHtml =
-                        `<div style="margin-top:16px;"><strong>Détail par enfant</strong></div>` +
+                        `<div style="margin-top: 24px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 20px;">family_restroom</span>
+                            <strong style="font-size: 1.1rem; color: var(--md-sys-color-on-surface);">Détail par enfant</strong>
+                        </div>` +
                         enfants
                             .map((e) => {
                                 const ePaye = parseFloat(e.montantPaye || 0);
@@ -18500,22 +18285,34 @@
                                     (e.fraisInscription || 0) - ePaye,
                                 );
                                 return `
-                        <div style="padding:10px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-top:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <strong>${e.prenom} ${e.nom}</strong>
-                                <span style="color:${e.fraisValide ? "var(--md-sys-color-primary)" : "var(--md-sys-color-error)"};">
+                        <div style="padding: 16px; background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 12px;">
+                                <strong style="font-size: 1.1rem; color: var(--md-sys-color-on-surface); display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 28px; height: 28px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">${e.prenom.charAt(0).toUpperCase()}</div>
+                                    ${e.prenom} ${e.nom}
+                                </strong>
+                                <span style="padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; background: ${e.fraisValide ? 'rgba(var(--md-sys-color-primary-rgb), 0.1)' : 'rgba(var(--md-sys-color-error-rgb), 0.1)'}; color: ${e.fraisValide ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-error)'};">
                                     ${e.fraisValide ? "Validé" : "En cours"}
                                 </span>
                             </div>
-                            <div style="font-size:0.9rem; color:var(--md-sys-color-on-surface-variant); margin-top:4px; display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
-                                <div style="display:flex; align-items:center; gap:4px;">
-                                    <span>Total: <b>${formatCurrency(e.fraisInscription)}</b></span>
-                                    <button onclick="adminModifierTotalFrais('${e.id}', ${e.fraisInscription || 0})" style="background:none; border:none; cursor:pointer; color:var(--md-sys-color-primary); padding:0; display:flex; align-items:center;" title="Modifier le total">
-                                        <span class="material-icons" style="font-size:16px;">edit</span>
-                                    </button>
+                            <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
+                                <div style="flex: 1; min-width: 100px;">
+                                    <div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.5px;">Total</div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                        <b style="font-size: 1.1rem;">${formatCurrency(e.fraisInscription)}</b>
+                                        <button onclick="adminModifierTotalFrais('${e.id}', ${e.fraisInscription || 0})" style="background: var(--md-sys-color-surface-variant); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: var(--md-sys-color-on-surface-variant); display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Modifier le total" onmouseover="this.style.background='var(--md-sys-color-primary)'; this.style.color='white'" onmouseout="this.style.background='var(--md-sys-color-surface-variant)'; this.style.color='var(--md-sys-color-on-surface-variant)'">
+                                            <span class="material-icons" style="font-size: 14px;">edit</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <span style="margin-left:8px;">Payé: ${formatCurrency(ePaye)}</span>
-                                <span>Reste: ${formatCurrency(eReste)}</span>
+                                <div style="flex: 1; min-width: 100px; padding-left: 16px; border-left: 1px solid var(--md-sys-color-outline-variant);">
+                                    <div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.5px;">Payé</div>
+                                    <div style="font-size: 1.1rem; color: var(--md-sys-color-primary); font-weight: 600; margin-top: 4px;">${formatCurrency(ePaye)}</div>
+                                </div>
+                                <div style="flex: 1; min-width: 100px; padding-left: 16px; border-left: 1px solid var(--md-sys-color-outline-variant);">
+                                    <div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.5px;">Reste</div>
+                                    <div style="font-size: 1.1rem; font-weight: 600; color: ${eReste > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'}; margin-top: 4px;">${formatCurrency(eReste)}</div>
+                                </div>
                             </div>
                         </div>`;
                             })
@@ -18523,58 +18320,106 @@
                 }
 
                 container.innerHTML = `
-                <div style="padding:16px; background:var(--md-sys-color-surface-container-low); border-radius:12px;">
-                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:12px;">
-                        <div style="text-align:center; flex:1; min-width:120px;">
-                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Total</div>
-                            <div style="font-size:1.4rem; font-weight:700;">${formatCurrency(total)}</div>
+                <div style="padding: 24px; background: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px;">
+                        <div style="flex: 1; min-width: 150px; background: var(--md-sys-color-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant); text-align: center;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                                <span class="material-icons" style="font-size: 18px; color: var(--md-sys-color-on-surface-variant);">account_balance_wallet</span>
+                                <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--md-sys-color-on-surface-variant); font-weight: 600; letter-spacing: 0.5px;">Total à payer</div>
+                            </div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--md-sys-color-on-surface);">${formatCurrency(total)}</div>
                         </div>
-                        <div style="text-align:center; flex:1; min-width:120px;">
-                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Payé</div>
-                            <div style="font-size:1.4rem; font-weight:700; color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
+                        <div style="flex: 1; min-width: 150px; background: var(--md-sys-color-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant); text-align: center;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                                <span class="material-icons" style="font-size: 18px; color: var(--md-sys-color-primary);">check_circle</span>
+                                <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--md-sys-color-on-surface-variant); font-weight: 600; letter-spacing: 0.5px;">Montant payé</div>
+                            </div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
                         </div>
-                        <div style="text-align:center; flex:1; min-width:120px;">
-                            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--md-sys-color-on-surface-variant); margin-bottom:4px;">Reste</div>
-                            <div style="font-size:1.4rem; font-weight:700; color:${resteAPayer > 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-primary)"};">${formatCurrency(resteAPayer)}</div>
+                        <div style="flex: 1; min-width: 150px; background: var(--md-sys-color-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant); text-align: center;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                                <span class="material-icons" style="font-size: 18px; color: ${resteAPayer > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">info</span>
+                                <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--md-sys-color-on-surface-variant); font-weight: 600; letter-spacing: 0.5px;">Reste à payer</div>
+                            </div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: ${resteAPayer > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'};">${formatCurrency(resteAPayer)}</div>
                         </div>
                     </div>
-                    <div style="height:10px; background:var(--md-sys-color-surface-container); border-radius:8px; overflow:hidden;">
-                        <div style="width:${progress}%; height:100%; background:linear-gradient(90deg,var(--md-sys-color-primary),var(--md-sys-color-secondary)); transition:width 0.5s ease;"></div>
+
+                    <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <span style="font-size: 0.9rem; font-weight: 600; color: var(--md-sys-color-on-surface-variant);">Progression du paiement</span>
+                        <span style="font-size: 1.2rem; font-weight: 700; color: var(--md-sys-color-primary);">${progress}%</span>
                     </div>
-                    <div style="text-align:center; font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); margin-top:6px;">${progress}% payé</div>
+                    <div style="height: 12px; background: var(--md-sys-color-surface-container-high); border-radius: 12px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="width: ${progress}%; height: 100%; background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-secondary)); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 12px;"></div>
+                    </div>
 
                     ${enfantsHtml}
 
-                    <div style="margin-top:20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <strong style="font-size:1rem;">Historique des paiements</strong>
-                            <span style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant);">${allPaiements.length} transaction(s)</span>
+                    <div style="margin-top: 32px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="material-icons" style="color: var(--md-sys-color-on-surface-variant);">history</span>
+                                <strong style="font-size: 1.1rem; color: var(--md-sys-color-on-surface);">Historique des paiements</strong>
+                            </div>
+                            <span style="font-size: 0.85rem; padding: 4px 12px; background: var(--md-sys-color-surface-variant); border-radius: 16px; color: var(--md-sys-color-on-surface-variant); font-weight: 600;">${allPaiements.length} transaction(s)</span>
                         </div>
                         ${
                             allPaiements.length === 0
-                                ? '<p style="text-align:center; padding:16px; color:var(--md-sys-color-on-surface-variant);">Aucun paiement enregistré</p>'
-                                : allPaiements
+                                ? '<div style="text-align: center; padding: 32px 16px; background: var(--md-sys-color-surface); border-radius: 12px; border: 1px dashed var(--md-sys-color-outline-variant); color: var(--md-sys-color-on-surface-variant);"><span class="material-icons" style="font-size: 48px; opacity: 0.5; margin-bottom: 8px; display: block;">receipt_long</span><p style="margin: 0;">Aucun paiement enregistré pour le moment.</p></div>'
+                                : '<div style="display: flex; flex-direction: column; gap: 8px;">' + allPaiements
                                       .map(
-                                          (p) => `
-                                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--md-sys-color-surface-container); border-radius:8px; margin-bottom:6px;">
-                                    <div style="display:flex; flex-direction:column; gap:2px;">
-                                        <div style="font-weight:600; font-size:1rem;">${formatCurrency(p.montant)}</div>
-                                        <div style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);">
-                                            ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
-                                            ${p.eleveNom ? ` ${p.eleveNom}` : ""}
-                                            ${p.note ? ` <em>${p.note}</em>` : ""}
-                                            ${p.staffNom ? ` • 👤 <b>${p.staffNom}</b>` : ""}
+                                          (p) => {
+                                              if (p.methodePaiement === 'ajustement') {
+
+                                                  return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px dashed var(--md-sys-color-outline); border-radius: 12px; margin-bottom: 4px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(var(--md-sys-color-primary-rgb), 0.1); display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 20px;">tune</span>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                                            <div style="font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);">Réajustement des frais</div>
+                                            <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);">
+                                                ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                                                ${p.staffNom ? ` • par ${p.staffNom}` : ""}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <span style="padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:500; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
-                                            ${getMethodeLabel(p.methodePaiement)}
-                                        </span>
+                                    <div style="padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); display: inline-flex; align-items: center; gap: 4px;">
+                                        ${p.note || 'Ajustement manuel'}
                                     </div>
                                 </div>
-                            `,
+                                                  `;
+                                              }
+
+                                              // Design classique pour un paiement normal
+                                              return `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.05)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(var(--md-sys-color-primary-rgb), 0.1); display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 20px;">${p.methodePaiement === 'espece' ? 'payments' : p.methodePaiement === 'carte' ? 'credit_card' : 'account_balance'}</span>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--md-sys-color-on-surface);">${formatCurrency(p.montant)}</div>
+                                            <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); display: flex; align-items: center; gap: 6px;">
+                                                <span class="material-icons" style="font-size: 14px;">event</span>
+                                                ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                                        <span style="padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); display: inline-flex; align-items: center; gap: 4px;">
+                                            ${getMethodeLabel(p.methodePaiement)}
+                                        </span>
+                                        ${p.note ? `<div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); font-style: italic;">${p.note}</div>` : ""}
+                                        ${p.staffNom ? `<div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.8;">Saisi par ${p.staffNom}</div>` : ""}
+                                    </div>
+                                </div>
+                            `;
+                                          }
                                       )
-                                      .join("")
+                                      .join("") + "</div>"
                         }
                     </div>
                 </div>
@@ -18600,14 +18445,14 @@
                     async () => {
                         const input = document.getElementById("nouveauTotalInput");
                         if (!input) return;
-                        
+
                         const nouveauTotal = input.value;
                         const parsed = parseFloat(nouveauTotal.replace(',', '.'));
-                        
+
                         if (isNaN(parsed) || parsed < 0) {
                             return showSnackbar("Montant invalide");
                         }
-                        
+
                         try {
                             const resp = await fetch(`${API_URL}/eleves/${eleveId}/frais-total`, {
                                 method: "PUT",

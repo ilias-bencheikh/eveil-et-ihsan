@@ -6746,7 +6746,29 @@
                                             new Date(b.date) - new Date(a.date),
                                     )
                                     .map(
-                                        (p) => `
+                                        (p) => {
+                                            if (p.methodePaiement === 'ajustement') {
+                                                return `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px dashed var(--md-sys-color-outline); border-radius: 12px; margin-bottom: 6px;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-surface-variant); display: flex; align-items: center; justify-content: center;">
+                                                <span class="material-icons" style="color: var(--md-sys-color-on-surface-variant); font-size: 16px;">tune</span>
+                                            </div>
+                                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                                <div style="font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);">Réajustement des frais</div>
+                                                <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);">
+                                                    ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.9rem; font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface); padding: 4px 12px; border-radius: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                            ${p.note || 'Ajustement manuel'}
+                                        </div>
+                                    </div>
+                                                `;
+                                            }
+
+                                            return `
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;margin-bottom:6px;font-size:13px;border:1px solid var(--md-sys-color-outline-variant);">
                                         <div style="display:flex;align-items:center;gap:8px;">
                                             <div class="info-card-icon ic-green" style="width:28px;height:28px;"><span class="material-icons" style="font-size:14px;">check</span></div>
@@ -6762,7 +6784,7 @@
                                             ${getMethodeLabel(p.methodePaiement)}
                                         </span>
                                     </div>
-                                `,
+                                `}
                                     )
                                     .join("")}
                             </div>
