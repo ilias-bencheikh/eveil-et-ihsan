@@ -6867,6 +6867,7 @@
                                             >
                                             Désactiver la maintenance
                                         </button>
+                                        <button class="md-btn md-btn-filled" style="background-color: #1e1e1e; margin-left: 12px;" onclick="openTerminalModal()"><span class="material-icons">terminal</span>Ouvrir un terminal</button>
                                     </div>
                                 </div>
                             </div>
@@ -6956,6 +6957,26 @@
                 </div>
             </div>
         </div>
+        <div class="md-dialog-overlay" id="terminalModalOverlay" onclick="if (event.target === this) closeTerminalModal();" style="z-index: 9999;">
+            <div class="md-dialog" id="terminalModal" style="max-width: 800px; background: #1e1e1e; border: 1px solid #333;">
+                <div class="md-dialog-header" style="border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 class="md-dialog-title" style="color: #00ff00; font-family: monospace; margin: 0;"><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">terminal</span> Terminal Serveur</h2>
+                    <button class="md-icon-btn" onclick="closeTerminalModal()" style="color: white;"><span class="material-icons">close</span></button>
+                </div>
+                <div class="md-dialog-content" style="padding-top: 16px;">
+                    <p style="color: #888; font-size: 0.9em; font-family: monospace; margin-bottom: 10px;">Commandes autorisées: <span style="color: #fff;">git pull</span>, <span style="color: #fff;">npm install</span>, <span style="color: #fff;">restart</span></p>
+                    <div id="terminal-output" style="height: 400px; overflow-y: auto; background: #000; padding: 12px; border: 1px solid #333; margin-bottom: 15px; border-radius: 4px; white-space: pre-wrap; font-family: monospace; font-size: 14px; color: #ccc;"></div>
+                    <div style="display: flex; gap: 10px; background: #000; padding: 10px; border-radius: 4px; border: 1px solid #333; align-items: center;">
+                        <span style="color: #00ff00; font-family: monospace; font-weight: bold;">root@eveil-ihsan:~#</span>
+                        <input type="text" id="terminal-input" style="flex: 1; background: transparent; border: none; color: white; font-family: monospace; font-size: 15px; outline: none;" placeholder="Tapez une commande...">
+                        <button id="terminal-btn" class="md-btn md-btn-filled" style="background: #007bff; color: white; min-width: auto; padding: 0 16px;">
+                            <span class="material-icons">send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Modale détail actualité -->
         <div
@@ -19733,6 +19754,14 @@
                     .getElementById("dialogOverlay")
                     .classList.remove("show");
             }
+            function openTerminalModal() {
+                document.getElementById("terminalModalOverlay").classList.add("show");
+                setTimeout(() => document.getElementById("terminal-input").focus(), 100);
+            }
+            function closeTerminalModal() {
+                document.getElementById("terminalModalOverlay").classList.remove("show");
+            }
+
 
             // Fonction pour mettre à jour les infos utilisateur dans la sidebar
             function updateSidebarUserInfo() {
@@ -19966,6 +19995,54 @@
                                 // Revert checkbox if error
                                 notifCheck.checked = !notifCheck.checked;
                             });
+                    });
+                }
+
+                // ==================== TERMINAL SERVEUR ====================
+                const terminalBtn = document.getElementById("terminal-btn");
+                const terminalInput = document.getElementById("terminal-input");
+                const terminalOutput = document.getElementById("terminal-output");
+
+                if (terminalBtn && terminalInput && terminalOutput) {
+                    const appendLog = (text, isError = false) => {
+                        const span = document.createElement("span");
+                        span.style.color = isError ? "#ff5555" : "#ccc";
+                        span.textContent = text + "\n";
+                        terminalOutput.appendChild(span);
+                        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    };
+
+                    const executeCommand = async () => {
+                        const cmd = terminalInput.value.trim();
+                        if (!cmd) return;
+
+                        // Display command
+                        const cmdLine = document.createElement("div");
+                        cmdLine.innerHTML = `<span style="color: #00ff00;">root@eveil-ihsan:~#</span> <span style="color: white;">${cmd}</span>`;
+                        terminalOutput.appendChild(cmdLine);
+                        terminalInput.value = "";
+                        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+                        try {
+                            const res = await apiRequest("/maintenance/terminal", {
+                                method: "POST",
+                                body: JSON.stringify({ command: cmd })
+                            });
+                            if (res.error) {
+                                appendLog(res.error, true);
+                            } else {
+                                appendLog(res.output || "Commande exécutée avec succès.", false);
+                            }
+                        } catch (err) {
+                            appendLog("Erreur de connexion au serveur: " + err.message, true);
+                        }
+                    };
+
+                    terminalBtn.addEventListener("click", executeCommand);
+                    terminalInput.addEventListener("keypress", (e) => {
+                        if (e.key === "Enter") {
+                            executeCommand();
+                        }
                     });
                 }
             });

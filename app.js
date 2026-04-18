@@ -7,7 +7,6 @@ const cors = require("cors");
 const path = require("path");
 const helmet = require("helmet");
 const hpp = require("hpp");
-require("dotenv").config();
 
 // Configuration
 const { SERVER_CONFIG, SESSION_CONFIG } = require("./src/config/constants");

@@ -262,12 +262,12 @@ const emailTemplates = {
             <p style="margin:0 0 16px;font-size:15px;color:#3c4043;line-height:1.7;">
               Vous avez reçu un nouveau message de <strong>${senderName}</strong>.
             </p>
-            
+
             <!-- Zone de message stylisée -->
             <div style="background:#f8f9fa; border-radius:12px; padding:24px; margin:28px 0; position:relative; border:1px solid #e8eaed; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
               <p style="margin:0; font-size:15px; color:#202124; line-height:1.6; white-space:pre-wrap; padding-left:16px; padding-top:4px; position:relative; z-index:1;">${messageContent}</p>
             </div>
-            
+
           </td>
         </tr>
         <tr>
@@ -316,7 +316,7 @@ async function sendEmail(to, template, ...args) {
     }
 
     const emailContent = emailTemplates[template](...templateArgs);
-    
+
     const mailOptions = {
         from: `Eveil et Ihsan <${process.env.EMAIL_USER || 'no.reply.eveil.et.ihsan@gmail.com'}>`,
         to,

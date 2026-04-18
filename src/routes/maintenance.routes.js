@@ -3,6 +3,8 @@ const router = express.Router();
 const { db } = require('../config/database');
 const { dbGet, dbRun } = require('../utils/helpers');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 // GET /api/maintenance/status — accessible à tous (pour la page de login)
 router.get('/status', async (req, res) => {
@@ -58,6 +60,54 @@ router.post('/toggle', requireAuth, requireAdmin, async (req, res) => {
         console.error('Erreur toggle maintenance:', err);
         return res.status(500).json({ error: 'Erreur serveur' });
     }
+});
+
+function restartServer() {
+    console.log("Redémarrage en cours...");
+    process.exit(99);
+}
+
+// POST /api/maintenance/terminal — admin uniquement
+router.post('/terminal', requireAuth, requireAdmin, async (req, res) => {
+    const { command } = req.body;
+    if (!command) {
+        return res.status(400).json({ error: 'Commande vide' });
+    }
+
+    const cmdStr = command.trim();
+    const allowedExact = ['git pull', 'npm install', 'restart'];
+
+    // On autorise un subset strict
+    if (!allowedExact.includes(cmdStr) && !cmdStr.startsWith('pm2 restart')) {
+        return res.status(403).json({ error: 'Commande non autorisée. Seules git pull, npm install et restart sont autorisées.' });
+    }
+
+    if (cmdStr === 'restart' || cmdStr.startsWith('pm2 restart')) {
+        res.json({ output: 'Redémarrage du serveur initié...' });
+        // Laisse 1 sec pour répondre, puis quitte (nodemon ou PM2 le relancera)
+        console.log('Redémarrage demandé via le terminal web.');
+        restartServer();
+    }
+    else if (cmdStr == "update") {
+      res.json({ output: 'Mise à jour du serveur initiée...' });
+      console.log('Mise à jour demandée via le terminal web.');
+      exec('git pull && npm install', { cwd: process.cwd() }, (error, stdout, stderr) => {
+          let output = stdout || '';
+          if (stderr) output += '\\n' + stderr;
+          if (error) output = `Erreur de mise à jour:\\n${error.message}\\n${output}`;
+          console.log(output);
+          // Après la mise à jour, on redémarre
+          restartServer();
+      });
+      return; // on ne veut pas exécuter la suite du code
+    }
+
+    exec(cmdStr, { cwd: process.cwd() }, (error, stdout, stderr) => {
+        let output = stdout || '';
+        if (stderr) output += '\\n' + stderr;
+        if (error) output = `Erreur de commande:\\n${error.message}\\n${output}`;
+        return res.json({ output: output.trim() });
+    });
 });
 
 module.exports = router;
