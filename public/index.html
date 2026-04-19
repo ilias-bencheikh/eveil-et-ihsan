@@ -2863,6 +2863,14 @@
                         <a
                             href="#"
                             class="sidebar-nav-item"
+                            data-tab="preinscriptions"
+                        >
+                            <span class="material-icons">how_to_reg</span>
+                            <span>Préinscriptions</span>
+                        </a>
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
                             data-tab="frais-admin"
                         >
                             <span class="material-icons">payments</span>
@@ -6222,6 +6230,145 @@
                         </div>
                     </div>
 
+                    <!-- ========== PREINSCRIPTIONS TAB ========== -->
+                    <div id="preinscriptions" class="tab-content" style="position: relative">
+
+                        <!-- Configuration -->
+                        <div class="widget-card" style="margin-top: 16px;">
+                            <div class="widget-card-header">
+                                <h3 class="widget-card-title">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">settings</span>
+                                    Configuration des préinscriptions
+                                </h3>
+                            </div>
+                            <div class="widget-card-content" style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+
+                                <div style="display: flex; align-items: center; gap: 16px; background: var(--md-sys-color-surface-container); padding: 16px 24px; border-radius: 16px; flex-grow: 1; justify-content: space-between;">
+                                    <div>
+                                        <h4 style="margin: 0 0 4px 0; font-size: 16px;">Ouverture des préinscriptions</h4>
+                                        <p style="margin: 0; font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Permet aux parents de soumettre de nouvelles demandes</p>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <span id="adminPreinsStatusText" style="font-weight: 500; font-size: 14px;">Fermé</span>
+                                        <label class="md-switch">
+                                            <input type="checkbox" class="md-switch-input" id="adminPreinsOuvert" onchange="document.getElementById('adminPreinsStatusText').textContent = this.checked ? 'Ouvert' : 'Fermé'; document.getElementById('adminPreinsStatusText').style.color = this.checked ? '#2e7d32' : '#d32f2f';" />
+                                            <span class="md-switch-track"></span>
+                                            <span class="md-switch-thumb"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                                    <div class="md-text-field" style="width: 200px;">
+                                        <div class="md-text-field-container">
+                                            <input type="text" id="adminPreinsAnnee" class="md-text-field-input" placeholder="ex: 2024-2025" />
+                                            <label class="md-text-field-label">Année Scolaire</label>
+                                        </div>
+                                    </div>
+                                    <button class="md-btn md-btn-filled" onclick="savePreinscriptionsConfig()">
+                                        <span class="material-icons">save</span> Enregistrer
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Liste des demandes -->
+                        <div class="widget-card" style="margin-top: 24px;">
+                            <div class="widget-card-header">
+                                <h3 class="widget-card-title">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">folder_shared</span>
+                                    Dossiers reçus
+                                </h3>
+                                <div class="widget-card-actions">
+                                    <button class="md-btn md-btn-text" onclick="loadAdminPreinscriptions()">
+                                        <span class="material-icons">refresh</span> Actualiser
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="widget-card-content">
+                                <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                                    <div class="topbar-search" style="flex-grow: 1; min-width: 250px;">
+                                        <span class="material-icons">search</span>
+                                        <input type="text" id="adminPreinsSearch" placeholder="Rechercher par nom ou email..." onkeyup="filterPreinscriptions()"/>
+                                    </div>
+                                    <div class="md-text-field" style="width: 200px;">
+                                        <div class="md-text-field-container">
+                                            <select id="adminPreinsFilterStatut" class="md-text-field-input" onchange="filterPreinscriptions()">
+                                                <option value="">Tous les statuts</option>
+                                                <option value="en_attente" selected>En attente</option>
+                                                <option value="confirmee">Confirmée</option>
+                                                <option value="rejetee">Rejetée</option>
+                                            </select>
+                                            <label class="md-text-field-label">Statut</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-text-field" style="width: 200px;">
+                                        <div class="md-text-field-container">
+                                            <select id="adminPreinsFilterType" class="md-text-field-input" onchange="filterPreinscriptions()">
+                                                <option value="">Tous les types</option>
+                                                <option value="nouveau">Nouveaux</option>
+                                                <option value="reinscription">Réinscriptions</option>
+                                                <option value="mixte">Mixtes</option>
+                                            </select>
+                                            <label class="md-text-field-label">Type</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="data-table" id="adminPreinscriptionsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Parent / Contact</th>
+                                                <th>Type</th>
+                                                <th>Enfants</th>
+                                                <th>Statut</th>
+                                                <th style="text-align: right;">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminPreinscriptionsTableBody">
+                                            <tr><td colspan="6" style="text-align:center;">Chargement...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Détails Préinscription -->
+                    <div id="adminPreinscriptionModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center;">
+                        <div class="modal-content" style="background:var(--md-sys-color-surface); width:100%; max-width:800px; border-radius:20px; padding:28px; position:relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid var(--md-sys-color-outline-variant);">
+                                <h3 style="margin:0; font-size:22px; color:var(--md-sys-color-on-surface); display:flex; align-items:center; gap:10px;">
+                                    <span class="material-icons" style="color:var(--md-sys-color-primary); font-size:28px;">folder_shared</span>
+                                    Détails du dossier
+                                </h3>
+                                <button class="md-icon-btn" onclick="document.getElementById('adminPreinscriptionModal').style.display='none'" style="color:var(--md-sys-color-on-surface-variant); width:40px; height:40px;">
+                                    <span class="material-icons" style="font-size:28px;">close</span>
+                                </button>
+                            </div>
+                            <div id="adminPreinscriptionDetailsContent" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;"></div>
+
+                            <div style="margin-top: 24px;">
+                                <div class="md-text-field" style="width: 100%;">
+                                    <div class="md-text-field-container">
+                                        <textarea id="adminPreinsNotes" class="md-text-field-input" style="min-height: 80px; resize: vertical; padding-top: 24px;" placeholder=" "></textarea>
+                                        <label class="md-text-field-label">Notes Admin (internes)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 24px; display:flex; justify-content:flex-end; gap:12px;">
+                                <button class="md-btn md-btn-text" onclick="document.getElementById('adminPreinscriptionModal').style.display='none'">Fermer</button>
+                                <button class="md-btn" style="background:var(--md-sys-color-error); color:var(--md-sys-color-on-error);" onclick="updatePreinscriptionStatus('rejetee')"><span class="material-icons">cancel</span> Refuser</button>
+                                <button class="md-btn md-btn-filled" style="background:#2e7d32; color:#fff;" onclick="updatePreinscriptionStatus('confirmee')"><span class="material-icons">check_circle</span> Approuver</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ========== FRAIS ADMIN TAB ========== -->
                     <div id="frais-admin" class="tab-content" style="position: relative">
                         <div class="widget-card" id="fraisMainWidget" style="margin-top: 16px">
@@ -6317,7 +6464,6 @@
                                         <div style="flex: 1; min-width: 150px;">
                                             <select id="adminPaiementMethode" class="md-text-field-input" style="width: 100%; padding: 10px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; background: var(--md-sys-color-surface);">
                                                 <option value="espece">💶 Espèce</option>
-                                                <option value="carte">💳 Carte</option>
                                                 <option value="virement">🏦 Virement</option>
                                             </select>
                                         </div>
@@ -7270,6 +7416,7 @@
                     messagerie: "Messagerie",
                     bureau: "Gestion du bureau",
                     inscriptions: "Dossiers d'inscription",
+                    preinscriptions: "Préinscriptions",
                     "frais-admin": "Gestion des frais",
                     accounts: "Comptes",
                     parametres: "Paramètres",
@@ -9035,6 +9182,9 @@
                         break;
                     case "inscriptions":
                         await loadInscriptions();
+                        break;
+                    case "preinscriptions":
+                        await loadAdminPreinscriptions();
                         break;
                     case "frais-admin":
                         await adminFraisTabInit();
@@ -15916,6 +16066,8 @@
                             if (!input.value) input.value = parentNom;
                         });
                 }
+
+                updateAllEnfantsFrais();
             }
 
             function createEnfantFieldHTML(index) {
@@ -16012,8 +16164,8 @@
                             </div>
                             <div class="md-text-field">
                                 <div class="md-text-field-container">
-                                    <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="0">
-                                    <label class="md-text-field-label">Montant ()</label>
+                                    <input type="number" step="0.01" min="0" class="md-text-field-input enfant-frais" data-index="${index}" placeholder=" " value="${index === 0 ? 390 : (index === 1 ? 290 : (index === 2 ? 260 : 250))}">
+                                    <label class="md-text-field-label">Montant</label>
                                 </div>
                             </div>
                             <div class="md-text-field">
@@ -16088,6 +16240,18 @@
                         : null;
                     if (enfantNomInput) enfantNomInput.value = parentNom;
                 }
+
+                updateAllEnfantsFrais();
+            }
+
+            function updateAllEnfantsFrais() {
+                const feeDistribution = [390, 290, 260];
+                document.querySelectorAll(".enfant-field").forEach((field, i) => {
+                    const input = field.querySelector(".enfant-frais");
+                    if (input) {
+                        input.value = i < 3 ? feeDistribution[i] : 250;
+                    }
+                });
             }
 
             function removeEnfantField(index) {
@@ -16128,6 +16292,7 @@
                                     `toggleEnfantAccount(${i})`,
                                 );
                         });
+                    updateAllEnfantsFrais();
                 }
             }
 
@@ -17161,6 +17326,8 @@
                         selectedIds.has(e.id),
                     );
 
+                recalculerFraisReinscription();
+
                 // Mettre à jour l'apparence du bloc
                 const card = document.getElementById(
                     `reinsc_child_card_${idx}`,
@@ -17474,6 +17641,29 @@
 
                 document.getElementById("reinscriptionFormContent").innerHTML =
                     html;
+
+                recalculerFraisReinscription();
+            }
+
+            function recalculerFraisReinscription() {
+                if (!selectedReinscriptionEleve) return;
+                const { allEleves, selectedIds } = selectedReinscriptionEleve;
+
+                let activeIndexes = [];
+                allEleves.forEach((eleve, idx) => {
+                    if (selectedIds.has(eleve.id)) {
+                        activeIndexes.push(idx);
+                    }
+                });
+
+                const feeDistribution = [390, 290, 260];
+                activeIndexes.forEach((idx, activePos) => {
+                    let fee = activePos < 3 ? feeDistribution[activePos] : 250;
+                    const input = document.getElementById(`reinsc_frais_${idx}`);
+                    if (input) {
+                        input.value = fee;
+                    }
+                });
             }
 
             function generateReinscriptionRecap() {
@@ -17591,7 +17781,7 @@
                         <div style="padding:10px;background:var(--md-sys-color-surface-container);border-radius:10px;margin-bottom:8px;font-size:13px;">
                             <strong>${prenomP} ${nomP}</strong> ${p.isPrimary ? '<span style="color:var(--md-sys-color-tertiary);font-size:11px;">(principal)</span>' : ""}
                             <div style="color:var(--md-sys-color-on-surface-variant);margin-top:4px;">
-                                ${telP ? "" + telP : ""} ${emailP ? "à&#13953;à " + emailP : ""}
+                                ${telP ? "" + telP : ""} ${emailP ? emailP : ""}
                             </div>
                         </div>
                     `;
@@ -17793,7 +17983,6 @@
 
             function getMethodeLabel(methode) {
                 const labels = {
-                    carte: "💳 Carte",
                     virement: "🏦 Virement",
                     espece: "💵 Espèce",
                     ajustement: "⚙️ Ajustement",
@@ -18309,7 +18498,12 @@
                                 <span class="material-icons" style="font-size: 18px; color: var(--md-sys-color-on-surface-variant);">account_balance_wallet</span>
                                 <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--md-sys-color-on-surface-variant); font-weight: 600; letter-spacing: 0.5px;">Total à payer</div>
                             </div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--md-sys-color-on-surface);">${formatCurrency(total)}</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--md-sys-color-on-surface); display:flex; align-items:center; justify-content:center; gap:8px;">
+                                ${formatCurrency(total)}
+                                <button onclick="${_fraisSelection.type === 'famille' ? `adminModifierTotalFraisFamille('${_fraisSelection.parentId}', ${total})` : `adminModifierTotalFrais('${_fraisSelection.id}', ${total})`}" style="background: var(--md-sys-color-surface-variant); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: var(--md-sys-color-on-surface-variant); display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Modifier le total global" onmouseover="this.style.background='var(--md-sys-color-primary)'; this.style.color='white'" onmouseout="this.style.background='var(--md-sys-color-surface-variant)'; this.style.color='var(--md-sys-color-on-surface-variant)'">
+                                    <span class="material-icons" style="font-size: 14px;">edit</span>
+                                </button>
+                            </div>
                         </div>
                         <div style="flex: 1; min-width: 150px; background: var(--md-sys-color-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant); text-align: center;">
                             <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;">
@@ -18379,7 +18573,7 @@
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.05)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
                                     <div style="display: flex; align-items: center; gap: 16px;">
                                         <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(var(--md-sys-color-primary-rgb), 0.1); display: flex; align-items: center; justify-content: center;">
-                                            <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 20px;">${p.methodePaiement === 'espece' ? 'payments' : p.methodePaiement === 'carte' ? 'credit_card' : 'account_balance'}</span>
+                                            <span class="material-icons" style="color: var(--md-sys-color-primary); font-size: 20px;">${p.methodePaiement === 'espece' ? 'payments' : 'account_balance'}</span>
                                         </div>
                                         <div style="display: flex; flex-direction: column; gap: 4px;">
                                             <div style="font-weight: 700; font-size: 1.1rem; color: var(--md-sys-color-on-surface);">${formatCurrency(p.montant)}</div>
@@ -18414,7 +18608,7 @@
                     `
                     <div style="display:flex; flex-direction:column; gap:12px;">
                         <p style="margin: 0; color: var(--md-sys-color-on-surface-variant);">
-                            Entrez le nouveau montant total des frais pour cet élève.
+                            Entrez le nouveau montant total des frais pour cet élève et indiquez la raison.
                         </p>
                         <div class="md-text-field">
                             <div class="md-text-field-container">
@@ -18422,24 +18616,35 @@
                                 <label class="md-text-field-label">Nouveau total (€)</label>
                             </div>
                         </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="raisonModifFrais" class="md-text-field-input" placeholder=" " required>
+                                <label class="md-text-field-label">Raison de la modification *</label>
+                            </div>
+                        </div>
                     </div>
                     `,
                     async () => {
                         const input = document.getElementById("nouveauTotalInput");
-                        if (!input) return;
+                        const raisonInput = document.getElementById("raisonModifFrais");
+                        if (!input || !raisonInput) return;
 
                         const nouveauTotal = input.value;
+                        const raison = raisonInput.value.trim();
                         const parsed = parseFloat(nouveauTotal.replace(',', '.'));
 
                         if (isNaN(parsed) || parsed < 0) {
                             return showSnackbar("Montant invalide");
+                        }
+                        if (!raison) {
+                            return showSnackbar("Veuillez indiquer une raison pour la modification");
                         }
 
                         try {
                             const resp = await fetch(`${API_URL}/eleves/${eleveId}/frais-total`, {
                                 method: "PUT",
                                 headers: getHeaders(),
-                                body: JSON.stringify({ nouveauTotal: parsed })
+                                body: JSON.stringify({ nouveauTotal: parsed, raison: raison })
                             });
                             if (!resp.ok) throw new Error("Erreur lors de la modification");
                             showSnackbar("Total modifié avec succès");
@@ -18447,6 +18652,62 @@
                         } catch (err) {
                             console.error(err);
                             showSnackbar("Erreur lors de la modification du total");
+                        }
+                    },
+                    "Enregistrer"
+                );
+            }
+
+            function adminModifierTotalFraisFamille(parentId, currentTotal) {
+                showDialog(
+                    "Modifier le total des frais de la famille",
+                    `
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <p style="margin: 0; color: var(--md-sys-color-on-surface-variant);">
+                            Entrez le nouveau montant total des frais pour l'ensemble de la famille et indiquez la raison de la modification. La différence sera ajoutée ou soustraite automatiquement sur les enfants.
+                        </p>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="number" id="nouveauTotalInputFamille" class="md-text-field-input" placeholder=" " value="${currentTotal}" step="0.01" min="0" required>
+                                <label class="md-text-field-label">Nouveau total global (€)</label>
+                            </div>
+                        </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="raisonModifFraisFamille" class="md-text-field-input" placeholder=" " required>
+                                <label class="md-text-field-label">Raison de la modification *</label>
+                            </div>
+                        </div>
+                    </div>
+                    `,
+                    async () => {
+                        const input = document.getElementById("nouveauTotalInputFamille");
+                        const raisonInput = document.getElementById("raisonModifFraisFamille");
+                        if (!input || !raisonInput) return;
+
+                        const nouveauTotal = input.value;
+                        const raison = raisonInput.value.trim();
+                        const parsed = parseFloat(nouveauTotal.replace(',', '.'));
+
+                        if (isNaN(parsed) || parsed < 0) {
+                            return showSnackbar("Montant invalide");
+                        }
+                        if (!raison) {
+                            return showSnackbar("Veuillez indiquer une raison pour la modification");
+                        }
+
+                        try {
+                            const resp = await fetch(`${API_URL}/eleves/frais/famille/${parentId}/frais-total`, {
+                                method: "PUT",
+                                headers: getHeaders(),
+                                body: JSON.stringify({ nouveauTotal: parsed, raison: raison })
+                            });
+                            if (!resp.ok) throw new Error("Erreur lors de la modification");
+                            showSnackbar("Total famille modifié avec succès");
+                            await adminLoadSelectedFrais();
+                        } catch (err) {
+                            console.error(err);
+                            showSnackbar("Erreur lors de la modification du total de la famille");
                         }
                     },
                     "Enregistrer"
@@ -21384,5 +21645,250 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            // ==========================================
+            // MODULE PRÉINSCRIPTIONS ADMIN
+            // ==========================================
+            let allAdminPreinscriptions = [];
+            let currentAdminPreinsId = null;
+
+            async function loadAdminPreinscriptions() {
+                try {
+                    // Charger la config
+                    const confRes = await apiRequest('/api/preinscriptions/status');
+                    document.getElementById('adminPreinsOuvert').checked = confRes.ouvert;
+                    document.getElementById('adminPreinsAnnee').value = confRes.anneeScolaire || '';
+                    document.getElementById('adminPreinsStatusText').textContent = confRes.ouvert ? 'Ouvert' : 'Fermé';
+                    document.getElementById('adminPreinsStatusText').style.color = confRes.ouvert ? '#2e7d32' : '#d32f2f';
+
+                    // Charger les demandes
+                    const res = await apiRequest('/api/preinscriptions');
+                    allAdminPreinscriptions = res.demandes || [];
+                    filterPreinscriptions();
+                } catch(err) {
+                    showToast(err.message || 'Erreur chargement préinscriptions', 'error');
+                }
+            }
+
+            async function savePreinscriptionsConfig() {
+                try {
+                    const ouvert = document.getElementById('adminPreinsOuvert').checked;
+                    const anneeScolaire = document.getElementById('adminPreinsAnnee').value;
+                    await apiRequest('/api/preinscriptions/config', {
+                        method: 'POST',
+                        body: JSON.stringify({ ouvert, anneeScolaire })
+                    });
+                    showToast('Configuration enregistrée', 'success');
+                    loadAdminPreinscriptions(); // Rafraîchir l'affichage
+                } catch(err) {
+                    showToast(err.message || 'Erreur sauvegarde configuration', 'error');
+                }
+            }
+
+            function filterPreinscriptions() {
+                const search = document.getElementById('adminPreinsSearch').value.toLowerCase();
+                const statut = document.getElementById('adminPreinsFilterStatut').value;
+                const type = document.getElementById('adminPreinsFilterType').value;
+
+                let filtered = allAdminPreinscriptions.filter(d => {
+                    const matchStatut = !statut || d.statut === statut;
+                    const matchType = !type || d.type === type;
+                    const parentName = `${d.parentInfo.nom} ${d.parentInfo.prenom}`.toLowerCase();
+                    const matchSearch = parentName.includes(search) || d.parentInfo.email.toLowerCase().includes(search);
+                    return matchStatut && matchType && matchSearch;
+                });
+
+                renderPreinscriptionsTable(filtered);
+            }
+
+            function renderPreinscriptionsTable(data) {
+                const tbody = document.getElementById('adminPreinscriptionsTableBody');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Aucune demande trouvée.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(d => {
+                    const dateStr = new Date(d.dateSoumission).toLocaleDateString('fr-FR');
+                    let statutHtml = '';
+                    if (d.statut === 'en_attente') statutHtml = '<span class="status-badge" style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container);">En attente</span>';
+                    else if (d.statut === 'confirmee') statutHtml = '<span class="status-badge" style="background:#e8f5e9; color:#2e7d32;">Confirmée</span>';
+                    else statutHtml = '<span class="status-badge" style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container);">Rejetée</span>';
+
+                    const typeStr = d.type === 'nouveau' ? '<span style="color:var(--md-sys-color-primary);font-weight:500;">Nouveau</span>' : (d.type === 'reinscription' ? '<span style="color:#ef6c00;font-weight:500;">Réinscription</span>' : '<span style="color:#6a1b9a;font-weight:500;">Mixte</span>');
+                    const enfantsCount = Array.isArray(d.enfantsInfo) ? d.enfantsInfo.length : 0;
+                    const initiales = `${(d.parentInfo.nom || 'P')[0].toUpperCase()}${(d.parentInfo.prenom || '')[0]?.toUpperCase() || ''}`;
+
+                    return `
+                        <tr onclick="openAdminPreinscriptionModal('${d.id}')" style="cursor:pointer;" class="hover-row">
+                            <td style="color:var(--md-sys-color-on-surface-variant);">${dateStr}</td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:36px; height:36px; border-radius:50%; background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px; flex-shrink:0;">
+                                        ${initiales}
+                                    </div>
+                                    <div style="display:flex; flex-direction:column;">
+                                        <strong style="color:var(--md-sys-color-on-surface); font-weight:500;">${d.parentInfo.nom} ${d.parentInfo.prenom}</strong>
+                                        <span style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${d.parentInfo.tel}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${typeStr}</td>
+                            <td>
+                                <span style="background:var(--md-sys-color-surface-container-highest); padding:4px 8px; border-radius:12px; font-size:13px; font-weight:500;">
+                                    ${enfantsCount} enfant(s)
+                                </span>
+                            </td>
+                            <td>${statutHtml}</td>
+                            <td style="text-align: right;">
+                                <button class="md-icon-btn" onclick="event.stopPropagation(); deletePreinscription('${d.id}')" title="Supprimer">
+                                    <span class="material-icons" style="color:var(--md-sys-color-error);">delete</span>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function openAdminPreinscriptionModal(id) {
+                const dossier = allAdminPreinscriptions.find(d => d.id === id);
+                if(!dossier) return;
+
+                currentAdminPreinsId = id;
+                document.getElementById('adminPreinsNotes').value = dossier.notesAdmin || '';
+
+                let parentHtml = `
+                    <div style="background:var(--md-sys-color-surface-container-lowest); padding:20px; border-radius:16px; border:1px solid var(--md-sys-color-outline-variant);">
+                        <h4 style="margin:0 0 16px 0; color:var(--md-sys-color-primary); font-size:16px; display:flex; align-items:center; gap:8px;">
+                            <span class="material-icons">person</span> Informations Représentant 1
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">badge</span> <strong>Nom:</strong> <span style="color:var(--md-sys-color-on-surface);">${dossier.parentInfo.nom} ${dossier.parentInfo.prenom}</span></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">email</span> <strong>Email:</strong> <a href="mailto:${dossier.parentInfo.email}" style="color:var(--md-sys-color-primary); text-decoration:none;">${dossier.parentInfo.email}</a></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">call</span> <strong>Téléphone:</strong> <a href="tel:${dossier.parentInfo.tel}" style="color:var(--md-sys-color-primary); text-decoration:none;">${dossier.parentInfo.tel}</a></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">location_on</span> <strong>Adresse:</strong> <span style="color:var(--md-sys-color-on-surface);">${dossier.parentInfo.adresse || '-'}</span></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">work</span> <strong>Profession:</strong> <span style="color:var(--md-sys-color-on-surface);">${dossier.parentInfo.profession || '-'}</span></div>
+                        </div>
+                    </div>
+                `;
+
+                if (dossier.parentInfo.nom2 || dossier.parentInfo.prenom2) {
+                    parentHtml += `
+                    <div style="background:var(--md-sys-color-surface-container-lowest); padding:20px; border-radius:16px; border:1px solid var(--md-sys-color-outline-variant); margin-top: 16px;">
+                        <h4 style="margin:0 0 16px 0; color:var(--md-sys-color-primary); font-size:16px; display:flex; align-items:center; gap:8px;">
+                            <span class="material-icons">person</span> Informations Représentant 2
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">badge</span> <strong>Nom:</strong> <span style="color:var(--md-sys-color-on-surface);">${dossier.parentInfo.nom2 || '-'} ${dossier.parentInfo.prenom2 || ''}</span></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">email</span> <strong>Email:</strong> <a href="mailto:${dossier.parentInfo.email2}" style="color:var(--md-sys-color-primary); text-decoration:none;">${dossier.parentInfo.email2 || '-'}</a></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">call</span> <strong>Téléphone:</strong> <a href="tel:${dossier.parentInfo.tel2}" style="color:var(--md-sys-color-primary); text-decoration:none;">${dossier.parentInfo.tel2 || '-'}</a></div>
+                            <div style="display:flex; align-items:center; gap:8px;"><span class="material-icons" style="font-size:18px; color:var(--md-sys-color-on-surface-variant);">work</span> <strong>Profession:</strong> <span style="color:var(--md-sys-color-on-surface);">${dossier.parentInfo.profession2 || '-'}</span></div>
+                        </div>
+                    </div>
+                    `;
+                }
+
+                let enfantsHtml = `
+                    <div style="background:var(--md-sys-color-surface-container-lowest); padding:20px; border-radius:16px; border:1px solid var(--md-sys-color-outline-variant);">
+                        <h4 style="margin:0 0 16px 0; color:var(--md-sys-color-primary); font-size:16px; display:flex; align-items:center; gap:8px;">
+                            <span class="material-icons">child_care</span> Enfants concernés
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                `;
+
+                dossier.enfantsInfo.forEach((e, idx) => {
+                    const tag = e.eleveId ? '<span style="background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); font-size:11px; padding:2px 8px; border-radius:12px; font-weight:500;">Déjà inscrit</span>' : '<span style="background:#fff3e0; color:#ef6c00; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:500;">Nouveau</span>';
+
+                    let ageText = 'Déjà enregistrée';
+                    if (e.dateNaissance !== 'Existante' && e.dateNaissance) {
+                        const dob = new Date(e.dateNaissance);
+                        const diff = Date.now() - dob.getTime();
+                        const ageDate = new Date(diff);
+                        const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+                        ageText = `${dob.toLocaleDateString('fr-FR')} (${age} ans)`;
+                    }
+
+                    let classesOptions = '<option value="">-- Assigner une classe (Optionnel) --</option>';
+                    if (typeof allClasses !== 'undefined') {
+                        allClasses.forEach(c => {
+                            const selected = e.classeAssigne == c.id ? 'selected' : '';
+                            classesOptions += `<option value="${c.id}" ${selected}>${c.nom}</option>`;
+                        });
+                    }
+
+                    const statusEnfant = e.statut || 'en_attente';
+
+                    enfantsHtml += `
+                        <div style="padding-bottom: 12px; border-bottom: ${idx === dossier.enfantsInfo.length - 1 ? 'none' : '1px solid var(--md-sys-color-surface-container-highest)'};">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                                <strong style="color:var(--md-sys-color-on-surface); font-size:15px;">${e.nom} ${e.prenom}</strong>
+                                ${tag}
+                            </div>
+                            <div style="font-size:13px; color:var(--md-sys-color-on-surface-variant); display:flex; gap:12px; margin-bottom:8px;">
+                                <span style="display:flex; align-items:center; gap:4px;"><span class="material-icons" style="font-size:14px;">cake</span> ${ageText}</span>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: center; margin-top: 8px;">
+                                <div class="md-text-field" style="flex: 1;">
+                                    <select id="status_enfant_${idx}" class="md-text-field-input" style="padding: 8px; font-size: 13px;">
+                                        <option value="en_attente" ${statusEnfant === 'en_attente' ? 'selected' : ''}>En attente</option>
+                                        <option value="accepte" ${statusEnfant === 'accepte' ? 'selected' : ''}>Accepté</option>
+                                        <option value="refuse" ${statusEnfant === 'refuse' ? 'selected' : ''}>Refusé</option>
+                                    </select>
+                                </div>
+                                <div class="md-text-field" style="flex: 1;">
+                                    <select id="assign_class_${idx}" class="md-text-field-input" style="padding: 8px; font-size: 13px;">
+                                        ${classesOptions}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                enfantsHtml += `</div></div>`;
+
+                document.getElementById('adminPreinscriptionDetailsContent').innerHTML = parentHtml + enfantsHtml;
+                document.getElementById('adminPreinscriptionModal').style.display = 'flex';
+            }
+
+            async function updatePreinscriptionStatus(statut) {
+                if (!currentAdminPreinsId) return;
+                try {
+                    const notesAdmin = document.getElementById('adminPreinsNotes').value;
+                    const preins = adminPreinscriptions.find(p => p.id === currentAdminPreinsId);
+
+                    const updatedEnfants = preins.enfantsInfo.map((e, idx) => {
+                        const statusSelect = document.getElementById(`status_enfant_${idx}`);
+                        const classSelect = document.getElementById(`assign_class_${idx}`);
+                        return {
+                            ...e,
+                            statut: statusSelect ? statusSelect.value : 'en_attente',
+                            classeAssigne: classSelect ? classSelect.value : null
+                        };
+                    });
+
+                    await apiRequest(`/api/preinscriptions/${currentAdminPreinsId}/status`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ statut, notesAdmin, enfantsInfo: updatedEnfants })
+                    });
+                    showToast(`Dossier mis à jour`, 'success');
+                    document.getElementById('adminPreinscriptionModal').style.display = 'none';
+                    loadAdminPreinscriptions();
+                } catch(err) {
+                    showToast(err.message || 'Erreur mise à jour', 'error');
+                }
+            }
+
+            async function deletePreinscription(id) {
+                if(!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce dossier ?')) return;
+                try {
+                    await apiRequest(`/api/preinscriptions/${id}`, { method: 'DELETE' });
+                    showToast('Dossier supprimé', 'success');
+                    loadAdminPreinscriptions();
+                } catch(err) {
+                    showToast(err.message || 'Erreur suppression', 'error');
+                }
+            }
+        </script>
     </body>
 </html>

@@ -11,6 +11,7 @@ const actualitesRoutes = require('./actualites.routes');
 const parentsRoutes = require('./parents.routes');
 const maintenanceRoutes = require('./maintenance.routes');
 const emploisDuTempsRoutes = require('./emploisDuTemps.routes');
+const preinscriptionsRoutes = require('./preinscriptions.routes');
 
 module.exports = {
     authRoutes,
@@ -26,4 +27,5 @@ module.exports = {
     parentsRoutes,
     maintenanceRoutes,
     emploisDuTempsRoutes,
+    preinscriptionsRoutes,
 };

@@ -216,6 +216,14 @@
                         <span class="login-submit-spinner"></span>
                         <span class="login-submit-text">Se connecter</span>
                     </button>
+                    
+                    <div id="preinscriptionBlock" style="display: none; text-align: center; margin-top: 16px;">
+                        <p style="font-size: 14px; color: var(--md-sys-color-on-surface-variant);">Pas encore de compte ?</p>
+                        <a href="/preinscription" class="md-btn md-btn-outlined" style="width: 100%; justify-content: center; margin-top: 8px;">
+                            <span class="material-icons" style="margin-right: 8px;">how_to_reg</span>
+                            Demande de préinscription
+                        </a>
+                    </div>
                 </form>
 
                 <!-- Footer -->
@@ -348,6 +356,23 @@
         checkMaintenanceStatus();
         // Rafraîchir toutes les 60 secondes
         setInterval(checkMaintenanceStatus, 60000);
+
+        // Vérifier si les préinscriptions sont ouvertes
+        async function checkPreinscriptionStatus() {
+            try {
+                const response = await fetch(`${API_URL}/preinscriptions/status`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.ouvert) {
+                        const block = document.getElementById('preinscriptionBlock');
+                        if(block) block.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                console.error('Erreur vérification préinscriptions:', err);
+            }
+        }
+        checkPreinscriptionStatus();
 
         // Éléments DOM
         const loginForm = document.getElementById('loginForm');

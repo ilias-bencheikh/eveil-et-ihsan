@@ -282,6 +282,32 @@ function initDatabase() {
                 message TEXT
             )`);
 
+            // Table de configuration globale (pour activer/désactiver les préinscriptions par ex)
+            db.run(`CREATE TABLE IF NOT EXISTS config_system (
+                cle TEXT PRIMARY KEY,
+                valeur TEXT NOT NULL,
+                description TEXT
+            )`);
+
+            // Initialiser la config des préinscriptions
+            db.run(`INSERT OR IGNORE INTO config_system (cle, valeur, description) VALUES 
+                ('preinscriptions_ouvertes', '0', '0 = Fermé, 1 = Ouvert'),
+                ('annee_scolaire_preinscription', '2024-2025', 'Année scolaire ciblée pour les préinscriptions')
+            `);
+
+            // Table preinscriptions
+            db.run(`CREATE TABLE IF NOT EXISTS preinscriptions (
+                id TEXT PRIMARY KEY,
+                parentId TEXT,
+                type TEXT NOT NULL, -- 'nouveau', 'reinscription', 'mixte'
+                parentInfo TEXT NOT NULL, -- JSON: nom, prenom, email, tel, adresse...
+                enfantsInfo TEXT NOT NULL, -- JSON: liste des enfants (nom, prenom, dateNaissance, niveauCible...)
+                statut TEXT DEFAULT 'en_attente', -- 'en_attente', 'confirmee', 'rejetee'
+                dateSoumission TEXT DEFAULT CURRENT_TIMESTAMP,
+                anneeScolaire TEXT,
+                notesAdmin TEXT
+            )`);
+
             // Insérer le compte admin par défaut s'il n'y a aucun admin
             db.get('SELECT id FROM staff WHERE role = ?', ['admin'], (err, row) => {
                 if (err) {

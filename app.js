@@ -76,6 +76,7 @@ const {
   parentsRoutes,
   maintenanceRoutes,
   emploisDuTempsRoutes,
+  preinscriptionsRoutes,
 } = require("./src/routes");
 
 // Initialisation de l'application
@@ -288,6 +289,7 @@ app.use(
   checkMaintenance,
   emploisDuTempsRoutes,
 );
+app.use("/api/preinscriptions", checkMaintenance, preinscriptionsRoutes);
 app.use("/api", requireAuth, secureHeaders, emailRoutes);
 
 // Route principale
@@ -306,6 +308,9 @@ app.get("/activation", (req, res) => {
 });
 app.get("/reset-password", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "reset-password.html"));
+});
+app.get("/preinscription", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "preinscription.html"));
 });
 // Dashboard admin/staff avec sections
 app.get("/dashboard", (req, res) => {

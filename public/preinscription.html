@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préinscription - Eveil & Ihsan</title>
+
+    <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png">
+    <link rel="apple-touch-icon" href="/uploads/logo/logo_apple.png">
+
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <style>
+        .preinscription-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            padding: 32px;
+            position: relative;
+            z-index: 10;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-sys-color-primary, #005ac1);
+            margin-top: 24px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--md-sys-color-primary-container, #d4e3ff);
+            padding-bottom: 8px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .enfant-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .btn-remove-enfant {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: #d32f2f;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .btn-add-enfant {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-primary, #005ac1);
+            background: var(--md-sys-color-primary-container, #d4e3ff);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+        .closed-message {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        .closed-message h2 {
+            color: #d32f2f;
+            margin-bottom: 16px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 32px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-on-surface-variant);
+            text-decoration: none;
+            margin-bottom: 24px;
+        }
+        .back-link:hover {
+            color: var(--md-sys-color-primary);
+        }
+        .success-message {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        .success-message .material-icons {
+            font-size: 64px;
+            color: #4caf50;
+            margin-bottom: 16px;
+        }
+        
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .preinscription-container { margin: 20px; padding: 20px; }
+        }
+    </style>
+</head>
+<body style="background: var(--md-sys-color-surface-container, #f2f6fc); min-height: 100vh; font-family: 'Roboto', sans-serif;">
+    <div class="login-shapes">
+        <div class="login-shape login-shape-1"></div>
+        <div class="login-shape login-shape-2"></div>
+        <div class="login-shape login-shape-3"></div>
+    </div>
+
+    <div class="preinscription-container" id="mainContainer">
+        <a href="/login" class="back-link">
+            <span class="material-icons">arrow_back</span>
+            Retour à la connexion
+        </a>
+
+        <div style="text-align: center; margin-bottom: 32px;">
+            <img src="/uploads/logo/logo.png" alt="Logo" style="height: 80px; margin-bottom: 16px;">
+            <h1 style="margin:0; font-size: 28px; color: #1c1b1f;">Demande de Préinscription</h1>
+            <p style="color: #49454f; margin-top: 8px;" id="anneeScolaireText">Année Scolaire ...</p>
+        </div>
+
+        <div id="closedMessage" class="closed-message">
+            <span class="material-icons" style="font-size: 64px; color: #d32f2f;">block</span>
+            <h2>Préinscriptions fermées</h2>
+            <p>La période de préinscription n'est actuellement pas ouverte. Veuillez réessayer ultérieurement ou contacter l'administration.</p>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            <span class="material-icons">check_circle</span>
+            <h2>Demande envoyée avec succès !</h2>
+            <p>Votre demande de préinscription a bien été enregistrée. L'administration l'examinera et vous contactera prochainement.</p>
+            <a href="/login" class="md-btn md-btn-filled" style="margin-top: 24px; display: inline-flex;">Retour à l'accueil</a>
+        </div>
+
+        <form id="preinscriptionForm" style="display: none;">
+            <div id="errorAlert" style="display: none; background: #ffdad6; color: #410002; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; align-items: center; gap: 8px;">
+                <span class="material-icons">error</span>
+                <span id="errorMessage">Erreur</span>
+            </div>
+
+            <h2 class="section-title">Informations du Représentant Légal 1</h2>
+            <div class="grid-2">
+                <div class="md-text-field">
+                    <div class="md-text-field-container">
+                        <input type="text" id="parentNom" class="md-text-field-input" placeholder=" " required>
+                        <label class="md-text-field-label">Nom</label>
+                    </div>
+                </div>
+                <div class="md-text-field">
+                    <div class="md-text-field-container">
+                        <input type="text" id="parentPrenom" class="md-text-field-input" placeholder=" " required>
+                        <label class="md-text-field-label">Prénom</label>
+                    </div>
+                </div>
+                <div class="md-text-field">
+                    <div class="md-text-field-container">
+                        <input type="email" id="parentEmail" class="md-text-field-input" placeholder=" " required>
+                        <label class="md-text-field-label">Email</label>
+                    </div>
+                </div>
+                <div class="md-text-field">
+                    <div class="md-text-field-container">
+                        <input type="tel" id="parentTel" class="md-text-field-input" placeholder=" " required>
+                        <label class="md-text-field-label">Téléphone</label>
+                    </div>
+                </div>
+            </div>
+            <div class="md-text-field" style="margin-top: 16px;">
+                <div class="md-text-field-container">
+                    <input type="text" id="parentAdresse" class="md-text-field-input" placeholder=" " required>
+                    <label class="md-text-field-label">Adresse complète</label>
+                </div>
+            </div>
+            <div class="md-text-field" style="margin-top: 16px;">
+                <div class="md-text-field-container">
+                    <input type="text" id="parentProfession" class="md-text-field-input" placeholder=" ">
+                    <label class="md-text-field-label">Profession (Optionnel)</label>
+                </div>
+            </div>
+
+            <button type="button" class="btn-add-enfant" id="addParent2Btn" style="margin-top: 24px;" onclick="document.getElementById('parent2Section').style.display='block'; this.style.display='none';">
+                <span class="material-icons">person_add</span>
+                Ajouter un deuxième représentant légal
+            </button>
+
+            <div id="parent2Section" style="display: none; margin-top: 24px;">
+                <h2 class="section-title">Informations du Représentant Légal 2</h2>
+                <div class="grid-2">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" id="parent2Nom" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Nom</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" id="parent2Prenom" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Prénom</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="email" id="parent2Email" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Email</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="tel" id="parent2Tel" class="md-text-field-input" placeholder=" ">
+                            <label class="md-text-field-label">Téléphone</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="md-text-field" style="margin-top: 16px;">
+                    <div class="md-text-field-container">
+                        <input type="text" id="parent2Profession" class="md-text-field-input" placeholder=" ">
+                        <label class="md-text-field-label">Profession (Optionnel)</label>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title" style="margin-top: 40px;">Enfants à préinscrire</h2>
+            
+            <div id="enfantsList">
+                <!-- Les enfants seront injectés ici -->
+            </div>
+            
+            <button type="button" class="btn-add-enfant" id="addEnfantBtn">
+                <span class="material-icons">add</span>
+                Ajouter un enfant
+            </button>
+
+            <div class="form-actions">
+                <button type="submit" class="md-btn md-btn-filled" id="submitBtn" style="padding: 0 32px;">
+                    <span class="material-icons" style="margin-right: 8px;">send</span>
+                    Envoyer la demande
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let enfantCount = 0;
+
+        function addEnfantForm() {
+            enfantCount++;
+            const id = enfantCount;
+            const div = document.createElement('div');
+            div.className = 'enfant-card';
+            div.id = `enfant-${id}`;
+            
+            let removeBtn = '';
+            if (id > 1) {
+                removeBtn = `<button type="button" class="btn-remove-enfant" onclick="removeEnfant(${id})"><span class="material-icons">delete</span></button>`;
+            }
+
+            div.innerHTML = `
+                ${removeBtn}
+                <h3 style="margin-top:0; font-size: 16px; color: #49454f; margin-bottom: 16px;">Enfant ${id}</h3>
+                <div class="grid-2">
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" class="md-text-field-input enfant-nom" placeholder=" " required>
+                            <label class="md-text-field-label">Nom de l'enfant</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field">
+                        <div class="md-text-field-container">
+                            <input type="text" class="md-text-field-input enfant-prenom" placeholder=" " required>
+                            <label class="md-text-field-label">Prénom de l'enfant</label>
+                        </div>
+                    </div>
+                    <div class="md-text-field" style="grid-column: 1 / -1;">
+                        <div class="md-text-field-container">
+                            <input type="date" class="md-text-field-input enfant-date" placeholder=" " required>
+                            <label class="md-text-field-label" style="top: 8px; font-size: 12px;">Date de naissance</label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('enfantsList').appendChild(div);
+        }
+
+        function removeEnfant(id) {
+            const el = document.getElementById(`enfant-${id}`);
+            if (el) el.remove();
+        }
+
+        document.getElementById('addEnfantBtn').addEventListener('click', addEnfantForm);
+
+        // Au chargement, vérifier si les préinscriptions sont ouvertes
+        async function checkStatus() {
+            try {
+                const res = await fetch('/api/preinscriptions/status');
+                const data = await res.json();
+                
+                if (data.success && data.ouvert) {
+                    document.getElementById('anneeScolaireText').textContent = `Année Scolaire ${data.anneeScolaire}`;
+                    document.getElementById('preinscriptionForm').style.display = 'block';
+                    addEnfantForm(); // Ajouter un enfant par défaut
+                } else {
+                    document.getElementById('closedMessage').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('closedMessage').style.display = 'block';
+                console.error(err);
+            }
+        }
+
+        document.getElementById('preinscriptionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const errorAlert = document.getElementById('errorAlert');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-icons" style="margin-right: 8px;">hourglass_empty</span>Envoi...';
+            errorAlert.style.display = 'none';
+
+            const parentInfo = {
+                nom: document.getElementById('parentNom').value,
+                prenom: document.getElementById('parentPrenom').value,
+                email: document.getElementById('parentEmail').value,
+                tel: document.getElementById('parentTel').value,
+                adresse: document.getElementById('parentAdresse').value,
+                profession: document.getElementById('parentProfession').value
+            };
+
+            if (document.getElementById('parent2Section').style.display === 'block') {
+                parentInfo.nom2 = document.getElementById('parent2Nom').value;
+                parentInfo.prenom2 = document.getElementById('parent2Prenom').value;
+                parentInfo.email2 = document.getElementById('parent2Email').value;
+                parentInfo.tel2 = document.getElementById('parent2Tel').value;
+                parentInfo.profession2 = document.getElementById('parent2Profession').value;
+            }
+
+            const enfantsInfo = [];
+            document.querySelectorAll('.enfant-card').forEach(card => {
+                enfantsInfo.push({
+                    nom: card.querySelector('.enfant-nom').value,
+                    prenom: card.querySelector('.enfant-prenom').value,
+                    dateNaissance: card.querySelector('.enfant-date').value,
+                    niveauCible: 'Non spécifié'
+                });
+            });
+
+            try {
+                const res = await fetch('/api/preinscriptions/public', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parentInfo, enfantsInfo })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('preinscriptionForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    throw new Error(data.message || 'Erreur lors de l\'enregistrement');
+                }
+            } catch (err) {
+                errorAlert.style.display = 'flex';
+                document.getElementById('errorMessage').textContent = err.message;
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-icons" style="margin-right: 8px;">send</span>Envoyer la demande';
+            }
+        });
+
+        checkStatus();
+    </script>
+</body>
+</html>

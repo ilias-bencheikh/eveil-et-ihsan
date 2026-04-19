@@ -452,10 +452,13 @@ router.post('/', checkPermission('create'), async (req, res) => {
 // Endpoint pour modifier le total des frais d'inscription
 router.put('/:id/frais-total', checkPermission('update'), async (req, res) => {
     const eleveId = req.params.id;
-    const { nouveauTotal } = req.body;
+    const { nouveauTotal, raison } = req.body;
 
     if (nouveauTotal === undefined || isNaN(nouveauTotal) || parseFloat(nouveauTotal) < 0) {
         return res.status(400).json({ error: 'Nouveau total invalide' });
+    }
+    if (!raison || !raison.trim()) {
+        return res.status(400).json({ error: 'Raison de modification obligatoire' });
     }
 
     try {
@@ -483,7 +486,7 @@ router.put('/:id/frais-total', checkPermission('update'), async (req, res) => {
             }
         } catch (e) {}
 
-        const note = `Ajustement du total à ${totalFrais} €`;
+        const note = `Ajustement du total à ${totalFrais} € - Raison: ${raison}`;
 
         await dbRun(db, `
             INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note, staffNom)
@@ -919,12 +922,14 @@ router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
             WHERE ep.parentId = ?
         `, [parentId]);
 
-        for (const enfant of enfants) {
-            enfant.paiements = await dbAll(db,
-                'SELECT id, montant, methodePaiement, date, note, staffNom, createdAt FROM paiements WHERE eleveId = ? ORDER BY date DESC',
-                [enfant.id]
-            );
-            enfant.montantPaye = parseFloat(enfant.montantPaye || 0);
+        for (let enfant of enfants) {
+            const paiements = await dbAll(db, `
+                SELECT id, montant, date, methodePaiement, note, staffNom
+                FROM paiements
+                WHERE eleveId = ?
+                ORDER BY date DESC
+            `, [enfant.id]);
+            enfant.paiements = paiements;
         }
 
         const totalFrais = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
@@ -939,7 +944,87 @@ router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
         });
 
     } catch (err) {
-        res.status(500).json({ error: 'Erreur interne du serveur' });
+        console.error('Erreur chargement frais famille:', err);
+        res.status(500).json({ error: 'Erreur lors du chargement des frais de la famille' });
+    }
+});
+
+// Endpoint pour modifier le total des frais d'inscription de la famille entière
+router.put('/frais/famille/:parentId/frais-total', checkPermission('update'), async (req, res) => {
+    const { parentId } = req.params;
+    const { nouveauTotal, raison } = req.body;
+
+    if (nouveauTotal === undefined || isNaN(nouveauTotal) || parseFloat(nouveauTotal) < 0) {
+        return res.status(400).json({ error: 'Nouveau total invalide' });
+    }
+    if (!raison || !raison.trim()) {
+        return res.status(400).json({ error: 'Raison de modification obligatoire' });
+    }
+
+    try {
+        const enfants = await dbAll(db, `
+            SELECT e.id, e.fraisInscription, e.montantPaye 
+            FROM eleves e
+            INNER JOIN eleve_parent ep ON e.id = ep.eleveId
+            WHERE ep.parentId = ?
+        `, [parentId]);
+
+        if (!enfants || enfants.length === 0) {
+            return res.status(404).json({ error: 'Aucun enfant trouvé pour cette famille' });
+        }
+
+        const oldTotal = enfants.reduce((sum, e) => sum + (e.fraisInscription || 0), 0);
+        const difference = parseFloat(nouveauTotal) - oldTotal;
+
+        // Appliquer la différence sur les enfants (sans descendre en dessous de 0 pour chaque enfant)
+        let resteADistribuer = difference;
+        
+        for (let enfant of enfants) {
+            if (resteADistribuer === 0) break;
+
+            const actuel = enfant.fraisInscription || 0;
+            let nouveauFrais = actuel + resteADistribuer;
+            
+            if (nouveauFrais < 0) {
+                resteADistribuer = nouveauFrais; // Il restera du négatif à distribuer aux autres
+                nouveauFrais = 0;
+            } else {
+                resteADistribuer = 0;
+            }
+
+            const dejaPaye = parseFloat(enfant.montantPaye || 0);
+            const fraisValide = dejaPaye >= nouveauFrais - 0.01 && nouveauFrais > 0 ? 1 : 0;
+
+            await dbRun(db, 'UPDATE eleves SET fraisInscription = ?, fraisValide = ? WHERE id = ?', [nouveauFrais, fraisValide, enfant.id]);
+        }
+
+        // Ajouter une trace dans l'historique
+        const paiementId = generateId('paie');
+        const datePaiement = new Date().toISOString();
+        
+        let staffNom = 'Staff';
+        try {
+            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+                const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
+                if (s) staffNom = s.prenom + ' ' + s.nom;
+            } else if (req.userRole === 'professeur') {
+                const p = await dbGet(db, 'SELECT nom, prenom FROM professeurs WHERE id = ?', [req.userId]);
+                if (p) staffNom = p.prenom + ' ' + p.nom;
+            }
+        } catch (e) {}
+
+        const note = `Ajustement du total famille à ${parseFloat(nouveauTotal)} € - Raison: ${raison}`;
+
+        await dbRun(db, `
+            INSERT INTO paiements (id, eleveId, montant, methodePaiement, date, note, staffNom)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [paiementId, enfants[0].id, 0, 'ajustement', datePaiement, note, staffNom]);
+
+        res.json({ message: 'Total de la famille mis à jour avec succès' });
+
+    } catch (err) {
+        console.error('Erreur mise à jour total famille:', err);
+        res.status(500).json({ error: 'Erreur interne' });
     }
 });
 

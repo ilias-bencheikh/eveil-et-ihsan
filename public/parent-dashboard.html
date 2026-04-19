@@ -4147,6 +4147,16 @@
                         <a
                             href="#"
                             class="sidebar-nav-item"
+                            data-section="preinscriptions"
+                            id="navItemPreinscriptions"
+                            style="display: none;"
+                        >
+                            <span class="material-icons">how_to_reg</span>
+                            <span>Préinscriptions</span>
+                        </a>
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
                             data-section="parametres"
                         >
                             <span class="material-icons">settings</span>
@@ -5158,6 +5168,61 @@
                     </div>
 
                     <!-- Section Profil Parent -->
+                    <!-- Modal Nouvelle Préinscription -->
+                    <div class="actu-modal" id="preinscriptionModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
+                        <div style="background: #fff; width: 100%; max-width: 600px; border-radius: 12px; padding: 24px; margin: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h2 style="margin: 0; font-size: 20px;">Demande de (Ré)inscription</h2>
+                                <button onclick="closePreinscriptionModal()" style="background: none; border: none; cursor: pointer; color: #49454f;"><span class="material-icons">close</span></button>
+                            </div>
+
+                            <form id="parentPreinscriptionForm">
+                                <div class="md-text-field">
+                                    <div class="md-text-field-container">
+                                        <select id="preinscriptionType" class="md-text-field-input" required>
+                                            <option value="" disabled selected>Sélectionnez un type</option>
+                                            <option value="reinscription">Réinscription d'enfant(s) actuel(s)</option>
+                                            <option value="nouveau">Inscription de nouvel(aux) enfant(s)</option>
+                                            <option value="mixte">Les deux</option>
+                                        </select>
+                                        <label class="md-text-field-label">Type de demande</label>
+                                    </div>
+                                </div>
+
+                                <div id="enfantsExistantsContainer" style="display: none; margin-top: 20px;">
+                                    <h3 style="font-size: 16px; margin-bottom: 12px;">Enfants déjà inscrits :</h3>
+                                    <div id="enfantsExistantsList"></div>
+                                </div>
+
+                                <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 12px;">Informations pour chaque enfant :</h3>
+                                <div id="nouveauxEnfantsList"></div>
+                                
+                                <button type="button" class="md-btn md-btn-text" onclick="addNouveauEnfantForm()" style="margin-bottom: 24px;">
+                                    <span class="material-icons">add</span> Ajouter un enfant à la demande
+                                </button>
+
+                                <div id="parent2ModalSection" style="display: none; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; margin-bottom: 24px;">
+                                    <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 16px; color: var(--md-sys-color-primary);">Deuxième Représentant Légal (Optionnel)</h3>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                        <div class="md-text-field"><div class="md-text-field-container"><input type="text" id="parent2ModalNom" class="md-text-field-input" placeholder=" "><label class="md-text-field-label">Nom</label></div></div>
+                                        <div class="md-text-field"><div class="md-text-field-container"><input type="text" id="parent2ModalPrenom" class="md-text-field-input" placeholder=" "><label class="md-text-field-label">Prénom</label></div></div>
+                                        <div class="md-text-field"><div class="md-text-field-container"><input type="email" id="parent2ModalEmail" class="md-text-field-input" placeholder=" "><label class="md-text-field-label">Email</label></div></div>
+                                        <div class="md-text-field"><div class="md-text-field-container"><input type="tel" id="parent2ModalTel" class="md-text-field-input" placeholder=" "><label class="md-text-field-label">Téléphone</label></div></div>
+                                    </div>
+                                    <div class="md-text-field" style="margin-top: 12px;"><div class="md-text-field-container"><input type="text" id="parent2ModalProfession" class="md-text-field-input" placeholder=" "><label class="md-text-field-label">Profession</label></div></div>
+                                </div>
+                                <button type="button" class="md-btn md-btn-tonal" id="addParent2ModalBtn" onclick="document.getElementById('parent2ModalSection').style.display='block'; this.style.display='none';" style="margin-bottom: 24px; width: 100%; justify-content: center;">
+                                    <span class="material-icons">person_add</span> Renseigner un 2ème parent
+                                </button>
+
+                                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                                    <button type="button" class="md-btn md-btn-text" onclick="closePreinscriptionModal()">Annuler</button>
+                                    <button type="submit" class="md-btn md-btn-filled" id="submitPreinscriptionBtn">Envoyer</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     <section id="section-profil" class="tab-content">
                         <!-- En-tête profil -->
                         <div class="p-profile-header">
@@ -5445,6 +5510,46 @@
                     </section>
 
                     <!-- Section Paramètres -->
+                    <section id="section-preinscriptions" class="tab-content">
+                        <div class="widget-card">
+                            <div class="widget-card-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="info-card-icon ic-blue">
+                                        <span class="material-icons">how_to_reg</span>
+                                    </div>
+                                    <h2 class="widget-card-title">Mes Demandes de Préinscription</h2>
+                                </div>
+                                <button class="md-btn md-btn-filled" id="btnNouvellePreinscription" onclick="openPreinscriptionModal()" style="display:none;">
+                                    <span class="material-icons">add</span> Nouvelle Demande
+                                </button>
+                            </div>
+                            
+                            <div id="preinscriptionsStatusAlert" style="margin-bottom: 20px; padding: 12px 16px; border-radius: 8px; background: #fff3e0; color: #e65100; display: none; align-items: center; gap: 8px;">
+                                <span class="material-icons">info</span>
+                                <span>Les préinscriptions sont actuellement fermées.</span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="data-table" id="preinscriptionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Enfants</th>
+                                            <th>Année Scolaire</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="preinscriptionsTableBody">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 20px;">Chargement...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
                     <section id="section-parametres" class="tab-content">
                         <div class="widget-card">
                             <div class="widget-card-header">
@@ -5619,6 +5724,17 @@
                     if (avatarEl)
                         avatarEl.textContent = (parentData.prenom ||
                             "P")[0].toUpperCase();
+                    
+                    // Vérifier si les préinscriptions sont ouvertes
+                    try {
+                        const preinsRes = await apiRequest('/api/preinscriptions/status');
+                        if (preinsRes.success && preinsRes.ouvert) {
+                            const navItem = document.getElementById('navItemPreinscriptions');
+                            if(navItem) navItem.style.display = 'flex';
+                        }
+                    } catch(err) {
+                        console.error('Erreur vérif préinscriptions:', err);
+                    }
 
                     // Générer les onglets enfants
                     renderChildTabs();
@@ -7536,6 +7652,7 @@
                         messagerie: "Messagerie",
                         actualites: "Actualités",
                         profil: "Mon Profil",
+                        preinscriptions: "Préinscriptions",
                         parametres: "Paramètres",
                     };
                     document.getElementById("pageTitle").textContent =
@@ -7566,6 +7683,8 @@
                             loadParentMessages();
                         } else if (sectionId === "messagerie") {
                             loadParentMessages();
+                        } else if (sectionId === "preinscriptions") {
+                            loadParentPreinscriptions();
                         } else if (
                             sectionId === "absences" &&
                             enfantsData.length > 0
@@ -8889,6 +9008,186 @@
                     toast.style.transform = "translateX(-50%) translateY(80px)";
                     setTimeout(() => toast.remove(), 350);
                 }, 3000);
+            }
+        </script>
+        <script>
+            // Logique Préinscriptions
+            let preinscriptionsState = { ouvert: false, anneeScolaire: '' };
+            let preinscriptionsLoaded = false;
+            let enfantCount = 0;
+
+            function openPreinscriptionModal() {
+                const modal = document.getElementById('preinscriptionModal');
+                if(modal) {
+                    modal.style.display = 'flex';
+                    const list = document.getElementById('enfantsExistantsList');
+                    list.innerHTML = '';
+                    
+                    enfantsData.forEach(enfant => {
+                        list.innerHTML += `
+                            <label style="display:flex; align-items:center; gap:8px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 8px;">
+                                <input type="checkbox" class="existants-checkbox" value="${enfant.id}" data-nom="${enfant.nom}" data-prenom="${enfant.prenom}">
+                                ${enfant.prenom} ${enfant.nom}
+                            </label>
+                        `;
+                    });
+
+                    document.getElementById('nouveauxEnfantsList').innerHTML = '';
+                    document.getElementById('parent2ModalSection').style.display = 'none';
+                    document.getElementById('addParent2ModalBtn').style.display = 'flex';
+                    document.getElementById('parent2ModalNom').value = '';
+                    document.getElementById('parent2ModalPrenom').value = '';
+                    document.getElementById('parent2ModalEmail').value = '';
+                    document.getElementById('parent2ModalTel').value = '';
+                    document.getElementById('parent2ModalProfession').value = '';
+                    enfantCount = 0;
+                    addNouveauEnfantForm(); // Au moins un champ
+                }
+            }
+
+            function closePreinscriptionModal() {
+                const modal = document.getElementById('preinscriptionModal');
+                if(modal) modal.style.display = 'none';
+            }
+
+            function addNouveauEnfantForm() {
+                enfantCount++;
+                const list = document.getElementById('nouveauxEnfantsList');
+                const div = document.createElement('div');
+                div.className = 'nouveau-enfant-form';
+                div.style.cssText = 'padding: 12px; border: 1px dashed #ccc; border-radius: 8px; margin-bottom: 12px; position:relative;';
+                div.innerHTML = `
+                    ${enfantCount > 1 ? '<button type="button" class="material-icons" style="position:absolute; right:8px; top:8px; color:red; background:none; border:none; cursor:pointer;" onclick="this.parentElement.remove()">delete</button>' : ''}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <input type="text" class="md-text-field-input en-nom" placeholder="Nom" style="padding:8px; border-radius:4px; border:1px solid #ccc;" required>
+                        <input type="text" class="md-text-field-input en-prenom" placeholder="Prénom" style="padding:8px; border-radius:4px; border:1px solid #ccc;" required>
+                        <input type="date" class="md-text-field-input en-date" placeholder="Date Naissance" style="grid-column: 1 / -1; padding:8px; border-radius:4px; border:1px solid #ccc;" required>
+                    </div>
+                `;
+                list.appendChild(div);
+            }
+
+            document.getElementById('preinscriptionType')?.addEventListener('change', function(e) {
+                const existants = document.getElementById('enfantsExistantsContainer');
+                if (e.target.value === 'reinscription' || e.target.value === 'mixte') {
+                    existants.style.display = 'block';
+                } else {
+                    existants.style.display = 'none';
+                }
+            });
+
+            document.getElementById('parentPreinscriptionForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const type = document.getElementById('preinscriptionType').value;
+                const btn = document.getElementById('submitPreinscriptionBtn');
+                btn.disabled = true;
+
+                let enfantsInfo = [];
+
+                if (type === 'reinscription' || type === 'mixte') {
+                    document.querySelectorAll('.existants-checkbox:checked').forEach(cb => {
+                        enfantsInfo.push({
+                            eleveId: cb.value,
+                            nom: cb.dataset.nom,
+                            prenom: cb.dataset.prenom,
+                            dateNaissance: 'Existante',
+                            niveauCible: 'Niveau Suivant'
+                        });
+                    });
+                }
+
+                if (type === 'nouveau' || type === 'mixte') {
+                    document.querySelectorAll('.nouveau-enfant-form').forEach(form => {
+                        enfantsInfo.push({
+                            nom: form.querySelector('.en-nom').value,
+                            prenom: form.querySelector('.en-prenom').value,
+                            dateNaissance: form.querySelector('.en-date').value,
+                            niveauCible: 'Non spécifié'
+                        });
+                    });
+                }
+
+                if (enfantsInfo.length === 0) {
+                    showToast('Veuillez sélectionner ou ajouter au moins un enfant.', 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                try {
+                    let parent2Info = null;
+                    if (document.getElementById('parent2ModalSection').style.display === 'block') {
+                        parent2Info = {
+                            nom: document.getElementById('parent2ModalNom').value,
+                            prenom: document.getElementById('parent2ModalPrenom').value,
+                            email: document.getElementById('parent2ModalEmail').value,
+                            tel: document.getElementById('parent2ModalTel').value,
+                            profession: document.getElementById('parent2ModalProfession').value
+                        };
+                    }
+
+                    const res = await apiRequest('/api/preinscriptions/parent', {
+                        method: 'POST',
+                        body: JSON.stringify({ type, enfantsInfo, parent2Info })
+                    });
+                    
+                    showToast(res.message || 'Demande envoyée !', 'success');
+                    closePreinscriptionModal();
+                    loadParentPreinscriptions();
+                } catch(err) {
+                    showToast(err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+
+            async function loadParentPreinscriptions() {
+                try {
+                    // Check status first
+                    const statusRes = await apiRequest('/api/preinscriptions/status');
+                    preinscriptionsState = statusRes;
+                    
+                    const btn = document.getElementById('btnNouvellePreinscription');
+                    const alertMsg = document.getElementById('preinscriptionsStatusAlert');
+                    
+                    if (statusRes.ouvert) {
+                        if(btn) btn.style.display = 'flex';
+                        if(alertMsg) alertMsg.style.display = 'none';
+                    } else {
+                        if(btn) btn.style.display = 'none';
+                        if(alertMsg) alertMsg.style.display = 'flex';
+                    }
+
+                    const data = await apiRequest('/api/preinscriptions/mes-demandes');
+                    const tbody = document.getElementById('preinscriptionsTableBody');
+                    
+                    if (data.demandes && data.demandes.length > 0) {
+                        tbody.innerHTML = data.demandes.map(d => {
+                            const dateStr = new Date(d.dateSoumission).toLocaleDateString('fr-FR');
+                            let statutHtml = '';
+                            if (d.statut === 'en_attente') statutHtml = '<span style="background:#fff3cd;color:#ff8f00;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;">En attente</span>';
+                            else if (d.statut === 'confirmee') statutHtml = '<span style="background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;">Confirmée</span>';
+                            else statutHtml = '<span style="background:#ffebee;color:#c62828;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;">Rejetée</span>';
+                            
+                            const typeStr = d.type === 'nouveau' ? 'Nouveau' : (d.type === 'reinscription' ? 'Réinscription' : 'Mixte');
+                            const enfantsCount = Array.isArray(d.enfantsInfo) ? d.enfantsInfo.length : 0;
+                            
+                            return `
+                                <tr>
+                                    <td>${dateStr}</td>
+                                    <td>${typeStr}</td>
+                                    <td>${enfantsCount} enfant(s)</td>
+                                    <td>${d.anneeScolaire}</td>
+                                    <td>${statutHtml}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color:#777;">Aucune demande enregistrée.</td></tr>`;
+                    }
+                    
+                } catch(err) {
+                    console.error('Erreur chargement préinscriptions:', err);
+                }
             }
         </script>
         <!-- Lightbox -->
