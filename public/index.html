@@ -2805,6 +2805,14 @@
                         <a
                             href="#"
                             class="sidebar-nav-item"
+                            data-tab="devoirs"
+                        >
+                            <span class="material-icons">assignment</span>
+                            <span>Devoirs</span>
+                        </a>
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
                             data-tab="appreciations"
                         >
                             <span class="material-icons">rate_review</span>
@@ -4393,6 +4401,122 @@
                             </div>
                             <div class="widget-card-content">
                                 <div id="actualitesList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== DEVOIRS TAB ========== -->
+                    <div id="devoirs" class="tab-content" style="position: relative">
+                        <div class="widget-card" style="margin-top: 16px">
+                            <div
+                                class="widget-card-header"
+                                style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                "
+                            >
+                                <h3 class="widget-card-title">
+                                    Gestion des devoirs par classe
+                                </h3>
+                            </div>
+                            <div class="widget-card-content">
+                                <div style="margin-bottom: 24px">
+                                    <h4
+                                        style="
+                                            margin-bottom: 16px;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 8px;
+                                            color: var(
+                                                --md-sys-color-on-surface
+                                            );
+                                        "
+                                    >
+                                        <span
+                                            class="material-icons"
+                                            style="
+                                                color: var(
+                                                    --md-sys-color-primary
+                                                );
+                                            "
+                                            >class</span
+                                        >
+                                        Sélectionnez une classe
+                                    </h4>
+
+                                    <!-- Barre de recherche devoirs -->
+                                    <div style="margin-bottom: 16px">
+                                        <div class="topbar-search" style="width: 100%">
+                                            <span class="material-icons">search</span>
+                                            <input
+                                                type="text"
+                                                id="devoirClassSearchInput"
+                                                placeholder="Rechercher une classe..."
+                                                oninput="filterDevoirsClasses()"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Grille des classes pour devoirs -->
+                                    <div
+                                        id="devoirsClassesGrid"
+                                        style="
+                                            display: grid;
+                                            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                                            gap: 12px;
+                                            margin-bottom: 24px;
+                                        "
+                                    >
+                                        <!-- Les classes seront ajoutées dynamiquement ici -->
+                                    </div>
+
+                                    <div id="devoirsContentArea" style="display: none;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: var(--md-sys-color-surface-container-low); padding: 12px 16px; border-radius: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <button class="md-icon-btn" onclick="backToDevoirsClasses()" title="Retour aux classes">
+                                                    <span class="material-icons">arrow_back</span>
+                                                </button>
+                                                <h4 style="margin: 0; font-size: 16px;" id="devoirsSelectedClasseName">Classe sélectionnée</h4>
+                                            </div>
+                                            <div id="btnAjouterDevoir" style="display: none;">
+                                                <button class="md-btn md-btn-filled" onclick="openDevoirModal()">
+                                                    <span class="material-icons">add</span> Nouveau devoir
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-container">
+                                            <table class="md-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date à faire</th>
+                                                        <th>Titre</th>
+                                                        <th>Description</th>
+                                                        <th>Fichiers</th>
+                                                        <th style="width: 80px">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="devoirsList">
+                                                    <tr>
+                                                        <td
+                                                            colspan="5"
+                                                            style="
+                                                                text-align: center;
+                                                                padding: 40px;
+                                                                color: var(
+                                                                    --md-sys-color-on-surface-variant
+                                                                );
+                                                            "
+                                                        >
+                                                            Chargement des devoirs...
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -7199,11 +7323,24 @@
                 return userRole && userRole !== "professeur";
             }
 
-            // ajuste dynamiquement la hauteur d'une textarea
+            // Ajuste dynamiquement la hauteur d'une textarea
             function autoResize(el) {
                 if (!el) return;
                 el.style.height = "auto";
                 el.style.height = el.scrollHeight + "px";
+            }
+
+            // Échapper le HTML pour la sécurité
+            function escapeHtml(text) {
+                if (!text) return "";
+                const map = {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                };
+                return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
             }
 
             // Variables globales
@@ -7413,6 +7550,7 @@
                     absences: "Appels & Absences",
                     appreciations: "Appréciations",
                     actualites: "Actualités",
+                    devoirs: "Devoirs",
                     messagerie: "Messagerie",
                     bureau: "Gestion du bureau",
                     inscriptions: "Dossiers d'inscription",
@@ -21889,6 +22027,276 @@
                     showToast(err.message || 'Erreur suppression', 'error');
                 }
             }
+        </script>
+
+        <!-- Modal Ajouter Devoir -->
+        <div class="modal-overlay" id="devoirModal" style="display: none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; padding:20px; box-sizing:border-box;">
+            <div class="modal-content" style="background:var(--md-sys-color-surface); border-radius:20px; padding:28px; width:100%; max-width:600px; max-height:95vh; overflow-y:auto; position:relative; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid var(--md-sys-color-outline-variant);">
+                    <h3 style="margin:0; font-size:22px; color:var(--md-sys-color-on-surface); display:flex; align-items:center; gap:10px;">
+                        <span class="material-icons" style="color:var(--md-sys-color-primary); font-size:28px;">post_add</span>
+                        Ajouter un devoir
+                    </h3>
+                    <button class="md-icon-btn" onclick="closeDevoirModal()" style="border:none; background:none; cursor:pointer;">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <form id="devoirForm" onsubmit="submitDevoir(event)">
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="md-text-field">
+                            <label style="display:block; margin-bottom:4px; font-weight:bold; color:var(--md-sys-color-on-surface);">Titre *</label>
+                            <input type="text" id="devoirTitre" class="md-text-field-input" required placeholder="Ex: Exercices de mathématiques" style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--md-sys-color-outline);" />
+                        </div>
+                        <div class="md-text-field">
+                            <label style="display:block; margin-bottom:4px; font-weight:bold; color:var(--md-sys-color-on-surface);">Description (optionnel)</label>
+                            <textarea id="devoirDescription" class="md-text-field-input" rows="3" placeholder="Instructions supplémentaires..." style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--md-sys-color-outline); resize:vertical;"></textarea>
+                        </div>
+                        <div class="md-text-field">
+                            <label style="display:block; margin-bottom:4px; font-weight:bold; color:var(--md-sys-color-on-surface);">Date à faire (au plus tard) *</label>
+                            <input type="date" id="devoirDate" class="md-text-field-input" required style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--md-sys-color-outline);" />
+                        </div>
+                        <div class="md-text-field">
+                            <label style="display:block; margin-bottom:4px; font-weight:bold; color:var(--md-sys-color-on-surface);">Fichiers joints (optionnel, max 5)</label>
+                            <input type="file" id="devoirFichiers" class="md-text-field-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv,.mp4,.webm,.mov,.avi,.mkv,.m4v" style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--md-sys-color-outline);" />
+                            <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant); margin-top:4px;">Max 100 Mo par fichier.</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--md-sys-color-outline-variant);">
+                        <button type="button" class="md-btn md-btn-text" onclick="closeDevoirModal()">Annuler</button>
+                        <button type="submit" class="md-btn md-btn-filled" id="btnSubmitDevoir">Ajouter le devoir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        // --- SECTION DEVOIRS ---
+        let devoirsSelectedClasseId = null;
+
+        async function initDevoirsTab() {
+            try {
+                if (allClasses.length === 0) {
+                    try {
+                        const API_URL = `${window.location.origin}/api`;
+                        const token = localStorage.getItem("token");
+                        const user = JSON.parse(localStorage.getItem("user") || "{}");
+                        const response = await fetch(`${API_URL}/classes`, {
+                            headers: {
+                                "Content-Type": "application/json",
+                                "x-user-role": user.role || "",
+                                "x-user-id": user.id || "",
+                                "Authorization": `Bearer ${token}`
+                            }
+                        });
+                        const data = await response.json();
+                        if (Array.isArray(data)) {
+                            allClasses = data;
+                        }
+                    } catch (e) {
+                        console.error('Erreur chargement classes:', e);
+                    }
+                }
+
+                renderDevoirsClassesGrid();
+
+                const userRole = localStorage.getItem('userRole');
+                if (['admin', 'professeur', 'secretariat', 'directeur'].includes(userRole)) {
+                    document.getElementById('btnAjouterDevoir').style.display = 'none'; // Will show when a class is selected
+                }
+            } catch (error) {
+                console.error('Erreur init devoirs:', error);
+            }
+        }
+
+        function renderDevoirsClassesGrid() {
+            const grid = document.getElementById("devoirsClassesGrid");
+            const searchTerm = document.getElementById("devoirClassSearchInput")?.value.toLowerCase() || "";
+
+            const filteredClasses = searchTerm
+                ? allClasses.filter(c => c.nom.toLowerCase().includes(searchTerm))
+                : allClasses;
+
+            if (filteredClasses.length === 0) {
+                grid.innerHTML = '<p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 20px; grid-column: 1 / -1;">Aucune classe trouvée</p>';
+                return;
+            }
+
+            grid.innerHTML = filteredClasses.map(c => `
+                <div class="class-card" onclick="selectDevoirClasse('${c.id}', '${escapeHtml(c.nom)}')" style="cursor:pointer;">
+                    <div class="class-card-icon">
+                        <span class="material-icons">class</span>
+                    </div>
+                    <div class="class-card-info">
+                        <div class="class-card-name">${escapeHtml(c.nom)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterDevoirsClasses() {
+            renderDevoirsClassesGrid();
+        }
+
+        function selectDevoirClasse(id, nom) {
+            devoirsSelectedClasseId = id;
+            document.getElementById("devoirsSelectedClasseName").textContent = "Classe : " + nom;
+            document.getElementById("devoirsClassesGrid").style.display = "none";
+            document.getElementById("devoirClassSearchInput").parentElement.style.display = "none";
+            document.getElementById("devoirsContentArea").style.display = "block";
+
+            const userRole = localStorage.getItem('userRole') || localStorage.getItem('role') || 'professeur';
+            if (['admin', 'professeur', 'secretariat', 'directeur'].includes(userRole)) {
+                document.getElementById('btnAjouterDevoir').style.display = 'block';
+            }
+
+            loadDevoirs(id);
+        }
+
+        function backToDevoirsClasses() {
+            devoirsSelectedClasseId = null;
+            document.getElementById("devoirsContentArea").style.display = "none";
+            document.getElementById("devoirsClassesGrid").style.display = "grid";
+            document.getElementById("devoirClassSearchInput").parentElement.style.display = "block";
+            document.getElementById("devoirClassSearchInput").value = "";
+            document.getElementById('btnAjouterDevoir').style.display = 'none';
+            renderDevoirsClassesGrid();
+        }
+
+        async function loadDevoirs(classeId) {
+            const tbody = document.getElementById('devoirsList');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Chargement des devoirs...</td></tr>';
+
+            try {
+                const devoirs = await apiRequest(`/api/devoirs/classe/${classeId}`);
+                if (!devoirs || devoirs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Aucun devoir pour cette classe.</td></tr>';
+                    return;
+                }
+
+                const userRole = localStorage.getItem('userRole');
+                const canDelete = ['admin', 'professeur', 'secretariat', 'directeur'].includes(userRole);
+
+                tbody.innerHTML = devoirs.map(d => {
+                    const dateFormatee = new Date(d.datePour).toLocaleDateString('fr-FR');
+                    let fichiersHtml = '-';
+                    if (d.fichiers) {
+                        try {
+                            const files = JSON.parse(d.fichiers);
+                            fichiersHtml = files.map(f => `<a href="${f.url}" target="_blank" class="md-btn md-btn-text" style="padding:4px 8px; min-width:0; height:auto;" title="Télécharger" download><span class="material-icons" style="font-size:18px;">attach_file</span></a>`).join(' ');
+                        } catch(e) {}
+                    }
+
+                    const deleteBtn = canDelete ? `<button class="md-btn md-btn-text" style="color:var(--md-sys-color-error); padding:4px 8px; min-width:0; height:auto;" onclick="deleteDevoir('${d.id}', '${classeId}')" title="Supprimer"><span class="material-icons" style="font-size:18px;">delete</span></button>` : '';
+
+                    return `
+                        <tr>
+                            <td>${dateFormatee}</td>
+                            <td><strong>${escapeHtml(d.titre)}</strong></td>
+                            <td>${escapeHtml(d.description || '-')}</td>
+                            <td>${fichiersHtml}</td>
+                            <td>
+                                <div style="display:flex; gap:4px;">
+                                    ${deleteBtn}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                showToast('Erreur chargement devoirs', 'error');
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--md-sys-color-error);">Erreur lors du chargement.</td></tr>';
+            }
+        }
+
+        function openDevoirModal() {
+            if (!devoirsSelectedClasseId) {
+                showToast('Veuillez d\'abord sélectionner une classe', 'warning');
+                return;
+            }
+            document.getElementById('devoirTitre').value = '';
+            document.getElementById('devoirDescription').value = '';
+            document.getElementById('devoirDate').value = '';
+            document.getElementById('devoirFichiers').value = '';
+            document.getElementById('devoirModal').style.display = 'flex';
+        }
+
+        function closeDevoirModal() {
+            document.getElementById('devoirModal').style.display = 'none';
+        }
+
+        async function submitDevoir(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitDevoir');
+            btn.disabled = true;
+            btn.textContent = 'Envoi...';
+
+            try {
+                const classeId = devoirsSelectedClasseId;
+                const titre = document.getElementById('devoirTitre').value;
+                const description = document.getElementById('devoirDescription').value;
+                const datePour = document.getElementById('devoirDate').value;
+                const fichiersInput = document.getElementById('devoirFichiers');
+
+                const formData = new FormData();
+                formData.append('classeId', classeId);
+                formData.append('titre', titre);
+                formData.append('description', description);
+                formData.append('datePour', datePour);
+
+                if (fichiersInput.files && fichiersInput.files.length > 0) {
+                    if (fichiersInput.files.length > 5) {
+                        throw new Error("Maximum 5 fichiers autorisés");
+                    }
+                    for (let i = 0; i < fichiersInput.files.length; i++) {
+                        formData.append('fichiers', fichiersInput.files[i]);
+                    }
+                }
+
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/devoirs', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Erreur lors de l\'ajout du devoir');
+                }
+
+                showToast('Devoir ajouté avec succès', 'success');
+                closeDevoirModal();
+                loadDevoirs(classeId);
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Ajouter';
+            }
+        }
+
+        async function deleteDevoir(id, classeId) {
+            if (!confirm('Voulez-vous vraiment supprimer ce devoir ?')) return;
+            try {
+                await apiRequest(`/api/devoirs/${id}`, { method: 'DELETE' });
+                showToast('Devoir supprimé', 'success');
+                loadDevoirs(classeId);
+            } catch (error) {
+                showToast('Erreur lors de la suppression', 'error');
+            }
+        }
+
+        // Initialiser l'onglet devoirs au chargement ou lors du clic sur l'onglet
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lier l'initialisation au clic sur l'onglet si ce n'est pas déjà géré par un gestionnaire central
+            const devoirsTab = document.querySelector('[data-tab="devoirs"]');
+            if(devoirsTab) {
+                devoirsTab.addEventListener('click', initDevoirsTab);
+            }
+        });
         </script>
     </body>
 </html>

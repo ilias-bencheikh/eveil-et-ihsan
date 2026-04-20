@@ -2855,6 +2855,7 @@
             .sidebar-nav-item[data-section="frais"].active,
             .sidebar-nav-item[data-section="messagerie"].active,
             .sidebar-nav-item[data-section="actualites"].active,
+            .sidebar-nav-item[data-section="devoirs"].active,
             .sidebar-nav-item[data-section="profil"].active {
                 background: var(--md-sys-color-primary-container);
                 color: var(--md-sys-color-on-primary-container);
@@ -4077,6 +4078,14 @@
                             <span class="material-icons">newspaper</span>
                             <span>Actualités</span>
                         </a>
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-section="devoirs"
+                        >
+                            <span class="material-icons">assignment</span>
+                            <span>Devoirs</span>
+                        </a>
                     </div>
 
                     <div class="sidebar-nav-section">
@@ -5081,24 +5090,34 @@
                                     style="
                                         display: flex;
                                         align-items: center;
-                                        gap: 10px;
+                                        gap: 12px;
                                     "
                                 >
-                                    <div class="info-card-icon ic-green">
-                                        <span class="material-icons"
-                                            >newspaper</span
-                                        >
-                                    </div>
-                                    <h3 class="widget-card-title">
-                                        Actualités
+                                    <span
+                                        class="material-icons"
+                                        style="
+                                            color: var(--md-sys-color-primary);
+                                            font-size: 28px;
+                                        "
+                                        >newspaper</span
+                                    >
+                                    <h3 style="margin: 0; font-size: 20px">
+                                        Dernières actualités de l'école
                                     </h3>
                                 </div>
                                 <div
+                                    class="nav-badge"
                                     id="actuCountBadge"
-                                    class="p-actu-count-badge"
-                                    style="display: none"
+                                    style="
+                                        display: none;
+                                        background: var(--md-sys-color-primary);
+                                        color: var(--md-sys-color-on-primary);
+                                        border-radius: 12px;
+                                        padding: 4px 10px;
+                                        font-size: 13px;
+                                        font-weight: 600;
+                                    "
                                 >
-                                    <span class="material-icons">feed</span>
                                     <span id="actuCountText"
                                         >0 publication</span
                                     >
@@ -5111,46 +5130,105 @@
                                         flex-direction: column;
                                         align-items: center;
                                         justify-content: center;
-                                        padding: 60px 20px;
-                                        gap: 16px;
+                                        padding: 64px 24px;
                                         color: var(
                                             --md-sys-color-on-surface-variant
                                         );
+                                        text-align: center;
                                     "
                                 >
-                                    <div
+                                    <span
+                                        class="material-icons"
                                         style="
-                                            width: 72px;
-                                            height: 72px;
-                                            border-radius: 50%;
-                                            background: var(
-                                                --md-sys-color-surface-container
-                                            );
-                                            display: flex;
-                                            align-items: center;
-                                            justify-content: center;
+                                            font-size: 64px;
+                                            opacity: 0.2;
+                                            margin-bottom: 16px;
                                         "
+                                        >inbox</span
                                     >
-                                        <span
-                                            class="material-icons"
-                                            style="
-                                                font-size: 36px;
-                                                color: var(
-                                                    --md-sys-color-outline
-                                                );
-                                            "
-                                            >newspaper</span
+                                    <p style="font-size: 16px; margin: 0">
+                                        Aucune actualité publiée pour le moment
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section Devoirs Parent -->
+                    <section id="section-devoirs" class="tab-content">
+                        <div class="widget-card">
+                            <div class="widget-card-header">
+                                <div
+                                    style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 10px;
+                                    "
+                                >
+                                    <div class="info-card-icon ic-blue">
+                                        <span class="material-icons"
+                                            >assignment</span
                                         >
                                     </div>
-                                    <p
-                                        style="
-                                            margin: 0;
-                                            font-size: 15px;
-                                            font-weight: 500;
-                                        "
-                                    >
-                                        Chargement des actualités...
-                                    </p>
+                                    <h3 class="widget-card-title">
+                                        Cahier de textes / Devoirs
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="widget-card-content">
+                                <div
+                                    style="
+                                        margin-bottom: 20px;
+                                        max-width: 400px;
+                                    "
+                                >
+                                    <div class="md-text-field">
+                                        <select
+                                            id="parentDevoirEnfantSelect"
+                                            class="md-text-field-input"
+                                            style="
+                                                padding: 16px 16px 12px;
+                                                background: var(
+                                                    --md-sys-color-surface-container-highest
+                                                );
+                                            "
+                                            onchange="loadParentDevoirs()"
+                                        >
+                                            <option value="">
+                                                Sélectionnez un enfant
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="table-container">
+                                    <table class="md-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date à faire</th>
+                                                <th>Titre</th>
+                                                <th>Description</th>
+                                                <th>Fichiers joints</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="parentDevoirsList">
+                                            <tr>
+                                                <td
+                                                    colspan="4"
+                                                    style="
+                                                        text-align: center;
+                                                        padding: 40px;
+                                                        color: var(
+                                                            --md-sys-color-on-surface-variant
+                                                        );
+                                                    "
+                                                >
+                                                    Sélectionnez un enfant pour
+                                                    voir ses devoirs
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -5604,6 +5682,19 @@
 
         <!-- Script Paramètres -->
         <script>
+            // Utilitaire global pour échapper le HTML (sécurité)
+            function escapeHtml(text) {
+                if (!text) return "";
+                const map = {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                };
+                return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
             document.addEventListener("DOMContentLoaded", async () => {
                 try {
                     const notifCb =
@@ -5753,6 +5844,9 @@
 
                     // Charger les actualités
                     loadActualites();
+
+                    // Initialiser le select pour les devoirs
+                    initDevoirsSelect();
 
                     // Charger les messages
                     loadParentMessages();
@@ -9189,6 +9283,83 @@
                     console.error('Erreur chargement préinscriptions:', err);
                 }
             }
+
+            // --- SECTION DEVOIRS ---
+            function initDevoirsSelect() {
+                const select = document.getElementById('parentDevoirEnfantSelect');
+                if (!select || !enfantsData) return;
+                
+                select.innerHTML = '<option value="">Sélectionnez un enfant</option>';
+                enfantsData.forEach(enfant => {
+                    if (enfant.classe) {
+                        const option = document.createElement('option');
+                        option.value = enfant.id;
+                        option.dataset.classe = enfant.classe; // id de la classe
+                        option.textContent = enfant.prenom + ' (Classe: ' + (enfant.classeNom || enfant.classe) + ')';
+                        select.appendChild(option);
+                    }
+                });
+            }
+
+            async function loadParentDevoirs() {
+                const select = document.getElementById('parentDevoirEnfantSelect');
+                const enfantId = select.value;
+                const tbody = document.getElementById('parentDevoirsList');
+                
+                if (!enfantId) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Veuillez sélectionner un enfant pour voir ses devoirs.</td></tr>';
+                    return;
+                }
+
+                const selectedOption = select.options[select.selectedIndex];
+                const classeId = selectedOption.dataset.classe;
+
+                if (!classeId) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Cet enfant n\\'est pas assigné à une classe.</td></tr>';
+                    return;
+                }
+
+                try {
+                    const devoirs = await apiRequest(`/api/devoirs/classe/${classeId}`);
+                    if (!devoirs || devoirs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Aucun devoir à faire pour cette classe.</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = devoirs.map(d => {
+                        const dateFormatee = new Date(d.datePour).toLocaleDateString('fr-FR');
+                        let fichiersHtml = '-';
+                        if (d.fichiers) {
+                            try {
+                                const files = JSON.parse(d.fichiers);
+                                fichiersHtml = files.map(f => `<a href="${f.url}" target="_blank" class="btn btn-icon" title="Télécharger" download><span class="material-icons">attach_file</span></a>`).join(' ');
+                            } catch(e) {}
+                        }
+
+                        return `
+                            <tr>
+                                <td>${dateFormatee}</td>
+                                <td><strong>${escapeHtml(d.titre)}</strong></td>
+                                <td>${escapeHtml(d.description || '-')}</td>
+                                <td>${fichiersHtml}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                } catch (error) {
+                    showToast('Erreur chargement devoirs', 'error');
+                    console.error(error);
+                }
+            }
+
+            // Mettre à jour les devoirs si la navigation change
+            document.addEventListener('DOMContentLoaded', () => {
+                const devoirsTab = document.querySelector('[data-section="devoirs"]');
+                if (devoirsTab) {
+                    devoirsTab.addEventListener('click', () => {
+                        initDevoirsSelect();
+                    });
+                }
+            });
         </script>
         <!-- Lightbox -->
         <div id="mediaLightbox" class="media-lightbox-overlay" onclick="closeMediaLightbox()">

@@ -77,6 +77,7 @@ const {
   maintenanceRoutes,
   emploisDuTempsRoutes,
   preinscriptionsRoutes,
+  devoirsRoutes,
 } = require("./src/routes");
 
 // Initialisation de l'application
@@ -250,6 +251,13 @@ app.use(
   secureHeaders,
   checkMaintenance,
   classesRoutes,
+);
+app.use(
+  "/api/devoirs",
+  requireAuth,
+  secureHeaders,
+  checkMaintenance,
+  devoirsRoutes,
 );
 app.use(
   "/api/absences",

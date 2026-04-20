@@ -289,6 +289,19 @@ function initDatabase() {
                 description TEXT
             )`);
 
+            // Table devoirs
+            db.run(`CREATE TABLE IF NOT EXISTS devoirs (
+                id TEXT PRIMARY KEY,
+                titre TEXT NOT NULL,
+                description TEXT,
+                datePour TEXT NOT NULL,
+                classeId TEXT NOT NULL,
+                professeurId TEXT,
+                fichiers TEXT,
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (classeId) REFERENCES classes(id) ON DELETE CASCADE
+            )`);
+
             // Initialiser la config des préinscriptions
             db.run(`INSERT OR IGNORE INTO config_system (cle, valeur, description) VALUES 
                 ('preinscriptions_ouvertes', '0', '0 = Fermé, 1 = Ouvert'),
