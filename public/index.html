@@ -8392,7 +8392,7 @@
                     const allReceived = messages.filter(
                         (msg) => msg.expediteurId != user.id,
                     );
-                    const recentMessages = allReceived.slice(0, 6);
+                    const recentMessages = allReceived.slice(0, 4);
                     const unreadCount = allReceived.filter(
                         (msg) => !msg.lu,
                     ).length;
@@ -22334,67 +22334,8 @@
                 devoirsTab.addEventListener('click', initDevoirsTab);
             }
         });
+    </script>
 
-        // Push Notifications Setup (VAPID key)
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-            const rawData = window.atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-
-        // Service Worker Registration for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful:', registration.scope);
-
-                        // S'assurer qu'on a le token de session pour l'API
-                        const token = localStorage.getItem('token');
-                        if (!token || !('PushManager' in window)) return;
-
-                        // Demander la permission
-                        Notification.requestPermission().then(async permission => {
-                            if (permission === 'granted') {
-                                try {
-                                    // 1. Récupérer la clé publique depuis le serveur
-                                    const keyRes = await fetch('/api/push/vapid-public-key', {
-                                        headers: { 'Authorization': `Bearer ${token}` }
-                                    });
-                                    if (!keyRes.ok) return;
-                                    const { publicKey } = await keyRes.json();
-
-                                    // 2. S'abonner au PushManager du navigateur
-                                    const subscription = await registration.pushManager.subscribe({
-                                        userVisibleOnly: true,
-                                        applicationServerKey: urlBase64ToUint8Array(publicKey)
-                                    });
-
-                                    // 3. Envoyer l'abonnement à notre serveur (SQLite)
-                                    await fetch('/api/push/subscribe', {
-                                        method: 'POST',
-                                        body: JSON.stringify(subscription),
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${token}`
-                                        }
-                                    });
-                                    console.log('Abonnement Push enregistré avec succès !');
-                                } catch (err) {
-                                    console.error('Erreur lors de l\'abonnement Push:', err);
-                                }
-                            }
-                        });
-                    }, err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-            });
-        }
-        </script>
-    </body>
+    <script src="/pwa-subscribe.js"></script>
+</body>
 </html>

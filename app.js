@@ -119,7 +119,11 @@ app.use(
           "https://cdnjs.cloudflare.com",
         ],
         imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'"],
+        connectSrc: [
+          "'self'", 
+          "https://fonts.googleapis.com", 
+          "https://fonts.gstatic.com"
+        ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],

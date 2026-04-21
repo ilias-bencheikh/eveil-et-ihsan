@@ -305,8 +305,23 @@
     </div>
 
     <script>
-        // Nettoyer les anciennes sessions au chargement
-        localStorage.clear();
+        // Redirection automatique si déjà connecté
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        
+        if (token && user) {
+            try {
+                const userData = JSON.parse(user);
+                if (userData.role === 'eleve') window.location.replace('/eleve');
+                else if (userData.role === 'parent') window.location.replace('/parent');
+                else window.location.replace('/dashboard');
+            } catch(e) {
+                localStorage.clear();
+            }
+        } else {
+            // Nettoyer les anciennes sessions au chargement
+            localStorage.clear();
+        }
 
         // URL de base de l'API
         // Utiliser l'URL actuelle du site pour l'API

@@ -1,3 +1,4 @@
+require('dotenv').config();
 const webpush = require('web-push');
 const { db } = require('../config/database');
 

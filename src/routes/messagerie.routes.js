@@ -13,7 +13,7 @@ function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
     sendPushNotification(destinataireId, {
         title: 'Nouveau message reçu',
         body: 'Vous avez reçu un nouveau message sur le portail',
-        url: '/messagerie.html'
+        url: '/'
     });
 
     // 2. Continuer avec l'envoi d'Email classique

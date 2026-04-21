@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
 const webpush = require('web-push');
+require('dotenv').config();
 
 // Configurer web-push avec nos clés VAPID
 const publicVapidKey = process.env.VAPID_PUBLIC_KEY;
@@ -24,19 +25,38 @@ router.get('/vapid-public-key', (req, res) => {
 router.post('/subscribe', (req, res) => {
     try {
         const subscription = req.body;
-        // On récupère l'ID de l'utilisateur depuis son token/session (ajouté par le middleware requireAuth)
-        const userId = req.user ? req.user.id : 'anonyme';
+        const userId = req.userId || 'anonyme';
+        const subString = JSON.stringify(subscription);
 
-        // Sauvegarder dans SQLite
-        db.run(
-            `INSERT INTO push_subscriptions (userId, subscription) VALUES (?, ?)`,
-            [userId, JSON.stringify(subscription)],
-            function(err) {
+        // Vérifier si cet abonnement existe déjà pour cet utilisateur
+        db.get(
+            `SELECT id FROM push_subscriptions WHERE userId = ? AND subscription LIKE ?`,
+            [userId, '%' + subscription.endpoint + '%'],
+            (err, row) => {
                 if (err) {
-                    console.error('Erreur SQLite push_subscriptions:', err.message);
-                    return res.status(500).json({ error: 'Erreur lors de la sauvegarde de l\'abonnement' });
+                    console.error('Erreur SQLite lecture push_subscriptions:', err.message);
+                    return res.status(500).json({ error: 'Erreur base de données' });
                 }
-                res.status(201).json({ message: 'Abonnement réussi' });
+
+                if (row) {
+                    // L'abonnement existe déjà, pas besoin de le dupliquer
+                    console.log('PUSH ABONNEMENT DEJA EXISTANT:', userId);
+                    return res.status(200).json({ message: 'Abonnement déjà enregistré' });
+                }
+
+                // Sauvegarder dans SQLite si non existant
+                db.run(
+                    `INSERT INTO push_subscriptions (userId, subscription) VALUES (?, ?)`,
+                    [userId, subString],
+                    function(err) {
+                        if (err) {
+                            console.error('Erreur SQLite push_subscriptions:', err.message);
+                            return res.status(500).json({ error: 'Erreur lors de la sauvegarde de l\'abonnement' });
+                        }
+                        console.log('NOUVEAU PUSH ABONNEMENT RECU:', userId); 
+                        res.status(201).json({ message: 'Abonnement réussi' });
+                    }
+                );
             }
         );
     } catch (error) {
@@ -47,7 +67,7 @@ router.post('/subscribe', (req, res) => {
 
 // Supprimer un abonnement (quand on se déconnecte)
 router.post('/unsubscribe', (req, res) => {
-    const userId = req.user ? req.user.id : 'anonyme';
+    const userId = req.userId || 'anonyme';
     db.run(
         `DELETE FROM push_subscriptions WHERE userId = ?`,
         [userId],

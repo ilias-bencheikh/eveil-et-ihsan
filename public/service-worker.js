@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eveil-ihsan-v4';
+const CACHE_NAME = 'eveil-ihsan-v5';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
@@ -82,26 +82,29 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
 
-  // L'URL à ouvrir (récupérée des données de la notification)
-  const urlToOpen = new URL(event.notification.data.url, self.location.origin).href;
+  const urlToOpen = new URL(event.notification.data.url || '/', self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      // Chercher si un onglet est déjà ouvert avec cette URL
+      // Chercher si un onglet de notre application est déjà ouvert
       let matchingClient = null;
       for (let i = 0; i < windowClients.length; i++) {
         const windowClient = windowClients[i];
-        if (windowClient.url === urlToOpen) {
+        // Si c'est une page de notre site, on la met au premier plan
+        if (windowClient.url.startsWith(self.location.origin)) {
           matchingClient = windowClient;
           break;
         }
       }
 
-      // Si ouvert, on le met au premier plan
       if (matchingClient) {
+        // Rediriger le client ouvert vers la bonne page (si besoin) et le focus
+        if (matchingClient.url !== urlToOpen && urlToOpen !== self.location.origin + '/') {
+            matchingClient.navigate(urlToOpen);
+        }
         return matchingClient.focus();
       } else {
-        // Sinon, on ouvre un nouvel onglet
+        // Sinon, on ouvre un nouvel onglet avec l'URL demandée
         return clients.openWindow(urlToOpen);
       }
     })
