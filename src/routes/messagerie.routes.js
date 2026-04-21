@@ -6,8 +6,17 @@ const multer = require('multer');
 const { db } = require('../config/database');
 const { generateId, formatDate } = require('../utils/helpers');
 const { sendEmail } = require('../config/email');
+const { sendPushNotification } = require('../utils/push');
 
 function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
+    // 1. Envoyer la notification Push PWA
+    sendPushNotification(destinataireId, {
+        title: 'Nouveau message reçu',
+        body: 'Vous avez reçu un nouveau message sur le portail',
+        url: '/messagerie.html'
+    });
+
+    // 2. Continuer avec l'envoi d'Email classique
     const getUserInfoQuery = `
         SELECT nom, prenom, email, notifEmailMessage FROM eleves WHERE id = ?
         UNION
@@ -84,7 +93,7 @@ router.get('/destinataires', async (req, res) => {
                 UNION
                 SELECT id, nom, prenom FROM staff WHERE lower(role) = 'professeur'
             `);
-            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) IN (?, ?, ?)', ['secretariat', 'directeur', 'admin']);
+            const staffs = await dbAll('SELECT id, nom, prenom, role FROM staff WHERE lower(role) IN (?, ?, ?)', ['secretariat', 'directeur', 'directeur_adjoint', 'admin']);
 
             res.json([
                 ...profs.map(p => ({ id: p.id, nom: `${p.prenom} ${p.nom}`, role: 'Professeur', type: 'user' })),
@@ -199,7 +208,7 @@ router.get('/destinataires', async (req, res) => {
                 ...classes.map(c => ({ id: `class_${c.nom}`, nom: `Classe ${c.nom}`, role: 'Classe', type: 'class', niveau: c.niveau, horaires: c.horaires }))
             ]);
 
-        } else if (userRole && ['directeur', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
+        } else if (userRole && ['directeur', 'directeur_adjoint', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
             // Staff peut envoyer à tous (y compris parents)
             // Seuls les élèves avec un compte activé apparaissent
             const eleves = await dbAll('SELECT id, nom, prenom FROM eleves WHERE activated = 1');
@@ -528,7 +537,7 @@ router.post('/', (req, res, next) => {
 
 // Vérifier si l'utilisateur peut envoyer aux destinataires spécifiés
 function canSendToDestinataires(userRole, destinataires) {
-    if (userRole && ['directeur', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
+    if (userRole && ['directeur', 'directeur_adjoint', 'secretariat', 'admin'].includes(userRole.toLowerCase())) {
         return true; // Staff peut envoyer à tous
     }
 

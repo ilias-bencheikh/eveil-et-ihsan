@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installer l'Application - Eveil & Ihsan</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color, #f4f7f6);
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+        }
+        .install-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 450px;
+            width: 90%;
+            margin: 20px;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        .btn-install {
+            background-color: var(--primary-color, #0056b3);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-install:hover {
+            background-color: #004494;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,86,179,0.3);
+        }
+        .btn-back {
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #ccc;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        /* Styles spécifiques pour les instructions iOS */
+        .ios-instructions {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        .ios-instructions h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .ios-instructions ol {
+            padding-left: 20px;
+            margin-bottom: 0;
+            color: #555;
+        }
+        .ios-instructions li {
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .ios-icon {
+            vertical-align: middle;
+            background: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 18px;
+        }
+
+        /* Message de succès */
+        .success-message {
+            color: #28a745;
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="install-container">
+        <img src="/uploads/logo/logo.png" alt="Logo Eveil & Ihsan" class="logo">
+        <h1>Installer l'Application</h1>
+
+        <div id="statusText">
+            <p>Installez notre portail sur votre appareil pour y accéder plus rapidement, comme une application native, avec un accès simplifié à vos données.</p>
+        </div>
+
+        <!-- Bouton principal (Android, Chrome, Edge) -->
+        <button id="installBtn" class="btn-install" style="display: none;">
+            <span class="material-icons">download</span>
+            Installer l'application
+        </button>
+
+        <!-- Instructions spécifiques pour iPhone/iPad -->
+        <div id="iosInstructions" class="ios-instructions" style="display: none;">
+            <h3>Pour installer sur iPhone ou iPad :</h3>
+            <ol>
+                <li>Appuyez sur le bouton de partage en bas de l'écran <span class="material-icons ios-icon">ios_share</span></li>
+                <li>Faites défiler le menu et appuyez sur <br><strong>"Sur l'écran d'accueil"</strong> <span class="material-icons ios-icon">add_box</span></li>
+            </ol>
+        </div>
+
+        <!-- Message de succès -->
+        <div id="successMessage" class="success-message" style="display: none;">
+            <span class="material-icons" style="font-size: 32px; margin-bottom: 10px;">check_circle</span><br>
+            <strong>Installation réussie !</strong><br>
+            Vous pouvez maintenant lancer l'application depuis votre écran d'accueil.
+        </div>
+
+        <!-- Message "Déjà installé" -->
+        <div id="alreadyInstalled" class="success-message" style="display: none; background-color: #e2e3e5; color: #383d41; border-color: #d6d8db;">
+            <span class="material-icons" style="font-size: 32px; margin-bottom: 10px;">stars</span><br>
+            <strong>Application déjà installée</strong><br>
+            Vous utilisez actuellement la version application.
+        </div>
+
+        <br>
+        <a href="/index.html" class="btn-back">Retour au portail</a>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        const iosInstructions = document.getElementById('iosInstructions');
+        const successMessage = document.getElementById('successMessage');
+        const alreadyInstalled = document.getElementById('alreadyInstalled');
+        const statusText = document.getElementById('statusText');
+
+        // Détection de l'appareil
+        const isIos = () => {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            return /iphone|ipad|ipod/.test(userAgent);
+        };
+
+        // Détection si l'app est DÉJÀ en mode PWA (installée et lancée depuis l'écran d'accueil)
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+
+        // Logique principale
+        if (isInStandaloneMode()) {
+            // L'utilisateur est déjà dans l'app installée
+            statusText.style.display = 'none';
+            alreadyInstalled.style.display = 'block';
+        } else if (isIos()) {
+            // C'est un appareil Apple (qui bloque l'auto-prompt)
+            iosInstructions.style.display = 'block';
+        } else {
+            // Autres appareils (Android, PC) - On attend l'événement du navigateur
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Empêcher la mini-barre d'info par défaut sur mobile
+                e.preventDefault();
+                // Sauvegarder l'événement pour le déclencher plus tard
+                deferredPrompt = e;
+                // Afficher notre bouton personnalisé
+                installBtn.style.display = 'flex';
+            });
+        }
+
+        // Action quand on clique sur notre bouton d'installation
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Afficher la vraie fenêtre système d'installation
+                deferredPrompt.prompt();
+                // Attendre la réponse de l'utilisateur
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Détecter quand l'installation est terminée avec succès
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            iosInstructions.style.display = 'none';
+            statusText.style.display = 'none';
+            successMessage.style.display = 'block';
+        });
+
+        // Enregistrer le service worker au cas où il ne le serait pas encore
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
+    </script>
+</body>
+</html>

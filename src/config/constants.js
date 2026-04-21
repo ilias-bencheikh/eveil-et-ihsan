@@ -10,6 +10,7 @@ const SERVER_CONFIG = {
 const PERMISSIONS = {
     admin: ['create', 'read', 'update', 'delete'],
     directeur: ['create', 'read', 'update', 'delete'],
+    directeur_adjoint: ['create', 'read', 'update', 'delete'],
     secretariat: ['create', 'read', 'update'],
     secretaire: ['create', 'read', 'update'],
     professeur: ['read', 'create_absence', 'create_appreciation'],

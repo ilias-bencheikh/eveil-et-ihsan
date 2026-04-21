@@ -78,6 +78,7 @@ const {
   emploisDuTempsRoutes,
   preinscriptionsRoutes,
   devoirsRoutes,
+  pushRoutes,
 } = require("./src/routes");
 
 // Initialisation de l'application
@@ -299,6 +300,7 @@ app.use(
 );
 app.use("/api/preinscriptions", checkMaintenance, preinscriptionsRoutes);
 app.use("/api", requireAuth, secureHeaders, emailRoutes);
+app.use("/api/push", requireAuth, secureHeaders, pushRoutes);
 
 // Route principale
 app.get("/", (req, res) => {

@@ -4070,14 +4070,10 @@
                             <span class="material-icons">home</span>
                             <span>Accueil</span>
                         </a>
-                        <a
-                            href="#"
-                            class="sidebar-nav-item"
-                            data-section="actualites"
-                        >
-                            <span class="material-icons">newspaper</span>
-                            <span>Actualités</span>
-                        </a>
+                    </div>
+
+                    <div class="sidebar-nav-section">
+                        <span class="sidebar-nav-section-title">Suivi</span>
                         <a
                             href="#"
                             class="sidebar-nav-item"
@@ -4086,10 +4082,6 @@
                             <span class="material-icons">assignment</span>
                             <span>Devoirs</span>
                         </a>
-                    </div>
-
-                    <div class="sidebar-nav-section">
-                        <span class="sidebar-nav-section-title">Suivi</span>
                         <a
                             href="#"
                             class="sidebar-nav-item"
@@ -4105,14 +4097,6 @@
                         >
                             <span class="material-icons">star</span>
                             <span>Appréciations</span>
-                        </a>
-                        <a
-                            href="#"
-                            class="sidebar-nav-item"
-                            data-section="frais"
-                        >
-                            <span class="material-icons">payments</span>
-                            <span>Frais</span>
                         </a>
                     </div>
 
@@ -4131,8 +4115,40 @@
                                 >0</span
                             >
                         </a>
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-section="actualites"
+                        >
+                            <span class="material-icons">newspaper</span>
+                            <span>Actualités</span>
+                        </a>
                     </div>
 
+                    <div class="sidebar-nav-section">
+                        <span class="sidebar-nav-section-title"
+                            >Gestion</span
+                        >
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-section="frais"
+                        >
+                            <span class="material-icons">payments</span>
+                            <span>Frais</span>
+                        </a>
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-section="preinscriptions"
+                            id="navItemPreinscriptions"
+                            style="display: none;"
+                        >
+                            <span class="material-icons">how_to_reg</span>
+                            <span>Préinscriptions</span>
+                        </a>
+
+                    </div>
                     <div class="sidebar-nav-section">
                         <span class="sidebar-nav-section-title"
                             >Mon espace</span
@@ -4152,16 +4168,6 @@
                         >
                             <span class="material-icons">child_care</span>
                             <span>Mes Enfants</span>
-                        </a>
-                        <a
-                            href="#"
-                            class="sidebar-nav-item"
-                            data-section="preinscriptions"
-                            id="navItemPreinscriptions"
-                            style="display: none;"
-                        >
-                            <span class="material-icons">how_to_reg</span>
-                            <span>Préinscriptions</span>
                         </a>
                         <a
                             href="#"
@@ -4667,7 +4673,7 @@
                                         >
                                     </div>
                                     <h3 class="widget-card-title">
-                                        Détails par enfant
+                                        Détails des frais
                                     </h3>
                                 </div>
                             </div>
@@ -5156,59 +5162,35 @@
 
                     <!-- Section Devoirs Parent -->
                     <section id="section-devoirs" class="tab-content">
-                        <div class="widget-card">
-                            <div class="widget-card-header">
-                                <div
-                                    style="
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 10px;
-                                    "
-                                >
-                                    <div class="info-card-icon ic-blue">
-                                        <span class="material-icons"
-                                            >assignment</span
-                                        >
+                        <div class="widget-card" style="border-radius: 24px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-top: 16px;">
+                            <div class="widget-card-header" style="background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-surface)); padding: 24px;">
+                                <div style="display: flex; flex-direction: column; gap: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="width: 48px; height: 48px; border-radius: 16px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                                            <span class="material-icons" style="font-size: 24px;">menu_book</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="widget-card-title" style="margin: 0; font-size: 24px; font-weight: 600; color: var(--md-sys-color-on-surface);">
+                                                Cahier de textes
+                                            </h3>
+                                            <p style="margin: 4px 0 0 0; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
+                                                Consultez les devoirs et leçons de vos enfants
+                                            </p>
+                                        </div>
                                     </div>
-                                    <h3 class="widget-card-title">
-                                        Cahier de textes / Devoirs
-                                    </h3>
                                 </div>
                             </div>
-                            <div class="widget-card-content">
-                                <div
-                                    style="
-                                        margin-bottom: 20px;
-                                        max-width: 400px;
-                                    "
-                                >
-                                    <div class="md-text-field">
-                                        <select
-                                            id="parentDevoirEnfantSelect"
-                                            class="md-text-field-input"
-                                            style="
-                                                padding: 16px 16px 12px;
-                                                background: var(
-                                                    --md-sys-color-surface-container-highest
-                                                );
-                                            "
-                                            onchange="loadParentDevoirs()"
-                                        >
-                                            <option value="">
-                                                Sélectionnez un enfant
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
+                            <div class="widget-card-content" style="padding: 24px; background: var(--md-sys-color-surface);">
+                                <div class="child-selector" id="devoirsChildSelector" style="margin-bottom: 24px"></div>
 
-                                <div class="table-container">
-                                    <table class="md-table">
-                                        <thead>
+                                <div class="table-container" style="border-radius: 16px; overflow: hidden; border: 1px solid var(--md-sys-color-outline-variant);">
+                                    <table class="md-table" style="margin: 0; width: 100%; border-collapse: collapse;">
+                                        <thead style="background: var(--md-sys-color-surface-container-high);">
                                             <tr>
-                                                <th>Date à faire</th>
-                                                <th>Titre</th>
-                                                <th>Description</th>
-                                                <th>Fichiers joints</th>
+                                                <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--md-sys-color-on-surface);">À faire pour le</th>
+                                                <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--md-sys-color-on-surface);">Matière / Titre</th>
+                                                <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--md-sys-color-on-surface);">Travail demandé</th>
+                                                <th style="padding: 16px; text-align: center; font-weight: 600; color: var(--md-sys-color-on-surface);">Pièces jointes</th>
                                             </tr>
                                         </thead>
                                         <tbody id="parentDevoirsList">
@@ -5217,14 +5199,13 @@
                                                     colspan="4"
                                                     style="
                                                         text-align: center;
-                                                        padding: 40px;
-                                                        color: var(
-                                                            --md-sys-color-on-surface-variant
-                                                        );
+                                                        padding: 60px 20px;
+                                                        color: var(--md-sys-color-on-surface-variant);
+                                                        background: var(--md-sys-color-surface);
                                                     "
                                                 >
-                                                    Sélectionnez un enfant pour
-                                                    voir ses devoirs
+                                                    <span class="material-icons" style="font-size: 48px; color: var(--md-sys-color-outline); margin-bottom: 16px; display: block;">school</span>
+                                                    <span style="font-size: 16px;">Veuillez sélectionner un enfant pour voir son cahier de textes.</span>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -5274,7 +5255,7 @@
 
                                 <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 12px;">Informations pour chaque enfant :</h3>
                                 <div id="nouveauxEnfantsList"></div>
-                                
+
                                 <button type="button" class="md-btn md-btn-text" onclick="addNouveauEnfantForm()" style="margin-bottom: 24px;">
                                     <span class="material-icons">add</span> Ajouter un enfant à la demande
                                 </button>
@@ -5601,7 +5582,7 @@
                                     <span class="material-icons">add</span> Nouvelle Demande
                                 </button>
                             </div>
-                            
+
                             <div id="preinscriptionsStatusAlert" style="margin-bottom: 20px; padding: 12px 16px; border-radius: 8px; background: #fff3e0; color: #e65100; display: none; align-items: center; gap: 8px;">
                                 <span class="material-icons">info</span>
                                 <span>Les préinscriptions sont actuellement fermées.</span>
@@ -5815,7 +5796,7 @@
                     if (avatarEl)
                         avatarEl.textContent = (parentData.prenom ||
                             "P")[0].toUpperCase();
-                    
+
                     // Vérifier si les préinscriptions sont ouvertes
                     try {
                         const preinsRes = await apiRequest('/api/preinscriptions/status');
@@ -6533,6 +6514,7 @@
                     "childSelector",
                     "absencesChildSelector",
                     "appreciationsChildSelector",
+                    "devoirsChildSelector"
                 ];
 
                 selectors.forEach((selectorId) => {
@@ -6580,6 +6562,8 @@
                     await loadChildAbsences(enfantId);
                 } else if (selectorId === "appreciationsChildSelector") {
                     await loadChildAppreciations(enfantId);
+                } else if (selectorId === "devoirsChildSelector") {
+                    await loadParentDevoirs(enfantId);
                 }
             }
 
@@ -6926,118 +6910,84 @@
                     </div>
                 `;
 
-                    const detailsContainer =
-                        document.getElementById("fraisDetailsList");
-                    detailsContainer.innerHTML = (response.enfants || [])
-                        .map((enfant) => {
-                            const total = enfant.fraisInscription || 0;
-                            const montantPaye = parseFloat(
-                                enfant.montantPaye || 0,
-                            );
-                            const reste = Math.max(0, total - montantPaye);
-                            const progressPercent =
-                                total > 0
-                                    ? Math.round((montantPaye / total) * 100)
-                                    : 0;
-                            const paiements = enfant.paiements || [];
-                            const isEnfantComplete = progressPercent >= 100;
+                    // Rassembler tous les paiements
+                    let tousLesPaiements = [];
+                    (response.enfants || []).forEach((enfant) => {
+                        if (enfant.paiements && enfant.paiements.length > 0) {
+                            enfant.paiements.forEach((p) => {
+                                // Ajouter le prénom pour l'afficher si besoin, bien qu'on veut unifier
+                                tousLesPaiements.push({ ...p, enfantPrenom: enfant.prenom });
+                            });
+                        }
+                    });
 
-                            let paiementsHtml = "";
-                            if (paiements.length > 0) {
-                                paiementsHtml = `
-                            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--md-sys-color-outline-variant);">
-                                <div style="font-weight:600;margin-bottom:10px;font-size:13px;display:flex;align-items:center;gap:6px;color:var(--md-sys-color-on-surface);">
-                                    <span class="material-icons" style="font-size:16px;color:var(--md-sys-color-primary);">receipt</span>
-                                    Historique des paiements (${paiements.length})
+                    // Trier par date décroissante
+                    tousLesPaiements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    const detailsContainer = document.getElementById("fraisDetailsList");
+
+                    if (tousLesPaiements.length === 0) {
+                        detailsContainer.innerHTML = `
+                            <div class="info-card" style="text-align:center; padding: 40px 20px;">
+                                <div class="info-card-icon ic-blue" style="margin: 0 auto 16px; width: 48px; height: 48px;">
+                                    <span class="material-icons" style="font-size: 24px;">receipt</span>
                                 </div>
-                                ${paiements
-                                    .sort(
-                                        (a, b) =>
-                                            new Date(b.date) - new Date(a.date),
-                                    )
-                                    .map(
-                                        (p) => {
-                                            if (p.methodePaiement === 'ajustement') {
-                                                return `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px dashed var(--md-sys-color-outline); border-radius: 12px; margin-bottom: 6px;">
-                                        <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-surface-variant); display: flex; align-items: center; justify-content: center;">
-                                                <span class="material-icons" style="color: var(--md-sys-color-on-surface-variant); font-size: 16px;">tune</span>
-                                            </div>
-                                            <div style="display: flex; flex-direction: column; gap: 2px;">
-                                                <div style="font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);">Réajustement des frais</div>
-                                                <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);">
-                                                    ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                                <h4 style="justify-content: center; margin-bottom: 8px;">Aucun paiement enregistré</h4>
+                                <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px;">L'historique de vos paiements apparaîtra ici.</p>
+                            </div>
+                        `;
+                    } else {
+                        detailsContainer.innerHTML = `
+                        <div class="info-card" style="margin-bottom:16px;">
+                            <h4>
+                                <div class="info-card-icon ic-blue"><span class="material-icons">history</span></div>
+                                Historique des paiements (${tousLesPaiements.length})
+                            </h4>
+                            <div style="margin-top:16px;">
+                                ${tousLesPaiements.map((p) => {
+                                    if (p.methodePaiement === 'ajustement') {
+                                        return `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--md-sys-color-surface-container-lowest); border: 1px dashed var(--md-sys-color-outline); border-radius: 12px; margin-bottom: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--md-sys-color-surface-variant); display: flex; align-items: center; justify-content: center;">
+                                                    <span class="material-icons" style="color: var(--md-sys-color-on-surface-variant); font-size: 16px;">tune</span>
+                                                </div>
+                                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                                    <div style="font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);">Réajustement des frais</div>
+                                                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant);">
+                                                        ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div style="font-size: 0.9rem; font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface); padding: 4px 12px; border-radius: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
+                                                ${p.note || 'Ajustement manuel'}
+                                            </div>
                                         </div>
-                                        <div style="font-size: 0.9rem; font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface); padding: 4px 12px; border-radius: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
-                                            ${p.note || 'Ajustement manuel'}
-                                        </div>
-                                    </div>
-                                                `;
-                                            }
+                                        `;
+                                    }
 
-                                            return `
-                                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--md-sys-color-surface-container);border-radius:10px;margin-bottom:6px;font-size:13px;border:1px solid var(--md-sys-color-outline-variant);">
-                                        <div style="display:flex;align-items:center;gap:8px;">
-                                            <div class="info-card-icon ic-green" style="width:28px;height:28px;"><span class="material-icons" style="font-size:14px;">check</span></div>
+                                    return `
+                                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--md-sys-color-surface-container);border-radius:12px;margin-bottom:8px;font-size:13px;border:1px solid var(--md-sys-color-outline-variant);">
+                                        <div style="display:flex;align-items:center;gap:12px;">
+                                            <div class="info-card-icon ic-green" style="width:32px;height:32px;"><span class="material-icons" style="font-size:16px;">check</span></div>
                                             <div>
-                                                <strong>${formatCurrency(p.montant)}</strong>
-                                                <div style="font-size:11px;color:var(--md-sys-color-on-surface-variant);">
+                                                <strong style="font-size: 1rem;">${formatCurrency(p.montant)}</strong>
+                                                <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;">
                                                     ${new Date(p.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
-                                                    ${p.note ? ` — ${p.note}` : ""}
+                                                    ${p.note ? ` — ${p.note}` : ""} ${p.enfantPrenom ? ` (${p.enfantPrenom})` : ""}
                                                 </div>
                                             </div>
                                         </div>
-                                        <span style="padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);">
+                                        <span style="padding:4px 12px;border-radius:50px;font-size:12px;font-weight:600;background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-on-secondary-container);">
                                             ${getMethodeLabel(p.methodePaiement)}
                                         </span>
                                     </div>
-                                `}
-                                    )
-                                    .join("")}
+                                    `;
+                                }).join("")}
                             </div>
-                        `;
-                            }
-
-                            return `
-                        <div class="info-card" style="margin-bottom:16px;">
-                            <h4>
-                                <div class="info-card-icon ic-blue"><span class="material-icons">person</span></div>
-                                ${enfant.prenom} ${enfant.nom}
-                                <span style="margin-left:auto;">
-                                    <span class="status-badge ${enfant.fraisValide ? "status-present" : "status-retard"}">
-                                        <span class="material-icons" style="font-size:12px;">${enfant.fraisValide ? "check_circle" : "pending"}</span>
-                                        ${enfant.fraisValide ? "Validés" : "En cours"}
-                                    </span>
-                                </span>
-                            </h4>
-                            <div class="p-stat-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
-                                <div class="p-stat-card" style="padding:12px;">
-                                    <div class="p-stat-card-label">Total</div>
-                                    <div class="p-stat-card-value" style="font-size:1rem;">${formatCurrency(total)}</div>
-                                </div>
-                                <div class="p-stat-card" style="padding:12px;">
-                                    <div class="p-stat-card-label">Payé</div>
-                                    <div class="p-stat-card-value" style="font-size:1rem;color:var(--md-sys-color-primary);">${formatCurrency(montantPaye)}</div>
-                                </div>
-                                <div class="p-stat-card" style="padding:12px;">
-                                    <div class="p-stat-card-label">Reste</div>
-                                    <div class="p-stat-card-value" style="font-size:1rem;color:${reste > 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-success)"};">${formatCurrency(reste)}</div>
-                                </div>
-                            </div>
-                            <div class="frais-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-bar-fill ${isEnfantComplete ? "complete" : ""}" style="width: ${Math.min(progressPercent, 100)}%"></div>
-                                </div>
-                                <div style="text-align:center;font-size:12px;font-weight:600;color:var(--md-sys-color-primary);margin-top:6px;">${progressPercent}%</div>
-                            </div>
-                            ${paiementsHtml}
                         </div>
-                    `;
-                        })
-                        .join("");
+                        `;
+                    }
                 } catch (error) {
                     console.error("Erreur chargement frais:", error);
                 }
@@ -7179,7 +7129,7 @@
                                       roleLabel = "Admin";
                                       roleBg = "#fee2e2";
                                       roleText = "#b91c1c";
-                                  } else if (authorRole === "directeur") {
+                                  } else if (["directeur", "directeur_adjoint"].includes(authorRole)) {
                                       roleLabel = "Directeur";
                                       roleBg = "#f3e8ff";
                                       roleText = "#1d4ed8";
@@ -7520,7 +7470,7 @@
                     roleLabel = "Admin";
                     roleBg = "#fee2e2";
                     roleText = "#b91c1c";
-                } else if (authorRole === "directeur") {
+                } else if (["directeur", "directeur_adjoint"].includes(authorRole)) {
                     roleLabel = "Directeur";
                     roleBg = "#f3e8ff";
                     roleText = "#1d4ed8";
@@ -7794,6 +7744,14 @@
                             selectChild(
                                 enfantsData[0].id,
                                 "appreciationsChildSelector",
+                            );
+                        } else if (
+                            sectionId === "devoirs" &&
+                            enfantsData.length > 0
+                        ) {
+                            selectChild(
+                                enfantsData[0].id,
+                                "devoirsChildSelector",
                             );
                         }
 
@@ -8416,6 +8374,7 @@
                     case "secretaire":
                         return "Secrétariat";
                     case "directeur":
+                    case "directeur_adjoint":
                         return "Directeur";
                     case "admin":
                         return "Administrateur";
@@ -9116,7 +9075,7 @@
                     modal.style.display = 'flex';
                     const list = document.getElementById('enfantsExistantsList');
                     list.innerHTML = '';
-                    
+
                     enfantsData.forEach(enfant => {
                         list.innerHTML += `
                             <label style="display:flex; align-items:center; gap:8px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 8px;">
@@ -9223,7 +9182,7 @@
                         method: 'POST',
                         body: JSON.stringify({ type, enfantsInfo, parent2Info })
                     });
-                    
+
                     showToast(res.message || 'Demande envoyée !', 'success');
                     closePreinscriptionModal();
                     loadParentPreinscriptions();
@@ -9239,10 +9198,10 @@
                     // Check status first
                     const statusRes = await apiRequest('/api/preinscriptions/status');
                     preinscriptionsState = statusRes;
-                    
+
                     const btn = document.getElementById('btnNouvellePreinscription');
                     const alertMsg = document.getElementById('preinscriptionsStatusAlert');
-                    
+
                     if (statusRes.ouvert) {
                         if(btn) btn.style.display = 'flex';
                         if(alertMsg) alertMsg.style.display = 'none';
@@ -9253,7 +9212,7 @@
 
                     const data = await apiRequest('/api/preinscriptions/mes-demandes');
                     const tbody = document.getElementById('preinscriptionsTableBody');
-                    
+
                     if (data.demandes && data.demandes.length > 0) {
                         tbody.innerHTML = data.demandes.map(d => {
                             const dateStr = new Date(d.dateSoumission).toLocaleDateString('fr-FR');
@@ -9261,10 +9220,10 @@
                             if (d.statut === 'en_attente') statutHtml = '<span style="background:#fff3cd;color:#ff8f00;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;">En attente</span>';
                             else if (d.statut === 'confirmee') statutHtml = '<span style="background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;">Confirmée</span>';
                             else statutHtml = '<span style="background:#ffebee;color:#c62828;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:600;">Rejetée</span>';
-                            
+
                             const typeStr = d.type === 'nouveau' ? 'Nouveau' : (d.type === 'reinscription' ? 'Réinscription' : 'Mixte');
                             const enfantsCount = Array.isArray(d.enfantsInfo) ? d.enfantsInfo.length : 0;
-                            
+
                             return `
                                 <tr>
                                     <td>${dateStr}</td>
@@ -9278,70 +9237,64 @@
                     } else {
                         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color:#777;">Aucune demande enregistrée.</td></tr>`;
                     }
-                    
+
                 } catch(err) {
                     console.error('Erreur chargement préinscriptions:', err);
                 }
             }
 
             // --- SECTION DEVOIRS ---
+            // L'initialisation se fait via renderChildTabs() et selectChild() maintenant
             function initDevoirsSelect() {
-                const select = document.getElementById('parentDevoirEnfantSelect');
-                if (!select || !enfantsData) return;
-                
-                select.innerHTML = '<option value="">Sélectionnez un enfant</option>';
-                enfantsData.forEach(enfant => {
-                    if (enfant.classe) {
-                        const option = document.createElement('option');
-                        option.value = enfant.id;
-                        option.dataset.classe = enfant.classe; // id de la classe
-                        option.textContent = enfant.prenom + ' (Classe: ' + (enfant.classeNom || enfant.classe) + ')';
-                        select.appendChild(option);
-                    }
-                });
+                // Fonction gardée vide pour compatibilité si appelée ailleurs
             }
 
-            async function loadParentDevoirs() {
-                const select = document.getElementById('parentDevoirEnfantSelect');
-                const enfantId = select.value;
+            async function loadParentDevoirs(enfantId) {
                 const tbody = document.getElementById('parentDevoirsList');
-                
+
                 if (!enfantId) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Veuillez sélectionner un enfant pour voir ses devoirs.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 60px 20px; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface);"><span class="material-icons" style="font-size: 48px; color: var(--md-sys-color-outline); margin-bottom: 16px; display: block;">school</span><span style="font-size: 16px;">Veuillez sélectionner un enfant pour voir son cahier de textes.</span></td></tr>';
                     return;
                 }
 
-                const selectedOption = select.options[select.selectedIndex];
-                const classeId = selectedOption.dataset.classe;
+                const enfant = enfantsData.find((e) => e.id === enfantId);
+                const classeId = enfant ? enfant.classe : null;
 
                 if (!classeId) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Cet enfant n\\'est pas assigné à une classe.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 60px 20px; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface);"><span class="material-icons" style="font-size: 48px; color: var(--md-sys-color-outline); margin-bottom: 16px; display: block;">info</span><span style="font-size: 16px;">Cet enfant n\'est pas encore assigné à une classe.</span></td></tr>';
                     return;
                 }
 
                 try {
                     const devoirs = await apiRequest(`/api/devoirs/classe/${classeId}`);
                     if (!devoirs || devoirs.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--md-sys-color-on-surface-variant);">Aucun devoir à faire pour cette classe.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 60px 20px; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface);"><span class="material-icons" style="font-size: 48px; color: var(--md-sys-color-primary); margin-bottom: 16px; display: block;">celebration</span><span style="font-size: 16px; font-weight: 500;">Génial ! Aucun devoir à faire pour le moment.</span></td></tr>';
                         return;
                     }
 
                     tbody.innerHTML = devoirs.map(d => {
-                        const dateFormatee = new Date(d.datePour).toLocaleDateString('fr-FR');
-                        let fichiersHtml = '-';
+                        const dateObj = new Date(d.datePour);
+                        const dateFormatee = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                        let fichiersHtml = '<span style="color: var(--md-sys-color-on-surface-variant); font-size: 13px; font-style: italic;">Aucun fichier</span>';
                         if (d.fichiers) {
                             try {
                                 const files = JSON.parse(d.fichiers);
-                                fichiersHtml = files.map(f => `<a href="${f.url}" target="_blank" class="btn btn-icon" title="Télécharger" download><span class="material-icons">attach_file</span></a>`).join(' ');
+                                if (files.length > 0) {
+                                    fichiersHtml = files.map(f => `<a href="${f.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='var(--md-sys-color-primary-container)'" onmouseout="this.style.background='var(--md-sys-color-secondary-container)'" title="Télécharger la pièce jointe" download><span class="material-icons" style="font-size: 16px;">attach_file</span> Fichier joint</a>`).join(' ');
+                                }
                             } catch(e) {}
                         }
 
                         return `
-                            <tr>
-                                <td>${dateFormatee}</td>
-                                <td><strong>${escapeHtml(d.titre)}</strong></td>
-                                <td>${escapeHtml(d.description || '-')}</td>
-                                <td>${fichiersHtml}</td>
+                            <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant); transition: background 0.2s; cursor: default;" onmouseover="this.style.background='var(--md-sys-color-surface-container-lowest)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 16px; font-weight: 500; color: var(--md-sys-color-primary); text-transform: capitalize; vertical-align: top; width: 180px;">${dateFormatee}</td>
+                                <td style="padding: 16px; font-weight: 600; color: var(--md-sys-color-on-surface); font-size: 15px; vertical-align: top; width: 250px;">${escapeHtml(d.titre)}</td>
+                                <td style="padding: 16px; color: var(--md-sys-color-on-surface-variant); line-height: 1.5; vertical-align: top;">${escapeHtml(d.description || 'Aucune description fournie.')}</td>
+                                <td style="padding: 16px; text-align: center; vertical-align: top; width: 150px;">
+                                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; flex-direction: column;">
+                                        ${fichiersHtml}
+                                    </div>
+                                </td>
                             </tr>
                         `;
                     }).join('');

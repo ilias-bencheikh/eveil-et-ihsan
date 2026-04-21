@@ -13,6 +13,7 @@ const maintenanceRoutes = require('./maintenance.routes');
 const emploisDuTempsRoutes = require('./emploisDuTemps.routes');
 const preinscriptionsRoutes = require('./preinscriptions.routes');
 const devoirsRoutes = require('./devoirs.routes');
+const pushRoutes = require('./push.routes');
 
 module.exports = {
     authRoutes,
@@ -30,4 +31,5 @@ module.exports = {
     emploisDuTempsRoutes,
     preinscriptionsRoutes,
     devoirsRoutes,
+    pushRoutes,
 };

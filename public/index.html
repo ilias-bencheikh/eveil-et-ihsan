@@ -2851,6 +2851,43 @@
 
                     <div
                         class="sidebar-nav-section"
+                        id="dossiersSection"
+                        style="display: none"
+                    >
+                        <span class="sidebar-nav-section-title"
+                            >Gestion des dossiers</span
+                        >
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-tab="inscriptions"
+                        >
+                            <span class="material-icons">assignment</span>
+                            <span>Inscriptions</span>
+                        </a>
+                         <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-tab="frais-admin"
+                        >
+                            <span class="material-icons">payments</span>
+                            <span>Gestion des frais</span>
+                        </a>
+
+                        <a
+                            href="#"
+                            class="sidebar-nav-item"
+                            data-tab="preinscriptions"
+                        >
+                            <span class="material-icons">how_to_reg</span>
+                            <span>Préinscriptions</span>
+                        </a>
+
+
+                    </div>
+
+                    <div
+                        class="sidebar-nav-section"
                         id="adminSection"
                         style="display: none"
                     >
@@ -2860,30 +2897,6 @@
                         <a href="#" class="sidebar-nav-item" data-tab="bureau">
                             <span class="material-icons">business</span>
                             <span>Bureau</span>
-                        </a>
-                        <a
-                            href="#"
-                            class="sidebar-nav-item"
-                            data-tab="inscriptions"
-                        >
-                            <span class="material-icons">assignment</span>
-                            <span>Inscriptions</span>
-                        </a>
-                        <a
-                            href="#"
-                            class="sidebar-nav-item"
-                            data-tab="preinscriptions"
-                        >
-                            <span class="material-icons">how_to_reg</span>
-                            <span>Préinscriptions</span>
-                        </a>
-                        <a
-                            href="#"
-                            class="sidebar-nav-item"
-                            data-tab="frais-admin"
-                        >
-                            <span class="material-icons">payments</span>
-                            <span>Gestion des frais</span>
                         </a>
                         <a
                             href="#"
@@ -7413,9 +7426,10 @@
                 document.getElementById("userRole").innerHTML =
                     `<span class="sidebar-user-badge">${getRoleName(user.role)}</span>`;
 
-                if (["admin", "directeur", "secretariat"].includes(user.role)) {
-                    document.getElementById("adminSection").style.display =
-                        "block";
+                if (["admin", "directeur", "directeur_adjoint", "secretariat"].includes(user.role)) {
+                    document.getElementById("adminSection").style.display = "block";
+                    const dossiersSection = document.getElementById("dossiersSection");
+                    if (dossiersSection) dossiersSection.style.display = "block";
                 }
                 // ne montrer l'onglet Comptes que pour les administrateurs
                 if (user.role !== "admin") {
@@ -7477,6 +7491,7 @@
                 const roles = {
                     admin: "Administrateur",
                     directeur: "Directeur",
+                    directeur_adjoint: "Directeur Adjoint",
                     secretariat: "Secrétariat",
                     professeur: "Professeur",
                     eleve: "Élève",
@@ -8175,7 +8190,7 @@
                     roleLabel = "Admin";
                     roleBg = "#fee2e2";
                     roleText = "#b91c1c";
-                } else if (authorRole === "directeur") {
+                } else if (["directeur", "directeur_adjoint"].includes(authorRole)) {
                     roleLabel = "Directeur";
                     roleBg = "#f3e8ff";
                     roleText = "#1d4ed8";
@@ -8358,6 +8373,7 @@
                 const userRole = getCurrentUserRole();
                 const bureauRoles = [
                     "directeur",
+                    "directeur_adjoint",
                     "secretariat",
                     "admin",
                     "professeur",
@@ -14217,6 +14233,7 @@
             function afficherole(role) {
                 switch (role) {
                     case "directeur":
+                    case "directeur_adjoint":
                         return "Directeur";
                     case "professeur":
                         return "Enseignant";
@@ -14865,6 +14882,10 @@
                                 <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);">stars</span>
                                 <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Directeur</span>
                             </button>
+                            <button type="button" class="role-chip" data-role="directeur_adjoint" onclick="selectNewStaffRole('directeur_adjoint')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container);cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);">stars</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Directeur Adjoint</span>
+                            </button>
                             <button type="button" class="role-chip" data-role="secretariat" onclick="selectNewStaffRole('secretariat')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--md-sys-color-outline-variant);border-radius:12px;background:var(--md-sys-color-surface-container);cursor:pointer;transition:all .2s;text-align:left;width:100%;">
                                 <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-tertiary);">assignment_ind</span>
                                 <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Secrétariat</span>
@@ -14961,6 +14982,11 @@
                     icon: "var(--md-sys-color-error)",
                 },
                 directeur: {
+                    border: "var(--md-sys-color-primary)",
+                    bg: "var(--md-sys-color-primary-container)",
+                    icon: "var(--md-sys-color-primary)",
+                },
+                directeur_adjoint: {
                     border: "var(--md-sys-color-primary)",
                     bg: "var(--md-sys-color-primary-container)",
                     icon: "var(--md-sys-color-primary)",
@@ -15070,6 +15096,10 @@
                                 bg: "var(--md-sys-color-primary-container)",
                                 fg: "var(--md-sys-color-on-primary-container)",
                             },
+                            directeur_adjoint: {
+                                bg: "var(--md-sys-color-primary-container)",
+                                fg: "var(--md-sys-color-on-primary-container)",
+                            },
                             professeur: {
                                 bg: "var(--md-sys-color-secondary-container)",
                                 fg: "var(--md-sys-color-on-secondary-container)",
@@ -15113,7 +15143,7 @@
                 const avatarBg =
                     staff.role === "admin"
                         ? "var(--md-sys-color-error-container)"
-                        : staff.role === "directeur"
+                        : staff.role === "directeur" || staff.role === "directeur_adjoint"
                           ? "var(--md-sys-color-primary-container)"
                           : staff.role === "professeur"
                             ? "var(--md-sys-color-secondary-container)"
@@ -15121,7 +15151,7 @@
                 const avatarColor =
                     staff.role === "admin"
                         ? "var(--md-sys-color-on-error-container)"
-                        : staff.role === "directeur"
+                        : staff.role === "directeur" || staff.role === "directeur_adjoint"
                           ? "var(--md-sys-color-on-primary-container)"
                           : staff.role === "professeur"
                             ? "var(--md-sys-color-on-secondary-container)"
@@ -15200,6 +15230,11 @@
                                 <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);">stars</span>
                                 <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Directeur</span>
                                 ${staff.role === "directeur" ? '<span class="material-icons" style="font-size:16px;margin-left:auto;color:var(--md-sys-color-primary);">check_circle</span>' : ""}
+                            </button>
+                            <button type="button" class="role-chip" data-role="directeur_adjoint" onclick="selectEditStaffRole('directeur_adjoint')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid ${staff.role === "directeur_adjoint" ? "var(--md-sys-color-primary)" : "var(--md-sys-color-outline-variant)"};border-radius:12px;background:${staff.role === "directeur_adjoint" ? "var(--md-sys-color-primary-container)" : "var(--md-sys-color-surface-container)"};cursor:pointer;transition:all .2s;text-align:left;width:100%;">
+                                <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-primary);">stars</span>
+                                <span style="font-size:13px;font-weight:500;color:var(--md-sys-color-on-surface);">Directeur Adjoint</span>
+                                ${staff.role === "directeur_adjoint" ? '<span class="material-icons" style="font-size:16px;margin-left:auto;color:var(--md-sys-color-primary);">check_circle</span>' : ""}
                             </button>
                             <button type="button" class="role-chip" data-role="secretariat" onclick="selectEditStaffRole('secretariat')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid ${staff.role === "secretariat" ? "var(--md-sys-color-tertiary)" : "var(--md-sys-color-outline-variant)"};border-radius:12px;background:${staff.role === "secretariat" ? "var(--md-sys-color-tertiary-container)" : "var(--md-sys-color-surface-container)"};cursor:pointer;transition:all .2s;text-align:left;width:100%;">
                                 <span class="material-icons" style="font-size:20px;color:var(--md-sys-color-tertiary);">assignment_ind</span>
@@ -19304,6 +19339,7 @@
                     [
                         "admin",
                         "directeur",
+                        "directeur_adjoint",
                         "secretariat",
                         "professeur",
                     ].includes(user.role)
@@ -19358,7 +19394,7 @@
             }
 
             function renderActualites() {
-                const isAdmin = ["admin", "directeur", "secretariat"].includes(
+                const isAdmin = ["admin", "directeur", "directeur_adjoint", "secretariat"].includes(
                     user.role,
                 );
 
@@ -19457,7 +19493,7 @@
                                   roleLabel = "Admin";
                                   roleBg = "#fee2e2";
                                   roleText = "#b91c1c";
-                              } else if (authorRole === "directeur") {
+                              } else if (["directeur", "directeur_adjoint"].includes(authorRole)) {
                                   roleLabel = "Directeur";
                                   roleBg = "#f3e8ff";
                                   roleText = "#1d4ed8";
@@ -22101,7 +22137,7 @@
                 renderDevoirsClassesGrid();
 
                 const userRole = localStorage.getItem('userRole');
-                if (['admin', 'professeur', 'secretariat', 'directeur'].includes(userRole)) {
+                if (['admin', 'professeur', 'secretariat', 'directeur', 'directeur_adjoint'].includes(userRole)) {
                     document.getElementById('btnAjouterDevoir').style.display = 'none'; // Will show when a class is selected
                 }
             } catch (error) {
@@ -22146,7 +22182,7 @@
             document.getElementById("devoirsContentArea").style.display = "block";
 
             const userRole = localStorage.getItem('userRole') || localStorage.getItem('role') || 'professeur';
-            if (['admin', 'professeur', 'secretariat', 'directeur'].includes(userRole)) {
+            if (['admin', 'professeur', 'secretariat', 'directeur', 'directeur_adjoint'].includes(userRole)) {
                 document.getElementById('btnAjouterDevoir').style.display = 'block';
             }
 
@@ -22175,7 +22211,7 @@
                 }
 
                 const userRole = localStorage.getItem('userRole');
-                const canDelete = ['admin', 'professeur', 'secretariat', 'directeur'].includes(userRole);
+                const canDelete = ['admin', 'professeur', 'secretariat', 'directeur', 'directeur_adjoint'].includes(userRole);
 
                 tbody.innerHTML = devoirs.map(d => {
                     const dateFormatee = new Date(d.datePour).toLocaleDateString('fr-FR');
@@ -22299,12 +22335,61 @@
             }
         });
 
+        // Push Notifications Setup (VAPID key)
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
         // Service Worker Registration for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                        console.log('ServiceWorker registration successful:', registration.scope);
+
+                        // S'assurer qu'on a le token de session pour l'API
+                        const token = localStorage.getItem('token');
+                        if (!token || !('PushManager' in window)) return;
+
+                        // Demander la permission
+                        Notification.requestPermission().then(async permission => {
+                            if (permission === 'granted') {
+                                try {
+                                    // 1. Récupérer la clé publique depuis le serveur
+                                    const keyRes = await fetch('/api/push/vapid-public-key', {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    if (!keyRes.ok) return;
+                                    const { publicKey } = await keyRes.json();
+
+                                    // 2. S'abonner au PushManager du navigateur
+                                    const subscription = await registration.pushManager.subscribe({
+                                        userVisibleOnly: true,
+                                        applicationServerKey: urlBase64ToUint8Array(publicKey)
+                                    });
+
+                                    // 3. Envoyer l'abonnement à notre serveur (SQLite)
+                                    await fetch('/api/push/subscribe', {
+                                        method: 'POST',
+                                        body: JSON.stringify(subscription),
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        }
+                                    });
+                                    console.log('Abonnement Push enregistré avec succès !');
+                                } catch (err) {
+                                    console.error('Erreur lors de l\'abonnement Push:', err);
+                                }
+                            }
+                        });
                     }, err => {
                         console.log('ServiceWorker registration failed: ', err);
                     });

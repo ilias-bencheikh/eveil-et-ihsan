@@ -29,11 +29,11 @@ router.post('/', (req, res) => {
     
     console.log('Création staff - Données reçues:', { nom, prenom, email, role, matiere, userRole });
     
-    if (userRole === 'directeur' && role === 'directeur') {
+    if (['directeur', 'directeur_adjoint'].includes(userRole) && role === 'directeur') {
         return res.status(403).json({ error: 'Le directeur ne peut pas créer un autre directeur' });
     }
     
-    if (!['admin', 'directeur'].includes(userRole)) {
+    if (!['admin', 'directeur', 'directeur_adjoint'].includes(userRole)) {
         return res.status(403).json({ error: 'Permission refusée' });
     }
     
@@ -116,7 +116,7 @@ router.put('/:id', requireAdmin, (req, res) => {
     const { nom, prenom, email, role, matiere } = req.body;
     const userRole = req.headers['x-user-role'];
     
-    if (userRole === 'directeur' && role === 'directeur') {
+    if (['directeur', 'directeur_adjoint'].includes(userRole) && role === 'directeur') {
         return res.status(403).json({ error: 'Le directeur ne peut pas modifier un directeur' });
     }
 

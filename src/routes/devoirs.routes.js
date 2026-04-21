@@ -64,14 +64,14 @@ router.get('/classe/:classeId', (req, res) => {
     // Nettoyer d'abord
     clearExpiredDevoirs();
     
-    const classeId = req.params.classeId;
+    const classeIdOrName = req.params.classeId;
     const today = new Date().toISOString().split('T')[0];
     
     db.all(`SELECT d.*, c.nom as classeNom 
             FROM devoirs d 
             LEFT JOIN classes c ON d.classeId = c.id 
-            WHERE d.classeId = ? AND d.datePour >= ? 
-            ORDER BY d.datePour ASC`, [classeId, today], (err, rows) => {
+            WHERE (d.classeId = ? OR c.nom = ?) AND d.datePour >= ? 
+            ORDER BY d.datePour ASC`, [classeIdOrName, classeIdOrName, today], (err, rows) => {
         if (err) {
             console.error("Erreur SQL devoirs:", err);
             return res.status(500).json({ error: "Erreur base de données" });
@@ -86,7 +86,7 @@ router.post('/', upload.array('fichiers', 5), (req, res) => {
     const professeurId = req.headers['x-user-id']; // Supposant qu'il est défini par secureHeaders
     const userRole = req.headers['x-user-role'];
     
-    if (userRole !== 'admin' && userRole !== 'professeur' && userRole !== 'secretariat' && userRole !== 'directeur') {
+    if (userRole !== 'admin' && userRole !== 'professeur' && userRole !== 'secretariat' && (!['directeur', 'directeur_adjoint'].includes(userRole))) {
          // Cleanup fichiers si echec
          if (req.files) {
              req.files.forEach(f => fs.unlinkSync(f.path));
@@ -128,7 +128,7 @@ router.post('/', upload.array('fichiers', 5), (req, res) => {
 // DELETE /api/devoirs/:id
 router.delete('/:id', (req, res) => {
     const userRole = req.headers['x-user-role'];
-    if (userRole !== 'admin' && userRole !== 'professeur' && userRole !== 'secretariat' && userRole !== 'directeur') {
+    if (userRole !== 'admin' && userRole !== 'professeur' && userRole !== 'secretariat' && (!['directeur', 'directeur_adjoint'].includes(userRole))) {
         return res.status(403).json({ error: "Non autorisé" });
     }
     

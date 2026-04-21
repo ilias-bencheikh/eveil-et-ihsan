@@ -1,7 +1,7 @@
 {
-  "name": "Badr Eveil Ihsan",
-  "short_name": "Badr",
-  "description": "Portail éducatif Badr Eveil Ihsan",
+  "name": "Eveil & Ihsan",
+  "short_name": "Eveil & Ihsan",
+  "description": "Portail éducatif Eveil & Ihsan",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -595,7 +595,7 @@ router.get('/eleve/:eleveId', requireAuth, async (req, res) => {
 // Recherche de familles par nom/prénom de parent ou d'enfant
 router.get('/search-familles', requireAuth, async (req, res) => {
     const userRole = req.userRole;
-    if (!['admin', 'secretaire', 'secretariat', 'directeur'].includes(userRole)) {
+    if (!['admin', 'secretaire', 'secretariat', 'directeur', 'directeur_adjoint'].includes(userRole)) {
         return res.status(403).json({ error: 'Accès non autorisé' });
     }
 
@@ -636,7 +636,7 @@ router.get('/search-familles', requireAuth, async (req, res) => {
 router.get('/', requireAuth, async (req, res) => {
     const userRole = req.userRole;
     
-    if (!['admin', 'secretaire', 'secretariat', 'directeur'].includes(userRole)) {
+    if (!['admin', 'secretaire', 'secretariat', 'directeur', 'directeur_adjoint'].includes(userRole)) {
         return res.status(403).json({ error: 'Accès non autorisé' });
     }
     

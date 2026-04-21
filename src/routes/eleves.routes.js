@@ -477,7 +477,7 @@ router.put('/:id/frais-total', checkPermission('update'), async (req, res) => {
         
         let staffNom = 'Staff';
         try {
-            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+            if (['admin', 'directeur', 'directeur_adjoint', 'secretariat', 'secretaire'].includes(req.userRole)) {
                 const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
                 if (s) staffNom = s.prenom + ' ' + s.nom;
             } else if (req.userRole === 'professeur') {
@@ -537,7 +537,7 @@ router.post('/:id/paiement', checkPermission('update'), async (req, res) => {
 
         let staffNom = 'Staff';
         try {
-            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+            if (['admin', 'directeur', 'directeur_adjoint', 'secretariat', 'secretaire'].includes(req.userRole)) {
                 const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
                 if (s) staffNom = s.prenom + ' ' + s.nom;
             } else if (req.userRole === 'professeur') {
@@ -619,7 +619,7 @@ router.post('/paiement-famille', checkPermission('update'), async (req, res) => 
 
         let staffNom = 'Staff';
         try {
-            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+            if (['admin', 'directeur', 'directeur_adjoint', 'secretariat', 'secretaire'].includes(req.userRole)) {
                 const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
                 if (s) staffNom = s.prenom + ' ' + s.nom;
             } else if (req.userRole === 'professeur') {
@@ -910,7 +910,7 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
 router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
     const { parentId } = req.params;
 
-    if (!['admin', 'secretaire', 'secretariat', 'directeur'].includes(req.userRole)) {
+    if (!['admin', 'secretaire', 'secretariat', 'directeur', 'directeur_adjoint'].includes(req.userRole)) {
         return res.status(403).json({ message: 'Accès non autorisé' });
     }
 
@@ -1004,7 +1004,7 @@ router.put('/frais/famille/:parentId/frais-total', checkPermission('update'), as
         
         let staffNom = 'Staff';
         try {
-            if (['admin', 'directeur', 'secretariat', 'secretaire'].includes(req.userRole)) {
+            if (['admin', 'directeur', 'directeur_adjoint', 'secretariat', 'secretaire'].includes(req.userRole)) {
                 const s = await dbGet(db, 'SELECT nom, prenom FROM staff WHERE id = ?', [req.userId]);
                 if (s) staffNom = s.prenom + ' ' + s.nom;
             } else if (req.userRole === 'professeur') {

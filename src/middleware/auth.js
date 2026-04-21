@@ -69,7 +69,7 @@ async function requireAuth(req, res, next) {
 function requireAdmin(req, res, next) {
     const userRole = req.userRole;
     
-    if (!userRole || !['admin', 'directeur'].includes(userRole)) {
+    if (!userRole || !['admin', 'directeur', 'directeur_adjoint'].includes(userRole)) {
         return res.status(403).json({ error: 'Permission refusée' });
     }
     
@@ -87,7 +87,7 @@ async function checkMaintenance(req, res, next) {
 
         // Vérifier si l'utilisateur est staff (admin, directeur, secretariat, secretaire)
         const userRole = req.userRole || req.headers['x-user-role'];
-        const staffRoles = ['admin', 'directeur', 'secretariat', 'secretaire'];
+        const staffRoles = ['admin', 'directeur', 'directeur_adjoint', 'secretariat', 'secretaire'];
 
         if (staffRoles.includes(userRole)) {
             return next(); // Les staff passent toujours

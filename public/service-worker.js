@@ -1,7 +1,6 @@
-const CACHE_NAME = 'badr-eveil-ihsan-v3';
+const CACHE_NAME = 'eveil-ihsan-v4';
 const OFFLINE_URL = '/offline.html';
 
-// Ressources à mettre en cache uniquement pour la page hors ligne
 const urlsToCache = [
   OFFLINE_URL,
   '/css/variables.css',
@@ -14,23 +13,17 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Ouverture du cache v3 pour mode hors ligne');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
   );
-  // Forcer le nouveau service worker à s'activer immédiatement
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-  // Supprimer les anciens caches (qui stockaient toute l'app hors ligne)
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Suppression de l\'ancien cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -41,29 +34,76 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Ignorer les requêtes non-GET
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
-  // Si la requête demande une page HTML (mode 'navigate')
   if (event.request.mode === 'navigate' || event.request.headers.get('accept').includes('text/html')) {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          // L'utilisateur est HORS LIGNE, on affiche la page offline.html
-          return caches.match(OFFLINE_URL);
-        })
+      fetch(event.request).catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
 
-  // Pour toutes les autres ressources statiques (CSS, JS, Images, Polices)
-  // Stratégie : Réseau en priorité, sinon on cherche dans notre cache pour la page hors ligne
   event.respondWith(
-    fetch(event.request)
-      .catch(() => {
-        return caches.match(event.request);
-      })
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
+});
+
+// Écoute des événements PUSH (notifications reçues en arrière-plan)
+self.addEventListener('push', event => {
+  let data = { title: "Nouveau message", body: "Vous avez reçu un nouveau message sur Badr Eveil Ihsan", url: "/" };
+  
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: '/uploads/logo/logo.png',
+    badge: '/uploads/logo/logo.png', // Petite icône monochrome pour la barre Android
+    vibrate: [100, 50, 100], // Vibration (téléphones)
+    data: {
+      url: data.url || '/'
+    },
+    actions: [
+      { action: 'open_app', title: 'Ouvrir l\'application' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Action lorsque l'utilisateur clique sur la notification
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+
+  // L'URL à ouvrir (récupérée des données de la notification)
+  const urlToOpen = new URL(event.notification.data.url, self.location.origin).href;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // Chercher si un onglet est déjà ouvert avec cette URL
+      let matchingClient = null;
+      for (let i = 0; i < windowClients.length; i++) {
+        const windowClient = windowClients[i];
+        if (windowClient.url === urlToOpen) {
+          matchingClient = windowClient;
+          break;
+        }
+      }
+
+      // Si ouvert, on le met au premier plan
+      if (matchingClient) {
+        return matchingClient.focus();
+      } else {
+        // Sinon, on ouvre un nouvel onglet
+        return clients.openWindow(urlToOpen);
+      }
+    })
   );
 });

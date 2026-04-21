@@ -545,6 +545,7 @@ router.put('/change-password', requireAuth, async (req, res) => {
             'professeur': 'professeurs',
             'admin': 'staff',
             'directeur': 'staff',
+            'directeur_adjoint': 'staff',
             'secretaire': 'staff',
             'secretariat': 'staff'
         };
@@ -601,6 +602,7 @@ router.get('/notifications/settings', requireAuth, async (req, res) => {
             'professeur': 'professeurs',
             'admin': 'staff',
             'directeur': 'staff',
+            'directeur_adjoint': 'staff',
             'secretaire': 'staff',
             'secretariat': 'staff'
         };
@@ -645,6 +647,7 @@ router.put('/notifications/settings', requireAuth, async (req, res) => {
             'professeur': 'professeurs',
             'admin': 'staff',
             'directeur': 'staff',
+            'directeur_adjoint': 'staff',
             'secretaire': 'staff',
             'secretariat': 'staff'
         };

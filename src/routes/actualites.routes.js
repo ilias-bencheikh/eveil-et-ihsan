@@ -95,7 +95,7 @@ router.get('/', (req, res) => {
                 const cibles = JSON.parse(actu.cible);
                 
                 // Admin/directeur/secrétariat voient tout
-                if (['admin', 'directeur', 'secretariat'].includes(userRole)) return true;
+                if (['admin', 'directeur', 'directeur_adjoint', 'secretariat'].includes(userRole)) return true;
                 
                 // Si cible inclut "professeurs" et user est prof
                 if (cibles.includes('professeurs') && userRole === 'professeur') return true;

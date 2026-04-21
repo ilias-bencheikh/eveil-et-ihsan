@@ -4700,7 +4700,7 @@
             }
 
             // Redirection si pas un réle autorisé (élève, secrétaire, directeur, admin)
-            const allowedRoles = ["eleve", "secretaire", "directeur", "admin"];
+            const allowedRoles = ["eleve", "secretaire", "directeur", "directeur_adjoint", "admin"];
             if (!allowedRoles.includes(user.role)) {
                 window.location.href = "/dashboard";
             }
@@ -4976,7 +4976,7 @@
                     });
 
                 // Montrer les éléments admin seulement pour les réles autorisés
-                const adminRoles = ["secretaire", "directeur", "admin"];
+                const adminRoles = ["secretaire", "directeur", "directeur_adjoint", "admin"];
                 if (adminRoles.includes(user.role)) {
                     document
                         .querySelectorAll(".admin-only")
@@ -6404,7 +6404,7 @@
                                         roleLabel = "Admin";
                                         roleBg = "#fee2e2";
                                         roleText = "#b91c1c";
-                                    } else if (authorRole === "directeur") {
+                                    } else if (["directeur", "directeur_adjoint"].includes(authorRole)) {
                                         roleLabel = "Directeur";
                                         roleBg = "#f3e8ff";
                                         roleText = "#1d4ed8";
@@ -6747,7 +6747,7 @@
                     roleLabel = "Admin";
                     roleBg = "#fee2e2";
                     roleText = "#b91c1c";
-                } else if (authorRole === "directeur") {
+                } else if (["directeur", "directeur_adjoint"].includes(authorRole)) {
                     roleLabel = "Directeur";
                     roleBg = "#f3e8ff";
                     roleText = "#1d4ed8";
@@ -8494,7 +8494,7 @@
 
                 const isAdminView =
                     user.role === "secretaire" ||
-                    user.role === "directeur" ||
+                    ["directeur", "directeur_adjoint"].includes(user.role) ||
                     user.role === "admin";
 
                 let historiqueHtml = "";
