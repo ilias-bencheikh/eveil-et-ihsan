@@ -263,13 +263,14 @@ router.get('/', (req, res) => {
         SELECT m.*,
                e.prenom as expPrenom, e.nom as expNomEleve,
                p.prenom as expPrenomProf, p.nom as expNomProf,
-               es.prenom as expPrenomStaff, es.nom as expNomStaff,
+               es.prenom as expPrenomStaff, es.nom as expNomStaff, es.role as expRoleStaff,
                ep.prenom as expPrenomParent, ep.nom as expNomParent,
                de.prenom as destPrenom, de.nom as destNomEleve,
                dp.prenom as destPrenomProf, dp.nom as destNomProf,
                ds.prenom as destPrenomStaff, ds.nom as destNomStaff,
                dpa.prenom as destPrenomParent, dpa.nom as destNomParent,
-               enf.prenom as enfantPrenom, enf.nom as enfantNom
+               enf.prenom as enfantPrenom, enf.nom as enfantNom,
+               c.classes as expClasses
         FROM messages m
         LEFT JOIN eleves e ON m.expediteurId = e.id
         LEFT JOIN professeurs p ON m.expediteurId = p.id
@@ -280,6 +281,7 @@ router.get('/', (req, res) => {
         LEFT JOIN staff ds ON m.destinataireId = ds.id
         LEFT JOIN parents dpa ON m.destinataireId = dpa.id
         LEFT JOIN eleves enf ON m.enfantId = enf.id
+        LEFT JOIN (SELECT professeurId, GROUP_CONCAT(nom, ', ') as classes FROM classes GROUP BY professeurId) c ON c.professeurId = m.expediteurId
         WHERE (m.destinataireId = ? AND m.deleted_by_receiver = 0)
            OR (m.expediteurId = ? AND m.deleted_by_sender = 0)
         ORDER BY m.date DESC
@@ -288,6 +290,8 @@ router.get('/', (req, res) => {
 
         const enrichedMessages = messages.map(m => {
             let expediteurNom = 'Inconnu';
+            let expediteurBadges = [];
+
             if (m.expPrenomParent && m.expNomParent) {
                 // Parent : afficher "Parent de (enfant)" si enfantId présent
                 if (m.enfantPrenom && m.enfantNom) {
@@ -299,8 +303,20 @@ router.get('/', (req, res) => {
                 expediteurNom = `${m.expPrenom} ${m.expNomEleve}`;
             } else if (m.expPrenomProf && m.expNomProf) {
                 expediteurNom = `${m.expPrenomProf} ${m.expNomProf}`;
+                expediteurBadges.push(m.expClasses ? `Prof (${m.expClasses})` : 'Professeur');
             } else if (m.expNomStaff) {
                 expediteurNom = `${m.expPrenomStaff || ''} ${m.expNomStaff}`.trim();
+                if (m.expRoleStaff) {
+                    let roleLower = m.expRoleStaff.toLowerCase();
+                    if (roleLower === 'admin') expediteurBadges.push('Administrateur');
+                    else if (roleLower === 'directeur') expediteurBadges.push('Directeur');
+                    else if (roleLower === 'directeur_adjoint') expediteurBadges.push('Directeur Adjoint');
+                    else if (roleLower === 'secretariat') expediteurBadges.push('Secrétariat');
+                    else if (roleLower === 'professeur' && !m.expClasses) expediteurBadges.push('Professeur');
+                }
+                if (m.expClasses) {
+                    expediteurBadges.push(`Prof (${m.expClasses})`);
+                }
             }
 
             let destinataireNom = 'Inconnu';
@@ -324,6 +340,7 @@ router.get('/', (req, res) => {
                 date: m.date,
                 lu: m.lu === 1,
                 expediteurNom: expediteurNom,
+                expediteurBadges: expediteurBadges,
                 destinataireNom: destinataireNom,
                 enfantId: m.enfantId || null,
                 piecesJointes: m.piecesJointes ? JSON.parse(m.piecesJointes) : []

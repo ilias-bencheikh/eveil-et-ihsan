@@ -8007,12 +8007,18 @@
                                           day: "2-digit",
                                           month: "2-digit",
                                       });
+                                
+                                let badgesHtml = "";
+                                if (msg.expediteurBadges && msg.expediteurBadges.length > 0) {
+                                    badgesHtml = msg.expediteurBadges.map(b => `<span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:1px 4px;border-radius:4px;font-size:9px;margin-left:4px;font-weight:bold;white-space:nowrap;">${b}</span>`).join("");
+                                }
+
                                 return `
                         <div class="db-msg-item ${!msg.lu ? "unread" : ""}" onclick="navigateParent('messagerie')">
                             <div class="db-msg-avatar">${initiale}</div>
-                            <div class="db-msg-body">
-                                <div class="db-msg-sender">${msg.expediteurNom}</div>
-                                <div class="db-msg-preview">${preview}</div>
+                            <div class="db-msg-body" style="min-width:0;overflow:hidden;">
+                                <div class="db-msg-sender" style="display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;gap:4px;"><span>${msg.expediteurNom}</span>${badgesHtml}</div>
+                                <div class="db-msg-preview" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${preview}</div>
                             </div>
                             <div class="db-msg-meta">
                                 <div class="db-msg-time">${dateStr}</div>
@@ -8156,6 +8162,12 @@
                 const clickHandler = isParentSelectionMode
                     ? `onclick="toggleParentMessageSelection('${message.id}')"`
                     : `onclick="openParentMsgReadPanel('${message.id}', '${view}')"`;
+                
+                let badgesHtml = "";
+                if (isReceived && message.expediteurBadges && message.expediteurBadges.length > 0) {
+                    badgesHtml = message.expediteurBadges.map(b => `<span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:2px 6px;border-radius:4px;font-size:10px;margin-left:6px;font-weight:bold;">${b}</span>`).join("");
+                }
+
                 return `
                 <div class="msg-list-item ${isUnread ? "unread" : ""} ${isParentSelectionMode && isSelected ? "selected" : ""}" data-msg-id="${message.id}" ${clickHandler}>
                     ${
@@ -8163,10 +8175,10 @@
                             ? `<div class="msg-cb-wrap"><span class="material-icons msg-cb-icon">${isSelected ? "check_circle" : "radio_button_unchecked"}</span></div>`
                             : `<div class="msg-avatar">${initials}</div>`
                     }
-                    <div class="msg-item-content">
-                        <div class="msg-item-top">
-                            <span class="msg-item-contact">${contactName || "InconnuS"}</span>
-                            <span class="msg-item-date">${dateStr}</span>
+                    <div class="msg-item-content" style="min-width:0;">
+                        <div class="msg-item-top" style="display:flex;align-items:center;margin-bottom:6px;gap:8px;">
+                            <span class="msg-item-contact" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;">${contactName || "Inconnu"}${badgesHtml}</span>
+                            <span class="msg-item-date" style="margin-left:auto;flex-shrink:0;">${dateStr}</span>
                         </div>
                         <div class="msg-item-preview">
                             ${hasAttachments ? '<span class="material-icons" style="font-size:13px;vertical-align:middle;margin-right:2px;">attach_file</span>' : ""}
@@ -8233,10 +8245,15 @@
                     .join("")
                     .toUpperCase();
 
+                let badgesHtml = "";
+                if (isReceived && message.expediteurBadges && message.expediteurBadges.length > 0) {
+                    badgesHtml = message.expediteurBadges.map(b => `<span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:8px;font-weight:bold;display:inline-block;">${b}</span>`).join("");
+                }
+
                 document.getElementById("parentMsgReadMeta").innerHTML = `
                 <div class="msg-read-avatar">${initials}</div>
-                <div>
-                    <div class="msg-read-contact">${isReceived ? "De" : "À"} : <strong>${contactName || "Inconnu"}</strong></div>
+                <div style="flex:1;">
+                    <div class="msg-read-contact" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">${isReceived ? "De" : "À"} : <strong style="margin-left:4px;">${contactName || "Inconnu"}</strong>${badgesHtml}</div>
                     <div class="msg-read-date">${formattedDate}</div>
                 </div>`;
 
