@@ -6,7 +6,7 @@
     <title>Préinscription - Eveil & Ihsan</title>
 
     <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png">
-    <link rel="apple-touch-icon" href="/uploads/logo/logo_apple.png">
+    <link rel="apple-touch-icon" href="/uploads/logo/logo.png">
 
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -102,7 +102,7 @@
             color: #4caf50;
             margin-bottom: 16px;
         }
-        
+
         @media (max-width: 600px) {
             .grid-2 { grid-template-columns: 1fr; }
             .preinscription-container { margin: 20px; padding: 20px; }
@@ -229,11 +229,11 @@
             </div>
 
             <h2 class="section-title" style="margin-top: 40px;">Enfants à préinscrire</h2>
-            
+
             <div id="enfantsList">
                 <!-- Les enfants seront injectés ici -->
             </div>
-            
+
             <button type="button" class="btn-add-enfant" id="addEnfantBtn">
                 <span class="material-icons">add</span>
                 Ajouter un enfant
@@ -257,7 +257,7 @@
             const div = document.createElement('div');
             div.className = 'enfant-card';
             div.id = `enfant-${id}`;
-            
+
             let removeBtn = '';
             if (id > 1) {
                 removeBtn = `<button type="button" class="btn-remove-enfant" onclick="removeEnfant(${id})"><span class="material-icons">delete</span></button>`;
@@ -302,7 +302,7 @@
             try {
                 const res = await fetch('/api/preinscriptions/status');
                 const data = await res.json();
-                
+
                 if (data.success && data.ouvert) {
                     document.getElementById('anneeScolaireText').textContent = `Année Scolaire ${data.anneeScolaire}`;
                     document.getElementById('preinscriptionForm').style.display = 'block';
@@ -318,7 +318,7 @@
 
         document.getElementById('preinscriptionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const btn = document.getElementById('submitBtn');
             const errorAlert = document.getElementById('errorAlert');
             btn.disabled = true;

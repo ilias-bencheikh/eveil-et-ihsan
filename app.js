@@ -79,6 +79,7 @@ const {
   preinscriptionsRoutes,
   devoirsRoutes,
   pushRoutes,
+  adminSettingsRoutes,
 } = require("./src/routes");
 
 // Initialisation de l'application
@@ -120,9 +121,11 @@ app.use(
         ],
         imgSrc: ["'self'", "data:", "blob:"],
         connectSrc: [
-          "'self'", 
-          "https://fonts.googleapis.com", 
-          "https://fonts.gstatic.com"
+          "'self'",
+          "https://fonts.googleapis.com",
+          "https://fonts.gstatic.com",
+          "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net",
         ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
@@ -242,6 +245,7 @@ function conditionalAuth(req, res, next) {
 
 // Routes API
 app.use("/api/auth", authRoutes);
+app.use("/api/settings", requireAuth, secureHeaders, adminSettingsRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/eleves", conditionalAuth, checkMaintenance, elevesRoutes);
 app.use(

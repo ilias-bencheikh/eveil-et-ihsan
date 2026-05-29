@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eveil-ihsan-v5';
+const CACHE_NAME = 'eveil-ihsan-v6';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
@@ -36,7 +36,10 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
-  if (event.request.mode === 'navigate' || event.request.headers.get('accept').includes('text/html')) {
+  const acceptHeader = event.request.headers.get('accept');
+  const isHtml = event.request.mode === 'navigate' || (acceptHeader && acceptHeader.includes('text/html'));
+
+  if (isHtml) {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(OFFLINE_URL))
     );
@@ -44,14 +47,22 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request).catch(async () => {
+      const cachedResponse = await caches.match(event.request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      // Pour éviter l'erreur "Failed to convert value to 'Response'"
+      // si l'élément n'est ni en cache, ni accessible via le réseau
+      return new Response('Hors ligne', { status: 503, statusText: 'Service Unavailable' });
+    })
   );
 });
 
 // Écoute des événements PUSH (notifications reçues en arrière-plan)
 self.addEventListener('push', event => {
   let data = { title: "Nouveau message", body: "Vous avez reçu un nouveau message sur Badr Eveil Ihsan", url: "/" };
-  
+
   if (event.data) {
     try {
       data = event.data.json();
@@ -62,8 +73,8 @@ self.addEventListener('push', event => {
 
   const options = {
     body: data.body,
-    icon: '/uploads/logo/logo.png',
-    badge: '/uploads/logo/logo.png', // Petite icône monochrome pour la barre Android
+    icon: '/uploads/logo/logo2.png',
+    badge: '/uploads/logo/badge.png', // Petite icône monochrome pour la barre Android
     vibrate: [100, 50, 100], // Vibration (téléphones)
     data: {
       url: data.url || '/'

@@ -7,7 +7,7 @@
 
         <!-- logo -->
         <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png" />
-        <link rel="apple-touch-icon" href="/uploads/logo/logo_onglet.png" />
+        <link rel="apple-touch-icon" href="/uploads/logo/logo.png" />
 
         <link rel="stylesheet" href="/css/dashboard.css" />
         <link
@@ -7156,6 +7156,31 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- NEW ADMIN SYSTEM CONFIGURATION WIDGET -->
+                        <div class="widget-card admin-only" style="margin-top: 24px;">
+                            <div class="widget-card-header">
+                                <h3 class="widget-card-title">
+                                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">toggle_on</span>
+                                    Fonctionnalités & Notifications (Admin)
+                                </h3>
+                            </div>
+                            <div class="widget-card-content">
+                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">
+                                    Permet d'activer ou de désactiver globalement certaines fonctionnalités du système en cas de problème ou de maintenance spécifique.
+                                </p>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 8px; background: var(--md-sys-color-surface-container-lowest);">
+                                    <input type="checkbox" id="adminToggleEmails" style="width: 20px; height: 20px; cursor: pointer;">
+                                    <label for="adminToggleEmails" style="cursor: pointer; flex: 1;">
+                                        <div style="font-weight: 600; color: var(--md-sys-color-on-surface);">Envoi d'emails automatique</div>
+                                        <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Si désactivé, aucun email ne sera envoyé par la plateforme (notifications, mots de passe, activations).</div>
+                                    </label>
+                                    <button class="md-btn md-btn-filled" onclick="saveAdminSystemConfig()" style="white-space: nowrap;">
+                                        Enregistrer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- ========== PARAMàTRES TAB ========== -->
@@ -9502,6 +9527,12 @@
                 window.eleveDetailsBackup = null;
                 loadEleves();
             }
+
+            // Afficher les détails d'un élève depuis d'autres vues
+            window.goToEleveFiche = function(eleveId) {
+                switchTab('eleves');
+                setTimeout(() => showEleveDetails(eleveId), 100);
+            };
 
             // Afficher les détails d'un élève dans la page principale
             async function showEleveDetails(eleveId) {
@@ -20336,6 +20367,38 @@
                     }
                 } catch (err) {
                     console.error("Erreur chargement maintenance:", err);
+                }
+
+                // Charger aussi les configurations système si on est admin
+                if (user && user.role === "admin") {
+                    try {
+                        const config = await fetch("/api/settings", { headers: getHeaders() }).then(r => r.json());
+                        const emailToggle = document.getElementById("adminToggleEmails");
+                        if (emailToggle && config.emails_actifs !== undefined) {
+                            emailToggle.checked = config.emails_actifs === "1";
+                        }
+                    } catch (e) {
+                        console.error("Erreur chargement settings:", e);
+                    }
+                }
+            }
+
+            async function saveAdminSystemConfig() {
+                try {
+                    const emailsActifs = document.getElementById("adminToggleEmails").checked ? "1" : "0";
+                    const res = await fetch("/api/settings", {
+                        method: "PUT",
+                        headers: getHeaders(),
+                        body: JSON.stringify({ emails_actifs: emailsActifs })
+                    });
+                    if (res.ok) {
+                        showSnackbar("Configuration système enregistrée");
+                    } else {
+                        showSnackbar("Erreur lors de l'enregistrement de la configuration");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showSnackbar("Erreur lors de l'enregistrement de la configuration");
                 }
             }
 

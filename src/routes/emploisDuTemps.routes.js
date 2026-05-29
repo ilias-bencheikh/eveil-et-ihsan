@@ -6,8 +6,13 @@ const { generateId } = require('../utils/helpers');
 
 // Jours valides
 const JOURS_VALIDES = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-// Periodes valides
-const PERIODES_VALIDES = ['matin', 'apres-midi'];
+
+function isValidPeriode(periode) {
+    if (periode === 'matin' || periode === 'apres-midi') return true;
+    // Format horaire HH:MM-HH:MM
+    const timeFormat = /^([01]\d|2[0-3]):([0-5]\d)-([01]\d|2[0-3]):([0-5]\d)$/;
+    return timeFormat.test(periode);
+}
 
 // Obtenir l'emploi du temps d'une classe
 router.get('/classe/:classeId', (req, res) => {
@@ -52,8 +57,8 @@ router.put('/classe/:classeId', checkPermission('update'), (req, res) => {
         if (!JOURS_VALIDES.includes(creneau.jour)) {
             return res.status(400).json({ error: `Jour invalide: ${creneau.jour}. Jours valides: ${JOURS_VALIDES.join(', ')}` });
         }
-        if (!PERIODES_VALIDES.includes(creneau.periode)) {
-            return res.status(400).json({ error: `Période invalide: ${creneau.periode}. Périodes valides: ${PERIODES_VALIDES.join(', ')}` });
+        if (!isValidPeriode(creneau.periode)) {
+            return res.status(400).json({ error: `Période invalide: ${creneau.periode}. Format attendu: HH:MM-HH:MM (ou matin/apres-midi)` });
         }
     }
 
@@ -121,8 +126,8 @@ router.post('/', checkPermission('create'), (req, res) => {
         return res.status(400).json({ error: `Jour invalide: ${jour}` });
     }
 
-    if (!PERIODES_VALIDES.includes(periode)) {
-        return res.status(400).json({ error: `Période invalide: ${periode}` });
+    if (!isValidPeriode(periode)) {
+        return res.status(400).json({ error: `Période invalide: ${periode}. Format attendu: HH:MM-HH:MM` });
     }
 
     const id = generateId();

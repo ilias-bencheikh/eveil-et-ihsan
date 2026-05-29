@@ -313,7 +313,8 @@ function initDatabase() {
             // Initialiser la config des préinscriptions
             db.run(`INSERT OR IGNORE INTO config_system (cle, valeur, description) VALUES 
                 ('preinscriptions_ouvertes', '0', '0 = Fermé, 1 = Ouvert'),
-                ('annee_scolaire_preinscription', '2024-2025', 'Année scolaire ciblée pour les préinscriptions')
+                ('annee_scolaire_preinscription', '2024-2025', 'Année scolaire ciblée pour les préinscriptions'),
+                ('emails_actifs', '1', '0 = Désactivé (aucun email envoyé), 1 = Activé')
             `);
 
             // Table preinscriptions

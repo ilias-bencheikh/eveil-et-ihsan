@@ -14,6 +14,7 @@ const emploisDuTempsRoutes = require('./emploisDuTemps.routes');
 const preinscriptionsRoutes = require('./preinscriptions.routes');
 const devoirsRoutes = require('./devoirs.routes');
 const pushRoutes = require('./push.routes');
+const adminSettingsRoutes = require('./admin-settings.routes');
 
 module.exports = {
     authRoutes,
@@ -32,4 +33,5 @@ module.exports = {
     preinscriptionsRoutes,
     devoirsRoutes,
     pushRoutes,
+    adminSettingsRoutes,
 };

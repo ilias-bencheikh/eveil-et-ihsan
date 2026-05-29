@@ -40,11 +40,11 @@ const sendPushNotification = (userId, payload) => {
                     const subscription = JSON.parse(row.subscription);
                     webpush.sendNotification(subscription, stringPayload)
                         .catch(error => {
-                            console.error('Échec de l\'envoi Push:', error.message);
+                            console.error(`Échec de l'envoi Push (HTTP ${error.statusCode}):`, error.body);
                             // Si l'abonnement a expiré ou que l'utilisateur a révoqué l'accès, 
                             // l'API renvoie une erreur 410 (Gone) ou 404. On supprime l'abonnement.
-                            if (error.statusCode === 404 || error.statusCode === 410) {
-                                console.log('Abonnement expiré, suppression dans la base de données (ID:', row.id, ')');
+                            if (error.statusCode === 404 || error.statusCode === 410 || error.statusCode === 401 || error.statusCode === 403) {
+                                console.log('Abonnement expiré ou clé invalide, suppression dans la base de données (ID:', row.id, ')');
                                 db.run(`DELETE FROM push_subscriptions WHERE id = ?`, [row.id]);
                             }
                         });

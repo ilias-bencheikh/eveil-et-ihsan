@@ -34,14 +34,12 @@ router.post('/subscribe', (req, res) => {
             [userId, '%' + subscription.endpoint + '%'],
             (err, row) => {
                 if (err) {
-                    console.error('Erreur SQLite lecture push_subscriptions:', err.message);
                     return res.status(500).json({ error: 'Erreur base de données' });
                 }
 
                 if (row) {
                     // L'abonnement existe déjà, pas besoin de le dupliquer
-                    console.log('PUSH ABONNEMENT DEJA EXISTANT:', userId);
-                    return res.status(200).json({ message: 'Abonnement déjà enregistré' });
+                    return res.status(200)
                 }
 
                 // Sauvegarder dans SQLite si non existant
@@ -50,10 +48,9 @@ router.post('/subscribe', (req, res) => {
                     [userId, subString],
                     function(err) {
                         if (err) {
-                            console.error('Erreur SQLite push_subscriptions:', err.message);
                             return res.status(500).json({ error: 'Erreur lors de la sauvegarde de l\'abonnement' });
                         }
-                        console.log('NOUVEAU PUSH ABONNEMENT RECU:', userId); 
+
                         res.status(201).json({ message: 'Abonnement réussi' });
                     }
                 );

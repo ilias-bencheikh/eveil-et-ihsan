@@ -9,14 +9,6 @@ const { sendEmail } = require('../config/email');
 const { sendPushNotification } = require('../utils/push');
 
 function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
-    // 1. Envoyer la notification Push PWA
-    sendPushNotification(destinataireId, {
-        title: 'Nouveau message reçu',
-        body: 'Vous avez reçu un nouveau message sur le portail',
-        url: '/'
-    });
-
-    // 2. Continuer avec l'envoi d'Email classique
     const getUserInfoQuery = `
         SELECT nom, prenom, email, notifEmailMessage FROM eleves WHERE id = ?
         UNION
@@ -27,13 +19,26 @@ function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
         SELECT nom, prenom, email, notifEmailMessage FROM staff WHERE id = ?
     `;
 
-    db.get(getUserInfoQuery, [destinataireId, destinataireId, destinataireId, destinataireId], (err, receiver) => {
-        if (err || !receiver || !receiver.email || receiver.notifEmailMessage !== 1) return;
+    // 1. On récupère d'abord l'expéditeur pour avoir son nom
+    db.get(getUserInfoQuery, [expediteurId, expediteurId, expediteurId, expediteurId], (err, sender) => {
+        if (err || !sender) return;
 
-        db.get(getUserInfoQuery, [expediteurId, expediteurId, expediteurId, expediteurId], (err, sender) => {
-            if (err || !sender) return;
+        const senderName = `${sender.prenom || ''} ${sender.nom}`.trim();
+        // Nettoyage rapide du contenu s'il contient des balises HTML + limitation de la taille
+        const plainTextContent = contenu.replace(/<[^>]*>?/gm, '').trim();
+        const shortBody = plainTextContent.length > 150 ? plainTextContent.substring(0, 147) + '...' : plainTextContent;
 
-            const senderName = `${sender.prenom || ''} ${sender.nom}`.trim();
+        // 2. Envoyer la notification Push PWA avec le nom et le corps du message
+        sendPushNotification(destinataireId, {
+            title: `Nouveau message de ${senderName}`,
+            body: shortBody,
+            url: '/'
+        });
+
+        // 3. On récupère le destinataire pour l'envoi d'Email classique
+        db.get(getUserInfoQuery, [destinataireId, destinataireId, destinataireId, destinataireId], (err, receiver) => {
+            if (err || !receiver || !receiver.email || receiver.notifEmailMessage !== 1) return;
+
             const loginLink = `http://${host}/login`;
             
             sendEmail(

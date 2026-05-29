@@ -1,4 +1,5 @@
 ﻿const nodemailer = require('nodemailer');
+const { db } = require('./database');
 require('dotenv').config();
 
 // Configuration du transporteur d'email
@@ -301,11 +302,26 @@ const emailTemplates = {
 };
 
 
+async function checkEmailsActive() {
+    return new Promise((resolve) => {
+        db.get("SELECT valeur FROM config_system WHERE cle = 'emails_actifs'", (err, row) => {
+            if (err || !row) resolve(true); // Par défaut on active
+            else resolve(row.valeur === '1');
+        });
+    });
+}
+
 // Fonction d'envoi d'email
 // Signature : sendEmail(to, template, arg1, arg2, ..., [{ attachments: [...] }])
 // Le dernier argument peut optionnellement être un objet { attachments: [...] }
 // chaque attachment : { filename, path } ou { filename, content (Buffer) }
 async function sendEmail(to, template, ...args) {
+    const isEmailActive = await checkEmailsActive();
+    if (!isEmailActive) {
+        console.log(`[Config] Envoi d'email désactivé. Template: ${template}, Destinataire: ${to}`);
+        return { message: 'Emails désactivés par la configuration système' };
+    }
+
     // Détecter si le dernier argument est un objet d'options (pièces jointes)
     let attachments = [];
     let templateArgs = args;
