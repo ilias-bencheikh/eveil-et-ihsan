@@ -192,12 +192,12 @@ app.use(
   express.static(path.join(__dirname, "public"), {
     dotfiles: "deny", // Bloquer l'accès aux fichiers cachés (.env, .git etc.)
     etag: true,
-    maxAge: "1h",
+    maxAge: 0, // Désactiver le cache pour que les mises à jour passent instantanément
     setHeaders: (res, filePath) => {
-      // Pas de cache pour les fichiers HTML
-      if (filePath.endsWith(".html")) {
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      }
+      // Forcer le non-cache total
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
     },
   }),
 );

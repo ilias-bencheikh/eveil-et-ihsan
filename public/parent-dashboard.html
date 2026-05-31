@@ -3,6 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Forcer le navigateur à ne pas cacher la page -->
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
         <title>Espace Parent - Eveil & Ihsan</title>
 
         <!-- logo -->
@@ -7694,6 +7698,10 @@
 
                 // Fonction pour naviguer vers une section
                 function navigateToSection(sectionId, pushToHistory = true) {
+                    // S'assurer que le style anti-flash est bien supprimé
+                    const earlyFix = document.getElementById("early-tab-fix");
+                    if (earlyFix) earlyFix.remove();
+
                     // Mettre à jour la navigation
                     navItems.forEach((i) => i.classList.remove("active"));
                     const navItem = document.querySelector(
@@ -7701,13 +7709,25 @@
                     );
                     if (navItem) navItem.classList.add("active");
 
-                    // Afficher la section
-                    sections.forEach((s) => s.classList.remove("active"));
+                    // Masquer TOUS les contenus d'abord
+                    sections.forEach((s) => {
+                        s.classList.remove("active");
+                        // Nettoyer les styles inline pour éviter l'accumulation
+                        s.style.display = "";
+                        s.style.visibility = "";
+                        s.style.opacity = "";
+                    });
+                    
+                    // Afficher la section active
                     const section = document.getElementById(
                         `section-${sectionId}`,
                     );
                     if (section) {
                         section.classList.add("active");
+                        // Nettoyer aussi les styles inline de la section active
+                        section.style.display = "";
+                        section.style.visibility = "";
+                        section.style.opacity = "";
                     }
 
                     // Mettre à jour le titre
@@ -7726,6 +7746,9 @@
                     document.getElementById("pageTitle").textContent =
                         titles[sectionId] || "Accueil";
 
+                    // Remonter en haut de page
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
                     // Sauvegarder la section active dans localStorage
                     localStorage.setItem("parent_active_section", sectionId);
 
@@ -7736,6 +7759,23 @@
                                 ? "/parent"
                                 : "/parent/" + sectionId;
                         history.pushState({ section: sectionId }, "", urlPath);
+                    }
+                    
+                    // Fermer sidebar sur mobile si elle est ouverte
+                    if (window.innerWidth < 900) {
+                        closeSidebarOnMobile();
+                    }
+                }
+                
+                // Fonction séparée pour fermer le sidebar sur mobile
+                function closeSidebarOnMobile() {
+                    const sidebar = document.getElementById("sidebar");
+                    const sidebarOverlay = document.getElementById("sidebarOverlay");
+                    if (sidebar) {
+                        sidebar.classList.remove("open");
+                    }
+                    if (sidebarOverlay) {
+                        sidebarOverlay.classList.remove("show");
                     }
                 }
 
@@ -7823,32 +7863,24 @@
                         navigateToSection(section, false);
                 });
 
-                // Supprimer le style anti-flash
-                const earlyFix = document.getElementById("early-tab-fix");
-                if (earlyFix) earlyFix.remove();
-
                 // Toggle sidebar sur mobile
                 document
                     .getElementById("menuToggle")
                     .addEventListener("click", () => {
-                        document
-                            .getElementById("sidebar")
-                            .classList.toggle("open");
-                        document
-                            .getElementById("sidebarOverlay")
-                            .classList.toggle("show");
+                        const sidebar = document.getElementById("sidebar");
+                        const sidebarOverlay = document.getElementById("sidebarOverlay");
+                        sidebar.classList.toggle("open");
+                        sidebarOverlay.classList.toggle("show");
                     });
 
                 // Fermer sidebar en cliquant sur l'overlay
                 document
                     .getElementById("sidebarOverlay")
                     .addEventListener("click", () => {
-                        document
-                            .getElementById("sidebar")
-                            .classList.remove("open");
-                        document
-                            .getElementById("sidebarOverlay")
-                            .classList.remove("show");
+                        const sidebar = document.getElementById("sidebar");
+                        const sidebarOverlay = document.getElementById("sidebarOverlay");
+                        sidebar.classList.remove("open");
+                        sidebarOverlay.classList.remove("show");
                     });
 
                 // Déconnexion

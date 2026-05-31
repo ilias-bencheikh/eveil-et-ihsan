@@ -10,13 +10,13 @@ const { sendPushNotification } = require('../utils/push');
 
 function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
     const getUserInfoQuery = `
-        SELECT nom, prenom, email, notifEmailMessage FROM eleves WHERE id = ?
+        SELECT nom, prenom, email, notifEmailMessage, 'eleve' as role FROM eleves WHERE id = ?
         UNION
-        SELECT nom, prenom, email, notifEmailMessage FROM parents WHERE id = ?
+        SELECT nom, prenom, email, notifEmailMessage, 'parent' as role FROM parents WHERE id = ?
         UNION
-        SELECT nom, prenom, email, notifEmailMessage FROM professeurs WHERE id = ?
+        SELECT nom, prenom, email, notifEmailMessage, 'professeur' as role FROM professeurs WHERE id = ?
         UNION
-        SELECT nom, prenom, email, notifEmailMessage FROM staff WHERE id = ?
+        SELECT nom, prenom, email, notifEmailMessage, 'staff' as role FROM staff WHERE id = ?
     `;
 
     // 1. On récupère d'abord l'expéditeur pour avoir son nom
@@ -28,27 +28,39 @@ function notifyMessageReceived(destinataireId, expediteurId, contenu, host) {
         const plainTextContent = contenu.replace(/<[^>]*>?/gm, '').trim();
         const shortBody = plainTextContent.length > 150 ? plainTextContent.substring(0, 147) + '...' : plainTextContent;
 
-        // 2. Envoyer la notification Push PWA avec le nom et le corps du message
-        sendPushNotification(destinataireId, {
-            title: `Nouveau message de ${senderName}`,
-            body: shortBody,
-            url: '/'
-        });
-
-        // 3. On récupère le destinataire pour l'envoi d'Email classique
+        // 3. On récupère le destinataire pour avoir son rôle et envoyer la notification et l'email
         db.get(getUserInfoQuery, [destinataireId, destinataireId, destinataireId, destinataireId], (err, receiver) => {
-            if (err || !receiver || !receiver.email || receiver.notifEmailMessage !== 1) return;
-
-            const loginLink = `http://${host}/login`;
+            if (err || !receiver) return;
             
-            sendEmail(
-                receiver.email,
-                'newMessage',
-                receiver.prenom || receiver.nom,
-                senderName,
-                contenu,
-                loginLink
-            ).catch(e => console.error('Erreur expédition email notif message', e));
+            // Déterminer l'URL d'ouverture selon le rôle du destinataire
+            let openUrl = '/';
+            if (receiver.role === 'eleve') {
+                openUrl = '/eleve/messages';
+            } else if (receiver.role === 'parent') {
+                openUrl = '/parent/messagerie';
+            } else {
+                openUrl = '/dashboard/messagerie';
+            }
+
+            // 2. Envoyer la notification Push PWA avec le nom et le corps du message
+            sendPushNotification(destinataireId, {
+                title: senderName,
+                body: shortBody,
+                url: openUrl
+            });
+
+            if (receiver.email && receiver.notifEmailMessage === 1) {
+                const loginLink = `http://${host}/login`;
+                
+                sendEmail(
+                    receiver.email,
+                    'newMessage',
+                    receiver.prenom || receiver.nom,
+                    senderName,
+                    contenu,
+                    loginLink
+                ).catch(e => console.error('Erreur expédition email notif message', e));
+            }
         });
     });
 }

@@ -10,29 +10,33 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-window.forcePushSubscription = async function() {
+window.forcePushSubscription = async function(silent = false) {
     try {
         console.log("Tentative d'abonnement aux notifications Push...");
         const token = localStorage.getItem('token');
         if (!token) {
             console.error("Aucun token de connexion trouvé.");
-            alert("Erreur : Vous devez être connecté pour activer les notifications.");
+            if (!silent) alert("Erreur : Vous devez être connecté pour activer les notifications.");
             return false;
         }
         
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             console.error("Les notifications Push ne sont pas supportées sur ce navigateur.");
-            alert("Votre navigateur ne supporte pas les notifications Push.");
+            if (!silent) alert("Votre navigateur ne supporte pas les notifications Push.");
             return false;
         }
 
         const registration = await navigator.serviceWorker.ready;
         console.log("Service Worker prêt. Demande de permission...");
 
-        const permission = await Notification.requestPermission();
+        let permission = Notification.permission;
+        if (permission !== 'granted') {
+            permission = await Notification.requestPermission();
+        }
+        
         if (permission !== 'granted') {
             console.warn("Permission refusée par l'utilisateur.");
-            alert("Vous avez refusé les notifications. Veuillez les autoriser dans les paramètres de votre navigateur/appareil.");
+            if (!silent) alert("Vous avez refusé les notifications. Veuillez les autoriser dans les paramètres de votre navigateur/appareil.");
             updatePushSettingsUI(false);
             return false;
         }
@@ -44,7 +48,7 @@ window.forcePushSubscription = async function() {
         
         if (!keyRes.ok) {
             console.error("Erreur récupération clé:", await keyRes.text());
-            alert("Erreur serveur lors de la configuration des notifications.");
+            if (!silent) alert("Erreur serveur lors de la configuration des notifications.");
             return false;
         }
         
@@ -79,12 +83,12 @@ window.forcePushSubscription = async function() {
             return true;
         } else {
             console.error("Erreur lors de l'enregistrement de l'abonnement:", await subRes.text());
-            alert("Une erreur s'est produite côté serveur.");
+            if (!silent) alert("Une erreur s'est produite côté serveur.");
             return false;
         }
     } catch (err) {
         console.error('Erreur globale Push:', err);
-        alert("Une erreur technique est survenue : " + err.message);
+        if (!silent) alert("Une erreur technique est survenue : " + err.message);
         return false;
     }
 };
@@ -186,7 +190,7 @@ if ('serviceWorker' in navigator) {
             .then(() => {
                 // Si la permission est déjà accordée, on retente la souscription en silence
                 if (Notification.permission === 'granted') {
-                    window.forcePushSubscription().catch(e => console.error("Silent sub failed", e));
+                    window.forcePushSubscription(true).catch(e => console.error("Silent sub failed", e));
                 }
                 
                 // Mettre à jour l'UI des paramètres si présent

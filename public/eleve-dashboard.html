@@ -3,6 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Forcer le navigateur à ne pas cacher la page -->
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
         <title>Espace Élève - Eveil & Ihsan</title>
 
 
@@ -5045,10 +5049,6 @@
                         switchTab(section, false);
                 });
 
-                // Supprimer le style anti-flash
-                const earlyFix = document.getElementById("early-tab-fix");
-                if (earlyFix) earlyFix.remove();
-
                 // Theme toggle
                 document
                     .getElementById("themeToggle")
@@ -5729,17 +5729,10 @@
             }
 
             function switchTab(tabName, pushToHistory = true) {
-                // Sauvegarder l'onglet actif dans localStorage
-                localStorage.setItem("eleve_active_tab", tabName);
+                // S'assurer que le style anti-flash est bien supprimé
+                const earlyFix = document.getElementById("early-tab-fix");
+                if (earlyFix) earlyFix.remove();
 
-                // Mettre à jour l'URL sans rechargement de page
-                if (pushToHistory) {
-                    const urlPath =
-                        tabName === "accueil" ? "/eleve" : "/eleve/" + tabName;
-                    history.pushState({ tab: tabName }, "", urlPath);
-                }
-
-                // Mettre • jour la navigation
                 document
                     .querySelectorAll(".sidebar-nav-item")
                     .forEach((item) => {
@@ -5749,28 +5742,43 @@
                         }
                     });
 
-                // Afficher le bon contenu
+                // Masquer TOUS les contenus d'onglets d'abord
                 document.querySelectorAll(".tab-content").forEach((tab) => {
                     tab.classList.remove("active");
+                    // Nettoyer les styles inline pour éviter l'accumulation
+                    tab.style.display = "";
+                    tab.style.visibility = "";
+                    tab.style.opacity = "";
                 });
-                document.getElementById(tabName).classList.add("active");
+                
+                // Afficher le contenu de l'onglet actif
+                const activeTab = document.getElementById(tabName);
+                if (activeTab) {
+                    activeTab.classList.add("active");
+                    // Nettoyer aussi les styles inline de l'onglet actif
+                    activeTab.style.display = "";
+                    activeTab.style.visibility = "";
+                    activeTab.style.opacity = "";
+                }
 
-                // Mettre • jour le titre
+                // Mettre à jour le titre
                 const titles = {
-                    accueil: "Mon espace",
-                    profil: "Mon profil",
+                    accueil: "Accueil",
+                    absences: "Absences",
+                    appreciations: "Appréciations",
+                    frais: "Frais",
+                    messages: "Messagerie",
                     actualites: "Actualités",
-                    absences: "Mes absences",
-                    appreciations: "Mes appréciations",
-                    messages: "Messages",
-                    frais: "Frais d'inscription",
+                    profil: "Mon Profil",
                     "frais-admin": "Gestion des frais",
                     parametres: "Paramètres",
                 };
                 document.getElementById("pageTitle").textContent =
                     titles[tabName] || tabName;
 
-                // Charger les données spécifiques • l'onglet
+                // Remonter en haut de page
+                window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
                 if (tabName === "accueil") {
                     setupEleveWelcome();
                     loadActualites();
@@ -5808,17 +5816,29 @@
                     loadFraisData();
                 }
 
-                // Fermer la sidebar sur mobile
+                // Fermer sidebar sur mobile si elle est ouverte
                 if (window.innerWidth < 900) {
-                    toggleSidebar();
+                    closeSidebarOnMobile();
+                }
+            }
+            
+            // Fonction séparée pour fermer le sidebar sur mobile
+            function closeSidebarOnMobile() {
+                const sidebar = document.getElementById("sidebar");
+                const sidebarOverlay = document.getElementById("sidebarOverlay");
+                if (sidebar) {
+                    sidebar.classList.remove("open");
+                }
+                if (sidebarOverlay) {
+                    sidebarOverlay.classList.remove("show");
                 }
             }
 
             function toggleSidebar() {
-                document.getElementById("sidebar").classList.toggle("open");
-                document
-                    .getElementById("sidebarOverlay")
-                    .classList.toggle("show");
+                const sidebar = document.getElementById("sidebar");
+                const sidebarOverlay = document.getElementById("sidebarOverlay");
+                sidebar.classList.toggle("open");
+                sidebarOverlay.classList.toggle("show");
             }
 
             function toggleTheme() {

@@ -841,9 +841,9 @@
 
 .tab-content {
     display: none;
-    animation: fadeIn 0.3s var(--md-sys-motion-easing-standard);
 }
 
+/* No animation on tab-content - instant display prevents mobile issues */
 .tab-content.active {
     display: block;
 }
