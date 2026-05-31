@@ -24,34 +24,34 @@ router.get('/', (req, res) => {
 
 // Créer une classe
 router.post('/', checkPermission('create'), (req, res) => {
-    const { nom, niveau, professeurId } = req.body;
-    console.log('Requête POST /classes reçue:', { nom, niveau, professeurId });
-    
+    const { nom, niveau, professeurId, salle } = req.body;
+    console.log('Requête POST /classes reçue:', { nom, niveau, professeurId, salle });
+
     const id = generateId();
 
-    db.run('INSERT INTO classes VALUES (?, ?, ?, ?)',
-        [id, nom, niveau, professeurId],
+    db.run('INSERT INTO classes VALUES (?, ?, ?, ?, ?)',
+        [id, nom, niveau, professeurId, salle || null],
         function(err) {
             if (err) {
                 console.error('Erreur lors de l\'insertion en base:', err);
                 return res.status(500).json({ error: 'Erreur interne du serveur' });
             }
-            console.log('Classe créée avec succès:', { id, nom, niveau, professeurId });
-            res.status(201).json({ id, nom, niveau, professeurId });
+            console.log('Classe créée avec succès:', { id, nom, niveau, professeurId, salle });
+            res.status(201).json({ id, nom, niveau, professeurId, salle: salle || null });
         }
     );
 });
 
 // Mettre à jour une classe
 router.put('/:id', checkPermission('update'), (req, res) => {
-    const { nom, niveau, professeurId } = req.body;
+    const { nom, niveau, professeurId, salle } = req.body;
 
-    db.run('UPDATE classes SET nom = ?, niveau = ?, professeurId = ? WHERE id = ?',
-        [nom, niveau, professeurId, req.params.id],
+    db.run('UPDATE classes SET nom = ?, niveau = ?, professeurId = ?, salle = ? WHERE id = ?',
+        [nom, niveau, professeurId, salle || null, req.params.id],
         function(err) {
             if (err) return res.status(500).json({ error: 'Erreur interne du serveur' });
             if (this.changes === 0) return res.status(404).json({ message: 'Classe non trouvée' });
-            res.json({ id: req.params.id, nom, niveau, professeurId });
+            res.json({ id: req.params.id, nom, niveau, professeurId, salle: salle || null });
         }
     );
 });

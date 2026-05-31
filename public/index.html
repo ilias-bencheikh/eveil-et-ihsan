@@ -2648,15 +2648,16 @@
             color: var(--md-sys-color-on-surface);
             display: flex;
             align-items: center;
-            gap: 12px;
-            width: 150px;
+            gap: 8px;
+            min-width: 160px;
         }
         .edt-day-toggles {
             display: flex;
             gap: 12px;
             flex: 1;
-            justify-content: flex-end;
+            justify-content: flex-start;
             flex-wrap: wrap;
+            align-items: center;
         }
         .edt-toggle-label {
             display: inline-flex;
@@ -2691,6 +2692,22 @@
         .edt-toggle-input:checked + .edt-toggle-label .material-icons {
             color: var(--md-sys-color-primary);
         }
+        .edt-time-input {
+            padding: 6px 10px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            background: var(--md-sys-color-surface-container-low);
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .edt-time-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            background: var(--md-sys-color-surface-container-high);
+        }
         @media (max-width: 600px) {
             .edt-day-row {
                 flex-direction: column;
@@ -2700,7 +2717,7 @@
             }
             .edt-day-toggles {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: flex-start;
             }
             .edt-toggle-label {
                 flex: 1;
@@ -10529,7 +10546,7 @@
                       ).trim() || professeur.displayName
                     : "";
 
-                // Formater l'emploi du temps pour l'affichage
+                // Grouper EDT par jour et trier par heure de début
                 const joursOrdre = [
                     "lundi",
                     "mardi",
@@ -10548,17 +10565,49 @@
                     samedi: "Samedi",
                     dimanche: "Dimanche",
                 };
-                const periodesLabels = {
-                    matin: "Matin",
-                    "apres-midi": "Après-midi",
-                };
 
-                // Grouper par jour
+                // Parser une période "HH:MM-HH:MM" en objet
+                function parsePeriode(p) {
+                    if (p === "matin") return { label: "Matin", debut: "08:00", fin: "12:00", icon: "wb_sunny" };
+                    if (p === "apres-midi") return { label: "Après-midi", debut: "14:00", fin: "17:00", icon: "wb_twilight" };
+                    const m = p.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+                    if (m) return { label: `${m[1]} – ${m[2]}`, debut: m[1], fin: m[2], icon: "schedule" };
+                    return { label: p, debut: p, fin: p, icon: "schedule" };
+                }
+
                 const edtParJour = {};
                 emploiDuTemps.forEach((c) => {
                     if (!edtParJour[c.jour]) edtParJour[c.jour] = [];
-                    edtParJour[c.jour].push(c.periode);
+                    edtParJour[c.jour].push(parsePeriode(c.periode));
                 });
+                Object.keys(edtParJour).forEach((j) => {
+                    edtParJour[j].sort((a, b) => a.debut.localeCompare(b.debut));
+                });
+
+                // Calculer l'âge d'un élève
+                function getAge(dateNaissance) {
+                    if (!dateNaissance) return null;
+                    const birth = new Date(dateNaissance);
+                    const today = new Date();
+                    let age = today.getFullYear() - birth.getFullYear();
+                    const m = today.getMonth() - birth.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+                    return age;
+                }
+
+                // Statut parent
+                function parentStatus(e) {
+                    if (e.nbParents > 0 && !e.parentsActivated) return { text: "Parent non activé", color: "var(--md-sys-color-error)" };
+                    if (e.nbParents === 0) return { text: "Aucun parent", color: "var(--md-sys-color-on-surface-variant)" };
+                    return { text: "Parent actif", color: "var(--md-sys-color-primary)" };
+                }
+
+                // Statistiques élèves
+                const totalEleves = elevesClasse.length;
+                const ageMoyen = elevesClasse.reduce((sum, e) => {
+                    const a = getAge(e.dateNaissance);
+                    return sum + (a !== null ? a : 0);
+                }, 0) / elevesClasse.filter(e => getAge(e.dateNaissance) !== null).length || 0;
 
                 const widgetCardContent = document.querySelector(
                     "#classes .widget-card-content",
@@ -10591,8 +10640,11 @@
                             <h3 style="margin:0 0 10px 0;font-size:26px;color:var(--md-sys-color-on-secondary-container);">${classe.nom}</h3>
                             <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                                 ${classe.niveau ? `<span style="background:var(--md-sys-color-secondary);color:white;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;">${classe.niveau}</span>` : ""}
+                                ${classe.salle ? `<span style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);padding:3px 12px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:4px;">
+                                    <span class="material-icons" style="font-size:14px;">door_front</span> Salle ${classe.salle}
+                                </span>` : ""}
                                 <span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:3px 12px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:4px;">
-                                    <span class="material-icons" style="font-size:14px;">group</span> ${elevesClasse.length} élève${elevesClasse.length !== 1 ? "s" : ""}
+                                    <span class="material-icons" style="font-size:14px;">group</span> ${totalEleves} élève${totalEleves !== 1 ? "s" : ""}
                                 </span>
                             </div>
                         </div>
@@ -10603,21 +10655,28 @@
                                 <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">person</span>
                                 <div>
                                     <div class="fiche-info-label">Professeur</div>
-                                    <div class="fiche-info-value">${professeurDisplay}</div>
+                                    <div class="fiche-info-value">${professeurDisplay || "—"}</div>
                                 </div>
                             </div>
                             <div class="fiche-info-item">
                                 <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">school</span>
                                 <div>
                                     <div class="fiche-info-label">Niveau</div>
-                                    <div class="fiche-info-value">${classe.niveau || ""}</div>
+                                    <div class="fiche-info-value">${classe.niveau || "—"}</div>
+                                </div>
+                            </div>
+                            <div class="fiche-info-item">
+                                <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">meeting_room</span>
+                                <div>
+                                    <div class="fiche-info-label">Salle</div>
+                                    <div class="fiche-info-value">${classe.salle || "—"}</div>
                                 </div>
                             </div>
                             <div class="fiche-info-item">
                                 <span class="material-icons fiche-info-icon" style="color:var(--md-sys-color-secondary);">group</span>
                                 <div>
                                     <div class="fiche-info-label">Effectif</div>
-                                    <div class="fiche-info-value">${elevesClasse.length} élève${elevesClasse.length !== 1 ? "s" : ""}</div>
+                                    <div class="fiche-info-value">${totalEleves} élève${totalEleves !== 1 ? "s" : ""}</div>
                                 </div>
                             </div>
                         </div>
@@ -10632,7 +10691,7 @@
                         </div>
                         <div style="flex:1;">
                             <h4 class="fiche-section-title">Emploi du temps</h4>
-                            <p class="fiche-section-subtitle">Jours et créneaux de cours</p>
+                            <p class="fiche-section-subtitle">Jours et créneaux horaires</p>
                         </div>
                         ${
                             canModifyData()
@@ -10657,34 +10716,36 @@
                                         : ""
                                 }
                                </div>`
-                                : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
-                                ${joursOrdre
-                                    .filter((j) => edtParJour[j])
-                                    .map(
-                                        (jour) => `
-                                <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:14px;
-                                            border:1px solid var(--md-sys-color-outline-variant);">
-                                    <div style="font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
-                                        ${joursLabels[jour]}
-                                    </div>
-                                    <div style="display:flex;flex-direction:column;gap:4px;">
-                                        ${edtParJour[jour]
-                                            .sort()
-                                            .map(
-                                                (periode) => `
-                                        <span style="background:${periode === "matin" ? "var(--md-sys-color-primary-container)" : "var(--md-sys-color-secondary-container)"};
-                                                     color:${periode === "matin" ? "var(--md-sys-color-on-primary-container)" : "var(--md-sys-color-on-secondary-container)"};
-                                                     padding:4px 10px;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:4px;">
-                                            <span class="material-icons" style="font-size:14px;">${periode === "matin" ? "wb_sunny" : "wb_twilight"}</span>
-                                            ${periodesLabels[periode]}
-                                        </span>`,
-                                            )
-                                            .join("")}
-                                    </div>
-                                </div>`,
-                                    )
-                                    .join("")}
+                                : `<div style="overflow-x:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                                    <thead>
+                                        <tr style="background:var(--md-sys-color-surface-container-high);">
+                                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Jour</th>
+                                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Horaires</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${joursOrdre
+                                            .filter((j) => edtParJour[j])
+                                            .map((jour) => `
+                                        <tr style="border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                                            <td style="padding:12px 16px;font-weight:600;color:var(--md-sys-color-on-surface);display:flex;align-items:center;gap:8px;">
+                                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
+                                                ${joursLabels[jour]}
+                                            </td>
+                                            <td style="padding:12px 16px;">
+                                                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                                    ${edtParJour[jour].map(p => `
+                                                        <span style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);
+                                                             padding:4px 12px;border-radius:20px;font-size:13px;display:flex;align-items:center;gap:6px;font-weight:500;">
+                                                            <span class="material-icons" style="font-size:14px;">${p.icon}</span>
+                                                            ${p.label}
+                                                        </span>`).join("")}
+                                                </div>
+                                            </td>
+                                        </tr>`).join("")}
+                                    </tbody>
+                                </table>
                                </div>`
                         }
                     </div>
@@ -10698,8 +10759,11 @@
                         </div>
                         <div style="flex:1;">
                             <h4 class="fiche-section-title">Élèves de la classe</h4>
-                            <p class="fiche-section-subtitle">${elevesClasse.length} élève${elevesClasse.length !== 1 ? "s" : ""} inscrit${elevesClasse.length !== 1 ? "s" : ""} </p>
+                            <p class="fiche-section-subtitle">${totalEleves} élève${totalEleves !== 1 ? "s" : ""} inscrit${totalEleves !== 1 ? "s" : ""}</p>
                         </div>
+                        ${totalEleves > 0 ? `<span style="font-size:12px;color:var(--md-sys-color-on-surface-variant);background:var(--md-sys-color-surface-container-low);padding:4px 10px;border-radius:20px;">
+                            ${!isNaN(ageMoyen) ? "Âge moyen : " + Math.round(ageMoyen) + " ans" : ""}
+                        </span>` : ""}
                     </div>
                     <div class="fiche-section-content">
                         ${
@@ -10708,30 +10772,45 @@
                                 <span class="material-icons" style="font-size:40px;opacity:.4;">group_off</span>
                                 <p style="margin:8px 0 0;">Aucun élève dans cette classe</p>
                                </div>`
-                                : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
-                                ${elevesClasse
-                                    .map(
-                                        (e) => `
-                                <div onclick="goToEleveFiche('${e.id}')"
-                                     style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
-                                            border:1px solid var(--md-sys-color-outline-variant);cursor:pointer;transition:all .2s;
-                                            background:var(--md-sys-color-surface-container-low);"
-                                     onmouseover="this.style.background='var(--md-sys-color-primary-container)';this.style.borderColor='var(--md-sys-color-primary)';"
-                                     onmouseout="this.style.background='var(--md-sys-color-surface-container-low)';this.style.borderColor='var(--md-sys-color-outline-variant)';">
-                                    <div class="md-avatar" style="width:40px;height:40px;font-size:16px;font-weight:700;flex-shrink:0;
-                                                background:var(--md-sys-color-primary);color:white;">
-                                        ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (e.prenom || "E")[0].toUpperCase()}
-                                    </div>
-                                    <div style="flex:1;min-width:0;">
-                                        <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.prenom} ${e.nom}</div>
-                                        <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;">
-                                            ${e.nbParents > 0 && !e.parentsActivated ? '<span style="color:var(--md-sys-color-error);">Parent non activé</span>' : e.nbParents === 0 ? "Aucun parent" : "Parent actif"}
-                                        </div>
-                                    </div>
-                                    <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);flex-shrink:0;">chevron_right</span>
-                                </div>`,
-                                    )
-                                    .join("")}
+                                : `<div style="overflow-x:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                                    <thead>
+                                        <tr style="background:var(--md-sys-color-surface-container-high);">
+                                            <th style="padding:10px 12px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Élève</th>
+                                            <th style="padding:10px 12px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Date de naissance</th>
+                                            <th style="padding:10px 12px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Statut parent</th>
+                                            <th style="padding:10px 12px;text-align:center;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Détails</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${elevesClasse.sort((a, b) => (a.nom + a.prenom).localeCompare(b.nom + b.prenom)).map((e) => {
+                                            const age = getAge(e.dateNaissance);
+                                            const status = parentStatus(e);
+                                            return `
+                                        <tr onclick="goToEleveFiche('${e.id}')" style="cursor:pointer;border-bottom:1px solid var(--md-sys-color-outline-variant);transition:background .15s;"
+                                            onmouseover="this.style.background='var(--md-sys-color-primary-container)'"
+                                            onmouseout="this.style.background=''">
+                                            <td style="padding:10px 12px;display:flex;align-items:center;gap:10px;">
+                                                <div class="md-avatar" style="width:36px;height:36px;font-size:14px;font-weight:700;flex-shrink:0;background:var(--md-sys-color-primary);color:white;">
+                                                    ${e.photo ? `<img src="${e.photo}" alt="${e.prenom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : (e.prenom || "E")[0].toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight:600;font-size:14px;">${e.prenom} ${e.nom}</div>
+                                                </div>
+                                            </td>
+                                            <td style="padding:10px 12px;color:var(--md-sys-color-on-surface-variant);">
+                                                ${e.dateNaissance ? e.dateNaissance.split("T")[0].split("-").reverse().join("/") : "—"}
+                                                ${age !== null ? `<span style="margin-left:6px;font-size:12px;color:var(--md-sys-color-primary);">(${age} ans)</span>` : ""}
+                                            </td>
+                                            <td style="padding:10px 12px;">
+                                                <span style="font-size:12px;color:${status.color};font-weight:500;">${status.text}</span>
+                                            </td>
+                                            <td style="padding:10px 12px;text-align:center;">
+                                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-on-surface-variant);">chevron_right</span>
+                                            </td>
+                                        </tr>`;}).join("")}
+                                    </tbody>
+                                </table>
                                </div>`
                         }
                     </div>
@@ -10739,9 +10818,18 @@
             `;
             }
 
-            // EMPLOI DU TEMPS - Modale et fonctions
+            // EMPLOI DU TEMPS - Modale et fonctions (horaires HH:MM-HH:MM)
             window._edtClasseId = null;
-            window._edtCreneaux = [];
+            window._edtCreneaux = []; // [{jour, periode: "HH:MM-HH:MM"}]
+
+            // Parser "HH:MM-HH:MM" → {debut, fin}
+            function parsePeriodeTime(p) {
+                if (p === "matin") return { debut: "08:00", fin: "12:00" };
+                if (p === "apres-midi") return { debut: "14:00", fin: "17:00" };
+                const m = p.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+                if (m) return { debut: m[1], fin: m[2] };
+                return { debut: "08:00", fin: "12:00" };
+            }
 
             async function openEdtModal(classeId) {
                 window._edtClasseId = classeId;
@@ -10786,6 +10874,36 @@
                     dimanche: "Dimanche",
                 };
 
+                // Construire le HTML des jours avec heures
+                const joursHtml = jours.map((jour) => {
+                    // Chercher si un creneau existe pour ce jour
+                    const creneau = window._edtCreneaux.find((c) => c.jour === jour);
+                    const times = creneau ? parsePeriodeTime(creneau.periode) : { debut: "08:30", fin: "12:30" };
+                    return `
+                    <div class="edt-day-row" id="edt_row_${jour}" style="${creneau ? "" : "opacity:.55;"}">
+                        <div class="edt-day-name">
+                            <input type="checkbox" id="edt_${jour}_enabled"
+                                   style="width:18px;height:18px;cursor:pointer;accent-color:var(--md-sys-color-primary);margin-right:4px;"
+                                   ${creneau ? "checked" : ""}
+                                   onchange="updateEdtDayEnabled('${jour}', this.checked)">
+                            <span class="material-icons" style="color:var(--md-sys-color-tertiary); font-size: 20px;">today</span>
+                            ${joursLabels[jour]}
+                        </div>
+                        <div class="edt-day-toggles" id="edt_${jour}_times" style="${creneau ? "" : "display:none;"}">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <label style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">De</label>
+                                <input type="time" id="edt_${jour}_debut" class="edt-time-input"
+                                       value="${times.debut}"
+                                       onchange="updateEdtTime('${jour}')">
+                                <label style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">à</label>
+                                <input type="time" id="edt_${jour}_fin" class="edt-time-input"
+                                       value="${times.fin}"
+                                       onchange="updateEdtTime('${jour}')">
+                            </div>
+                        </div>
+                    </div>`;
+                }).join("");
+
                 // Créer ou afficher la modale
                 let modal = document.getElementById("edtModal");
                 if (!modal) {
@@ -10796,7 +10914,7 @@
                 }
 
                 modal.innerHTML = `
-                <div class="actu-modal" style="max-width:600px;">
+                <div class="actu-modal" style="max-width:640px;">
                     <button class="actu-modal-close" onclick="closeEdtModal()">
                         <span class="material-icons">close</span>
                     </button>
@@ -10806,39 +10924,18 @@
                             <span class="material-icons">schedule</span>
                         </div>
                         <div class="actu-modal-hero-content">
-                            <div class="actu-modal-hero-title">Emploi du temps - ${classe.nom}</div>
+                            <div class="actu-modal-hero-title">Emploi du temps — ${classe.nom}</div>
                             <div class="actu-modal-hero-meta">
-                                <span><span class="material-icons">info</span> Sélectionnez les jours et périodes de cours</span>
+                                <span><span class="material-icons">info</span> Définissez les jours et horaires de cours</span>
                             </div>
                         </div>
                     </div>
                     <div class="actu-modal-body">
-                        <p style="margin-bottom:20px;color:var(--md-sys-color-on-surface-variant);font-size:14px;">
-                            Cochez les créneaux où cette classe a cours. Vous pouvez sélectionner le matin, l'après-midi, ou les deux pour chaque jour.
+                        <p style="margin-bottom:16px;color:var(--md-sys-color-on-surface-variant);font-size:13px;">
+                            Cochez les jours où la classe a cours et indiquez l'horaire (début et fin).
                         </p>
-                        <div class="edt-container">
-                            ${jours.map(jour => `
-                            <div class="edt-day-row">
-                                <div class="edt-day-name">
-                                    <span class="material-icons" style="color:var(--md-sys-color-tertiary); font-size: 20px;">today</span>
-                                    ${joursLabels[jour]}
-                                </div>
-                                <div class="edt-day-toggles">
-                                    <input class="edt-toggle-input" type="checkbox" id="edt_${jour}_matin"
-                                           ${window._edtCreneaux.some((c) => c.jour === jour && c.periode === "matin") ? "checked" : ""}
-                                           onchange="updateEdtCheckbox(this, '${jour}', 'matin')">
-                                    <label class="edt-toggle-label" for="edt_${jour}_matin" title="Matin - ${joursLabels[jour]}">
-                                        <span class="material-icons" style="font-size: 18px;">wb_sunny</span> Matin
-                                    </label>
-
-                                    <input class="edt-toggle-input" type="checkbox" id="edt_${jour}_apm"
-                                           ${window._edtCreneaux.some((c) => c.jour === jour && c.periode === "apres-midi") ? "checked" : ""}
-                                           onchange="updateEdtCheckbox(this, '${jour}', 'apres-midi')">
-                                    <label class="edt-toggle-label" for="edt_${jour}_apm" title="Après-midi - ${joursLabels[jour]}">
-                                        <span class="material-icons" style="font-size: 18px;">wb_twilight</span> Après-midi
-                                    </label>
-                                </div>
-                            </div>`).join("")}
+                        <div class="edt-container" id="edtModalDaysContainer">
+                            ${joursHtml}
                         </div>
 
                         <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid var(--md-sys-color-outline-variant);">
@@ -10848,21 +10945,43 @@
                             </button>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
 
                 // Afficher la modale
                 setTimeout(() => modal.classList.add("open"), 10);
             }
 
-            function updateEdtCheckbox(checkbox, jour, periode) {
-                const exists = window._edtCreneaux.findIndex(
-                    (c) => c.jour === jour && c.periode === periode,
-                );
-                if (checkbox.checked && exists === -1) {
+            function updateEdtDayEnabled(jour, enabled) {
+                const row = document.getElementById(`edt_row_${jour}`);
+                const timesDiv = document.getElementById(`edt_${jour}_times`);
+                if (enabled) {
+                    row.style.opacity = "1";
+                    timesDiv.style.display = "flex";
+                    // Ajouter le créneau s'il n'existe pas
+                    const debut = document.getElementById(`edt_${jour}_debut`)?.value || "08:30";
+                    const fin = document.getElementById(`edt_${jour}_fin`)?.value || "12:30";
+                    updateEdtCreneau(jour, debut, fin);
+                } else {
+                    row.style.opacity = "0.55";
+                    timesDiv.style.display = "none";
+                    // Retirer le créneau
+                    window._edtCreneaux = window._edtCreneaux.filter((c) => c.jour !== jour);
+                }
+            }
+
+            function updateEdtTime(jour) {
+                const debut = document.getElementById(`edt_${jour}_debut`)?.value;
+                const fin = document.getElementById(`edt_${jour}_fin`)?.value;
+                if (debut && fin) updateEdtCreneau(jour, debut, fin);
+            }
+
+            function updateEdtCreneau(jour, debut, fin) {
+                const periode = `${debut}-${fin}`;
+                const idx = window._edtCreneaux.findIndex((c) => c.jour === jour);
+                if (idx !== -1) {
+                    window._edtCreneaux[idx].periode = periode;
+                } else {
                     window._edtCreneaux.push({ jour, periode });
-                } else if (!checkbox.checked && exists !== -1) {
-                    window._edtCreneaux.splice(exists, 1);
                 }
             }
 
@@ -10879,7 +10998,7 @@
             async function saveEdtModal() {
                 if (!window._edtClasseId) return;
                 const classeId = window._edtClasseId;
-                const creneaux = [...window._edtCreneaux]; // Copie pour utiliser après fermeture
+                const creneaux = [...window._edtCreneaux];
 
                 try {
                     const response = await fetch(
@@ -10897,7 +11016,6 @@
                             "success",
                         );
                         closeEdtModal();
-                        // Mettre à jour uniquement la section emploi du temps
                         updateEdtSection(classeId, creneaux);
                     } else {
                         const err = await response.json();
@@ -10932,24 +11050,29 @@
                     samedi: "Samedi",
                     dimanche: "Dimanche",
                 };
-                const periodesLabels = {
-                    matin: "Matin",
-                    "apres-midi": "Après-midi",
-                };
+
+                // Parser les périodes
+                function parsePeriode(p) {
+                    if (p === "matin") return { label: "Matin 08:00–12:00", icon: "wb_sunny" };
+                    if (p === "apres-midi") return { label: "Après-midi 14:00–17:00", icon: "wb_twilight" };
+                    const m = p.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+                    if (m) return { label: `${m[1]} – ${m[2]}`, icon: "schedule" };
+                    return { label: p, icon: "schedule" };
+                }
 
                 // Grouper par jour
                 const edtParJour = {};
                 creneaux.forEach((c) => {
                     if (!edtParJour[c.jour]) edtParJour[c.jour] = [];
-                    edtParJour[c.jour].push(c.periode);
+                    edtParJour[c.jour].push(parsePeriode(c.periode));
+                });
+                Object.keys(edtParJour).forEach((j) => {
+                    edtParJour[j].sort((a, b) => a.label.localeCompare(b.label));
                 });
 
-                // Trouver la section emploi du temps par ID
-                const sectionContent =
-                    document.getElementById("edtSectionContent");
+                const sectionContent = document.getElementById("edtSectionContent");
                 if (!sectionContent) return;
 
-                // Mettre à jour le contenu
                 if (creneaux.length === 0) {
                     sectionContent.innerHTML = `
                     <div style="text-align:center;padding:28px 16px;color:var(--md-sys-color-on-surface-variant);">
@@ -10965,34 +11088,36 @@
                     </div>`;
                 } else {
                     sectionContent.innerHTML = `
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
-                        ${joursOrdre
-                            .filter((j) => edtParJour[j])
-                            .map(
-                                (jour) => `
-                        <div style="background:var(--md-sys-color-surface-container-low);border-radius:12px;padding:14px;
-                                    border:1px solid var(--md-sys-color-outline-variant);">
-                            <div style="font-weight:600;font-size:14px;color:var(--md-sys-color-on-surface);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                                <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
-                                ${joursLabels[jour]}
-                            </div>
-                            <div style="display:flex;flex-direction:column;gap:4px;">
-                                ${edtParJour[jour]
-                                    .sort()
-                                    .map(
-                                        (periode) => `
-                                <span style="background:${periode === "matin" ? "var(--md-sys-color-primary-container)" : "var(--md-sys-color-secondary-container)"};
-                                             color:${periode === "matin" ? "var(--md-sys-color-on-primary-container)" : "var(--md-sys-color-on-secondary-container)"};
-                                             padding:4px 10px;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:4px;">
-                                    <span class="material-icons" style="font-size:14px;">${periode === "matin" ? "wb_sunny" : "wb_twilight"}</span>
-                                    ${periodesLabels[periode]}
-                                </span>`,
-                                    )
-                                    .join("")}
-                            </div>
-                        </div>`,
-                            )
-                            .join("")}
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                            <thead>
+                                <tr style="background:var(--md-sys-color-surface-container-high);">
+                                    <th style="padding:10px 16px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Jour</th>
+                                    <th style="padding:10px 16px;text-align:left;font-weight:600;color:var(--md-sys-color-on-surface-variant);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--md-sys-color-outline-variant);">Horaires</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${joursOrdre
+                                    .filter((j) => edtParJour[j])
+                                    .map((jour) => `
+                                <tr style="border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                                    <td style="padding:12px 16px;font-weight:600;color:var(--md-sys-color-on-surface);display:flex;align-items:center;gap:8px;">
+                                        <span class="material-icons" style="font-size:18px;color:var(--md-sys-color-tertiary);">today</span>
+                                        ${joursLabels[jour]}
+                                    </td>
+                                    <td style="padding:12px 16px;">
+                                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                            ${edtParJour[jour].map(p => `
+                                                <span style="background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);
+                                                     padding:4px 12px;border-radius:20px;font-size:13px;display:flex;align-items:center;gap:6px;font-weight:500;">
+                                                    <span class="material-icons" style="font-size:14px;">${p.icon}</span>
+                                                    ${p.label}
+                                                </span>`).join("")}
+                                        </div>
+                                    </td>
+                                </tr>`).join("")}
+                            </tbody>
+                        </table>
                     </div>`;
                 }
             }
@@ -11276,10 +11401,15 @@
                             </p>
                         </div>
                     </div>
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px;">
-                        <p style="font-size: 14px; color: var(--md-sys-color-on-surface-variant); display:flex; align-items:center; gap:4px;">
-                            <span class="material-icons" style="font-size:16px;">group</span> ${nbEleves} élève${nbEleves !== 1 ? "s" : ""}
-                        </p>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; flex-wrap:wrap; gap:6px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); display:flex; align-items:center; gap:4px;">
+                                <span class="material-icons" style="font-size:16px;">group</span> ${nbEleves} élève${nbEleves !== 1 ? "s" : ""}
+                            </p>
+                            ${c.salle ? `<span style="font-size:11px;background:var(--md-sys-color-tertiary-container);color:var(--md-sys-color-on-tertiary-container);padding:2px 8px;border-radius:20px;display:flex;align-items:center;gap:3px;">
+                                <span class="material-icons" style="font-size:12px;">door_front</span> ${c.salle}
+                            </span>` : ""}
+                        </div>
                         <div style="display: flex; gap: 8px;">
                             ${canModifyData() ? `<button class="md-btn md-btn-tonal" onclick="event.stopPropagation(); enterClasseEditMode('${c.id}')"><span class="material-icons">edit</span></button>` : ""}
                             ${canModifyData() ? `<button class="md-btn md-btn-text" style="color: var(--md-sys-color-error);" onclick="event.stopPropagation(); deleteClasse('${c.id}')"><span class="material-icons">delete</span></button>` : ""}
@@ -11314,6 +11444,7 @@
                     `Classe : ${classe.nom}`,
                     `
                 <p><strong>Niveau :</strong> ${classe.niveau || "Non défini"}</p>
+                <p><strong>Salle :</strong> ${classe.salle || "Non définie"}</p>
                 <p><strong>Effectif :</strong> ${elevesClasse.length} élève(s)</p>
                 <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--md-sys-color-outline-variant);">
                 <h4 style="margin-bottom: 12px;">Liste des élèves :</h4>
@@ -11417,6 +11548,10 @@
                                         )
                                         .join("")}
                                 </select>
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons">meeting_room</span> Numéro de salle</label>
+                                <input id="edit_classeSalle" class="fiche-edit-input" type="text" value="${classe.salle || ""}" placeholder="ex: 101, A3...">
                             </div>
                             <div class="fiche-edit-item fiche-edit-item--full" style="position:relative;">
                                 <label class="fiche-edit-label"><span class="material-icons">person</span> Professeur référent</label>
@@ -11762,6 +11897,8 @@
 
                 const niveau =
                     document.getElementById("edit_classeNiveau")?.value || null;
+                const salle =
+                    document.getElementById("edit_classeSalle")?.value?.trim() || null;
                 const professeurId = window._classeEditProfesseurId || null;
 
                 const errors = [];
@@ -11771,7 +11908,7 @@
                     const r = await fetch(`${API_URL}/classes/${classeId}`, {
                         method: "PUT",
                         headers: getHeaders(),
-                        body: JSON.stringify({ nom, niveau, professeurId }),
+                        body: JSON.stringify({ nom, niveau, professeurId, salle }),
                     });
                     if (!r.ok) errors.push("classe");
                 } catch (e) {
@@ -11984,6 +12121,10 @@
                                         .join("")}
                                 </select>
                             </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons">meeting_room</span> Numéro de salle</label>
+                                <input id="classeSalle" class="fiche-edit-input" type="text" value="" placeholder="ex: 101, A3...">
+                            </div>
                             <div class="fiche-edit-item fiche-edit-item--full" style="position:relative;">
                                 <label class="fiche-edit-label"><span class="material-icons">person</span> Professeur référent</label>
                                 <div>
@@ -12027,27 +12168,27 @@
                     </div>
                     <div class="fiche-section-content">
                         <p style="margin-bottom:16px;color:var(--md-sys-color-on-surface-variant);font-size:13px;">
-                            Cochez les créneaux où cette classe a cours. Vous pourrez modifier cela plus tard.
+                            Cochez les jours de cours et indiquez l'horaire. Vous pourrez modifier cela plus tard.
                         </p>
-                        <div class="edt-container">
+                        <div class="edt-container" id="createEdtContainer">
                             ${jours.map(jour => `
-                            <div class="edt-day-row">
+                            <div class="edt-day-row" id="create_edt_row_${jour}" style="opacity:.55;">
                                 <div class="edt-day-name">
+                                    <input type="checkbox" id="create_edt_${jour}_enabled"
+                                           style="width:18px;height:18px;cursor:pointer;accent-color:var(--md-sys-color-primary);margin-right:4px;"
+                                           onchange="updateCreateEdtDayEnabled('${jour}', this.checked)">
                                     <span class="material-icons" style="color:var(--md-sys-color-tertiary); font-size: 20px;">today</span>
                                     ${joursLabels[jour]}
                                 </div>
-                                <div class="edt-day-toggles">
-                                    <input class="edt-toggle-input" type="checkbox" id="create_edt_${jour}_matin"
-                                           onchange="updateCreateClasseEdt('${jour}', 'matin', this.checked)">
-                                    <label class="edt-toggle-label" for="create_edt_${jour}_matin" title="Matin - ${joursLabels[jour]}">
-                                        <span class="material-icons" style="font-size: 18px;">wb_sunny</span> Matin
-                                    </label>
-
-                                    <input class="edt-toggle-input" type="checkbox" id="create_edt_${jour}_apm"
-                                           onchange="updateCreateClasseEdt('${jour}', 'apres-midi', this.checked)">
-                                    <label class="edt-toggle-label" for="create_edt_${jour}_apm" title="Après-midi - ${joursLabels[jour]}">
-                                        <span class="material-icons" style="font-size: 18px;">wb_twilight</span> Après-midi
-                                    </label>
+                                <div class="edt-day-toggles" id="create_edt_${jour}_times" style="display:none;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <label style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">De</label>
+                                        <input type="time" id="create_edt_${jour}_debut" class="edt-time-input"
+                                               value="08:30" onchange="updateCreateEdtTime('${jour}')">
+                                        <label style="font-size:12px;color:var(--md-sys-color-on-surface-variant);">à</label>
+                                        <input type="time" id="create_edt_${jour}_fin" class="edt-time-input"
+                                               value="12:30" onchange="updateCreateEdtTime('${jour}')">
+                                    </div>
                                 </div>
                             </div>`).join("")}
                         </div>
@@ -12069,16 +12210,36 @@
             `;
             }
 
-            function updateCreateClasseEdt(jour, periode, checked) {
-                if (!window._createClasseEdtCreneaux)
-                    window._createClasseEdtCreneaux = [];
-                const idx = window._createClasseEdtCreneaux.findIndex(
-                    (c) => c.jour === jour && c.periode === periode,
-                );
-                if (checked && idx === -1) {
+            function updateCreateEdtDayEnabled(jour, enabled) {
+                const row = document.getElementById(`create_edt_row_${jour}`);
+                const timesDiv = document.getElementById(`create_edt_${jour}_times`);
+                if (enabled) {
+                    row.style.opacity = "1";
+                    timesDiv.style.display = "flex";
+                    const debut = document.getElementById(`create_edt_${jour}_debut`)?.value || "08:30";
+                    const fin = document.getElementById(`create_edt_${jour}_fin`)?.value || "12:30";
+                    updateCreateClasseEdtCreneau(jour, debut, fin);
+                } else {
+                    row.style.opacity = "0.55";
+                    timesDiv.style.display = "none";
+                    window._createClasseEdtCreneaux = window._createClasseEdtCreneaux.filter((c) => c.jour !== jour);
+                }
+            }
+
+            function updateCreateEdtTime(jour) {
+                const debut = document.getElementById(`create_edt_${jour}_debut`)?.value;
+                const fin = document.getElementById(`create_edt_${jour}_fin`)?.value;
+                if (debut && fin) updateCreateClasseEdtCreneau(jour, debut, fin);
+            }
+
+            function updateCreateClasseEdtCreneau(jour, debut, fin) {
+                if (!window._createClasseEdtCreneaux) window._createClasseEdtCreneaux = [];
+                const periode = `${debut}-${fin}`;
+                const idx = window._createClasseEdtCreneaux.findIndex((c) => c.jour === jour);
+                if (idx !== -1) {
+                    window._createClasseEdtCreneaux[idx].periode = periode;
+                } else {
                     window._createClasseEdtCreneaux.push({ jour, periode });
-                } else if (!checked && idx !== -1) {
-                    window._createClasseEdtCreneaux.splice(idx, 1);
                 }
             }
 
@@ -12094,6 +12255,8 @@
                 const nom = document.getElementById("classeNom")?.value?.trim();
                 const niveau =
                     document.getElementById("classeNiveau")?.value || null;
+                const salle =
+                    document.getElementById("classeSalle")?.value?.trim() || null;
                 const professeurId =
                     document.getElementById("selectedProfesseurId")?.value ||
                     null;
@@ -12114,7 +12277,7 @@
                     const response = await fetch(`${API_URL}/classes`, {
                         method: "POST",
                         headers: getHeaders(),
-                        body: JSON.stringify({ nom, niveau, professeurId }),
+                        body: JSON.stringify({ nom, niveau, professeurId, salle }),
                     });
 
                     if (response.ok) {

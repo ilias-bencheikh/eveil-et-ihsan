@@ -133,8 +133,12 @@ function initDatabase() {
                 id TEXT PRIMARY KEY,
                 nom TEXT NOT NULL,
                 niveau TEXT,
-                professeurId TEXT
+                professeurId TEXT,
+                salle TEXT
             )`);
+
+            // Migration : ajouter salle si elle n'existe pas
+            db.run(`ALTER TABLE classes ADD COLUMN salle TEXT`, () => {});
 
             // Table emplois du temps (créneaux horaires par classe)
             db.run(`CREATE TABLE IF NOT EXISTS emplois_du_temps (
