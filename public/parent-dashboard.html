@@ -4032,6 +4032,11 @@
             <!-- Overlay Mobile -->
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+            <!-- Floating Menu Button (Mobile) -->
+            <button class="floating-menu-btn" id="menuToggle" aria-label="Ouvrir le menu">
+                <span class="material-icons">menu</span>
+            </button>
+
             <!-- Sidebar Navigation -->
             <aside class="dashboard-sidebar" id="sidebar">
                 <div class="sidebar-header">
@@ -4201,33 +4206,6 @@
 
             <!-- Main Content -->
             <main class="dashboard-main">
-                <!-- Top Bar -->
-                <header class="dashboard-topbar">
-                    <div class="topbar-left">
-                        <button class="topbar-menu-btn" id="menuToggle">
-                            <span class="material-icons">menu</span>
-                        </button>
-                        <h1 class="topbar-title" id="pageTitle">Accueil</h1>
-                    </div>
-                    <div class="topbar-right">
-                        <span
-                            id="userName"
-                            style="
-                                font: var(--md-sys-typescale-label-large);
-                                color: var(--md-sys-color-on-surface);
-                            "
-                            >Parent</span
-                        >
-                        <span
-                            class="material-icons"
-                            style="
-                                color: var(--md-sys-color-on-surface-variant);
-                            "
-                            >account_circle</span
-                        >
-                    </div>
-                </header>
-
                 <!-- Content Area -->
                 <div class="dashboard-content">
                     <!-- Section Accueil Parent -->
@@ -7749,8 +7727,8 @@
                         preinscriptions: "Préinscriptions",
                         parametres: "Paramètres",
                     };
-                    document.getElementById("pageTitle").textContent =
-                        titles[sectionId] || "Accueil";
+                    var titleEl = document.getElementById("pageTitle");
+                    if (titleEl) titleEl.textContent = titles[sectionId] || "Accueil";
 
                     // Remonter en haut de page
                     window.scrollTo({ top: 0, left: 0, behavior: "instant" });

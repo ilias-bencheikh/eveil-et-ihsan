@@ -412,75 +412,48 @@
         var(--md-sys-motion-easing-emphasized);
 }
 
-/* Top Bar */
-.dashboard-topbar {
-    position: sticky;
-    top: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--md-sys-color-surface);
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-    z-index: 100;
-}
-
-.topbar-left {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-
-.topbar-menu-btn {
+/* Floating Menu Button (Mobile) */
+.floating-menu-btn {
     display: none;
-    width: 40px;
-    height: 40px;
+    position: fixed;
+    top: env(safe-area-inset-top, 16px);
+    left: 16px;
+    z-index: 998;
+    width: 48px;
+    height: 48px;
     border: none;
-    background: none;
-    border-radius: var(--md-sys-shape-corner-full);
+    background: var(--md-sys-color-surface);
     color: var(--md-sys-color-on-surface);
+    border-radius: var(--md-sys-shape-corner-large);
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short3)
-        var(--md-sys-motion-easing-standard);
-}
-
-.topbar-menu-btn:hover {
-    background: var(--md-sys-color-surface-container);
-}
-
-.topbar-breadcrumb {
-    display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    font: var(--md-sys-typescale-body-medium);
-    color: var(--md-sys-color-on-surface-variant);
+    justify-content: center;
+    box-shadow: var(--md-sys-elevation-3);
+    transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
 }
 
-.topbar-breadcrumb a {
-    color: var(--md-sys-color-primary);
-    text-decoration: none;
+.floating-menu-btn .material-icons {
+    font-size: 24px;
 }
 
-.topbar-title {
-    font: var(--md-sys-typescale-title-large);
-    color: var(--md-sys-color-on-surface);
+.floating-menu-btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+    box-shadow: var(--md-sys-elevation-4);
+    transform: scale(1.05);
 }
 
-.topbar-right {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+.floating-menu-btn:active {
+    transform: scale(0.96);
 }
 
+/* Search Bar (used inside dashboard tabs) */
 .topbar-search {
-    position: relative;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--md-sys-color-surface-container);
     border-radius: var(--md-sys-shape-corner-full);
-    width: 280px;
     transition: all var(--md-sys-motion-duration-short3)
         var(--md-sys-motion-easing-standard);
 }
@@ -490,6 +463,12 @@
     box-shadow: var(--md-sys-elevation-1);
 }
 
+.topbar-search .material-icons {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
 .topbar-search input {
     flex: 1;
     border: none;
@@ -497,47 +476,11 @@
     font: var(--md-sys-typescale-body-medium);
     color: var(--md-sys-color-on-surface);
     outline: none;
+    min-width: 0;
 }
 
 .topbar-search input::placeholder {
     color: var(--md-sys-color-on-surface-variant);
-}
-
-.topbar-icon-btn {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: none;
-    border-radius: var(--md-sys-shape-corner-full);
-    color: var(--md-sys-color-on-surface-variant);
-    cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short3)
-        var(--md-sys-motion-easing-standard);
-}
-
-.topbar-icon-btn:hover {
-    background: var(--md-sys-color-surface-container);
-    color: var(--md-sys-color-on-surface);
-}
-
-.topbar-icon-btn .badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
-    background: var(--md-sys-color-error);
-    color: white;
-    border-radius: var(--md-sys-shape-corner-full);
-    font: var(--md-sys-typescale-label-small);
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Content Area */
@@ -796,12 +739,8 @@
         margin-left: 0;
     }
 
-    .topbar-menu-btn {
+    .floating-menu-btn {
         display: flex;
-    }
-
-    .dashboard-topbar .topbar-search {
-        display: none;
     }
 }
 

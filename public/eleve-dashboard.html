@@ -2685,6 +2685,11 @@
             <!-- Overlay Mobile -->
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+            <!-- Floating Menu Button (Mobile) -->
+            <button class="floating-menu-btn" id="menuToggle" aria-label="Ouvrir le menu">
+                <span class="material-icons">menu</span>
+            </button>
+
             <!-- Sidebar Navigation -->
             <aside class="dashboard-sidebar" id="sidebar">
                 <div class="sidebar-header">
@@ -2839,32 +2844,6 @@
 
             <!-- Main Content -->
             <main class="dashboard-main">
-                <!-- Top Bar -->
-                <header class="dashboard-topbar">
-                    <div class="topbar-left">
-                        <button class="topbar-menu-btn" id="menuToggle">
-                            <span class="material-icons">menu</span>
-                        </button>
-                        <h1 class="topbar-title" id="pageTitle">Mon espace</h1>
-                    </div>
-
-                    <div class="topbar-right">
-                        <button class="topbar-icon-btn" id="notifBtn">
-                            <span class="material-icons">notifications</span>
-                            <span
-                                class="badge"
-                                id="notifBadge"
-                                style="display: none"
-                                >0</span
-                            >
-                        </button>
-
-                        <button class="topbar-icon-btn" id="themeToggle">
-                            <span class="material-icons">dark_mode</span>
-                        </button>
-                    </div>
-                </header>
-
                 <!-- Content Area -->
                 <div class="dashboard-content">
                     <!-- Accueil Tab -->
@@ -5778,8 +5757,8 @@
                     "frais-admin": "Gestion des frais",
                     parametres: "Paramètres",
                 };
-                document.getElementById("pageTitle").textContent =
-                    titles[tabName] || tabName;
+                var titleEl = document.getElementById("pageTitle");
+                    if (titleEl) titleEl.textContent = titles[tabName] || tabName;
 
                 // Remonter en haut de page
                 window.scrollTo({ top: 0, left: 0, behavior: "instant" });

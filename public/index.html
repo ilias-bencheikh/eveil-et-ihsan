@@ -2881,6 +2881,11 @@
             <!-- Overlay Mobile -->
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+            <!-- Floating Menu Button (Mobile) -->
+            <button class="floating-menu-btn" id="menuToggle" aria-label="Ouvrir le menu">
+                <span class="material-icons">menu</span>
+            </button>
+
             <!-- Sidebar Navigation -->
             <aside class="dashboard-sidebar" id="sidebar">
                 <div class="sidebar-header">
@@ -3089,37 +3094,6 @@
 
             <!-- Main Content -->
             <main class="dashboard-main">
-                <!-- Top Bar -->
-                <header class="dashboard-topbar">
-                    <div class="topbar-left">
-                        <button class="topbar-menu-btn" id="menuToggle">
-                            <span class="material-icons">menu</span>
-                        </button>
-                        <h1 class="topbar-title" id="pageTitle">
-                            Tableau de bord
-                        </h1>
-                    </div>
-                    <div class="topbar-right">
-                        <div class="topbar-search">
-                            <span class="material-icons">search</span>
-                            <input
-                                type="text"
-                                placeholder="Rechercher..."
-                                id="globalSearch"
-                            />
-                        </div>
-                        <button class="topbar-icon-btn" id="notifBtn">
-                            <span class="material-icons">notifications</span>
-                            <span
-                                class="badge"
-                                id="notifBadge"
-                                style="display: none"
-                                >0</span
-                            >
-                        </button>
-                    </div>
-                </header>
-
                 <!-- Content Area -->
                 <div class="dashboard-content">
                     <!-- ========== DASHBOARD TAB ========== -->
@@ -7785,8 +7759,8 @@
                     accounts: "Comptes",
                     parametres: "Paramètres",
                 };
-                document.getElementById("pageTitle").textContent =
-                    titles[tabName] || tabName;
+                var titleEl = document.getElementById("pageTitle");
+                if (titleEl) titleEl.textContent = titles[tabName] || tabName;
                 
                 // Charger les données de l'onglet après un petit délai pour laisser le DOM se stabiliser
                 requestAnimationFrame(() => {
