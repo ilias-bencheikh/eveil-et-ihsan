@@ -3756,9 +3756,9 @@
                     </div>
 
                     <!-- ========== APPRàCIATIONS TAB ========== -->
-                    <div id="appreciations" class="tab-content">
+                    <div id="appreciations" class="tab-content" style="position: relative">
                         <!-- Section principale: Sélection de classe et actions -->
-                        <div class="widget-card" style="margin-bottom: 16px">
+                        <div class="widget-card" id="appreciationsMainWidget" style="margin-bottom: 16px">
                             <div class="widget-card-header">
                                 <h3 class="widget-card-title">
                                     Gestion des appréciations par classe
@@ -4008,7 +4008,7 @@
                         <div
                             class="widget-card"
                             id="appreciationFormCard"
-                            style="display: none"
+                            style="display: none; position: absolute; left: 0; right: 0; z-index: 30"
                         >
                             <div class="widget-card-header">
                                 <h3
@@ -13949,6 +13949,11 @@
                     "block";
                 document.getElementById("historiqueCard").style.display =
                     "none";
+                const mainWidget = document.getElementById("appreciationsMainWidget");
+                if (mainWidget) {
+                    mainWidget.style.display = "none";
+                }
+                
                 document.getElementById("appreciationFormTitle").textContent =
                     "Nouvelle saisie d'appréciations";
                 document.getElementById("selectedClasseLabel").textContent =
@@ -13965,6 +13970,11 @@
             function hideAppreciationForm() {
                 document.getElementById("appreciationFormCard").style.display =
                     "none";
+                document.getElementById("historiqueCard").style.display = "none";
+                const mainWidget = document.getElementById("appreciationsMainWidget");
+                if (mainWidget) {
+                    mainWidget.style.display = "block";
+                }
             }
 
             // Charger les élèves dans le formulaire
@@ -14241,6 +14251,10 @@
                     ).style.display = "block";
                     document.getElementById("historiqueCard").style.display =
                         "none";
+                    const mainWidget = document.getElementById("appreciationsMainWidget");
+                    if (mainWidget) {
+                        mainWidget.style.display = "none";
+                    }
                     document.getElementById(
                         "appreciationFormTitle",
                     ).textContent = "Modifier les appréciations";
