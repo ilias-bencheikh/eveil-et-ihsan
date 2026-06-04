@@ -168,6 +168,29 @@
                 padding-left: 40px !important;
             }
 
+            /* Form grid — used in actualité create/edit form and elsewhere */
+            .md-form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                align-items: start;
+            }
+
+            @media (max-width: 500px) {
+                .actualite-dates-grid {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                }
+                .actualite-form-section {
+                    padding: 16px;
+                    margin: 16px 0;
+                }
+                .md-form-grid {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                }
+            }
+
             /* textarea that grows with content */
             textarea.auto-resize {
                 overflow: hidden;
@@ -300,18 +323,98 @@
             /* Grille actualités */
             #actualitesList {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-                gap: 24px;
-                padding: 16px;
+                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                gap: 20px;
+                padding: 20px;
                 max-width: 1400px;
                 margin: 0 auto;
                 align-items: start;
             }
 
-            @media (max-width: 800px) {
+            /* Feed vide */
+            .actu-empty {
+                grid-column: 1 / -1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                padding: 64px 24px;
+                text-align: center;
+            }
+            .actu-empty-icon {
+                font-size: 52px;
+                color: var(--md-sys-color-outline);
+                opacity: 0.5;
+            }
+            .actu-empty-title {
+                font-size: 17px;
+                font-weight: 600;
+                color: var(--md-sys-color-on-surface);
+            }
+            .actu-empty-sub {
+                font-size: 14px;
+                color: var(--md-sys-color-on-surface-variant);
+                line-height: 1.6;
+                max-width: 280px;
+            }
+
+            @media (max-width: 700px) {
                 #actualitesList {
                     grid-template-columns: 1fr;
-                    max-width: 720px;
+                    padding: 12px;
+                    gap: 14px;
+                }
+                /* Cards plus compactes sur mobile */
+                .fb-post {
+                    border-radius: 16px;
+                    margin-bottom: 0;
+                }
+                .fb-post-header {
+                    padding: 18px 18px 12px;
+                }
+                .fb-post-avatar {
+                    width: 44px;
+                    height: 44px;
+                    font-size: 15px;
+                }
+                .fb-post-content {
+                    padding: 0 18px 14px;
+                }
+                .fb-post-title {
+                    font-size: 16px;
+                }
+                .fb-post-text {
+                    font-size: 14px;
+                    line-height: 1.6;
+                }
+                .fb-post-footer {
+                    padding: 12px 18px;
+                }
+                .fb-post-media.single img,
+                .fb-post-media.single video {
+                    max-height: 220px;
+                }
+                .fb-post-media-grid {
+                    gap: 6px;
+                    padding-bottom: 6px;
+                }
+                .fb-post-media-grid .media-item {
+                    width: 140px;
+                    height: 140px;
+                }
+                .fb-post-attachments {
+                    padding: 0 18px 16px;
+                }
+                .fb-post-text-only {
+                    padding: 28px 20px;
+                    margin: 0 12px 16px;
+                }
+                .fb-post-text-only .fb-post-title {
+                    font-size: 19px;
+                }
+                .fb-post-text-only .fb-post-text {
+                    font-size: 15px;
                 }
             }
 
@@ -762,68 +865,44 @@
             }
 
             @media (max-width: 700px) {
-                #actualitesList {
-                    padding: 12px;
-                    gap: 12px;
+                .fb-post-media-grid .media-item {
+                    width: 160px;
+                    height: 160px;
                 }
-                .fb-post {
-                    margin-bottom: 16px;
-                    border-radius: 16px;
-                }
-                .fb-post-header {
-                    padding: 16px 16px 12px;
-                    gap: 12px;
-                }
-                .fb-post-avatar {
-                    width: 44px;
-                    height: 44px;
-                    font-size: 16px;
-                }
-                .fb-post-content {
-                    padding: 0 16px 12px;
-                }
-                .fb-post-title {
-                    font-size: 16px;
-                }
-                .fb-post-text {
-                    font-size: 14px;
-                }
-                .fb-post-media {
-                    margin: 0 12px 16px;
-                    border-radius: 12px;
-                }
-                .fb-post-video-container {
-                    margin: 0 12px 16px;
-                    border-radius: 12px;
-                }
-                .fb-post-attachments {
-                    padding: 0 16px 16px;
-                }
-                .fb-post-attachment {
-                    padding: 12px;
-                }
-                .fb-post-text-only {
-                    padding: 32px 20px;
+                .actu-modal-hero {
                     min-height: 160px;
-                    margin: 0 12px 16px;
-                    border-radius: 16px;
                 }
-                .fb-post-text-only .fb-post-title {
-                    font-size: 20px;
+                .actu-modal-hero-icon .material-icons {
+                    font-size: 52px;
                 }
-                .fb-post-text-only .fb-post-text {
-                    font-size: 16px;
+                .actu-modal {
+                    border-radius: 18px 18px 0 0;
                 }
-                .fb-post-action-btn {
-                    font-size: 13px;
-                    padding: 8px;
+                .actu-modal-overlay {
+                    align-items: flex-end;
+                    padding: 0;
                 }
-                .fb-post-text-only {
-                    padding: 24px 16px;
-                    min-height: 140px;
+                .actu-modal-overlay.open .actu-modal {
+                    transform: translateY(0);
                 }
-                .fb-post-text-only .fb-post-title {
-                    font-size: 17px;
+                .actu-modal::before {
+                    display: block;
+                }
+                .actu-modal-hero {
+                    border-radius: 18px 18px 0 0;
+                }
+                .actu-modal-body {
+                    padding: 20px 20px 32px;
+                }
+                .actu-modal-hero-title {
+                    font-size: 19px;
+                }
+                .actu-modal-hero-content {
+                    padding: 16px 20px 20px;
+                }
+                .actu-modal-desc {
+                    font-size: 14px;
+                    line-height: 1.75;
                 }
             }
 
@@ -934,23 +1013,18 @@
                 }
             }
             .actu-modal::-webkit-scrollbar {
-                width: 8px;
+                width: 6px;
             }
             .actu-modal::-webkit-scrollbar-track {
-                background: transparent;
-                margin: 250px 0 20px 0;
+                background: rgba(0,0,0,0.08);
+                border-radius: 10px;
             }
             .actu-modal::-webkit-scrollbar-thumb {
-                background: var(--md-sys-color-primary, #6b7280);
+                background: var(--md-sys-color-outline);
                 border-radius: 10px;
-                border: 2px solid transparent;
-                background-clip: padding-box;
-                opacity: 0.8;
             }
             .actu-modal::-webkit-scrollbar-thumb:hover {
-                background-color: var(--md-sys-color-primary, #4b5563);
-                border-width: 1px;
-                opacity: 1;
+                background: var(--md-sys-color-primary);
             }
             .actu-modal-close {
                 position: absolute;
@@ -979,12 +1053,12 @@
             .actu-modal-close .material-icons {
                 font-size: 20px;
             }
-            /* Badge "Nouveau" dans la modale : statique (pas absolu comme sur les cartes) */
+            /* Badge "Nouveau" dans la modale : en inline statique (pas absolu) */
             .actu-modal-body .actu-new-pill,
             .actu-modal-head-chips .actu-new-pill {
                 position: static;
-                top: auto;
-                right: auto;
+                animation: none;
+                box-shadow: 0 2px 8px rgba(30, 90, 168, 0.25);
             }
             /* Hero */
             .actu-modal-hero {
@@ -1010,16 +1084,49 @@
                     height: 350px;
                 }
             }
+            .actu-modal-hero {
+                width: 100%;
+                position: relative;
+                border-radius: 28px 28px 0 0;
+                overflow: hidden;
+                background: linear-gradient(
+                    135deg,
+                    var(--md-sys-color-primary-container) 0%,
+                    var(--md-sys-color-secondary-container) 100%
+                );
+                min-height: 200px;
+            }
+            @media (max-width: 640px) {
+                .actu-modal-hero {
+                    min-height: 200px;
+                }
+            }
+            @media (max-width: 480px) {
+                .actu-modal-hero {
+                    min-height: 180px;
+                }
+            }
             .actu-modal-hero-grad {
                 position: absolute;
                 inset: 0;
                 background: linear-gradient(
                     to bottom,
-                    rgba(0, 0, 0, 0.04) 0%,
+                    rgba(0, 0, 0, 0.02) 0%,
                     rgba(0, 0, 0, 0) 30%,
-                    rgba(0, 0, 0, 0.72) 100%
+                    rgba(0, 0, 0, 0.5) 100%
                 );
                 pointer-events: none;
+            }
+            .actu-modal-body {
+                padding: 26px 28px 34px;
+                /* All scrolling happens via parent .actu-modal — no overflow here */
+                overflow: visible;
+                min-height: 0;
+            }
+            @media (max-width: 480px) {
+                .actu-modal-body {
+                    padding: 18px 18px 28px;
+                }
             }
             .actu-modal-hero.no-image .actu-modal-hero-grad {
                 background: linear-gradient(
@@ -1114,6 +1221,22 @@
                 color: var(--md-sys-color-on-surface-variant);
                 white-space: pre-wrap;
                 margin: 0 0 28px;
+            }
+            .actu-modal-main-title {
+                font-size: 24px;
+                font-weight: 800;
+                line-height: 1.3;
+                color: var(--md-sys-color-on-surface);
+                letter-spacing: -0.02em;
+            }
+            @media (max-width: 480px) {
+                .actu-modal-main-title {
+                    font-size: 20px;
+                }
+                .actu-modal-desc {
+                    font-size: 14px;
+                    line-height: 1.75;
+                }
             }
             /* PJ */
             .actu-modal-pj-section {
@@ -1452,10 +1575,7 @@
             }
 
             .actu-new-pill {
-                position: absolute;
-                top: 12px;
-                right: 12px;
-                z-index: 2;
+                position: static;
                 display: inline-flex;
                 align-items: center;
                 gap: 5px;
@@ -1466,8 +1586,7 @@
                 font-size: 11px;
                 font-weight: 700;
                 letter-spacing: 0.04em;
-                box-shadow: 0 2px 10px rgba(30, 90, 168, 0.45);
-                animation: pulseBadge 2.5s ease-in-out infinite;
+                box-shadow: 0 2px 8px rgba(30, 90, 168, 0.25);
             }
             .actu-new-pill .material-icons {
                 font-size: 13px;
@@ -8312,15 +8431,7 @@
                     roleText = "#374151";
                 }
 
-                // Chips
-                const chipsHtml = isNew
-                    ? `<span class="actu-new-pill" id="modalActuNewPill" data-actu-id="${a.id}" style="font-size:11px;padding:4px 10px;">Nouveau</span>`
-                    : "";
-                const expireChip = a.dateFin
-                    ? `<span class="actu-expire-chip-inline"><span class="material-icons">schedule</span> Expire le ${new Date(a.dateFin).toLocaleDateString("fr-FR")}</span>`
-                    : "";
-
-                // Galerie images
+// Galerie images
                 const galleryHtml =
                     images.length > 0
                         ? `
@@ -8407,33 +8518,39 @@
                 </div>
                 `
                         : `
-                <button class="actu-modal-close" onclick="closeActuModal()" aria-label="Fermer" style="background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); border-color: transparent;">
-                    <span class="material-icons">close</span>
-                </button>
+                <div class="actu-modal-hero" style="min-height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,var(--md-sys-color-primary-container) 0%,var(--md-sys-color-secondary-container) 60%,var(--md-sys-color-tertiary-container) 100%);">
+                    <button class="actu-modal-close" onclick="closeActuModal()" aria-label="Fermer" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.25);">
+                        <span class="material-icons">close</span>
+                    </button>
+                    <div style="text-align:center;padding:40px 20px 32px;">
+                        <span class="material-icons" style="font-size:52px;color:rgba(0,0,0,0.12);display:block;margin-bottom:10px;">campaign</span>
+                        <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:rgba(0,0,0,0.28);margin:0;">Actualité</p>
+                    </div>
+                </div>
                 `
                 }
-                <div class="actu-modal-body" style="${!hasHero ? "padding-top: 40px;" : ""}">
+                <div class="actu-modal-body">
                     <!-- En-tête type Facebook -->
-                    <div class="fb-post-header" style="padding: 0 0 20px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); margin-bottom: 24px; gap: 12px;">
+                    <div class="fb-post-header" style="padding: 0 0 20px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); margin-bottom: 20px; gap: 12px;">
                         <div class="fb-post-avatar" style="width: 48px; height: 48px; font-size: 16px;">${initials}</div>
                         <div class="fb-post-info">
-                            <div class="fb-post-author" style="font-size: 16px;">
-                                ${authorName}
-                                <span class="material-icons verified-badge">verified</span>
-                                <span style="margin-left: 8px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: ${roleBg}; color: ${roleText}; letter-spacing: 0.03em; vertical-align: middle;">${roleLabel}</span>
+                            <div class="fb-post-author" style="font-size: 15px; flex-wrap: wrap; gap: 6px; align-items: center;">
+                                <span style="font-weight: 700; color: var(--md-sys-color-on-surface);">${authorName}</span>
+                                <span class="material-icons verified-badge" style="font-size: 15px; color: var(--md-sys-color-primary);">verified</span>
+                                <span style="font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 100px; background: ${roleBg}; color: ${roleText}; letter-spacing: 0.03em;">${roleLabel}</span>
                             </div>
-                            <div class="fb-post-meta">
-                                <span>${dateStr}</span>
-                                <span class="material-icons">public</span>
-                                ${isNew ? `<span id="modalActuNewPill" class="fb-post-new-badge" style="position:static; margin-left: 4px; transition: opacity 0.5s ease;">Nouveau</span>` : ""}
-                                ${a.dateFin ? `<span style="margin-left:6px; color:var(--md-sys-color-error); display:inline-flex; align-items:center; gap:3px;"><span class="material-icons" style="font-size:14px;">schedule</span> Expire le ${new Date(a.dateFin).toLocaleDateString("fr-FR")}</span>` : ""}
+                            <div class="fb-post-meta" style="flex-wrap: wrap; gap: 5px; align-items: center;">
+                                <span class="material-icons" style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">calendar_today</span>
+                                <span style="color: var(--md-sys-color-on-surface-variant);">${dateStr}</span>
+                                ${isNew ? `<span id="modalActuNewPill" class="fb-post-new-badge" style="position:static; margin-left: 0; transition: opacity 0.5s ease;">Nouveau</span>` : ""}
+                                ${a.dateFin ? `<span style="color:var(--md-sys-color-error);display:inline-flex;align-items:center;gap:3px;font-size:12px;margin-left:2px;"><span class="material-icons" style="font-size:13px;">schedule</span> Expire ${new Date(a.dateFin).toLocaleDateString("fr-FR")}</span>` : ""}
                             </div>
                         </div>
                     </div>
 
-                    <h2 class="actu-modal-main-title" style="font-size: 24px; font-weight: 800; line-height: 1.3; color: var(--md-sys-color-on-surface); margin: 0 0 16px; letter-spacing: -0.02em;">${a.titre}</h2>
+                    <h2 class="actu-modal-main-title" style="font-size: 22px; font-weight: 800; line-height: 1.25; color: var(--md-sys-color-on-surface); margin: 0 0 18px; letter-spacing: -0.02em; padding-bottom: 18px; border-bottom: 1px solid var(--md-sys-color-outline-variant);">${a.titre}</h2>
 
-                    <div class="actu-modal-desc" style="font-size: 16px; line-height: 1.7; color: var(--md-sys-color-on-surface-variant); white-space: pre-wrap; margin-bottom: 32px;">${a.description || ""}</div>
+                    <div class="actu-modal-desc" style="font-size: 15.5px; line-height: 1.8; color: var(--md-sys-color-on-surface-variant); white-space: pre-wrap; margin-bottom: 28px;">${a.description || ""}</div>
 
                     ${pjSectionHtml}
                 </div>`;
@@ -12583,7 +12700,7 @@
                     const status = document.querySelector(
                         `input[name="appel_${eleve.id}"]:checked`,
                     ).value;
-                    if (status !== "present") {
+                    if (status) {
                         absences.push({
                             eleveId: eleve.id,
                             type: status,
@@ -13009,7 +13126,7 @@
                     const status = document.querySelector(
                         `input[name="appel_${eleve.id}"]:checked`,
                     ).value;
-                    if (status !== "present") {
+                    if (status) {
                         absences.push({
                             eleveId: eleve.id,
                             type: status,
@@ -13035,8 +13152,7 @@
 
                     if (response.ok) {
                         showSnackbar("Appel enregistré avec succès");
-                        document.getElementById("appelFormCard").style.display =
-                            "none";
+                        hideAppelForm();
                         loadDashboardData();
                         if (currentSelectedAbsencesClasse) {
                             loadAbsencesHistorique();
@@ -13069,6 +13185,10 @@
                     const formCard = positionAppelFormOverlay();
                     if (formCard) {
                         formCard.style.display = "block";
+                        const historiqueWidget = document.getElementById("absencesHistoriqueWidget");
+                        if (historiqueWidget) {
+                            historiqueWidget.style.display = "none";
+                        }
                     }
 
                     // Marquer comme édition
@@ -13127,7 +13247,7 @@
                     const status = document.querySelector(
                         `input[name="appel_${eleve.id}"]:checked`,
                     ).value;
-                    if (status !== "present") {
+                    if (status) {
                         absences.push({
                             eleveId: eleve.id,
                             type: status,
@@ -13151,8 +13271,7 @@
 
                     if (response.ok) {
                         showSnackbar("Appel enregistré avec succès");
-                        document.getElementById("appelFormCard").style.display =
-                            "none";
+                        hideAppelForm();
                         loadDashboardData();
                         // Recharger l'historique des absences pour la classe actuelle
                         if (currentSelectedAbsencesClasse) {
