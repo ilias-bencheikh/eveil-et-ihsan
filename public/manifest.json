@@ -1,11 +1,21 @@
 {
-  "name": "Eveil & Ihsan",
+  "name": "Eveil & Ihsan - Portail Educatif",
   "short_name": "Eveil & Ihsan",
-  "description": "Portail éducatif Eveil & Ihsan",
+  "description": "Application mobile du portail éducatif Eveil & Ihsan - Gestion scolaire pour parents et élèves",
   "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0056b3",
+  "orientation": "portrait",
+  "background_color": "#f8f9ff",
+  "theme_color": "#1e5aa8",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "iarc_rating_id": "",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/uploads/logo/logo2.png",
@@ -24,6 +34,44 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/uploads/logo/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/uploads/logo/logo_onglet.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Tableau de bord Parent",
+      "short_name": "Parent",
+      "description": "Accéder au tableau de bord parent",
+      "url": "/parent-dashboard.html",
+      "icons": [{ "src": "/uploads/logo/logo.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Tableau de bord Elève",
+      "short_name": "Elève",
+      "description": "Accéder au tableau de bord élève",
+      "url": "/eleve-dashboard.html",
+      "icons": [{ "src": "/uploads/logo/logo.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Inscription",
+      "short_name": "Inscription",
+      "description": "S'inscrire au portail",
+      "url": "/preinscription.html",
+      "icons": [{ "src": "/uploads/logo/logo.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "related_applications": [],
+  "handle_links": "preferred"
 }
