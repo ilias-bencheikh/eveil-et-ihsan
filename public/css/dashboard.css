@@ -412,7 +412,58 @@
         var(--md-sys-motion-easing-emphasized);
 }
 
-/* Floating Menu Button (Mobile) */
+/* ===== MOBILE HEADER BAR ===== */
+.mobile-header-bar {
+    display: none;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-md);
+    height: 64px;
+    background: var(--md-sys-color-surface);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--md-sys-color-on-surface);
+    border-radius: var(--md-sys-shape-corner-medium);
+    cursor: pointer;
+    transition: background var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.mobile-menu-btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+}
+
+.mobile-menu-btn .material-icons {
+    font-size: 24px;
+}
+
+.mobile-header-title {
+    font: var(--md-sys-typescale-title-large);
+    color: var(--md-sys-color-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobile-header-spacer {
+    flex: 1;
+}
+
+/* Floating Menu Button (Mobile) - DEPRECATED, replaced by mobile-header-bar */
 .floating-menu-btn {
     display: none;
     position: fixed;
@@ -739,8 +790,16 @@
         margin-left: 0;
     }
 
-    .floating-menu-btn {
+    .mobile-header-bar {
         display: flex;
+    }
+
+    .dashboard-content {
+        padding-top: calc(64px + var(--spacing-md));
+    }
+
+    .floating-menu-btn {
+        display: none !important;
     }
 }
 
@@ -754,7 +813,7 @@
     }
 
     .dashboard-content {
-        padding: var(--spacing-md);
+        padding: calc(64px + var(--spacing-md)) var(--spacing-md) var(--spacing-md);
     }
 }
 

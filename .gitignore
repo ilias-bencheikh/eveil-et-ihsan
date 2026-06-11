@@ -16,8 +16,8 @@ data/
 *.log
 npm-debug.log*
 
-# Fichiers uploadés par les utilisateurs
-uploads/
+# Fichiers uploadés par les
+public/uploads/devoirs/*
 public/uploads/actualites/*
 public/uploads/messagerie/*
 public/uploads/profile/*
