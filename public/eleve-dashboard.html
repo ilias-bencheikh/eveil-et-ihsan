@@ -9,11 +9,6 @@
         <meta http-equiv="Expires" content="0" />
         <title>Espace Élève - Eveil & Ihsan</title>
 
-        <!-- PWA Meta Tags -->
-        <meta name="theme-color" content="#1e5aa8">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <link rel="manifest" href="/manifest.json">
 
         <!-- logo -->
         <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png" />
@@ -2685,14 +2680,6 @@
             <!-- Overlay Mobile -->
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-            <!-- Mobile Header Bar -->
-            <header class="mobile-header-bar">
-                <button class="mobile-menu-btn" id="menuToggle" aria-label="Ouvrir le menu">
-                    <span class="material-icons">menu</span>
-                </button>
-                <div class="mobile-header-spacer"></div>
-            </header>
-
             <!-- Sidebar Navigation -->
             <aside class="dashboard-sidebar" id="sidebar">
                 <div class="sidebar-header">
@@ -2847,6 +2834,32 @@
 
             <!-- Main Content -->
             <main class="dashboard-main">
+                <!-- Top Bar -->
+                <header class="dashboard-topbar">
+                    <div class="topbar-left">
+                        <button class="topbar-menu-btn" id="menuToggle">
+                            <span class="material-icons">menu</span>
+                        </button>
+                        <h1 class="topbar-title" id="pageTitle">Mon espace</h1>
+                    </div>
+
+                    <div class="topbar-right">
+                        <button class="topbar-icon-btn" id="notifBtn">
+                            <span class="material-icons">notifications</span>
+                            <span
+                                class="badge"
+                                id="notifBadge"
+                                style="display: none"
+                                >0</span
+                            >
+                        </button>
+
+                        <button class="topbar-icon-btn" id="themeToggle">
+                            <span class="material-icons">dark_mode</span>
+                        </button>
+                    </div>
+                </header>
+
                 <!-- Content Area -->
                 <div class="dashboard-content">
                     <!-- Accueil Tab -->
@@ -3998,43 +4011,6 @@
                                         class="msg-read-attachments"
                                         id="eleveMsgReadAttachments"
                                     ></div>
-                                    <div class="msg-chat-composer" id="eleveMsgChatComposer">
-                                        <input
-                                            type="file"
-                                            id="eleveMsgQuickAttachments"
-                                            multiple
-                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv,.mp4,.webm,.mov,.avi,.mkv,.m4v"
-                                            style="display: none"
-                                            onchange="updateEleveQuickAttachPreview()"
-                                        />
-                                        <button
-                                            class="msg-chat-attach-btn"
-                                            type="button"
-                                            onclick="document.getElementById('eleveMsgQuickAttachments').click()"
-                                            title="Ajouter des pièces jointes"
-                                        >
-                                            <span class="material-icons">attach_file</span>
-                                        </button>
-                                        <input
-                                            type="text"
-                                            id="eleveMsgQuickReplyInput"
-                                            class="msg-chat-input"
-                                            placeholder="Tapez un message"
-                                            onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendEleveQuickReply();}"
-                                        />
-                                        <button
-                                            class="msg-chat-send-btn"
-                                            type="button"
-                                            id="eleveMsgQuickSendBtn"
-                                            onclick="sendEleveQuickReply()"
-                                        >
-                                            <span class="material-icons">send</span>
-                                        </button>
-                                    </div>
-                                    <div
-                                        id="eleveMsgQuickAttachPreview"
-                                        class="msg-quick-attach-preview"
-                                    ></div>
                                 </div>
 
                                 <!-- Vue composition -->
@@ -4766,100 +4742,12 @@
             let familyMembers = [];
             let currentChild = user;
             let parentInfo = null;
-let allMessages = { received: [], sent: [] };
+            let allMessages = { received: [], sent: [] };
             let currentMessageView = "received";
+            let selectedDestinatairesMessage = [];
+            let availableDestinataires = [];
             let isEleveSelectionMode = false;
             let eleveSelectedIds = new Set();
-            let currentEleveConversation = null;
-
-            // ── Helpers conversation ──
-            function eleveSameUserId(a, b) {
-                return String(a || "") === String(b || "");
-            }
-            function eleveGetConvId(msg) {
-                if (!msg.child) return msg.destinataireId === msg.expediteurId ? msg.destinataireId : (msg.destinataireId || msg.expediteurId);
-                const childId = msg.child.id;
-                return eleveSameUserId(msg.expediteurId, childId)
-                    ? msg.destinataireId
-                    : msg.expediteurId;
-            }
-            function eleveGetConvName(msg) {
-                if (!msg.child) return msg.destinataireNom || msg.expediteurNom || "Inconnu";
-                const childId = msg.child.id;
-                return eleveSameUserId(msg.expediteurId, childId)
-                    ? (msg.destinataireNom || "Inconnu")
-                    : (msg.expediteurNom || "Inconnu");
-            }
-            function eleveBuildConversations() {
-                const merged = [...allMessages.received, ...allMessages.sent];
-                const map = new Map();
-                merged.forEach((m) => {
-                    const cid = eleveGetConvId(m);
-                    const cname = eleveGetConvName(m) || "Conversation";
-                    if (!map.has(cid)) {
-                        map.set(cid, { id: cid, name: cname, messages: [], unreadCount: 0, lastDate: 0 });
-                    }
-                    const conv = map.get(cid);
-                    conv.messages.push(m);
-                    if (m.child && eleveSameUserId(m.destinataireId, m.child.id) && !m.lu) {
-                        conv.unreadCount++;
-                    }
-                    const ts = new Date(m.date).getTime();
-                    if (ts > conv.lastDate) conv.lastDate = ts;
-                });
-                return [...map.values()]
-                    .map((c) => {
-                        c.messages.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        c.lastMessage = c.messages[c.messages.length - 1];
-                        return c;
-                    })
-                    .sort((a, b) => b.lastDate - a.lastDate);
-            }
-            currentEleveConversation = null;
-
-            // ── Helpers conversation ──
-            function eleveSameUserId(a, b) {
-                return String(a || "") === String(b || "");
-            }
-            function eleveGetConvId(m) {
-                const childId = m.child?.id || currentChild?.id;
-                return eleveSameUserId(m.expediteurId, childId)
-                    ? m.destinataireId
-                    : m.expediteurId;
-            }
-            function eleveGetConvName(m) {
-                const childId = m.child?.id || currentChild?.id;
-                return eleveSameUserId(m.expediteurId, childId)
-                    ? m.destinataireNom
-                    : m.expediteurNom;
-            }
-
-            function eleveBuildConversations() {
-                const merged = [...allMessages.received, ...allMessages.sent];
-                const map = new Map();
-                merged.forEach((m) => {
-                    const cid = eleveGetConvId(m);
-                    const cname = eleveGetConvName(m) || "Conversation";
-                    if (!map.has(cid)) {
-                        map.set(cid, { id: cid, name: cname, messages: [], unreadCount: 0, lastDate: 0 });
-                    }
-                    const conv = map.get(cid);
-                    conv.messages.push(m);
-                    const childId = m.child?.id || currentChild?.id;
-                    if (eleveSameUserId(m.destinataireId, childId) && !m.lu) {
-                        conv.unreadCount++;
-                    }
-                    const ts = new Date(m.date).getTime();
-                    if (ts > conv.lastDate) conv.lastDate = ts;
-                });
-                return [...map.values()]
-                    .map((c) => {
-                        c.messages.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        c.lastMessage = c.messages[c.messages.length - 1];
-                        return c;
-                    })
-                    .sort((a, b) => b.lastDate - a.lastDate);
-            }
 
             // Charger les données actuelles de l'élève depuis le serveur
             async function loadCurrentChildData() {
@@ -5862,7 +5750,7 @@ let allMessages = { received: [], sent: [] };
                     tab.style.visibility = "";
                     tab.style.opacity = "";
                 });
-
+                
                 // Afficher le contenu de l'onglet actif
                 const activeTab = document.getElementById(tabName);
                 if (activeTab) {
@@ -5885,8 +5773,8 @@ let allMessages = { received: [], sent: [] };
                     "frais-admin": "Gestion des frais",
                     parametres: "Paramètres",
                 };
-                var titleEl = document.getElementById("pageTitle");
-                    if (titleEl) titleEl.textContent = titles[tabName] || tabName;
+                document.getElementById("pageTitle").textContent =
+                    titles[tabName] || tabName;
 
                 // Remonter en haut de page
                 window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -5933,7 +5821,7 @@ let allMessages = { received: [], sent: [] };
                     closeSidebarOnMobile();
                 }
             }
-
+            
             // Fonction séparée pour fermer le sidebar sur mobile
             function closeSidebarOnMobile() {
                 const sidebar = document.getElementById("sidebar");
@@ -7807,7 +7695,7 @@ let allMessages = { received: [], sent: [] };
                     allMessages.sent = allSent;
 
                     updateMessageBadge();
-                    renderEleveMsgList();
+                    switchMessageView(currentMessageView);
                 } catch (err) {
                     console.error("loadMessages:", err);
                     container.innerHTML = `<div class="msg-list-loading" style="color:var(--md-sys-color-error)">
@@ -7835,41 +7723,57 @@ let allMessages = { received: [], sent: [] };
                 const search = (
                     document.getElementById("messageSearch")?.value || ""
                 ).toLowerCase();
-                const convs = eleveBuildConversations();
-                const filtered = convs.filter(
-                    (c) =>
-                        !search ||
-                        (c.name || "").toLowerCase().includes(search) ||
-                        (c.lastMessage?.contenu || "").toLowerCase().includes(search),
-                );
-                if (filtered.length === 0) {
+                let msgs = allMessages[currentMessageView] || [];
+                if (search)
+                    msgs = msgs.filter((m) => {
+                        const other =
+                            currentMessageView === "received"
+                                ? m.expediteurNom
+                                : m.destinataireNom;
+                        return (
+                            (other || "").toLowerCase().includes(search) ||
+                            (m.contenu || "").toLowerCase().includes(search)
+                        );
+                    });
+                if (msgs.length === 0) {
                     container.innerHTML = `<div class="msg-panel-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--md-sys-color-on-surface-variant)">
                     <span class="material-icons" style="font-size:48px;opacity:.4">mail_outline</span>
-                    <span>${search ? "Aucun résultat" : "Aucune conversation"}</span></div>`;
+                    <span>${search ? "Aucun résultat" : "Aucun message"}</span></div>`;
                     return;
                 }
-                container.innerHTML = filtered
-                    .map((conv) => createEleveConversationItem(conv))
+                container.innerHTML = msgs
+                    .map((m) => createEleveMsgListItem(m, currentMessageView))
                     .join("");
             }
 
-            function createEleveConversationItem(conv) {
-                const lastMsg = conv.lastMessage;
-                const child = lastMsg?.child;
-                const isSelected = eleveSelectedIds.has(conv.id);
+            function filterMessages() {
+                renderEleveMsgList();
+            }
+
+            function createEleveMsgListItem(m, view) {
+                const isRec = view === "received";
+                const other = isRec
+                    ? m.expediteurNom || "Inconnu"
+                    : m.destinataireNom || "Inconnu";
+                const initials = other
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((w) => w[0])
+                    .join("")
+                    .toUpperCase();
+                const dateStr = new Date(m.date).toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "short",
+                });
+                const preview = (m.contenu || "")
+                    .replace(/<[^>]+>/g, "")
+                    .substring(0, 80);
+                const unread = isRec && !m.lu;
+                const isSelected = eleveSelectedIds.has(m.id);
                 const clickHandler = isEleveSelectionMode
-                    ? `onclick="toggleEleveMessageSelection('${conv.id}')"`
-                    : `onclick="openEleveMsgReadPanel('${conv.id}')"`;
-                const preview = lastMsg
-                    ? (lastMsg.contenu || "").replace(/<[^>]+>/g, "").substring(0, 80)
-                    : "";
-                const dateStr = lastMsg
-                    ? new Date(lastMsg.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })
-                    : "";
-                const initials = (conv.name || "S").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-                const isUnread = (conv.unreadCount || 0) > 0;
-                const childInfo = child ? ` • <span style="font-size:11px;opacity:.7">${child.prenom}</span>` : "";
-                return `<div class="msg-list-item ${isUnread ? "unread" : ""} ${isEleveSelectionMode && isSelected ? "selected" : ""}" data-msg-id="${conv.id}" ${clickHandler}>
+                    ? `onclick="toggleEleveMessageSelection('${m.id}')"`
+                    : `onclick="openEleveMsgReadPanel('${m.id}')"`;
+                return `<div class="msg-list-item ${unread ? "unread" : ""} ${isEleveSelectionMode && isSelected ? "selected" : ""}" data-msg-id="${m.id}" ${clickHandler}>
                 ${
                     isEleveSelectionMode
                         ? `<div class="msg-cb-wrap"><span class="material-icons msg-cb-icon">${isSelected ? "check_circle" : "radio_button_unchecked"}</span></div>`
@@ -7877,17 +7781,13 @@ let allMessages = { received: [], sent: [] };
                 }
                 <div class="msg-item-content">
                     <div class="msg-item-top">
-                        <span class="msg-item-contact">${conv.name || "Inconnu"}${childInfo}</span>
+                        <span class="msg-item-contact">${other}</span>
                         <span class="msg-item-date">${dateStr}</span>
                     </div>
-                    <div class="msg-item-preview">${preview || "(message vide)"}</div>
+                    <div class="msg-item-preview">${preview || "é"}</div>
                 </div>
-                ${isUnread && !isEleveSelectionMode ? '<span class="msg-unread-dot"></span>' : ""}
+                ${unread && !isEleveSelectionMode ? '<span class="msg-unread-dot"></span>' : ""}
             </div>`;
-            }
-
-            function filterMessages() {
-                renderEleveMsgList();
             }
 
             async function openEleveMsgReadPanel(id) {

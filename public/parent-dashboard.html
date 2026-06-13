@@ -9,12 +9,6 @@
         <meta http-equiv="Expires" content="0" />
         <title>Espace Parent - Eveil & Ihsan</title>
 
-        <!-- PWA Meta Tags -->
-        <meta name="theme-color" content="#1e5aa8">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <link rel="manifest" href="/manifest.json">
-
         <!-- logo -->
         <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png" />
         <link rel="apple-touch-icon" href="/uploads/logo/logo.png" />
@@ -3557,162 +3551,6 @@
                 color: var(--md-sys-color-on-surface-variant);
             }
 
-            /* ===== STYLE MESSAGERIE STAFF (chat bubbles) ===== */
-            .msg-read-body {
-                flex: 1;
-                overflow-y: auto;
-                padding: 24px 16px 0;
-                white-space: pre-wrap;
-                font-size: 16px;
-                line-height: 1.6;
-                color: var(--md-sys-color-on-surface);
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-            }
-            .msg-read-day {
-                text-align: center;
-                font-size: 12px;
-                color: var(--md-sys-color-on-surface-variant);
-                margin: 16px 0 8px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                position: sticky;
-                top: 0;
-                background: var(--md-sys-color-surface);
-                padding: 4px 0;
-                z-index: 1;
-            }
-            .msg-chat-row {
-                display: flex;
-                flex-direction: column;
-                margin-bottom: 4px;
-            }
-            .msg-chat-row.incoming { align-items: flex-start; }
-            .msg-chat-row.outgoing { align-items: flex-end; }
-            .msg-chat-bubble {
-                max-width: 75%;
-                padding: 10px 14px;
-                border-radius: 18px;
-                font-size: 15px;
-                line-height: 1.5;
-                color: var(--md-sys-color-on-surface);
-                word-break: break-word;
-                white-space: pre-wrap;
-            }
-            .msg-chat-row.incoming .msg-chat-bubble {
-                background: var(--md-sys-color-surface-container-high);
-                border-bottom-left-radius: 4px;
-            }
-            .msg-chat-row.outgoing .msg-chat-bubble {
-                background: var(--md-sys-color-primary-container);
-                color: var(--md-sys-color-on-primary-container);
-                border-bottom-right-radius: 4px;
-            }
-            .msg-chat-time {
-                display: block;
-                font-size: 11px;
-                color: var(--md-sys-color-on-surface-variant);
-                margin-top: 4px;
-                text-align: right;
-            }
-            .msg-chat-files {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-top: 8px;
-            }
-            .msg-chat-file-item {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px 12px;
-                background: rgba(0,0,0,0.08);
-                border-radius: 10px;
-                text-decoration: none;
-                color: inherit;
-                font-size: 13px;
-                transition: background 0.2s;
-            }
-            .msg-chat-row.incoming .msg-chat-file-item { background: rgba(0,0,0,0.06); }
-            .msg-chat-row.outgoing .msg-chat-file-item { background: rgba(255,255,255,0.15); }
-            .msg-chat-file-item:hover { opacity: 0.85; }
-            .msg-chat-file-item .material-icons { font-size: 18px; }
-
-            /* Quick reply bar */
-            .msg-chat-composer {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 12px 16px;
-                border-top: 1px solid var(--md-sys-color-outline-variant);
-                background: var(--md-sys-color-surface);
-                flex-shrink: 0;
-            }
-            .msg-chat-attach-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 42px;
-                height: 42px;
-                border-radius: 50%;
-                border: none;
-                background: var(--md-sys-color-surface-container);
-                cursor: pointer;
-                color: var(--md-sys-color-on-surface-variant);
-                transition: all 0.2s;
-                flex-shrink: 0;
-            }
-            .msg-chat-attach-btn:hover { background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-primary); }
-            .msg-chat-input {
-                flex: 1;
-                padding: 10px 16px;
-                border-radius: 22px;
-                border: 1.5px solid var(--md-sys-color-outline);
-                background: var(--md-sys-color-surface-container-low);
-                color: var(--md-sys-color-on-surface);
-                font-size: 15px;
-                font-family: inherit;
-                outline: none;
-                transition: border-color 0.2s;
-            }
-            .msg-chat-input:focus { border-color: var(--md-sys-color-primary); }
-            .msg-chat-send-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 42px;
-                height: 42px;
-                border-radius: 50%;
-                border: none;
-                background: var(--md-sys-color-primary);
-                color: var(--md-sys-color-on-primary);
-                cursor: pointer;
-                transition: all 0.2s;
-                flex-shrink: 0;
-            }
-            .msg-chat-send-btn:hover { background: var(--md-sys-color-primary-darken, color-mix(in srgb, var(--md-sys-color-primary) 85%, #000)); }
-            .msg-chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-            .msg-quick-attach-preview {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                padding: 8px 16px;
-                background: var(--md-sys-color-surface-container-low);
-                border-top: 1px solid var(--md-sys-color-outline-variant);
-            }
-            .msg-attach-chip {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 4px 10px;
-                background: var(--md-sys-color-primary-container);
-                color: var(--md-sys-color-on-primary-container);
-                border-radius: 16px;
-                font-size: 12px;
-            }
-
             /* ===== VUE COMPOSITION ===== */
             .msg-compose-view {
                 flex: 1;
@@ -4188,15 +4026,6 @@
             <!-- Overlay Mobile -->
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-            <!-- Mobile Header Bar -->
-            <header class="mobile-header-bar">
-                <button class="mobile-menu-btn" id="menuToggle" aria-label="Ouvrir le menu">
-                    <span class="material-icons">menu</span>
-                </button>
-                <span class="mobile-header-title">Eveil & Ihsan</span>
-                <div class="mobile-header-spacer"></div>
-            </header>
-
             <!-- Sidebar Navigation -->
             <aside class="dashboard-sidebar" id="sidebar">
                 <div class="sidebar-header">
@@ -4366,6 +4195,33 @@
 
             <!-- Main Content -->
             <main class="dashboard-main">
+                <!-- Top Bar -->
+                <header class="dashboard-topbar">
+                    <div class="topbar-left">
+                        <button class="topbar-menu-btn" id="menuToggle">
+                            <span class="material-icons">menu</span>
+                        </button>
+                        <h1 class="topbar-title" id="pageTitle">Accueil</h1>
+                    </div>
+                    <div class="topbar-right">
+                        <span
+                            id="userName"
+                            style="
+                                font: var(--md-sys-typescale-label-large);
+                                color: var(--md-sys-color-on-surface);
+                            "
+                            >Parent</span
+                        >
+                        <span
+                            class="material-icons"
+                            style="
+                                color: var(--md-sys-color-on-surface-variant);
+                            "
+                            >account_circle</span
+                        >
+                    </div>
+                </header>
+
                 <!-- Content Area -->
                 <div class="dashboard-content">
                     <!-- Section Accueil Parent -->
@@ -4860,6 +4716,35 @@
                                             >
                                         </button>
                                     </div>
+                                    <div class="msg-tabs">
+                                        <button
+                                            class="msg-tab active"
+                                            id="btn-received"
+                                            onclick="
+                                                switchParentMessageView(
+                                                    'received',
+                                                )
+                                            "
+                                        >
+                                            <span class="material-icons"
+                                                >move_to_inbox</span
+                                            >
+                                            <span>Reçus</span>
+                                        </button>
+                                        <button
+                                            class="msg-tab"
+                                            id="btn-sent"
+                                            onclick="
+                                                switchParentMessageView('sent')
+                                            "
+                                        >
+                                            <span class="material-icons"
+                                                >send</span
+                                            >
+                                            <span>Envoyés</span>
+                                        </button>
+                                    </div>
+                                </div>
                                 <div class="msg-search-wrap">
                                     <div class="msg-search-box">
                                         <span
@@ -4983,43 +4868,6 @@
                                     <div
                                         class="msg-read-attachments"
                                         id="parentMsgReadAttachments"
-                                    ></div>
-                                    <div class="msg-chat-composer" id="parentMsgChatComposer">
-                                        <input
-                                            type="file"
-                                            id="parentMsgQuickAttachments"
-                                            multiple
-                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.zip,.rar,.csv,.mp4,.webm,.mov,.avi,.mkv,.m4v"
-                                            style="display: none"
-                                            onchange="updateParentQuickAttachPreview()"
-                                        />
-                                        <button
-                                            class="msg-chat-attach-btn"
-                                            type="button"
-                                            onclick="document.getElementById('parentMsgQuickAttachments').click()"
-                                            title="Ajouter des pièces jointes"
-                                        >
-                                            <span class="material-icons">attach_file</span>
-                                        </button>
-                                        <input
-                                            type="text"
-                                            id="parentMsgQuickReplyInput"
-                                            class="msg-chat-input"
-                                            placeholder="Tapez un message"
-                                            onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendParentQuickReply();}"
-                                        />
-                                        <button
-                                            class="msg-chat-send-btn"
-                                            type="button"
-                                            id="parentMsgQuickSendBtn"
-                                            onclick="sendParentQuickReply()"
-                                        >
-                                            <span class="material-icons">send</span>
-                                        </button>
-                                    </div>
-                                    <div
-                                        id="parentMsgQuickAttachPreview"
-                                        class="msg-quick-attach-preview"
                                     ></div>
                                 </div>
 
@@ -7895,8 +7743,8 @@
                         preinscriptions: "Préinscriptions",
                         parametres: "Paramètres",
                     };
-                    var titleEl = document.getElementById("pageTitle");
-                    if (titleEl) titleEl.textContent = titles[sectionId] || "Accueil";
+                    document.getElementById("pageTitle").textContent =
+                        titles[sectionId] || "Accueil";
 
                     // Remonter en haut de page
                     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -8169,49 +8017,6 @@
             let currentParentMessageView = "received";
             let isParentSelectionMode = false;
             let parentSelectedIds = new Set();
-            let currentParentConversation = null;
-
-            // ── Helpers conversation ──
-            function parentSameUserId(a, b) {
-                return String(a || "") === String(b || "");
-            }
-            function parentGetConvId(message) {
-                const user = JSON.parse(localStorage.getItem("user") || "{}");
-                return parentSameUserId(message.expediteurId, user.id)
-                    ? message.destinataireId
-                    : message.expediteurId;
-            }
-            function parentGetConvName(message) {
-                const user = JSON.parse(localStorage.getItem("user") || "{}");
-                return parentSameUserId(message.expediteurId, user.id)
-                    ? message.destinataireNom
-                    : message.expediteurNom;
-            }
-            function parentBuildConversations() {
-                const merged = [...allParentMessages.received, ...allParentMessages.sent];
-                const map = new Map();
-                merged.forEach((m) => {
-                    const cid = parentGetConvId(m);
-                    const cname = parentGetConvName(m) || "Conversation";
-                    if (!map.has(cid)) {
-                        map.set(cid, { id: cid, name: cname, messages: [], unreadCount: 0, lastDate: 0 });
-                    }
-                    const conv = map.get(cid);
-                    conv.messages.push(m);
-                    if (parentSameUserId(m.destinataireId, JSON.parse(localStorage.getItem("user") || "{}").id) && !m.lu) {
-                        conv.unreadCount++;
-                    }
-                    const ts = new Date(m.date).getTime();
-                    if (ts > conv.lastDate) conv.lastDate = ts;
-                });
-                return [...map.values()]
-                    .map((c) => {
-                        c.messages.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        c.lastMessage = c.messages[c.messages.length - 1];
-                        return c;
-                    })
-                    .sort((a, b) => b.lastDate - a.lastDate);
-            }
 
             // ── Derniers messages reçus (widget dashboard) ──
             async function loadDashboardRecentMessages() {
@@ -8313,7 +8118,7 @@
                 }
             }
 
-async function loadParentMessages() {
+            async function loadParentMessages() {
                 const container = document.getElementById(
                     "parentMessagesContainer",
                 );
@@ -8332,107 +8137,10 @@ async function loadParentMessages() {
                         ),
                     };
                     updateParentMessageBadge();
-                    displayParentMessages();
+                    switchParentMessageView(currentParentMessageView);
                 } catch (error) {
                     container.innerHTML = `<div class="msg-list-empty"><span class="material-icons">error</span><p>Erreur de chargement</p><button class="md-btn md-btn-tonal" onclick="loadParentMessages()">Réessayer</button></div>`;
                 }
-            }
-
-            function updateParentMessageBadge() {
-                const convs = parentBuildConversations();
-                const unreadCount = convs.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
-                const badge = document.getElementById("parentMessageBadge");
-                if (badge) {
-                    badge.textContent = unreadCount > 99 ? "99+" : unreadCount;
-                    badge.style.display = unreadCount > 0 ? "flex" : "none";
-                }
-                const wcMessages = document.getElementById("wc-messages-count");
-                if (wcMessages) wcMessages.textContent = unreadCount;
-            }
-
-            function displayParentMessages() {
-                const container = document.getElementById(
-                    "parentMessagesContainer",
-                );
-                const search = (
-                    document.getElementById("parentMessageSearch")?.value || ""
-                ).toLowerCase();
-                const convs = parentBuildConversations();
-                const filtered = convs.filter(
-                    (c) =>
-                        !search ||
-                        (c.name || "").toLowerCase().includes(search) ||
-                        (c.lastMessage?.contenu || "").toLowerCase().includes(search),
-                );
-                if (filtered.length === 0) {
-                    container.innerHTML = `<div class="msg-list-empty"><span class="material-icons">mail_outline</span><p>${search ? "Aucun résultat" : "Aucune conversation"}</p></div>`;
-                    return;
-                }
-                container.innerHTML = filtered
-                    .map((conv) => createParentConversationItem(conv))
-                    .join("");
-                filterParentSearchMessages();
-            }
-
-            function createParentConversationItem(conv) {
-                const user = JSON.parse(localStorage.getItem("user") || "{}");
-                const isSelected = parentSelectedIds.has(conv.id);
-                const clickHandler = isParentSelectionMode
-                    ? `onclick="toggleParentMessageSelection('${conv.id}')"`
-                    : `onclick="openParentMsgReadPanel('${conv.id}')"`;
-                const lastMsg = conv.lastMessage;
-                const preview = lastMsg
-                    ? (lastMsg.contenu || "").replace(/\n/g, " ").substring(0, 80)
-                    : "";
-                const d = lastMsg ? new Date(lastMsg.date) : new Date();
-                const now = new Date();
-                const sameDay = d.toDateString() === now.toDateString();
-                const dateStr = sameDay
-                    ? d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
-                    : d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
-                const initials = (conv.name || "S").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-                const isUnread = (conv.unreadCount || 0) > 0;
-                const isReceived = lastMsg && lastMsg.destinataireId !== user.id;
-                const contactLabel = isReceived ? lastMsg.destinataireNom : (lastMsg ? lastMsg.expediteurNom : conv.name);
-                const badgesHtml = (lastMsg?.expediteurBadges || []).length
-                    ? lastMsg.expediteurBadges.map(b => `<span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:1px 4px;border-radius:4px;font-size:9px;margin-left:4px;font-weight:bold;">${b}</span>`).join("")
-                    : "";
-                return `
-                <div class="msg-list-item ${isUnread ? "unread" : ""} ${isParentSelectionMode && isSelected ? "selected" : ""}" data-msg-id="${conv.id}" ${clickHandler}>
-                    ${isParentSelectionMode
-                        ? `<div class="msg-cb-wrap"><span class="material-icons msg-cb-icon">${isSelected ? "check_circle" : "radio_button_unchecked"}</span></div>`
-                        : `<div class="msg-avatar">${initials}</div>`}
-                    <div class="msg-item-content" style="min-width:0;">
-                        <div class="msg-item-top" style="display:flex;align-items:center;margin-bottom:6px;gap:8px;">
-                            <span class="msg-item-contact" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;">${contactLabel || conv.name || "Inconnu"}${badgesHtml}</span>
-                            <span class="msg-item-date" style="margin-left:auto;flex-shrink:0;">${dateStr}</span>
-                        </div>
-                        <div class="msg-item-preview">
-                            ${(lastMsg?.piecesJointes?.length || 0) > 0 ? '<span class="material-icons" style="font-size:13px;vertical-align:middle;margin-right:2px;">attach_file</span>' : ""}
-                            ${preview || "(message vide)"}
-                        </div>
-                    </div>
-                    ${isUnread && !isParentSelectionMode ? '<span class="msg-unread-dot"></span>' : ""}
-                </div>`;
-            }
-
-            function filterParentSearchMessages() {
-                const search = (
-                    document.getElementById("parentMessageSearch")?.value || ""
-                ).toLowerCase();
-                document
-                    .querySelectorAll("#parentMessagesContainer .msg-list-item")
-                    .forEach((item) => {
-                        item.style.display =
-                            !search ||
-                            item.textContent.toLowerCase().includes(search)
-                                ? ""
-                                : "none";
-                    });
-            }
-            }
-            }
-            }
             }
 
             function updateParentMessageBadge() {
@@ -8458,29 +8166,31 @@ async function loadParentMessages() {
                     .getElementById("btn-sent")
                     .classList.toggle("active", view === "sent");
                 parentSelectedIds.clear();
-                displayParentMessages();
+                displayParentMessages(view);
                 updateParentBulkBar();
             }
 
-            function displayParentMessages() {
-                const conversations = parentBuildConversations();
+            function displayParentMessages(view) {
+                const messages = allParentMessages[view] || [];
                 const container = document.getElementById(
                     "parentMessagesContainer",
                 );
-                if (conversations.length === 0) {
-                    container.innerHTML = `<div class="msg-list-empty"><span class="material-icons">chat_bubble_outline</span><p>Aucune discussion</p></div>`;
+                if (messages.length === 0) {
+                    container.innerHTML = `<div class="msg-list-empty"><span class="material-icons">mail_outline</span><p>Aucun message</p></div>`;
                     return;
                 }
-                container.innerHTML = conversations
-                    .map((c) => createParentMsgListItem(c))
+                container.innerHTML = messages
+                    .map((m) => createParentMsgListItem(m, view))
                     .join("");
                 filterParentSearchMessages();
             }
 
-            function createParentMsgListItem(conversation) {
-                const message = conversation.lastMessage;
-                const isUnread = conversation.unreadCount > 0;
-                const contactName = conversation.name;
+            function createParentMsgListItem(message, view) {
+                const isReceived = view === "received";
+                const isUnread = isReceived && !message.lu;
+                const contactName = isReceived
+                    ? message.expediteurNom
+                    : message.destinataireNom;
                 const d = new Date(message.date);
                 const now = new Date();
                 const sameDay = d.toDateString() === now.toDateString();
@@ -8504,15 +8214,18 @@ async function loadParentMessages() {
                     .toUpperCase();
                 const hasAttachments =
                     message.piecesJointes && message.piecesJointes.length > 0;
-                const isSelected = parentSelectedIds.has(conversation.id);
-                const isActive =
-                    currentParentConversation &&
-                    currentParentConversation.id === conversation.id;
+                const isSelected = parentSelectedIds.has(message.id);
                 const clickHandler = isParentSelectionMode
-                    ? `onclick="toggleParentMessageSelection('${conversation.id}')"`
-                    : `onclick="openParentMsgReadPanel('${conversation.id}')"`;
+                    ? `onclick="toggleParentMessageSelection('${message.id}')"`
+                    : `onclick="openParentMsgReadPanel('${message.id}', '${view}')"`;
+
+                let badgesHtml = "";
+                if (isReceived && message.expediteurBadges && message.expediteurBadges.length > 0) {
+                    badgesHtml = message.expediteurBadges.map(b => `<span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:2px 6px;border-radius:4px;font-size:10px;margin-left:6px;font-weight:bold;">${b}</span>`).join("");
+                }
+
                 return `
-                <div class="msg-list-item ${isUnread ? "unread" : ""} ${isParentSelectionMode && isSelected ? "selected" : ""} ${isActive ? "active" : ""}" data-msg-id="${conversation.id}" ${clickHandler}>
+                <div class="msg-list-item ${isUnread ? "unread" : ""} ${isParentSelectionMode && isSelected ? "selected" : ""}" data-msg-id="${message.id}" ${clickHandler}>
                     ${
                         isParentSelectionMode
                             ? `<div class="msg-cb-wrap"><span class="material-icons msg-cb-icon">${isSelected ? "check_circle" : "radio_button_unchecked"}</span></div>`
@@ -8520,7 +8233,7 @@ async function loadParentMessages() {
                     }
                     <div class="msg-item-content" style="min-width:0;">
                         <div class="msg-item-top" style="display:flex;align-items:center;margin-bottom:6px;gap:8px;">
-                            <span class="msg-item-contact" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;">${contactName || "Système"}</span>
+                            <span class="msg-item-contact" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;">${contactName || "Inconnu"}${badgesHtml}</span>
                             <span class="msg-item-date" style="margin-left:auto;flex-shrink:0;">${dateStr}</span>
                         </div>
                         <div class="msg-item-preview">
@@ -8547,189 +8260,140 @@ async function loadParentMessages() {
                     });
             }
 
-            async function openParentMsgReadPanel(convId) {
-                const merged = [...allParentMessages.received, ...allParentMessages.sent]
-                    .filter((m) => parentGetConvId(m) === convId)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-                if (merged.length === 0) return;
-
+            async function openParentMsgReadPanel(messageId, view) {
+                const message = [
+                    ...allParentMessages.received,
+                    ...allParentMessages.sent,
+                ].find((m) => m.id === messageId);
+                if (!message) return;
                 const user = JSON.parse(localStorage.getItem("user") || "{}");
-                currentParentConversation = {
-                    id: convId,
-                    name: parentGetConvName(merged[merged.length - 1]),
-                    type: merged[0].destinataireId === user.id ? "incoming" : "outgoing",
-                };
 
-                // Mark all unread as read
-                const unreadToMark = merged.filter(
-                    (m) => parentSameUserId(m.destinataireId, user.id) && !m.lu,
-                );
-                if (unreadToMark.length > 0) {
-                    await Promise.allSettled(
-                        unreadToMark.map((m) =>
-                            apiRequest(`/api/messagerie/${m.id}/lu`, { method: "PUT" }),
-                        ),
-                    );
-                    unreadToMark.forEach((m) => { m.lu = true; });
+                if (message.destinataireId === user.id && !message.lu) {
+                    try {
+                        await apiRequest(`/api/messagerie/${messageId}/lu`, {
+                            method: "PUT",
+                        });
+                        message.lu = true;
+                        updateParentMessageBadge();
+                        displayParentMessages(currentParentMessageView);
+                    } catch (e) {}
                 }
 
-                const contactName = currentParentConversation.name || "Système";
-                const initials = (contactName || "S")
-                    .split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+                const isReceived = message.destinataireId === user.id;
+                const contactName = isReceived
+                    ? message.expediteurNom
+                    : message.destinataireNom;
+                const formattedDate = new Date(message.date).toLocaleString(
+                    "fr-FR",
+                    {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    },
+                );
+                const initials = (contactName || "Inconnu")
+                    .split(" ")
+                    .map((w) => w[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase();
+
+                let badgesHtml = "";
+                if (isReceived && message.expediteurBadges && message.expediteurBadges.length > 0) {
+                    badgesHtml = message.expediteurBadges.map(b => `<span style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:8px;font-weight:bold;display:inline-block;">${b}</span>`).join("");
+                }
 
                 document.getElementById("parentMsgReadMeta").innerHTML = `
                 <div class="msg-read-avatar">${initials}</div>
                 <div style="flex:1;">
-                    <div class="msg-read-contact" style="display:flex;align-items:center;"><strong>${contactName}</strong></div>
+                    <div class="msg-read-contact" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">${isReceived ? "De" : "À"} : <strong style="margin-left:4px;">${contactName || "Inconnu"}</strong>${badgesHtml}</div>
+                    <div class="msg-read-date">${formattedDate}</div>
                 </div>`;
 
                 document.getElementById("parentMsgReadActions").innerHTML = `
-                <button class="msg-del-btn" onclick="deleteParentConversation()" title="Supprimer cette discussion"><span class="material-icons">delete</span></button>`;
+                ${isReceived ? `<button class="md-btn md-btn-tonal" onclick="openParentComposePanel('${message.expediteurId}', '${(contactName || "").replace(/'/g, "\\'")}')"><span class="material-icons">reply</span> Répondre</button>` : ""}
+                <button class="msg-del-btn" onclick="deleteParentMessage('${message.id}')" title="Supprimer"><span class="material-icons">delete</span></button>`;
 
-                const token = localStorage.getItem("token");
-                const groupedByDay = {};
-                merged.forEach((m) => {
-                    const key = new Date(m.date).toLocaleDateString("fr-FR", {
-                        weekday: "long", day: "2-digit", month: "long",
-                    });
-                    if (!groupedByDay[key]) groupedByDay[key] = [];
-                    groupedByDay[key].push(m);
-                });
+                document.getElementById("parentMsgReadBody").textContent =
+                    message.contenu;
 
-                const chatHtml = Object.entries(groupedByDay)
-                    .map(([day, msgs]) => `
-                    <div class="msg-read-day">${day}</div>
-                    ${msgs.map((message) => {
-                        const isIncoming = parentSameUserId(message.destinataireId, user.id);
-                        const bubbleContent = (message.contenu || "").replace(/\n/g, "<br>");
-                        const bubbleTime = new Date(message.date).toLocaleTimeString("fr-FR", {
-                            hour: "2-digit", minute: "2-digit",
-                        });
-                        const files = Array.isArray(message.piecesJointes) ? message.piecesJointes : [];
-                        const bubbleAttachments = files.length
-                            ? `<div class="msg-chat-files">${files.map((pj) => {
+                const attachEl = document.getElementById(
+                    "parentMsgReadAttachments",
+                );
+                if (message.piecesJointes && message.piecesJointes.length > 0) {
+                    const token = localStorage.getItem("token");
+
+                    // Séparer médias (vidéos/images) et autres fichiers
+                    const mediaFiles = message.piecesJointes.filter(
+                        (pj) => isParentMsgVideo(pj) || isParentMsgImage(pj),
+                    );
+                    const otherFiles = message.piecesJointes.filter(
+                        (pj) => !isParentMsgVideo(pj) && !isParentMsgImage(pj),
+                    );
+
+                    let mediaHtml = "";
+                    if (mediaFiles.length > 0) {
+                        mediaHtml = `<div class="msg-media-gallery" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                        ${mediaFiles
+                            .map((pj) => {
                                 const url = `/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}`;
-                                return `<a class="msg-chat-file-item" href="${url}" target="_blank" download="${pj.originalname}"><span class="material-icons">${getParentFileIcon(pj.mimetype)}</span><span>${pj.originalname}</span></a>`;
-                            }).join("")}</div>`
-                            : "";
-                        return `
-                        <div class="msg-chat-row ${isIncoming ? "incoming" : "outgoing"}">
-                            <div class="msg-chat-bubble">
-                                ${bubbleContent || "(message vide)"}
-                                ${bubbleAttachments}
-                                <span class="msg-chat-time">${bubbleTime}</span>
-                            </div>
-                        </div>`;
-                    }).join("")}
-                `).join("");
+                                if (isParentMsgVideo(pj)) {
+                                    return `<div class="msg-media-item" style="flex:1;min-width:200px;max-width:400px;">
+                                    <video controls style="width:100%;border-radius:12px;background:#000;" preload="metadata">
+                                        <source src="${url}" type="${pj.mimetype || "video/mp4"}">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:4px;display:flex;align-items:center;gap:4px;">
+                                        <span class="material-icons" style="font-size:14px;">videocam</span>
+                                        ${pj.originalname} (${(pj.size / 1024 / 1024).toFixed(1)} Mo)
+                                    </div>
+                                </div>`;
+                                } else {
+                                    return `<div class="msg-media-item" style="flex:0 0 auto;">
+                                    <a href="${url}" target="_blank">
+                                        <img src="${url}" alt="${pj.originalname}" style="max-width:200px;max-height:200px;border-radius:12px;object-fit:cover;cursor:pointer;">
+                                    </a>
+                                    <div style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:4px;">${pj.originalname}</div>
+                                </div>`;
+                                }
+                            })
+                            .join("")}
+                    </div>`;
+                    }
 
-                document.getElementById("parentMsgReadBody").innerHTML = chatHtml;
-                document.getElementById("parentMsgReadAttachments").innerHTML = "";
-                document.getElementById("parentMsgQuickReplyInput").value = "";
-                document.getElementById("parentMsgQuickAttachments").value = "";
-                document.getElementById("parentMsgQuickAttachPreview").innerHTML = "";
+                    let filesHtml = "";
+                    if (otherFiles.length > 0) {
+                        filesHtml = `<div class="msg-attach-title"><span class="material-icons">attach_file</span> Autres fichiers (${otherFiles.length})</div>
+                    <div class="msg-attach-list">
+                        ${otherFiles
+                            .map(
+                                (pj) => `
+                            <a href="/api/messagerie/pieces-jointes/${encodeURIComponent(pj.filename)}?token=${token}" download="${pj.originalname}" target="_blank" class="msg-attach-item">
+                                <span class="material-icons">${getParentFileIcon(pj.mimetype)}</span>
+                                <span class="msg-attach-name">${pj.originalname}</span>
+                                <span class="msg-attach-size">${(pj.size / 1024).toFixed(0)} Ko</span>
+                                <span class="material-icons msg-attach-dl">download</span>
+                            </a>
+                        `,
+                            )
+                            .join("")}
+                    </div>`;
+                    }
 
-                updateParentMessageBadge();
-                displayParentMessages();
+                    attachEl.innerHTML = mediaHtml + filesHtml;
+                } else {
+                    attachEl.innerHTML = "";
+                }
                 showParentMsgPanel("read");
-                setTimeout(() => {
-                    const body = document.getElementById("parentMsgReadBody");
-                    if (body) body.scrollTop = body.scrollHeight;
-                    document.getElementById("parentMsgQuickReplyInput")?.focus();
-                }, 40);
             }
 
-            async function sendParentQuickReply() {
-                const input = document.getElementById("parentMsgQuickReplyInput");
-                const contenu = input?.value.trim();
-                const filesInput = document.getElementById("parentMsgQuickAttachments");
-                const hasFiles = filesInput?.files?.length > 0;
-                if (!contenu && !hasFiles) return;
-                if (!currentParentConversation) return;
-
-                const user = JSON.parse(localStorage.getItem("user") || "{}");
-                const destinataire = [{
-                    id: currentParentConversation.id,
-                    nom: currentParentConversation.name,
-                    type: "user",
-                    role: "",
-                }];
-
-                const formData = new FormData();
-                formData.append("expediteurId", user.id);
-                formData.append("destinataires", JSON.stringify(destinataire));
-                formData.append("contenu", contenu || "(pièce jointe)");
-                if (filesInput?.files) {
-                    for (const file of filesInput.files) {
-                        formData.append("piecesJointes", file);
-                    }
-                }
-
-                const btn = document.getElementById("parentMsgQuickSendBtn");
-                if (btn) { btn.disabled = true; btn.classList.add("sending"); }
-
-                try {
-                    const result = await apiRequest("/api/messagerie", { method: "POST", body: formData });
-                    const newMsg = Array.isArray(result) ? result[0] : result;
-                    if (newMsg) {
-                        newMsg.expediteurId = user.id;
-                        newMsg.expediteurNom = user.nom || user.prenom || "Vous";
-                        newMsg.destinataireId = currentParentConversation.id;
-                        newMsg.destinataireNom = currentParentConversation.name;
-                        allParentMessages.sent.push(newMsg);
-                    }
-                    if (input) { input.value = ""; input.focus(); }
-                    if (filesInput) filesInput.value = "";
-                    document.getElementById("parentMsgQuickAttachPreview").innerHTML = "";
-                    updateParentMessageBadge();
-                    displayParentMessages();
-                    showParentMsgPanel("read");
-                    setTimeout(() => {
-                        const body = document.getElementById("parentMsgReadBody");
-                        if (body) body.scrollTop = body.scrollHeight;
-                    }, 40);
-                    showNotification("Message envoyé", "success");
-                } catch (e) {
-                    showNotification("Erreur lors de l'envoi", "error");
-                } finally {
-                    if (btn) { btn.disabled = false; btn.classList.remove("sending"); }
-                }
-            }
-
-            function updateParentQuickAttachPreview() {
-                const input = document.getElementById("parentMsgQuickAttachments");
-                const preview = document.getElementById("parentMsgQuickAttachPreview");
-                if (!input || !preview) return;
-                preview.innerHTML = "";
-                if (!input.files) return;
-                [...input.files].forEach((file) => {
-                    const el = document.createElement("div");
-                    el.className = "msg-quick-attach-item";
-                    el.innerHTML = `<span class="material-icons">attach_file</span><span>${file.name}</span>`;
-                    preview.appendChild(el);
-                });
-            }
-
-            async function deleteParentConversation() {
-                if (!currentParentConversation) return;
-                if (!confirm("Supprimer toute cette discussion de votre messagerie ?")) return;
-                const convId = currentParentConversation.id;
-                const merged = [...allParentMessages.received, ...allParentMessages.sent]
-                    .filter((m) => parentGetConvId(m) === convId);
-                let count = 0;
-                for (const msg of merged) {
-                    try {
-                        await apiRequest(`/api/messagerie/${msg.id}`, { method: "DELETE" });
-                        count++;
-                    } catch (e) {}
-                }
-                allParentMessages.sent = allParentMessages.sent.filter((m) => !merged.some((x) => x.id === m.id));
-                allParentMessages.received = allParentMessages.received.filter((m) => !merged.some((x) => x.id === m.id));
-                closeParentMsgPanel();
-                updateParentMessageBadge();
-                displayParentMessages();
-                showNotification(`${count} message${count > 1 ? "s" : ""} supprimé${count > 1 ? "s" : ""}`, "success");
-            }
+            async function openParentComposePanel(
+                preselId = "",
+                preselNom = "",
+            ) {
                 selectedParentDest = [];
                 document.getElementById("parentComposeMessage").value = "";
                 document.getElementById("parentPiecesJointes").value = "";
@@ -8968,9 +8632,10 @@ async function loadParentMessages() {
                 if (!confirm("Supprimer ce message de votre messagerie ?"))
                     return;
                 try {
-                    await apiRequest(`/api/messagerie/${messageId}`, {
-                        method: "DELETE",
-                    });
+                    const data = await apiRequest(
+                        `/api/messagerie/${messageId}`,
+                        { method: "DELETE" },
+                    );
                     closeParentMsgPanel();
                     showNotification(
                         "Message supprimé de votre messagerie",
@@ -8979,85 +8644,6 @@ async function loadParentMessages() {
                     loadParentMessages();
                 } catch (error) {
                     showNotification("Erreur lors de la suppression", "error");
-                }
-            }
-
-            async function deleteParentConversation() {
-                if (!currentParentConversation || !currentParentConversation.id) return;
-                const convId = currentParentConversation.id;
-                const ids = [...allParentMessages.received, ...allParentMessages.sent]
-                    .filter((m) => parentGetConvId(m) === convId)
-                    .map((m) => m.id);
-                if (ids.length === 0) return;
-                if (!confirm("Supprimer toute cette discussion ?")) return;
-                await Promise.allSettled(
-                    ids.map((id) => apiRequest(`/api/messagerie/${id}`, { method: "DELETE" })),
-                );
-                currentParentConversation = null;
-                closeParentMsgPanel();
-                await loadParentMessages();
-                showNotification("Discussion supprimée", "success");
-            }
-
-            function updateParentQuickAttachPreview() {
-                const preview = document.getElementById("parentMsgQuickAttachPreview");
-                const input = document.getElementById("parentMsgQuickAttachments");
-                if (!preview || !input) return;
-                preview.innerHTML = "";
-                Array.from(input.files || []).forEach((file) => {
-                    const chip = document.createElement("div");
-                    chip.className = "msg-attach-chip";
-                    chip.innerHTML = `<span class="material-icons" style="font-size:14px;">attach_file</span>${file.name}<span style="opacity:.6;margin-left:4px;">(${(file.size / 1024).toFixed(0)} Ko)</span>`;
-                    preview.appendChild(chip);
-                });
-            }
-
-            async function sendParentQuickReply() {
-                if (!currentParentConversation || !currentParentConversation.id) {
-                    showNotification("Aucune discussion sélectionnée", "error");
-                    return;
-                }
-                const input = document.getElementById("parentMsgQuickReplyInput");
-                const filesInput = document.getElementById("parentMsgQuickAttachments");
-                const sendBtn = document.getElementById("parentMsgQuickSendBtn");
-                const contenu = (input?.value || "").trim();
-                if (!contenu) {
-                    showNotification("Tapez un message avant d'envoyer", "error");
-                    return;
-                }
-                const formData = new FormData();
-                formData.append("expediteurId", JSON.parse(localStorage.getItem("user") || "{}").id);
-                formData.append("destinataires", JSON.stringify([{
-                    id: currentParentConversation.id,
-                    nom: currentParentConversation.name || "",
-                    type: "user",
-                }]));
-                formData.append("contenu", contenu);
-                if (filesInput && filesInput.files.length > 0) {
-                    if (filesInput.files.length > 5) {
-                        showNotification("Maximum 5 pièces jointes", "error");
-                        return;
-                    }
-                    for (const f of filesInput.files) formData.append("piecesJointes", f);
-                }
-                if (sendBtn) sendBtn.disabled = true;
-                try {
-                    const resp = await apiRequest("/api/messagerie", { method: "POST", body: formData });
-                    if (!resp.ok) {
-                        const err = await resp.json();
-                        showNotification(err.error || "Erreur d'envoi", "error");
-                        return;
-                    }
-                    input.value = "";
-                    if (filesInput) filesInput.value = "";
-                    document.getElementById("parentMsgQuickAttachPreview").innerHTML = "";
-                    const convId = currentParentConversation.id;
-                    await loadParentMessages();
-                    await openParentMsgReadPanel(convId);
-                } catch (e) {
-                    showNotification("Erreur d'envoi", "error");
-                } finally {
-                    if (sendBtn) sendBtn.disabled = false;
                 }
             }
 
@@ -9073,7 +8659,7 @@ async function loadParentMessages() {
                         ? "flex"
                         : "none";
                 if (isParentSelectionMode) closeParentMsgPanel();
-                displayParentMessages();
+                displayParentMessages(currentParentMessageView);
                 updateParentBulkBar();
             }
 
@@ -9096,11 +8682,13 @@ async function loadParentMessages() {
             }
 
             function toggleParentSelectAll() {
-                const convs = parentBuildConversations();
-                const allSel = convs.length > 0 && convs.every((c) => parentSelectedIds.has(c.id));
+                const msgs = allParentMessages[currentParentMessageView] || [];
+                const allSel =
+                    msgs.length > 0 &&
+                    msgs.every((m) => parentSelectedIds.has(m.id));
                 if (allSel) parentSelectedIds.clear();
-                else convs.forEach((c) => parentSelectedIds.add(c.id));
-                displayParentMessages();
+                else msgs.forEach((m) => parentSelectedIds.add(m.id));
+                displayParentMessages(currentParentMessageView);
                 updateParentBulkBar();
             }
 
@@ -9113,8 +8701,10 @@ async function loadParentMessages() {
                     "#parentMsgBulkBar .msg-bulk-delete",
                 );
                 if (delBtn) delBtn.disabled = count === 0;
-                const convs = parentBuildConversations();
-                const allSel = convs.length > 0 && convs.every((c) => parentSelectedIds.has(c.id));
+                const msgs = allParentMessages[currentParentMessageView] || [];
+                const allSel =
+                    msgs.length > 0 &&
+                    msgs.every((m) => parentSelectedIds.has(m.id));
                 const selAllBtn = document.getElementById(
                     "parentMsgBulkSelectAll",
                 );

@@ -2,326 +2,126 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1e5aa8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hors ligne - Eveil & Ihsan</title>
-    <link rel="icon" type="image/png" href="/uploads/logo/logo_onglet.png">
-    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/css/variables.css">
     <link rel="stylesheet" href="/css/main.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            min-height: 100dvh;
+            height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, var(--md-sys-color-surface, #f8f9ff) 0%, var(--md-sys-color-surface-container-low, #f2f3fa) 100%);
-            color: var(--md-sys-color-on-surface, #191c20);
-            font-family: 'Google Sans', 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background, #f8f9ff);
+            color: var(--md-sys-color-on-background, #191c20);
+            font-family: 'Roboto', sans-serif;
             text-align: center;
-            overflow: hidden;
         }
-
-        /* Animated background elements */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(30, 90, 168, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 70%, rgba(110, 86, 118, 0.05) 0%, transparent 50%);
-            z-index: 0;
-            animation: bgShift 20s ease-in-out infinite alternate;
-        }
-
-        @keyframes bgShift {
-            from { transform: translate(0, 0) rotate(0deg); }
-            to { transform: translate(-5%, -5%) rotate(10deg); }
-        }
-
+        
         .offline-container {
-            position: relative;
-            z-index: 1;
-            background: var(--md-sys-color-surface-container-lowest, #ffffff);
-            padding: 48px 40px;
+            background-color: var(--md-sys-color-surface-container-lowest, #ffffff);
+            padding: var(--spacing-2xl, 48px) var(--spacing-lg, 24px);
             border-radius: var(--md-sys-shape-corner-extra-large, 28px);
-            box-shadow: var(--md-sys-elevation-3);
+            box-shadow: var(--md-sys-elevation-3, 0 4px 8px 3px rgba(0, 0, 0, 0.15));
             max-width: 420px;
-            width: calc(100% - 32px);
+            width: 90%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: slideUp var(--md-sys-motion-duration-medium4, 400ms) var(--md-sys-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
+            animation: fadeIn var(--md-sys-motion-duration-medium4, 400ms) var(--md-sys-motion-easing-emphasized, cubic-bezier(0.2, 0, 0, 1));
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(32px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo area */
-        .logo-area {
-            width: 96px;
-            height: 96px;
-            border-radius: var(--md-sys-shape-corner-extra-large, 28px);
-            background: linear-gradient(135deg, var(--md-sys-color-primary-container, #d4e3ff) 0%, var(--md-sys-color-secondary-container, #d8e3f8) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-            box-shadow: var(--md-sys-elevation-1);
-            overflow: hidden;
+        .logo {
+            width: 140px;
+            margin-bottom: var(--spacing-lg, 24px);
         }
 
-        .logo-area img {
-            width: 64px;
-            height: 64px;
-            object-fit: contain;
-        }
-
-        .logo-area img.hidden {
-            display: none;
-        }
-
-        /* Icon container */
         .icon-container {
-            width: 96px;
-            height: 96px;
+            width: 80px;
+            height: 80px;
             border-radius: var(--md-sys-shape-corner-full, 9999px);
-            background: linear-gradient(135deg, var(--md-sys-color-error-container, #ffdad6) 0%, rgba(255, 218, 214, 0.6) 100%);
+            background-color: var(--md-sys-color-error-container, #ffdad6);
             color: var(--md-sys-color-on-error-container, #410002);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.15); }
-            50% { box-shadow: 0 0 0 16px rgba(186, 26, 26, 0); }
+            margin-bottom: var(--spacing-lg, 24px);
         }
 
         .offline-icon {
-            font-size: 44px;
+            font-size: 40px;
         }
 
         h1 {
-            font: var(--md-sys-typescale-headline-medium);
+            font: var(--md-sys-typescale-headline-small);
             color: var(--md-sys-color-on-surface, #191c20);
-            margin: 0 0 12px 0;
-            letter-spacing: -0.5px;
+            margin: 0 0 var(--spacing-sm, 8px) 0;
         }
 
         p {
             font: var(--md-sys-typescale-body-large);
             color: var(--md-sys-color-on-surface-variant, #43474e);
-            margin: 0 0 32px 0;
-            line-height: 1.6;
-            max-width: 320px;
+            margin: 0 0 var(--spacing-xl, 32px) 0;
+            line-height: 1.5;
         }
 
-        /* Status indicator */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: var(--md-sys-shape-corner-full, 9999px);
-            background: var(--md-sys-color-surface-container-high, #e6e8ef);
-            color: var(--md-sys-color-on-surface-variant, #43474e);
-            font: var(--md-sys-typescale-label-medium);
-            margin-bottom: 28px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--md-sys-color-error, #ba1a1a);
-            animation: blink 1.5s ease-in-out infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Primary button */
         .btn-retry {
-            position: relative;
-            background: var(--md-sys-color-primary, #1e5aa8);
+            background-color: var(--md-sys-color-primary, #1e5aa8);
             color: var(--md-sys-color-on-primary, #ffffff);
             border: none;
-            padding: 0 32px;
-            height: 48px;
+            padding: 0 var(--spacing-lg, 24px);
+            height: 40px;
             border-radius: var(--md-sys-shape-corner-full, 9999px);
             font: var(--md-sys-typescale-label-large);
-            font-family: 'Google Sans', 'Roboto', sans-serif;
-            font-weight: 500;
             cursor: pointer;
+            transition: background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+                        box-shadow var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+                        transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: var(--md-sys-elevation-2);
-            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
-            overflow: hidden;
-            min-width: 160px;
-        }
-
-        .btn-retry::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .btn-retry:hover {
-            background: var(--md-sys-color-primary-container, #d4e3ff);
-            color: var(--md-sys-color-on-primary-container, #001c3a);
-            box-shadow: var(--md-sys-elevation-4);
-            transform: translateY(-2px);
-        }
-
-        .btn-retry:active {
-            transform: scale(0.97);
             box-shadow: var(--md-sys-elevation-1);
         }
 
+        .btn-retry:hover {
+            background-color: var(--md-sys-color-primary-container, #d4e3ff);
+            color: var(--md-sys-color-on-primary-container, #001c3a);
+            box-shadow: var(--md-sys-elevation-2);
+        }
+
+        .btn-retry:active {
+            transform: scale(0.98);
+        }
+        
         .btn-retry .material-icons {
             font-size: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .btn-retry:hover .material-icons {
-            transform: rotate(180deg);
-        }
-
-        .btn-retry.loading .material-icons {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Footer hint */
-        .footer-hint {
-            margin-top: 24px;
-            font: var(--md-sys-typescale-body-small);
-            color: var(--md-sys-color-outline, #73777f);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .footer-hint .material-icons {
-            font-size: 14px;
-        }
-
-        /* Dark mode */
-        [data-theme="dark"] body::before {
-            background: radial-gradient(circle at 30% 30%, rgba(165, 200, 255, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 70%, rgba(219, 188, 227, 0.05) 0%, transparent 50%);
-        }
-
-        /* Responsive */
-        @media (max-height: 600px) {
-            .offline-container {
-                padding: 32px 24px;
-            }
-            .logo-area, .icon-container {
-                width: 72px;
-                height: 72px;
-            }
-            .logo-area img {
-                width: 48px;
-                height: 48px;
-            }
-            .offline-icon {
-                font-size: 32px;
-            }
-            h1 {
-                font-size: 22px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="offline-container">
-        <div class="logo-area">
-            <img src="/uploads/logo/logo.png" alt="Eveil & Ihsan" onerror="this.classList.add('hidden')">
-        </div>
-
+        <img src="/uploads/logo/logo.png" alt="Logo Eveil & Ihsan" class="logo" onerror="this.style.display='none'">
+        
         <div class="icon-container">
             <span class="material-icons offline-icon">wifi_off</span>
         </div>
-
-        <div class="status-badge">
-            <span class="status-dot"></span>
-            Hors connexion
-        </div>
-
+        
         <h1>Connexion perdue</h1>
-        <p>Il semble que vous soyez hors ligne. Vérifiez votre connexion internet pour accéder au portail Eveil & Ihsan.</p>
-
-        <button class="btn-retry" id="retryBtn" onclick="handleRetry()">
+        <p>Il semble que vous soyez hors ligne. Veuillez vérifier votre connexion internet pour accéder au portail Eveil & Ihsan.</p>
+        
+        <button class="btn-retry" onclick="window.location.reload()">
             <span class="material-icons">refresh</span>
             Réessayer
         </button>
-
-        <div class="footer-hint">
-            <span class="material-icons">info</span>
-            L'application fonctionne hors connexion une fois installée
-        </div>
     </div>
-
-    <script>
-        const retryBtn = document.getElementById('retryBtn');
-
-        async function handleRetry() {
-            retryBtn.classList.add('loading');
-            retryBtn.querySelector('.material-icons').textContent = 'progress_activity';
-
-            try {
-                const response = await fetch(window.location.href, { cache: 'no-cache' });
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    showError();
-                }
-            } catch (e) {
-                // Still offline
-                showError();
-            }
-        }
-
-        function showError() {
-            retryBtn.classList.remove('loading');
-            retryBtn.querySelector('.material-icons').textContent = 'refresh';
-        }
-
-        // Listen for online event
-        window.addEventListener('online', () => {
-            window.location.reload();
-        });
-    </script>
 </body>
 </html>
