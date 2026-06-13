@@ -128,7 +128,7 @@ router.get('/profil', requireAuth, async (req, res) => {
         }
 
         const eleve = await dbGet(db,
-            'SELECT id, nom, prenom, email, photo, tel, status, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, classe FROM eleves WHERE id = ?',
+            'SELECT id, nom, prenom, email, photo, tel, status, fraisInscription, dossierId, nbPaiements, fraisValide, paiementsEffectues, classe FROM eleves WHERE id = ?',
             [eleveId]
         );
 
@@ -344,7 +344,7 @@ router.get('/famille-by-email/:email', (req, res) => {
 
 // Route d'inscription publique pour élèves sans parents
 router.post('/inscription', async (req, res) => {
-    const { nom, prenom, email, tel, dateNaissance, classe, fraisInscription, nbPaiements, anneeScolaire } = req.body;
+    const { nom, prenom, email, tel, dateNaissance, classe, fraisInscription, nbPaiements, dossierId, anneeScolaire } = req.body;
 
     if (!email || !nom || !prenom) {
         return res.status(400).json({ error: 'Email, nom et prénom requis' });
@@ -379,9 +379,9 @@ router.post('/inscription', async (req, res) => {
 
         await dbRun(db, `
             INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated,
-                               enFamille, nombreFamille, familleLienId, tel, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, ?, 0, 0, ?)
-        `, [id, nom, prenom, dateNaissance || null, classe || null, email, activationToken, tel || null, frais, nb, anneeScolaire || null]);
+                               enFamille, nombreFamille, familleLienId, tel, fraisInscription, dossierId, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, ?, ?, 0, 0, ?)
+        `, [id, nom, prenom, dateNaissance || null, classe || null, email, activationToken, tel || null, frais, dossierId || null, nb, anneeScolaire || null]);
 
         res.status(201).json({
             success: true,
@@ -430,11 +430,11 @@ router.post('/', checkPermission('create'), async (req, res) => {
 
         await dbRun(db, `
             INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, password, activationToken, activated,
-                               enFamille, nombreFamille, familleLienId, photo, fraisInscription, nbPaiements,
+                               enFamille, nombreFamille, familleLienId, photo, fraisInscription, dossierId, nbPaiements,
                                fraisValide, paiementsEffectues, tel, anneeScolaire)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
         `, [id, nom, prenom, dateNaissance || null, classe || null, email || null, activationToken,
-            enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, nb, tel || null, anneeScolaire || null]);
+            enFamille || 0, nombreFamille || 1, familleLienId || null, photo || null, frais, req.body.dossierId || null, nb, tel || null, anneeScolaire || null]);
 
         const activationLink = email ? `http://${req.headers.host}/activation.html?token=${activationToken}` : null;
 
@@ -716,7 +716,7 @@ router.post('/validate-frais-famille', checkPermission('update'), (req, res) => 
 
 // Mettre à jour un élève
 router.put('/:id', checkPermission('update'), async (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, photo, tel } = req.body;
+    const { nom, prenom, dateNaissance, classe, email, photo, tel, fraisInscription, dossierId, nbPaiements } = req.body;
 
     try {
         // Vérifier que l'email n'est pas déjà utilisé par quelqu'un d'autre
@@ -743,8 +743,8 @@ router.put('/:id', checkPermission('update'), async (req, res) => {
         }
 
         await dbRun(db,
-            'UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, tel = ? WHERE id = ?',
-            [nom, prenom, dateNaissance || null, classe || null, email || null, photo || null, tel || null, req.params.id]
+            'UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, tel = ?, fraisInscription = ?, dossierId = ?, nbPaiements = ? WHERE id = ?',
+            [nom, prenom, dateNaissance || null, classe || null, email || null, photo || null, tel || null, fraisInscription !== undefined ? parseFloat(fraisInscription) : null, dossierId !== undefined ? dossierId : null, nbPaiements !== undefined ? parseInt(nbPaiements) : null, req.params.id]
         );
 
         res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, tel });
@@ -873,7 +873,7 @@ router.get('/frais/famille/me', requireAuth, async (req, res) => {
 
     try {
         const enfants = await dbAll(db, `
-            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye
+            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.dossierId, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye
             FROM eleves e
             INNER JOIN eleve_parent ep ON e.id = ep.eleveId
             WHERE ep.parentId = ?
@@ -916,7 +916,7 @@ router.get('/frais/famille/:parentId', requireAuth, async (req, res) => {
 
     try {
         const enfants = await dbAll(db, `
-            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye
+            SELECT e.id, e.nom, e.prenom, e.fraisInscription, e.dossierId, e.nbPaiements, e.fraisValide, e.paiementsEffectues, e.montantPaye
             FROM eleves e
             INNER JOIN eleve_parent ep ON e.id = ep.eleveId
             WHERE ep.parentId = ?
@@ -1046,7 +1046,7 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
         }
 
         const eleve = await dbGet(db,
-            'SELECT id, nom, prenom, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, montantPaye FROM eleves WHERE id = ?',
+            'SELECT id, nom, prenom, fraisInscription, dossierId, nbPaiements, fraisValide, paiementsEffectues, montantPaye FROM eleves WHERE id = ?',
             [eleveId]
         );
 
@@ -1080,7 +1080,7 @@ router.get('/frais/:id', requireAuth, async (req, res) => {
 
 // Réinscrire un élève pour une nouvelle année scolaire
 router.post('/:id/reinscription', checkPermission('update'), async (req, res) => {
-    const { anneeScolaire, classe, fraisInscription, nbPaiements } = req.body;
+    const { anneeScolaire, classe, fraisInscription, dossierId, nbPaiements } = req.body;
     const eleveId = req.params.id;
 
     if (!anneeScolaire) {
@@ -1102,17 +1102,18 @@ router.post('/:id/reinscription', checkPermission('update'), async (req, res) =>
                 anneeScolaire = ?,
                 classe = ?,
                 fraisInscription = ?,
+                dossierId = ?,
                 nbPaiements = ?,
                 fraisValide = 0,
                 paiementsEffectues = 0,
                 montantPaye = 0
             WHERE id = ?
-        `, [anneeScolaire, classe || eleve.classe, frais, nb, eleveId]);
+        `, [anneeScolaire, classe || eleve.classe, frais, dossierId || null, nb, eleveId]);
 
         res.json({
             success: true,
             message: `Réinscription de ${eleve.prenom} ${eleve.nom} pour l'année ${anneeScolaire} effectuée.`,
-            eleve: { id: eleveId, anneeScolaire, classe: classe || eleve.classe, fraisInscription: frais, nbPaiements: nb }
+            eleve: { id: eleveId, anneeScolaire, classe: classe || eleve.classe, fraisInscription: frais, dossierId: dossierId || null, nbPaiements: nb }
         });
 
     } catch (err) {
@@ -1124,7 +1125,7 @@ router.post('/:id/reinscription', checkPermission('update'), async (req, res) =>
 // Réinscription en lot (plusieurs élèves)
 router.post('/reinscription/batch', checkPermission('update'), async (req, res) => {
     const { anneeScolaire, eleves } = req.body;
-    // eleves: [{ id, classe, fraisInscription, nbPaiements }]
+    // eleves: [{ id, classe, fraisInscription, dossierId, nbPaiements }]
 
     if (!anneeScolaire) {
         return res.status(400).json({ error: 'L\'année scolaire est requise' });
@@ -1152,12 +1153,13 @@ router.post('/reinscription/batch', checkPermission('update'), async (req, res) 
                     anneeScolaire = ?,
                     classe = ?,
                     fraisInscription = ?,
+                    dossierId = ?,
                     nbPaiements = ?,
                     fraisValide = 0,
                     paiementsEffectues = 0,
                     montantPaye = 0
                 WHERE id = ?
-            `, [anneeScolaire, e.classe || existing.classe, frais, nb, e.id]);
+            `, [anneeScolaire, e.classe || existing.classe, frais, e.dossierId || null, nb, e.id]);
 
             results.push({ id: e.id, nom: existing.nom, prenom: existing.prenom });
         }
@@ -1223,9 +1225,9 @@ router.post('/import', checkPermission('create'), async (req, res) => {
 
             await dbRun(db, `
                 INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated,
-                                   enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements,
+                                   enFamille, nombreFamille, familleLienId, fraisInscription, dossierId, nbPaiements,
                                    fraisValide, paiementsEffectues, anneeScolaire, montantPaye)
-                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, ?, 0, 0, ?, 0)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, NULL, ?, 0, 0, ?, 0)
             `, [eleveId, eNom, ePrenom, eDateNaiss, eClasse, eEmail, eTel, activationToken, fraisIns, nbPaie, eAnnee]);
 
             if (eEmail && activationToken && sendEmail) {

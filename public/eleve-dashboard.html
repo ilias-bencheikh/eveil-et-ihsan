@@ -4517,7 +4517,7 @@
                                                         ?? Carte
                                                     </option>
                                                     <option value="virement">
-                                                        ?? Virement
+                                                        ?? Chèque
                                                     </option>
                                                 </select>
                                             </div>
@@ -6195,7 +6195,7 @@
                                                 ? "💳 Carte"
                                                 : p.methodePaiement ===
                                                     "virement"
-                                                  ? "🏦 Virement"
+                                                  ? "🏦 Chèque"
                                                   : p.methodePaiement ===
                                                       "espece"
                                                     ? "💵 Espèce"
@@ -8586,7 +8586,7 @@
                                         ${p.note ? `<span style="font-size:0.8rem; color:var(--md-sys-color-on-surface-variant);"> • ${p.note}</span>` : ""}
                                     </div>
                                     <span style="padding:3px 8px; border-radius:16px; font-size:0.75rem; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">
-                                        ${p.methodePaiement === "carte" ? "💳 Carte" : p.methodePaiement === "virement" ? "🏦 Virement" : "💵 Espèce"}
+                                        ${p.methodePaiement === "carte" ? "💳 Carte" : p.methodePaiement === "virement" ? "🏦 Chèque" : "💵 Espèce"}
                                     </span>
                                 </div>
                             `})
@@ -8730,8 +8730,8 @@
             function getMethodeLabel(methode) {
                 const labels = {
                     carte: "?? Carte",
-                    virement: "?? Virement",
-                    espece: "?? Espéce",
+                    virement: "?? Chèque",
+                    espece: "?? Espèce",
                 };
                 return labels[methode] || methode;
             }

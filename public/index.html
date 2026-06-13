@@ -5960,6 +5960,21 @@
                                         </div>
                                     </div>
 
+                                    <!-- Numéro de dossier famille -->
+                                    <div id="dossierIdSection" style="margin-top: 20px; padding: 16px; background: var(--md-sys-color-tertiary-container); border-radius: 12px; display: none;">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                            <span class="material-icons" style="color: var(--md-sys-color-on-tertiary-container); font-size: 20px;">folder</span>
+                                            <span style="font-weight: 600; color: var(--md-sys-color-on-tertiary-container);">Numéro de dossier (frais d'inscription)</span>
+                                        </div>
+                                        <div class="md-text-field" style="background: var(--md-sys-color-surface); border-radius: 8px;">
+                                            <div class="md-text-field-container">
+                                                <input type="text" id="insc_dossierId" class="md-text-field-input" placeholder=" " />
+                                                <label class="md-text-field-label">N° Dossier</label>
+                                            </div>
+                                        </div>
+                                        <p style="margin: 8px 0 0; font-size: 12px; color: var(--md-sys-color-on-tertiary-container); opacity: 0.8;">Ce numéro sera appliqué à tous les enfants de cette inscription.</p>
+                                    </div>
+
                                     <div
                                         style="
                                             display: flex;
@@ -6701,7 +6716,7 @@
                                             <input
                                                 type="text"
                                                 id="adminFraisSearch"
-                                                placeholder="Tapez un nom ou prénom..."
+                                                placeholder="Tapez un nom, prénom ou n° de dossier..."
                                                 oninput="adminSearchFrais()"
                                             />
                                             <button
@@ -6765,7 +6780,7 @@
                                         <div style="flex: 1; min-width: 150px;">
                                             <select id="adminPaiementMethode" class="md-text-field-input" style="width: 100%; padding: 10px; border: 1px solid var(--md-sys-color-outline); border-radius: 8px; background: var(--md-sys-color-surface);">
                                                 <option value="espece">💶 Espèce</option>
-                                                <option value="virement">🏦 Virement</option>
+                                                <option value="virement">🏦 Chèque</option>
                                             </select>
                                         </div>
                                         <div style="flex: 1; min-width: 150px;">
@@ -7523,6 +7538,11 @@
             function canModifyData() {
                 const userRole = getCurrentUserRole();
                 return userRole && userRole !== "professeur";
+            }
+
+            function canGererFrais() {
+                const userRole = getCurrentUserRole();
+                return ["admin", "directeur", "directeur_adjoint", "secretariat"].includes(userRole);
             }
 
             // Ajuste dynamiquement la hauteur d'une textarea
@@ -9968,6 +9988,7 @@
                             infoRow("email", "Adresse e-mail", eleve.email),
                             infoRow("phone", "Téléphone", eleve.tel),
                             infoRow("home", "Adresse", eleve.adresse),
+                            canGererFrais() ? infoRow("folder", "N° Dossier Frais", eleve.dossierId || null) : "",
                         ].join("");
                         return (
                             rows ||
@@ -16526,6 +16547,20 @@
                 `;
                 }
 
+                const recapDossierId = document.getElementById("insc_dossierId")?.value?.trim() || "";
+                if (recapDossierId) {
+                    html += `
+                    <div class="fiche-section" style="margin-bottom: 16px;">
+                        <div class="fiche-section-header">
+                            <div class="fiche-section-icon" style="background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+                                <span class="material-icons">folder</span>
+                            </div>
+                            <div><h5 style="margin: 0;">N° Dossier famille</h5><p style="margin: 0; font-size: 13px;">${recapDossierId}</p></div>
+                        </div>
+                    </div>
+                `;
+                }
+
                 // Enfants
                 const enfantFields = document.querySelectorAll(".enfant-field");
                 enfantFields.forEach((field, idx) => {
@@ -16541,6 +16576,8 @@
                         "";
                     const frais =
                         field.querySelector(".enfant-frais")?.value || "0";
+                    const nbPaiements =
+                        field.querySelector(".enfant-nbPaiements")?.value || "1";
                     const anneeScolaire =
                         field.querySelector(".enfant-anneeScolaire")?.value ||
                         getCurrentAnneeScolaire();
@@ -16553,7 +16590,7 @@
                             </div>
                             <div style="flex: 1;">
                                 <h5 style="margin: 0;">Élève ${idx + 1} ${prenom} ${nom}</h5>
-                                <p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Année: ${anneeScolaire} | Classe: ${classe} ${email ? "| Email: " + email : ""} | Frais: ${frais}</p>
+                                <p style="margin: 0; font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Année: ${anneeScolaire} | Classe: ${classe} ${email ? "| Email: " + email : ""} | Frais: ${frais}€ (${nbPaiements}x)</p>
                             </div>
                         </div>
                     </div>
@@ -16689,6 +16726,7 @@
                     document.getElementById("insc_parentEmail").value = "";
                     document.getElementById("insc_parentTel").value = "";
                     document.getElementById("insc_parentAdresse").value = "";
+                    document.getElementById("dossierIdSection").style.display = "none";
                 } else {
                     parentSection.style.display = "block";
                     if (toggleBtn) {
@@ -16699,6 +16737,7 @@
                         toggleBtn.querySelector("span:last-child").textContent =
                             "check";
                     }
+                    document.getElementById("dossierIdSection").style.display = "block";
                 }
 
                 updateParentFieldsVisibility();
@@ -17225,6 +17264,9 @@
                     });
                 }
 
+                const dossierId =
+                    document.getElementById("insc_dossierId")?.value?.trim() || "";
+
                 try {
                     const parent2Nom =
                         document
@@ -17279,6 +17321,7 @@
                                 parent1,
                                 parent2,
                                 enfants,
+                                dossierId,
                                 enFamille:
                                     inscriptionType === "famille" ? 1 : 0,
                             }),
@@ -17429,6 +17472,12 @@
                         }
                     }
 
+                    // Remplir dossierId famille depuis le premier enfant
+                    if (siblings[0]?.dossierId) {
+                        document.getElementById("insc_dossierId").value =
+                            siblings[0].dossierId;
+                    }
+
                     // Construire les champs enfants
                     inscriptionEnfantCount = siblings.length;
                     const container = document.getElementById(
@@ -17470,6 +17519,11 @@
                         );
                         if (nbPaiementsSelect && s.nbPaiements)
                             nbPaiementsSelect.value = s.nbPaiements;
+                        const dossierIdInput = field.querySelector(
+                            ".enfant-dossierId",
+                        );
+                        if (dossierIdInput && s.dossierId)
+                            dossierIdInput.value = s.dossierId;
                         const anneeScolaireSelect = field.querySelector(
                             ".enfant-anneeScolaire",
                         );
@@ -17649,6 +17703,12 @@
                             classe,
                             email,
                             tel,
+                            fraisInscription:
+                                parseFloat(field.querySelector(".enfant-frais")?.value) || 0,
+                            dossierId:
+                                field.querySelector(".enfant-dossierId")?.value?.trim() || "",
+                            nbPaiements:
+                                parseInt(field.querySelector(".enfant-nbPaiements")?.value) || 1,
                         }),
                     });
                     if (!r.ok) {
@@ -18303,6 +18363,12 @@
                                 <label class="md-text-field-label">Nombre de paiements</label>
                             </div>
                         </div>
+                        <div class="md-text-field">
+                            <div class="md-text-field-container">
+                                <input type="text" id="reinsc_dossierId_${idx}" class="md-text-field-input" placeholder=" " value="${eleve.dossierId || ""}">
+                                <label class="md-text-field-label">N° Dossier</label>
+                            </div>
+                        </div>
                     </div>
 
                     ${
@@ -18457,6 +18523,9 @@
                     const nbPaiements =
                         document.getElementById(`reinsc_nbPaiements_${idx}`)
                             ?.value || "1";
+                    const dossierId =
+                        document.getElementById(`reinsc_dossierId_${idx}`)
+                            ?.value?.trim() || eleve.dossierId || "";
 
                     html += `
                     <div class="fiche-section" style="margin-bottom:16px;">
@@ -18476,6 +18545,7 @@
                                 <div><span style="color:var(--md-sys-color-on-surface-variant);">Classe :</span> <strong>${classe}</strong></div>
                                 <div><span style="color:var(--md-sys-color-on-surface-variant);">Frais :</span> <strong>${parseFloat(frais).toFixed(2)} </strong></div>
                                 <div><span style="color:var(--md-sys-color-on-surface-variant);">Paiements :</span> <strong>${nbPaiements}x</strong></div>
+                                ${dossierId ? `<div><span style="color:var(--md-sys-color-on-surface-variant);">Dossier :</span> <strong>${dossierId}</strong></div>` : ""}
                             </div>
                         </div>
                     </div>
@@ -18576,6 +18646,9 @@
                                         `reinsc_nbPaiements_${idx}`,
                                     )?.value,
                                 ) || 1,
+                            dossierId:
+                                document.getElementById(`reinsc_dossierId_${idx}`)
+                                    ?.value?.trim() || "",
                         });
                         elevesInfoUpdates.push({
                             eleve,
@@ -18721,7 +18794,7 @@
 
             function getMethodeLabel(methode) {
                 const labels = {
-                    virement: "🏦 Virement",
+                    virement: "🏦 Chèque",
                     espece: "💵 Espèce",
                     ajustement: "⚙️ Ajustement",
                 };
@@ -18815,12 +18888,13 @@
                             ),
                         );
 
-                        // Élèves sans parent qui correspondent à la query
+                        // Élèves sans parent qui correspondent à la query (par nom/prénom ou numéro de dossier)
                         const elevesSansParent = allEleves.filter(
                             (e) =>
                                 !tousElevesAvecParent.has(e.id) &&
                                 ((e.prenom || "").toLowerCase().includes(q) ||
-                                    (e.nom || "").toLowerCase().includes(q)),
+                                    (e.nom || "").toLowerCase().includes(q) ||
+                                    (e.dossierId || "").toLowerCase().includes(q)),
                         );
 
                         if (
@@ -18860,7 +18934,7 @@
                                                   .slice(0, 2)
                                                   .map(
                                                       (e) =>
-                                                          `<span style="padding:4px 10px; border-radius:16px; font-size:0.75rem; font-weight: 500; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">${e.prenom} ${e.nom}</span>`,
+                                                          `<span style="padding:4px 10px; border-radius:16px; font-size:0.75rem; font-weight: 500; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container);">${e.prenom} ${e.nom}${e.dossierId ? ` (${e.dossierId})` : ""}</span>`,
                                                   )
                                                   .join("")}
                                                   ${p.enfants.length > 2 ? `<span style="padding:4px 10px; border-radius:16px; font-size:0.75rem; font-weight: 500; background:var(--md-sys-color-surface-variant); color:var(--md-sys-color-on-surface-variant);">+${p.enfants.length - 2}</span>` : ''}
@@ -18881,11 +18955,11 @@
                             <div style="padding:12px 16px; background:transparent; border-bottom: 1px solid var(--md-sys-color-surface-container); cursor:pointer; transition:all 0.2s ease;"
                                  onmouseover="this.style.background='var(--md-sys-color-surface-container-low)'; this.style.paddingLeft='20px'"
                                  onmouseout="this.style.background='transparent'; this.style.paddingLeft='16px'"
-                                 onclick="adminSelectFraisEleve('${e.id}','${(e.prenom + " " + e.nom).replace(/'/g, "\\'")}','${(e.classe || "").replace(/'/g, "\\'")}',${e.fraisInscription || 0},${parseFloat(e.montantPaye || 0)})">
+                                 onclick="adminSelectFraisEleve('${e.id}','${(e.prenom + " " + e.nom).replace(/'/g, "\\'")}','${(e.classe || "").replace(/'/g, "\\'")}',${e.fraisInscription || 0},${parseFloat(e.montantPaye || 0)},'${(e.dossierId || "").replace(/'/g, "\\'")}')">
                                 <div style="display:flex; align-items:center; gap:16px;">
                                     <div style="width:40px; height:40px; border-radius:50%; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1.1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${(e.prenom || "E")[0].toUpperCase()}</div>
                                     <div style="flex:1;">
-                                        <div style="font-weight:700; font-size:1.05rem; color:var(--md-sys-color-on-surface);">${e.prenom} ${e.nom}</div>
+                                        <div style="font-weight:700; font-size:1.05rem; color:var(--md-sys-color-on-surface);">${e.prenom} ${e.nom}${e.dossierId ? ` <span style="font-size:0.8rem; font-weight:500; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); padding: 2px 8px; border-radius: 12px; margin-left: 6px;">Dossier ${e.dossierId}</span>` : ""}</div>
                                         <div style="font-size:0.85rem; color:var(--md-sys-color-on-surface-variant); display: flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="material-icons" style="font-size: 14px;">school</span> Classe : ${e.classe || "Non assignée"}</div>
                                     </div>
                                     <div style="font-size:0.9rem; padding: 6px 12px; border-radius: 20px; background: ${Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)) > 0 ? 'rgba(var(--md-sys-color-error-rgb), 0.1)' : 'rgba(var(--md-sys-color-primary-rgb), 0.1)'}; color:${Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)) > 0 ? "var(--md-sys-color-error)" : "var(--md-sys-color-primary)"}; font-weight:700;">Reste : ${formatCurrency(Math.max(0, (e.fraisInscription || 0) - parseFloat(e.montantPaye || 0)))}</div>
@@ -18950,7 +19024,7 @@
                             parseFloat(e.montantPaye || 0),
                     );
                     if (reste > 0)
-                        options += `<option value="${e.id}">${e.prenom} ${e.nom} (reste: ${formatCurrency(reste)})</option>`;
+                        options += `<option value="${e.id}">${e.prenom} ${e.nom}${e.dossierId ? ` (Dossier ${e.dossierId})` : ""} (reste: ${formatCurrency(reste)})</option>`;
                 });
                 selectEl.innerHTML = options;
                 document.getElementById("adminFraisEnfantBlock").style.display =
@@ -18967,6 +19041,7 @@
                 classe,
                 fraisInscription,
                 montantPaye,
+                dossierId,
             ) {
                 _fraisSelection = {
                     type: "eleve",
@@ -18977,8 +19052,8 @@
                 document.getElementById("adminFraisSearch").value = "";
                 document.getElementById("adminFraisSearchResults").innerHTML =
                     "";
-                document.getElementById("adminFraisSelectedName").textContent =
-                    `${nom.trim()}`;
+                document.getElementById("adminFraisSelectedName").innerHTML =
+                    `${nom.trim()}${dossierId ? ` <span style="font-size:0.85rem; font-weight:500; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); padding: 2px 8px; border-radius: 12px;">Dossier ${dossierId}</span>` : ""}`;
                 const reste = Math.max(
                     0,
                     (fraisInscription || 0) - (montantPaye || 0),

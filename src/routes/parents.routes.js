@@ -214,10 +214,11 @@ router.post('/activate', activationLimiter, async (req, res) => {
 
 // Inscription d'enfants avec 0, 1 ou 2 parents
 router.post('/inscription', async (req, res) => {
-    const { 
+    const {
         parent1, // { nom, prenom, email, tel, adresse, profession } - optionnel
         parent2, // { nom, prenom, email, tel, adresse, profession } - optionnel
         enfants, // [{ nom, prenom, dateNaissance, classe, fraisInscription, nbPaiements, email, anneeScolaire }]
+        dossierId, // numéro de dossier commun à toute la famille
         anneeScolaire // année scolaire globale (ex: "2026-2027")
     } = req.body;
     
@@ -328,9 +329,9 @@ router.post('/inscription', async (req, res) => {
             }
             
             await dbRun(db, `
-                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire, adresse)
-                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, 0, 0, ?, ?)
-            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, enfant.tel || null, eleveActivationToken, enfants.length > 1 ? 1 : 0, enfants.length, familleLienId, frais, nbPaiements, enfant.anneeScolaire || anneeScolaire || null, enfant.adresse || null]);
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, dossierId, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire, adresse)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
+            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, enfant.tel || null, eleveActivationToken, enfants.length > 1 ? 1 : 0, enfants.length, familleLienId, frais, dossierId || null, nbPaiements, enfant.anneeScolaire || anneeScolaire || null, enfant.adresse || null]);
             
             createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail, activationToken: eleveActivationToken });
             
@@ -443,9 +444,9 @@ router.post('/inscription/famille-existante', checkPermission('update'), async (
             }
 
             await dbRun(db, `
-                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire, adresse)
-                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 1, ?, ?, ?, ?, 0, 0, ?, ?)
-            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, enfant.tel || null, eleveActivationToken, totalChildren, familleLienId, frais, nbPaiements, enfant.anneeScolaire || null, enfant.adresse || null]);
+                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated, enFamille, nombreFamille, familleLienId, fraisInscription, dossierId, nbPaiements, fraisValide, paiementsEffectues, anneeScolaire, adresse)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 1, ?, ?, ?, ?, ?, 0, 0, ?, ?)
+            `, [eleveId, enfant.nom, enfant.prenom, enfant.dateNaissance || null, enfant.classe || null, eleveEmail, enfant.tel || null, eleveActivationToken, totalChildren, familleLienId, frais, dossierId || null, nbPaiements, enfant.anneeScolaire || null, enfant.adresse || null]);
 
             createdEnfants.push({ id: eleveId, nom: enfant.nom, prenom: enfant.prenom, email: eleveEmail });
 
@@ -612,13 +613,13 @@ router.get('/search-familles', requireAuth, async (req, res) => {
             LEFT JOIN eleve_parent ep ON p.id = ep.parentId
             LEFT JOIN eleves e ON ep.eleveId = e.id
             WHERE LOWER(p.nom) LIKE ? OR LOWER(p.prenom) LIKE ? OR LOWER(p.email) LIKE ?
-               OR LOWER(e.nom) LIKE ? OR LOWER(e.prenom) LIKE ?
-        `, [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`]);
+               OR LOWER(e.nom) LIKE ? OR LOWER(e.prenom) LIKE ? OR LOWER(e.dossierId) LIKE ?
+        `, [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`]);
 
         // Pour chaque parent, récupérer ses enfants
         for (const parent of parents) {
             parent.enfants = await dbAll(db, `
-                SELECT e.id, e.nom, e.prenom, e.classe, e.fraisInscription, e.montantPaye, e.fraisValide
+                SELECT e.id, e.nom, e.prenom, e.classe, e.fraisInscription, e.dossierId, e.montantPaye, e.fraisValide
                 FROM eleves e
                 INNER JOIN eleve_parent ep ON e.id = ep.eleveId
                 WHERE ep.parentId = ?

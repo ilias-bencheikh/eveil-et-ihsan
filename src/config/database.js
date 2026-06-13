@@ -48,6 +48,7 @@ function initDatabase() {
                 tel TEXT,
                 adresse TEXT,
                 fraisInscription REAL DEFAULT 0,
+                dossierId TEXT,
                 nbPaiements INTEGER DEFAULT 1,
                 fraisValide INTEGER DEFAULT 0,
                 paiementsEffectues INTEGER DEFAULT 0,
@@ -57,6 +58,7 @@ function initDatabase() {
 
             // Migrations pour élèves
             db.run(`ALTER TABLE eleves ADD COLUMN fraisInscription REAL DEFAULT 0`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN dossierId TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN nbPaiements INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN fraisValide INTEGER DEFAULT 0`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN paiementsEffectues INTEGER DEFAULT 0`, () => {});
