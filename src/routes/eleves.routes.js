@@ -1177,7 +1177,7 @@ router.post('/reinscription/batch', checkPermission('update'), async (req, res) 
     }
 });
 
-// Import bulk depuis Excel
+// Import bulk depuis Excel/CSV
 router.post('/import', checkPermission('create'), async (req, res) => {
     const { elevesData } = req.body;
     if (!Array.isArray(elevesData)) {
@@ -1192,71 +1192,90 @@ router.post('/import', checkPermission('create'), async (req, res) => {
         console.error("sendEmail introuvable", e);
     }
 
+    const host = req.get('host');
+    const errors = [];
+    let importedCount = 0;
+    let parentsCreated = 0;
+    let emailsSent = 0;
+
     try {
-        let importedCount = 0;
         for (const data of elevesData) {
-            const eNom = data["Nom"] || "";
-            const ePrenom = data["Prénom"] || "";
-            if (!eNom || !ePrenom) continue; // Skip invalid rows
+            const eNom = data["Nom Prénom de l'élève"] || "";
+            const parts = eNom.trim().split(/\s+/);
+            const ePrenom = parts.pop() || ""; // dernier mot = prénom
+            const elevesNom = parts.join(" ") || eNom; // le reste = nom
+
+            if (!ePrenom) continue;
 
             const eClasse = data["Classe"] || null;
-            const eDateNaiss = data["Date de Naissance"] || null;
-            const eTel = data["Téléphone Élève"] || null;
-            const eEmail = data["Email Élève"] || null;
             const eAnnee = data["Année Scolaire"] || null;
+            const eDossierId = data["Dossier Frais"] || data["DossierId"] || data["Dossier"] || null;
 
-            const fraisIns = parseFloat(data["Frais Inscription"]) || 0;
-            const nbPaie = parseInt(data["Nombre de Paiements Prévus"]) || 1;
+            const p1Tel = data["Téléphone Parent 1"] || null;
+            const p1Email = data["Email Parent 1"] || null;
+            const p2Tel = data["Téléphone Parent 2"] || null;
+            const p2Email = data["Email Parent 2"] || null;
 
-            const p1Nom = data["Parent 1 Nom"] || "";
-            const p1Prenom = data["Parent 1 Prénom"] || "";
-            const p1Tel = data["Parent 1 Téléphone"] || null;
-            const p1Email = data["Parent 1 Email"] || null;
-            const p1Adresse = data["Parent 1 Adresse"] || null;
-
-            const p2Nom = data["Parent 2 Nom"] || "";
-            const p2Prenom = data["Parent 2 Prénom"] || "";
-            const p2Tel = data["Parent 2 Téléphone"] || null;
-            const p2Email = data["Parent 2 Email"] || null;
-            const p2Adresse = data["Parent 2 Adresse"] || null;
+            const authSortieSeul = data["Autorisation de sortie seul"] || null;
+            const sortieSeul = [true, "true", "1", "oui", "OUI", "OUI", 1, "True", "TRUE"].includes(authSortieSeul) ? 1 : 0;
 
             const eleveId = generateId('e');
-            const activationToken = eEmail ? generateToken() : null;
 
             await dbRun(db, `
-                INSERT INTO eleves (id, nom, prenom, dateNaissance, classe, email, tel, password, activationToken, activated,
-                                   enFamille, nombreFamille, familleLienId, fraisInscription, dossierId, nbPaiements,
-                                   fraisValide, paiementsEffectues, anneeScolaire, montantPaye)
-                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, NULL, ?, NULL, ?, 0, 0, ?, 0)
-            `, [eleveId, eNom, ePrenom, eDateNaiss, eClasse, eEmail, eTel, activationToken, fraisIns, nbPaie, eAnnee]);
+                INSERT INTO eleves (id, nom, prenom, classe, email, password, activationToken, activated,
+                                   enFamille, nombreFamille, familleLienId, dossierId, nbPaiements,
+                                   fraisValide, paiementsEffectues, anneeScolaire, montantPaye, sortieSeul)
+                VALUES (?, ?, ?, ?, NULL, NULL, NULL, 1, 0, 1, NULL, ?, 1, 1, 1, ?, 0, ?)
+            `, [eleveId, elevesNom, ePrenom, eClasse, eDossierId, eAnnee, sortieSeul]);
 
-            if (eEmail && activationToken && sendEmail) {
-                const host = req.get('host');
-                const link = `http://${host}/activation.html?token=${activationToken}`;
-                sendEmail(eEmail, 'activation', `${ePrenom} ${eNom}`, link).catch(e => console.error(e));
-            }
+            const handleParent = async (pTel, pEmail, isPrimary) => {
+                if (!pTel && !pEmail) return;
 
-            const handleParent = async (pNom, pPrenom, pTel, pEmail, pAdresse, isPrimary) => {
-                if (!pNom && !pPrenom && !pEmail && !pTel) return;
-
+                // Vérifier si le parent existe déjà par email
                 let parentId = null;
                 if (pEmail) {
                     const existing = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [pEmail]);
                     if (existing) parentId = existing.id;
                 }
-                if (!parentId && pNom && pPrenom) {
-                    const existing = await dbGet(db, 'SELECT id FROM parents WHERE nom = ? AND prenom = ? COLLATE NOCASE', [pNom, pPrenom]);
-                    if (existing) parentId = existing.id;
-                }
 
                 if (!parentId) {
                     parentId = generateId('p');
-                    const pToken = pEmail ? generateToken() : null;
+                    const pToken = generateToken();
+                    let finalEmail = pEmail || null;
+                    let needsEmailUpdate = false;
+
+                    if (!pEmail) {
+                        finalEmail = `parent_${parentId}@placeholder.eveil-ihsan.local`;
+                        needsEmailUpdate = true;
+                    }
+
                     await dbRun(db, `
-                        INSERT INTO parents (id, nom, prenom, email, tel, adresse, activationToken, activated)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
-                    `, [parentId, pNom, pPrenom, pEmail, pTel, pAdresse, pToken]);
-                    // Mails aux parents commentés par rapport à votre demande (le dashboard gérera l'envoi)
+                        INSERT INTO parents (id, nom, prenom, email, tel, activationToken, activated, needsEmailUpdate)
+                        VALUES (?, '', '', ?, ?, ?, 0, ?)
+                    `, [parentId, finalEmail, pTel, pToken, needsEmailUpdate ? 1 : 0]);
+                    parentsCreated++;
+
+                    if (sendEmail) {
+                        if (pEmail) {
+                            const activationLink = `http://${host}/activation.html?token=${pToken}&type=parent`;
+                            sendEmail(pEmail, 'activation', '', activationLink)
+                                .then(() => { emailsSent++; })
+                                .catch(e => console.error(`Erreur email parent ${pEmail}:`, e));
+                        } else {
+                            // Prévenir l'admin
+                            const adminEmail = process.env.EMAIL_USER || 'no.reply.eveil.et.ihsan@gmail.com';
+                            const activationLink = `http://${host}/activation.html?token=${pToken}&type=parent`;
+                            const adminSubject = `[Eveil et Ihsan] Compte parent créé — email manquant`;
+                            const adminHtml = `<p>Un compte parent a été créé automatiquement lors de l'import CSV&nbsp;:</p>
+<ul>
+  <li><strong>Téléphone&nbsp;:</strong> ${pTel || 'non renseigné'}</li>
+  <li><strong>Élève lié&nbsp;:</strong> ${ePrenom} ${elevesNom}</li>
+</ul>
+<p>Cet élève n'a pas d'email parent dans le fichier CSV. <strong>Merci de demander un email valide au parent</strong> et de mettre à jour le compte dans l'interface admin.</p>
+<p>Lien d'activation temporaire&nbsp;: <a href="${activationLink}">${activationLink}</a></p>`;
+                            sendEmail(adminEmail, 'adminNotification', adminSubject, adminHtml).catch(() => {});
+                        }
+                    }
                 }
 
                 await dbRun(db, `
@@ -1265,13 +1284,17 @@ router.post('/import', checkPermission('create'), async (req, res) => {
                 `, [generateId('ep'), eleveId, parentId, isPrimary ? 1 : 0]);
             };
 
-            await handleParent(p1Nom, p1Prenom, p1Tel, p1Email, p1Adresse, true);
-            await handleParent(p2Nom, p2Prenom, p2Tel, p2Email, p2Adresse, false);
+            await handleParent(p1Tel, p1Email, true);
+            await handleParent(p2Tel, p2Email, false);
 
             importedCount++;
         }
 
-        res.status(200).json({ message: `Import réussi de ${importedCount} élèves` });
+        res.status(200).json({
+            message: `Import réussi : ${importedCount} élève(s), ${parentsCreated} parent(s) créé(s). ${emailsSent} email(s) d'activation envoyé(s).`,
+            stats: { eleves: importedCount, parents: parentsCreated, emails: emailsSent },
+            errors: errors.length > 0 ? errors : undefined
+        });
     } catch (err) {
         console.error('Erreur import Excel:', err);
         res.status(500).json({ error: 'Erreur lors de l\'import des élèves' });

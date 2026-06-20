@@ -763,6 +763,61 @@
                 margin-top: 4px;
             }
 
+            .p-profile-incomplete-banner {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                background: #fff8e1;
+                border: 1.5px solid #f59e0b;
+                border-radius: 16px;
+                padding: 16px 20px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+            .p-profile-incomplete-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: #fef3c7;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .p-profile-incomplete-icon .material-icons {
+                color: #d97706;
+                font-size: 22px;
+            }
+            .p-profile-incomplete-content {
+                flex: 1;
+                min-width: 200px;
+            }
+            .p-profile-incomplete-title {
+                font-weight: 600;
+                color: #92400e;
+                font-size: 15px;
+                margin-bottom: 2px;
+            }
+            .p-profile-incomplete-desc {
+                font-size: 13px;
+                color: #b45309;
+            }
+            .p-profile-incomplete-btn {
+                background: #f59e0b;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                white-space: nowrap;
+                font-family: inherit;
+            }
+            .p-profile-incomplete-btn:hover {
+                background: #d97706;
+            }
+
             .form-group {
                 margin-bottom: 20px;
             }
@@ -4241,6 +4296,22 @@
                             </div>
                         </div>
 
+                        <!-- Bannière de complétion de profil (si incomplet) -->
+                        <div id="profileCompletionBanner" class="p-profile-incomplete-banner" style="display:none;">
+                            <div class="p-profile-incomplete-icon">
+                                <span class="material-icons">warning</span>
+                            </div>
+                            <div class="p-profile-incomplete-content">
+                                <div class="p-profile-incomplete-title">Complétez votre profil</div>
+                                <div class="p-profile-incomplete-desc">
+                                    Pour accéder à toutes les fonctionnalités, veuillez renseigner votre nom, prénom et adresse.
+                                </div>
+                            </div>
+                            <button class="p-profile-incomplete-btn" onclick="document.querySelector('[data-section=\'profil\']').click()">
+                                Compléter mon profil
+                            </button>
+                        </div>
+
                         <!-- Grille de contenu -->
                         <div class="p-content-grid">
                             <!-- Dernières actualités — Carrousel PPT (colonne principale) -->
@@ -5346,12 +5417,10 @@
                                                     "
                                                     >badge</span
                                                 >
-                                                Nom</label
-                                            >
+                                                Nom</label>
                                             <input
                                                 type="text"
                                                 id="profilNom"
-                                                readonly
                                             />
                                         </div>
                                         <div class="form-group">
@@ -5365,12 +5434,10 @@
                                                     "
                                                     >badge</span
                                                 >
-                                                Prénom</label
-                                            >
+                                                Prénom</label>
                                             <input
                                                 type="text"
                                                 id="profilPrenom"
-                                                readonly
                                             />
                                         </div>
                                     </div>
@@ -5847,6 +5914,13 @@
 
                     // Charger les données du profil
                     loadProfileData();
+
+                    // Afficher la bannière de complétion si profil incomplet
+                    const needsProfileCompletion = !parentData.nom || !parentData.prenom || !parentData.adresse;
+                    const banner = document.getElementById('profileCompletionBanner');
+                    if (banner) {
+                        banner.style.display = needsProfileCompletion ? 'flex' : 'none';
+                    }
 
                     // Charger les frais
                     loadFraisData();
@@ -7903,6 +7977,10 @@
                             await apiRequest("/api/parents/profil/me", {
                                 method: "PUT",
                                 body: JSON.stringify({
+                                    nom: document.getElementById("profilNom")
+                                        .value,
+                                    prenom: document.getElementById("profilPrenom")
+                                        .value,
                                     tel: document.getElementById("profilTel")
                                         .value,
                                     adresse:

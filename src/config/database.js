@@ -68,6 +68,7 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN anneeScolaire TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN adresse TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN sortieSeul INTEGER DEFAULT 0`, () => {});
 
             // Table paiements (historique des transactions)
             db.run(`CREATE TABLE IF NOT EXISTS paiements (
@@ -101,6 +102,7 @@ function initDatabase() {
                 notifEmailMessage INTEGER DEFAULT 1
             )`);
             db.run(`ALTER TABLE parents ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
+            db.run(`ALTER TABLE parents ADD COLUMN needsEmailUpdate INTEGER DEFAULT 0`, () => {});
 
             // Table de liaison élève-parent (un élève peut avoir 2 parents)
             db.run(`CREATE TABLE IF NOT EXISTS eleve_parent (

@@ -6863,12 +6863,23 @@
                                         font-size: 15px;
                                     "
                                 >
-                                    Gérez les accès parents et élèves de la
-                                    plateforme.
+                                    Gérez les accès parents et élèves de la plateforme. L'import Excel crée automatiquement les comptes parents (avec ou sans email) et envoie les liens d'activation par email.
                                 </p>
                             </div>
                             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                                <input type="file" id="importExcelInput" accept=".xlsx, .xls" style="display: none;" onchange="importElevesExcel(event)">
+                                <input type="file" id="importExcelInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importElevesExcel(event)">
+                                <button
+                                    class="md-btn md-btn-outlined"
+                                    onclick="downloadCsvTemplate()"
+                                    style="background: white"
+                                >
+                                    <span
+                                        class="material-icons"
+                                        style="font-size: 18px"
+                                        >description</span
+                                    >
+                                    Modèle CSV
+                                </button>
                                 <button
                                     class="md-btn md-btn-outlined"
                                     onclick="document.getElementById('importExcelInput').click()"
@@ -9130,13 +9141,24 @@
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        let jsonData;
+                        const isCsv = file.name.endsWith('.csv');
+
+                        if (isCsv) {
+                            // SheetJS lit les CSV sans dépendre de readAsText/BOM
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array', cellDates: false });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                        } else {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, {type: 'array'});
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        }
 
                         if (jsonData.length === 0) {
-                            showSnackbar("Le fichier Excel est vide.");
+                            showSnackbar("Le fichier est vide.");
                             return;
                         }
 
@@ -9158,12 +9180,46 @@
                         }
                     } catch (err) {
                         console.error(err);
-                        showSnackbar("Erreur de lecture du fichier Excel");
+                        showSnackbar("Erreur de lecture du fichier");
                     }
-                    // Reset input
                     event.target.value = "";
                 };
                 reader.readAsArrayBuffer(file);
+            }
+
+            function downloadCsvTemplate() {
+                const headers = [
+                    "Nom Prénom de l'élève", "Classe", "Année Scolaire", "Dossier Frais",
+                    "Téléphone Parent 1", "Email Parent 1",
+                    "Téléphone Parent 2", "Email Parent 2",
+                    "Autorisation de sortie seul"
+                ];
+                const exampleRows = [
+                    [
+                        "BENCHERIF Yasmine", "CM2", "2025-2026", "DOS-001",
+                        "0612345678", "karim.bencherif@email.com",
+                        "0623456789", "fatima.bencherif@email.com",
+                        "Non"
+                    ],
+                    [
+                        "EL FASSI Ilyas", "5ème", "2025-2026", "DOS-002",
+                        "0611112222", "ahmed.elfassi@email.com",
+                        "", "",
+                        "Oui"
+                    ]
+                ];
+
+                const csvContent = [headers, ...exampleRows]
+                    .map(row => row.map(cell => `"${(cell || "").toString().replace(/"/g, '""')}"`).join(","))
+                    .join("\n");
+
+                const blob = new Blob(["﻿" + csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "modele_import_eleves.csv";
+                link.click();
+                URL.revokeObjectURL(url);
             }
 
             function editParent(id) {

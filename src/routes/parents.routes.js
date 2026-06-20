@@ -47,14 +47,17 @@ router.put('/profil/me', requireAuth, async (req, res) => {
     if (req.userRole !== 'parent') {
         return res.status(403).json({ error: 'Accès réservé aux parents' });
     }
-    
-    const { tel, adresse } = req.body;
-    
+
+    const { nom, prenom, tel, adresse } = req.body;
+
     try {
-        await dbRun(db, 'UPDATE parents SET tel = ?, adresse = ? WHERE id = ?', [tel || null, adresse || null, req.userId]);
-        
+        await dbRun(db, 'UPDATE parents SET nom = ?, prenom = ?, tel = ?, adresse = ? WHERE id = ?',
+            [nom || null, prenom || null, tel || null, adresse || null, req.userId]);
+
         const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession FROM parents WHERE id = ?', [req.userId]);
-        res.json({ message: 'Profil mis à jour', parent });
+
+        const profilIncomplet = !parent.nom || !parent.prenom || !parent.adresse;
+        res.json({ message: 'Profil mis à jour', parent, profilIncomplet });
     } catch (err) {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }

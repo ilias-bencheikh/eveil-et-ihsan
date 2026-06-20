@@ -298,6 +298,56 @@ const emailTemplates = {
 </table>
 </body>
 </html>`
+    }),
+    adminNotification: (adminSubject, adminHtml) => ({
+        subject: adminSubject,
+        html: `<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>${adminSubject}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f6f8fc;font-family:Roboto,'Segoe UI',Helvetica,Arial,sans-serif;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f8fc;">
+  <tr>
+    <td align="center" style="padding:32px 16px 48px;">
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0"
+             style="max-width:560px;width:100%;background:#ffffff;border-radius:8px;
+                    box-shadow:0 1px 3px rgba(60,64,67,.15),0 4px 8px rgba(60,64,67,.10);">
+        <tr>
+          <td style="height:4px;background:#b91c1c;border-radius:8px 8px 0 0;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:24px 0 16px;text-align:center;">
+            <span style="font-size:22px;font-weight:700;color:#1e5aa8;letter-spacing:-0.3px;">Eveil et Ihsan — Admin</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 48px 40px;">
+            <h1 style="margin:0 0 24px;font-size:22px;font-weight:500;color:#202124;text-align:center;letter-spacing:0;">
+              ${adminSubject}
+            </h1>
+            ${adminHtml}
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+        <tr>
+          <td style="padding:24px 0 0;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#80868b;line-height:1.8;">
+              © ${new Date().getFullYear()} Eveil et Ihsan &bull; Notification automatique<br>
+              Connectez-vous à l'interface admin pour plus de détails.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`
     })
 };
 

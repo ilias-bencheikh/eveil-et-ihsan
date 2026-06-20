@@ -114,24 +114,28 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         // Vérifier dans la table PARENTS
         row = await dbGet(db, 'SELECT * FROM parents WHERE email = ? AND activated = 1', [cleanEmail]);
-        
+
         if (row && await verifyPassword(password, row.password)) {
             await migratePasswordIfNeeded('parents', row.id, password, row.password);
-            
+
             const enfants = await dbAll(db, `
                 SELECT e.id, e.nom, e.prenom, e.classe, e.photo, ep.isPrimary
                 FROM eleves e
                 INNER JOIN eleve_parent ep ON e.id = ep.eleveId
                 WHERE ep.parentId = ?
             `, [row.id]);
-            
+
+            // Vérifier si le profil parent est incomplet (nom/prénom/adresse manquants)
+            const needsProfileCompletion = !row.nom || !row.prenom || !row.adresse;
+
             const user = {
                 id: row.id,
                 email: row.email,
                 role: 'parent',
                 nom: row.nom,
                 prenom: row.prenom,
-                enfants: enfants
+                enfants: enfants,
+                needsProfileCompletion
             };
             const token = await createSession(user, req);
             return res.json({ user, token });
