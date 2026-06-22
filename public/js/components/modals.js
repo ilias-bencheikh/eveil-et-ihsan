@@ -221,278 +221,139 @@ function showIncompleteContactsModal(incompleteContacts) {
     modal.className = 'modal-overlay';
     modal.style.cssText = `
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(4px);
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(6px);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10000;
         padding: 20px;
-        animation: fadeIn 0.2s ease;
+        box-sizing: border-box;
     `;
 
-    let tableRows = '';
-    incompleteContacts.forEach((student, index) => {
-        let parentsInfo = '';
+    const th = (label, bg = '#e8f0fe') => `
+        <th style="
+            padding: 11px 16px;
+            background: ${bg};
+            color: #1e5aa8;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: left;
+            border-right: 1px solid #c5d3e8;
+            border-bottom: 2px solid #c5d3e8;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            white-space: nowrap;
+        ">${label}</th>`;
 
-        if (student.parents && student.parents.length > 0) {
-            parentsInfo = student.parents.map((p, idx) => {
-                const parts = [];
-                const parentLabel = `Parent ${idx + 1}`;
+    const cell = (value, type) => {
+        const styles = {
+            idx:     'background:#f8f9ff; color:#666; text-align:center; font-weight:700; width:36px;',
+            name:    'background:#fff; color:#191c20; font-weight:600;',
+            classe:  'background:#fff; color:#43474e; text-align:center;',
+            ok:      'background:#f0faf4; color:#146b3a; font-weight:500;',
+            missing: 'background:#fff4f4; color:#ba1a1a; font-weight:600;',
+            alt_ok:  'background:#e8f4f0; color:#146b3a; font-weight:500;',
+            alt_miss:'background:#ffecec; color:#ba1a1a; font-weight:600;',
+            empty:   'background:#fafafa; color:#aaa;',
+        };
+        return `<td style="padding:10px 16px; border-right:1px solid #e0e4ee; border-bottom:1px solid #e0e4ee; font-size:13px; white-space:nowrap; ${styles[type] || ''}">${value}</td>`;
+    };
 
-                if (p.nom || p.prenom) {
-                    parts.push(`<strong>${parentLabel}:</strong> ${p.nom} ${p.prenom}`.trim());
-                } else {
-                    parts.push(`<strong>${parentLabel}:</strong>`);
-                }
+    const rows = incompleteContacts.map((student, i) => {
+        const p1 = student.parents[0] || {};
+        const p2 = student.parents[1] || null;
+        const even = i % 2 === 0;
 
-                const info = [];
-                if (p.email) {
-                    info.push(`📧 ${p.email}`);
-                } else {
-                    info.push(`<span style="color: var(--md-sys-color-error);">📧 Email manquant</span>`);
-                }
+        const p1Email = p1.email && p1.email.trim() ? p1.email : null;
+        const p1Tel   = p1.tel   && p1.tel.trim()   ? p1.tel   : null;
+        const p2Email = p2 && p2.email && p2.email.trim() ? p2.email : null;
+        const p2Tel   = p2 && p2.tel   && p2.tel.trim()   ? p2.tel   : null;
 
-                if (p.tel) {
-                    info.push(`📞 ${p.tel}`);
-                } else {
-                    info.push(`<span style="color: var(--md-sys-color-error);">📞 Tél manquant</span>`);
-                }
-
-                parts.push('<div style="margin-left: 20px; font-size: 0.95em;">' + info.join(' • ') + '</div>');
-                return parts.join('<br>');
-            }).join('<br><br>');
-        } else {
-            parentsInfo = '<span style="color: var(--md-sys-color-error); font-weight: 500;">⚠️ Aucun parent enregistré</span>';
-        }
-
-        tableRows += `
-            <tr style="border-bottom: 1px solid var(--md-sys-color-outline-variant); transition: background 0.2s;">
-                <td style="padding: 16px; font-weight: 500; color: var(--md-sys-color-on-surface);">${student.eleveNom} ${student.elevePrenom}</td>
-                <td style="padding: 16px; color: var(--md-sys-color-on-surface-variant);">${student.classe || '-'}</td>
-                <td style="padding: 16px; color: var(--md-sys-color-on-surface-variant); line-height: 1.8;">${parentsInfo}</td>
-            </tr>
-        `;
-    });
+        return `<tr>
+            ${cell(i + 1, 'idx')}
+            ${cell(`${student.eleveNom} ${student.elevePrenom}`, 'name')}
+            ${cell(student.classe || '—', 'classe')}
+            ${cell(p1Email ? `✓ ${p1Email}` : '✗ Manquant', p1Email ? 'ok' : 'missing')}
+            ${cell(p1Tel   ? `✓ ${p1Tel}`   : '✗ Manquant', p1Tel   ? 'ok' : 'missing')}
+            ${p2 !== null
+                ? cell(p2Email ? `✓ ${p2Email}` : '✗ Manquant', p2Email ? 'alt_ok' : 'alt_miss') + cell(p2Tel ? `✓ ${p2Tel}` : '✗ Manquant', p2Tel ? 'alt_ok' : 'alt_miss')
+                : cell('—', 'empty') + cell('—', 'empty')
+            }
+        </tr>`;
+    }).join('');
 
     modal.innerHTML = `
-        <div class="modal-content" style="
+        <div style="
             background: var(--md-sys-color-surface-container-low);
-            border-radius: var(--md-sys-shape-corner-extra-large);
-            max-width: 1000px;
-            width: 95%;
-            max-height: 85vh;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 88vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: var(--md-sys-elevation-5);
-            animation: slideUp 0.3s var(--md-sys-motion-easing-emphasized-decelerate);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+            animation: ic-slideUp 0.25s cubic-bezier(0.05,0.7,0.1,1);
         ">
-            <div style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 24px 32px;
-                border-bottom: 1px solid var(--md-sys-color-outline-variant);
-                background: var(--md-sys-color-surface-container);
-            ">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="
-                        width: 48px;
-                        height: 48px;
-                        border-radius: var(--md-sys-shape-corner-full);
-                        background: var(--md-sys-color-warning-container);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 24px;
-                    ">⚠️</div>
-                    <div>
-                        <h2 style="
-                            margin: 0;
-                            font: var(--md-sys-typescale-headline-small);
-                            color: var(--md-sys-color-on-surface);
-                        ">Contacts Incomplets Détectés</h2>
-                        <p style="
-                            margin: 4px 0 0 0;
-                            font: var(--md-sys-typescale-body-medium);
-                            color: var(--md-sys-color-on-surface-variant);
-                        ">${incompleteContacts.length} famille(s) à compléter</p>
-                    </div>
+            <!-- Header -->
+            <div style="display:flex;align-items:center;gap:14px;padding:20px 24px;background:var(--md-sys-color-surface-container);border-bottom:1px solid #e0e4ee;flex-shrink:0;">
+                <div style="width:44px;height:44px;border-radius:50%;background:#ffdea6;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚠️</div>
+                <div style="flex:1;">
+                    <div style="font-size:17px;font-weight:700;color:var(--md-sys-color-on-surface);">Contacts incomplets — ${incompleteContacts.length} famille(s)</div>
+                    <div style="font-size:13px;color:var(--md-sys-color-on-surface-variant);margin-top:2px;">Aucun parent n'a à la fois un email et un téléphone</div>
                 </div>
-                <button class="close-btn" style="
-                    background: transparent;
-                    border: none;
-                    width: 40px;
-                    height: 40px;
-                    border-radius: var(--md-sys-shape-corner-full);
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: var(--md-sys-color-on-surface-variant);
-                    font-size: 24px;
-                    transition: all 0.2s;
-                " onmouseover="this.style.background='var(--md-sys-color-surface-container-highest)'" onmouseout="this.style.background='transparent'">✕</button>
+                <button class="ic-close" style="background:none;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;font-size:18px;transition:background 0.2s;" onmouseover="this.style.background='#eee'" onmouseout="this.style.background='none'">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
 
-            <div style="
-                padding: 24px 32px;
-                background: var(--md-sys-color-warning-container);
-                border-left: 4px solid var(--md-sys-color-warning);
-            ">
-                <p style="
-                    margin: 0;
-                    font: var(--md-sys-typescale-body-medium);
-                    color: var(--md-sys-color-on-warning-container);
-                    line-height: 1.6;
-                ">
-                    <strong>Important :</strong> Les élèves suivants n'ont pas au moins un parent avec <strong>à la fois</strong> une adresse email et un numéro de téléphone.
-                    Veuillez compléter ces informations pour permettre la communication avec les familles.
-                </p>
-            </div>
-
-            <div style="
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px;
-            ">
-                <table style="
-                    width: 100%;
-                    border-collapse: collapse;
-                    background: var(--md-sys-color-surface-container-lowest);
-                    border-radius: var(--md-sys-shape-corner-large);
-                    overflow: hidden;
-                ">
+            <!-- Tableau scrollable -->
+            <div style="flex:1;overflow:auto;min-height:0;">
+                <table style="width:100%;border-collapse:collapse;border-left:1px solid #e0e4ee;border-top:1px solid #e0e4ee;font-family:'Roboto',sans-serif;">
                     <thead>
-                        <tr style="
-                            background: var(--md-sys-color-surface-container-high);
-                            position: sticky;
-                            top: 0;
-                            z-index: 1;
-                        ">
-                            <th style="
-                                padding: 16px;
-                                text-align: left;
-                                font: var(--md-sys-typescale-title-medium);
-                                color: var(--md-sys-color-on-surface);
-                                border-bottom: 2px solid var(--md-sys-color-outline);
-                            ">Élève</th>
-                            <th style="
-                                padding: 16px;
-                                text-align: left;
-                                font: var(--md-sys-typescale-title-medium);
-                                color: var(--md-sys-color-on-surface);
-                                border-bottom: 2px solid var(--md-sys-color-outline);
-                            ">Classe</th>
-                            <th style="
-                                padding: 16px;
-                                text-align: left;
-                                font: var(--md-sys-typescale-title-medium);
-                                color: var(--md-sys-color-on-surface);
-                                border-bottom: 2px solid var(--md-sys-color-outline);
-                            ">Informations Parents</th>
+                        <tr>
+                            ${th('#', '#eef1f8')}
+                            ${th('Élève', '#eef1f8')}
+                            ${th('Classe', '#eef1f8')}
+                            ${th('Email Parent 1', '#dce8ff')}
+                            ${th('Téléphone Parent 1', '#dce8ff')}
+                            ${th('Email Parent 2', '#e2f0ea')}
+                            ${th('Téléphone Parent 2', '#e2f0ea')}
                         </tr>
                     </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
+                    <tbody>${rows}</tbody>
                 </table>
             </div>
 
-            <div style="
-                display: flex;
-                gap: 12px;
-                justify-content: flex-end;
-                padding: 24px 32px;
-                border-top: 1px solid var(--md-sys-color-outline-variant);
-                background: var(--md-sys-color-surface-container);
-            ">
-                <button class="download-btn" style="
-                    padding: 12px 24px;
-                    background: var(--md-sys-color-success);
-                    color: var(--md-sys-color-on-success);
-                    border: none;
-                    border-radius: var(--md-sys-shape-corner-full);
-                    cursor: pointer;
-                    font: var(--md-sys-typescale-label-large);
-                    font-weight: 600;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.2s;
-                    box-shadow: var(--md-sys-elevation-2);
-                " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='var(--md-sys-elevation-3)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='var(--md-sys-elevation-2)'">
-                    <span>📥</span> Télécharger Excel
-                </button>
-                <button class="close-modal-btn" style="
-                    padding: 12px 24px;
-                    background: var(--md-sys-color-primary);
-                    color: var(--md-sys-color-on-primary);
-                    border: none;
-                    border-radius: var(--md-sys-shape-corner-full);
-                    cursor: pointer;
-                    font: var(--md-sys-typescale-label-large);
-                    font-weight: 600;
-                    transition: all 0.2s;
-                    box-shadow: var(--md-sys-elevation-2);
-                " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='var(--md-sys-elevation-3)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='var(--md-sys-elevation-2)'">
-                    Fermer
-                </button>
+            <!-- Légende + Footer -->
+            <div style="padding:14px 24px;border-top:1px solid #e0e4ee;background:var(--md-sys-color-surface-container);flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:20px;margin-bottom:12px;flex-wrap:wrap;">
+                    <span style="font-size:12px;color:#666;">Légende :</span>
+                    <span style="font-size:12px;padding:2px 10px;background:#f0faf4;color:#146b3a;border-radius:99px;font-weight:600;">✓ Information présente</span>
+                    <span style="font-size:12px;padding:2px 10px;background:#fff4f4;color:#ba1a1a;border-radius:99px;font-weight:600;">✗ Information manquante</span>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="ic-download" style="display:flex;align-items:center;gap:7px;padding:9px 20px;background:#146b3a;color:#fff;border:none;border-radius:99px;cursor:pointer;font-weight:600;font-size:13px;transition:filter 0.2s;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+                        <span class="material-icons" style="font-size:17px;">download</span> Télécharger Excel
+                    </button>
+                    <button class="ic-close" style="padding:9px 20px;background:#1e5aa8;color:#fff;border:none;border-radius:99px;cursor:pointer;font-weight:600;font-size:13px;transition:filter 0.2s;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+                        Fermer
+                    </button>
+                </div>
             </div>
         </div>
-        <style>
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes slideUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            tbody tr:hover {
-                background: var(--md-sys-color-surface-container) !important;
-            }
-        </style>
+        <style>@keyframes ic-slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }</style>
     `;
 
     document.body.appendChild(modal);
-
-    const closeModal = () => {
-        modal.style.animation = 'fadeOut 0.2s ease';
-        setTimeout(() => modal.remove(), 200);
-    };
-
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-
-    modal.querySelector('.close-btn').addEventListener('click', closeModal);
-    modal.querySelector('.close-modal-btn').addEventListener('click', closeModal);
-
-    modal.querySelector('.download-btn').addEventListener('click', () => {
-        downloadIncompleteContactsExcel(incompleteContacts);
-    });
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-    });
-
+    const closeModal = () => modal.remove();
+    modal.querySelectorAll('.ic-close').forEach(b => b.addEventListener('click', closeModal));
+    modal.querySelector('.ic-download').addEventListener('click', () => downloadIncompleteContactsExcel(incompleteContacts));
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     return modal;
 }
 

@@ -1243,16 +1243,10 @@ router.post('/import', checkPermission('create'), async (req, res) => {
             const handleParent = async (pTel, pEmail, isPrimary) => {
                 if (!pTel && !pEmail) return;
 
-                // Vérifier si le parent existe déjà par email (seulement si email fourni)
+                // Chercher un parent existant uniquement par email (identifiant unique fiable)
                 let parentId = null;
                 if (pEmail) {
                     const existing = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [pEmail]);
-                    if (existing) parentId = existing.id;
-                }
-
-                // Si pas trouvé par email, chercher par téléphone
-                if (!parentId && pTel) {
-                    const existing = await dbGet(db, 'SELECT id FROM parents WHERE tel = ?', [pTel]);
                     if (existing) parentId = existing.id;
                 }
 
@@ -1315,8 +1309,8 @@ router.post('/import', checkPermission('create'), async (req, res) => {
                             'tel', p.tel,
                             'relation', ep.relation,
                             'isPrimary', ep.isPrimary
-                        )
-                    ) as parents
+                        ), '|||'
+                    ORDER BY ep.isPrimary DESC) as parents
                 FROM eleves e
                 LEFT JOIN eleve_parent ep ON e.id = ep.eleveId
                 LEFT JOIN parents p ON ep.parentId = p.id
@@ -1329,14 +1323,19 @@ router.post('/import', checkPermission('create'), async (req, res) => {
             for (const student of allStudents) {
                 let parentsData = [];
                 if (student.parents) {
-                    const parentsStr = student.parents.split(',').map(p => {
+                    console.log('Raw parents string:', student.parents);
+                    parentsData = student.parents.split('|||').map(p => {
                         try {
-                            return JSON.parse(p);
-                        } catch {
+                            const parsed = JSON.parse(p);
+                            console.log('Parsed parent:', parsed);
+                            return parsed;
+                        } catch (e) {
+                            console.error('Erreur parsing parent:', p, e);
                             return null;
                         }
                     }).filter(Boolean);
-                    parentsData = parentsStr;
+                } else {
+                    console.log('Pas de parents pour élève:', student.eleveNom, student.elevePrenom);
                 }
 
                 // Vérifier si au moins un parent a email ET téléphone
