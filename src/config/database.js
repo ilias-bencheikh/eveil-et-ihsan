@@ -104,6 +104,40 @@ function initDatabase() {
             db.run(`ALTER TABLE parents ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE parents ADD COLUMN needsEmailUpdate INTEGER DEFAULT 0`, () => {});
 
+            // Migration: Permettre email NULL pour parents sans email
+            db.run(`
+                CREATE TABLE IF NOT EXISTS parents_new (
+                    id TEXT PRIMARY KEY,
+                    nom TEXT NOT NULL,
+                    prenom TEXT NOT NULL,
+                    email TEXT UNIQUE,
+                    password TEXT,
+                    tel TEXT,
+                    adresse TEXT,
+                    profession TEXT,
+                    activationToken TEXT,
+                    activated INTEGER DEFAULT 0,
+                    resetToken TEXT,
+                    resetExpires INTEGER,
+                    createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                    notifEmailMessage INTEGER DEFAULT 1,
+                    needsEmailUpdate INTEGER DEFAULT 0
+                )
+            `, (err) => {
+                if (err) return;
+
+                // Copier les données existantes
+                db.run(`INSERT OR IGNORE INTO parents_new SELECT * FROM parents`, (err) => {
+                    if (err) return;
+
+                    // Supprimer l'ancienne table et renommer
+                    db.run(`DROP TABLE parents`, (err) => {
+                        if (err) return;
+                        db.run(`ALTER TABLE parents_new RENAME TO parents`);
+                    });
+                });
+            });
+
             // Table de liaison élève-parent (un élève peut avoir 2 parents)
             db.run(`CREATE TABLE IF NOT EXISTS eleve_parent (
                 id TEXT PRIMARY KEY,

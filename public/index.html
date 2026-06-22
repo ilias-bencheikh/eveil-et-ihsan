@@ -2847,6 +2847,7 @@
     </style>
     <!-- SheetJS for Excel Import/Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="/js/components/modals.js"></script>
     <link rel="manifest" href="/manifest.json">
 </head>
     <body>
@@ -9171,7 +9172,20 @@
 
                         if (response.ok) {
                             const resData = await response.json();
+                            console.log('Réponse import:', resData);
                             showSnackbar(resData.message || "Importation réussie");
+
+                            if (resData.incompleteContacts && resData.incompleteContacts.length > 0) {
+                                console.log('Contacts incomplets trouvés:', resData.incompleteContacts);
+                                if (window.UI && window.UI.showIncompleteContactsModal) {
+                                    window.UI.showIncompleteContactsModal(resData.incompleteContacts);
+                                } else {
+                                    console.error('UI.showIncompleteContactsModal non disponible');
+                                }
+                            } else {
+                                console.log('Aucun contact incomplet détecté');
+                            }
+
                             await loadEleves();
                             await loadAccounts();
                         } else {

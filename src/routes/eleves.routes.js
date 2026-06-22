@@ -1197,6 +1197,7 @@ router.post('/import', checkPermission('create'), async (req, res) => {
     let importedCount = 0;
     let parentsCreated = 0;
     let emailsSent = 0;
+    const importedEleveIds = [];
 
     try {
         for (const data of elevesData) {
@@ -1211,9 +1212,20 @@ router.post('/import', checkPermission('create'), async (req, res) => {
             const eAnnee = data["Année Scolaire"] || null;
             const eDossierId = data["Dossier Frais"] || data["DossierId"] || data["Dossier"] || null;
 
-            const p1Tel = data["Téléphone Parent 1"] || null;
+            // Formater les numéros de téléphone (ajouter 0 au début si manquant)
+            const formatPhone = (phone) => {
+                if (!phone) return null;
+                let phoneStr = String(phone).trim();
+                // Si le numéro commence par 6 ou 7 et a 9 chiffres, ajouter 0 devant
+                if (/^[67]\d{8}$/.test(phoneStr)) {
+                    phoneStr = '0' + phoneStr;
+                }
+                return phoneStr;
+            };
+
+            const p1Tel = formatPhone(data["Téléphone Parent 1"]);
             const p1Email = data["Email Parent 1"] || null;
-            const p2Tel = data["Téléphone Parent 2"] || null;
+            const p2Tel = formatPhone(data["Téléphone Parent 2"]);
             const p2Email = data["Email Parent 2"] || null;
 
             const authSortieSeul = data["Autorisation de sortie seul"] || null;
@@ -1231,68 +1243,139 @@ router.post('/import', checkPermission('create'), async (req, res) => {
             const handleParent = async (pTel, pEmail, isPrimary) => {
                 if (!pTel && !pEmail) return;
 
-                // Vérifier si le parent existe déjà par email
+                // Vérifier si le parent existe déjà par email (seulement si email fourni)
                 let parentId = null;
                 if (pEmail) {
                     const existing = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [pEmail]);
                     if (existing) parentId = existing.id;
                 }
 
+                // Si pas trouvé par email, chercher par téléphone
+                if (!parentId && pTel) {
+                    const existing = await dbGet(db, 'SELECT id FROM parents WHERE tel = ?', [pTel]);
+                    if (existing) parentId = existing.id;
+                }
+
                 if (!parentId) {
                     parentId = generateId('p');
                     const pToken = generateToken();
-                    let finalEmail = pEmail || null;
-                    let needsEmailUpdate = false;
-
-                    if (!pEmail) {
-                        finalEmail = `parent_${parentId}@placeholder.eveil-ihsan.local`;
-                        needsEmailUpdate = true;
-                    }
 
                     await dbRun(db, `
                         INSERT INTO parents (id, nom, prenom, email, tel, activationToken, activated, needsEmailUpdate)
                         VALUES (?, '', '', ?, ?, ?, 0, ?)
-                    `, [parentId, finalEmail, pTel, pToken, needsEmailUpdate ? 1 : 0]);
+                    `, [parentId, pEmail || null, pTel || null, pToken, pEmail ? 0 : 1]);
                     parentsCreated++;
 
-                    if (sendEmail) {
-                        if (pEmail) {
-                            const activationLink = `http://${host}/activation.html?token=${pToken}&type=parent`;
-                            sendEmail(pEmail, 'activation', '', activationLink)
-                                .then(() => { emailsSent++; })
-                                .catch(e => console.error(`Erreur email parent ${pEmail}:`, e));
-                        } else {
-                            // Prévenir l'admin
-                            const adminEmail = process.env.EMAIL_USER || 'no.reply.eveil.et.ihsan@gmail.com';
-                            const activationLink = `http://${host}/activation.html?token=${pToken}&type=parent`;
-                            const adminSubject = `[Eveil et Ihsan] Compte parent créé — email manquant`;
-                            const adminHtml = `<p>Un compte parent a été créé automatiquement lors de l'import CSV&nbsp;:</p>
-<ul>
-  <li><strong>Téléphone&nbsp;:</strong> ${pTel || 'non renseigné'}</li>
-  <li><strong>Élève lié&nbsp;:</strong> ${ePrenom} ${elevesNom}</li>
-</ul>
-<p>Cet élève n'a pas d'email parent dans le fichier CSV. <strong>Merci de demander un email valide au parent</strong> et de mettre à jour le compte dans l'interface admin.</p>
-<p>Lien d'activation temporaire&nbsp;: <a href="${activationLink}">${activationLink}</a></p>`;
-                            sendEmail(adminEmail, 'adminNotification', adminSubject, adminHtml).catch(() => {});
-                        }
+                    if (sendEmail && pEmail) {
+                        const activationLink = `http://${host}/activation.html?token=${pToken}&type=parent`;
+                        sendEmail(pEmail, 'activation', '', activationLink)
+                            .then(() => { emailsSent++; })
+                            .catch(e => console.error(`Erreur email parent ${pEmail}:`, e));
                     }
                 }
 
-                await dbRun(db, `
-                    INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
-                    VALUES (?, ?, ?, 'parent', ?)
-                `, [generateId('ep'), eleveId, parentId, isPrimary ? 1 : 0]);
+                // Vérifier si la liaison élève-parent existe déjà
+                const linkExists = await dbGet(db,
+                    'SELECT id FROM eleve_parent WHERE eleveId = ? AND parentId = ?',
+                    [eleveId, parentId]
+                );
+
+                if (!linkExists) {
+                    await dbRun(db, `
+                        INSERT INTO eleve_parent (id, eleveId, parentId, relation, isPrimary)
+                        VALUES (?, ?, ?, 'parent', ?)
+                    `, [generateId('ep'), eleveId, parentId, isPrimary ? 1 : 0]);
+                }
             };
 
             await handleParent(p1Tel, p1Email, true);
             await handleParent(p2Tel, p2Email, false);
 
+            importedEleveIds.push(eleveId);
             importedCount++;
+        }
+
+        // Vérifier les élèves dont les parents n'ont pas à la fois email ET téléphone
+        const incompleteContacts = [];
+
+        if (importedEleveIds.length > 0) {
+            const placeholders = importedEleveIds.map(() => '?').join(',');
+            const incompleteContactsQuery = `
+                SELECT
+                    e.id as eleveId,
+                    e.nom as eleveNom,
+                    e.prenom as elevePrenom,
+                    e.classe,
+                    GROUP_CONCAT(
+                        json_object(
+                            'parentId', p.id,
+                            'nom', p.nom,
+                            'prenom', p.prenom,
+                            'email', p.email,
+                            'tel', p.tel,
+                            'relation', ep.relation,
+                            'isPrimary', ep.isPrimary
+                        )
+                    ) as parents
+                FROM eleves e
+                LEFT JOIN eleve_parent ep ON e.id = ep.eleveId
+                LEFT JOIN parents p ON ep.parentId = p.id
+                WHERE e.id IN (${placeholders})
+                GROUP BY e.id
+            `;
+
+            const allStudents = await dbAll(db, incompleteContactsQuery, importedEleveIds);
+
+            for (const student of allStudents) {
+                let parentsData = [];
+                if (student.parents) {
+                    const parentsStr = student.parents.split(',').map(p => {
+                        try {
+                            return JSON.parse(p);
+                        } catch {
+                            return null;
+                        }
+                    }).filter(Boolean);
+                    parentsData = parentsStr;
+                }
+
+                // Vérifier si au moins un parent a email ET téléphone
+                const hasCompleteContact = parentsData.some(p => {
+                    const email = p.email && p.email.trim() !== '';
+                    const tel = p.tel && p.tel.trim() !== '';
+                    return email && tel;
+                });
+
+                // Ajouter à la liste si aucun parent complet OU aucun parent du tout
+                if (!hasCompleteContact) {
+                    incompleteContacts.push({
+                        eleveId: student.eleveId,
+                        eleveNom: student.eleveNom,
+                        elevePrenom: student.elevePrenom,
+                        classe: student.classe,
+                        parents: parentsData.map(p => ({
+                            nom: p.nom || '',
+                            prenom: p.prenom || '',
+                            email: p.email || '',
+                            tel: p.tel || '',
+                            relation: p.relation,
+                            isPrimary: p.isPrimary
+                        }))
+                    });
+                }
+            }
+        }
+
+        console.log(`Vérification des contacts: ${importedEleveIds.length} élèves importés`);
+        console.log(`Contacts incomplets trouvés: ${incompleteContacts.length}`);
+        if (incompleteContacts.length > 0) {
+            console.log('Détails:', JSON.stringify(incompleteContacts, null, 2));
         }
 
         res.status(200).json({
             message: `Import réussi : ${importedCount} élève(s), ${parentsCreated} parent(s) créé(s). ${emailsSent} email(s) d'activation envoyé(s).`,
             stats: { eleves: importedCount, parents: parentsCreated, emails: emailsSent },
+            incompleteContacts: incompleteContacts.length > 0 ? incompleteContacts : undefined,
             errors: errors.length > 0 ? errors : undefined
         });
     } catch (err) {
