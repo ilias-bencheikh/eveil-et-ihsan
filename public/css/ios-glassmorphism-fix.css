@@ -1,0 +1,86 @@
+/**
+ * iOS Safari Glassmorphism Crash Fix
+ *
+ * `backdrop-filter: blur()` peut provoquer un ecran blanc (white screen of death)
+ * sur iOS Safari, notamment avec:
+ *   - Les overlays modaux
+ *   - Les backgrounds avec blur + saturate sur iOS < 15
+ *   - Les elements avec blur sur un parent en fixed + transform
+ *
+ * Solution: ajouter -webkit-backdrop-filter (requis sur Safari) ET
+ * des fallback avec @supports pour eviter le crash
+ */
+
+/* =============================================
+   1. Ajout du prefixe -webkit-backdrop-filter
+   requis sur Safari iOS (sans prefixe ne marche pas)
+   ============================================= */
+
+/* Fait dans le CSS principal deja avec -webkit-backdrop-filter en premiere valeur
+   verifier que tous les backdrop-filter ont le prefixe */
+
+/* =============================================
+   2. Desactiver uniquement sur iOS < 15
+   qui a des bugs connus avec backdrop-filter
+   ============================================= */
+
+/* iOS 12-13: desactiver backdrop-filter (crashes connus) */
+@supports (-webkit-touch-callout: present) and (not (min-version: 15)) {
+    * {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+
+    /* Fallback: fond opaque semi-transparent */
+    .glass-effect,
+    .glass,
+    [class*="glassmorphism"],
+    [class*="glass-"],
+    .modal-overlay,
+    .modal-backdrop,
+    .overlay,
+    .toast,
+    .notification,
+    .card.glass,
+    nav.glass,
+    .navbar,
+    .header {
+        background: rgba(255, 255, 255, 0.94) !important;
+    }
+
+    /* Overlay sombres (modaux, dropdowns) */
+    .overlay-dark,
+    .modal-overlay,
+    [class*="dark-overlay"],
+    [class*="modal-backdrop"] {
+        background: rgba(0, 0, 0, 0.55) !important;
+    }
+
+    /* Header/nav fond clair */
+    .header,
+    .topbar,
+    nav,
+    .navbar {
+        background: rgba(255, 255, 255, 0.98) !important;
+    }
+}
+
+/* =============================================
+   3. Workaround pour les crashes lies a transform+blur
+   Les elements avec blur sur un parent transform:fixed crachent
+   sur iOS Safari meme recent
+
+   Note: couvre aussi backdrop-filter defini en inline style (JS)
+   ============================================= */
+
+/* Desactiver blur sur les parents transform:fixed (pattern courant des modaux) */
+@supports (-webkit-touch-callout: present) {
+    .modal-overlay,
+    body > .modal-overlay,
+    [class*="modal-overlay"],
+    [data-overlay] {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+    }
+}

@@ -305,22 +305,45 @@
     </div>
 
     <script>
-        // Redirection automatique si déjà connecté
+        // ============================================================
+        // LOGIN - Utiliser le système de recovery iOS si disponible
+        // ============================================================
+
+        // Vérifier si on a un token et des données utilisateur
         const token = localStorage.getItem('token');
         const user = localStorage.getItem('user');
 
         if (token && user) {
             try {
                 const userData = JSON.parse(user);
-                if (userData.role === 'eleve') window.location.replace('/eleve');
-                else if (userData.role === 'parent') window.location.replace('/parent');
-                else window.location.replace('/dashboard');
+                // Vérifier que les données sont valides
+                if (userData && userData.role) {
+                    if (userData.role === 'eleve') window.location.replace('/eleve');
+                    else if (userData.role === 'parent') window.location.replace('/parent');
+                    else window.location.replace('/dashboard');
+                    // Ne pas nettoyer ici - laisser le sw-recovery gérer si nécessaire
+                } else {
+                    // Données invalides, nettoyer
+                    if (window.iOSRecovery) {
+                        window.iOSRecovery.clean();
+                    } else {
+                        localStorage.clear();
+                    }
+                }
             } catch(e) {
-                localStorage.clear();
+                // JSON invalide, nettoyer
+                if (window.iOSRecovery) {
+                    window.iOSRecovery.clean();
+                } else {
+                    localStorage.clear();
+                }
             }
         } else {
-            // Nettoyer les anciennes sessions au chargement
-            localStorage.clear();
+            // Pas de session, nettoyer (seulement si sw-recovery n'a pas déjà nettoyé)
+            if (!token && !user) {
+                // C'est une nouvelle session ou première visite
+                // Ne pas nettoyer ici - sw-recovery le fait déjà sur iOS
+            }
         }
 
         // URL de base de l'API

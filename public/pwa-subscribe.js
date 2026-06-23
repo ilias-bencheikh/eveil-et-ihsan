@@ -10,6 +10,44 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
+// Vérifier si on est en environnement ngrok (dev) ou production
+function isNgrokEnvironment() {
+    const hostname = window.location.hostname;
+    return hostname.includes('ngrok') ||
+           hostname.includes('ngrok-free') ||
+           hostname.includes('localhost') ||
+           hostname.includes('127.0.0.1') ||
+           hostname.includes('0.0.0.0');
+}
+
+// Forcer la mise à jour ou désinscription du Service Worker
+async function forceUpdateServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+
+    try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+            // Sur ngrok/dev, on désinstalle le SW pour éviter les conflits
+            if (isNgrokEnvironment()) {
+                console.log('[PWA] Environnement dev détecté, désinstallation du Service Worker...');
+                await registration.unregister();
+
+                // Vider le cache aussi
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    console.log('[PWA] Cache vidé');
+                }
+            } else {
+                // En production, juste mettre à jour
+                await registration.update();
+            }
+        }
+    } catch (e) {
+        console.warn('[PWA] Erreur gestion SW:', e);
+    }
+}
+
 window.forcePushSubscription = async function(silent = false) {
     try {
         console.log("Tentative d'abonnement aux notifications Push...");
@@ -185,21 +223,30 @@ function showFirstInstallPushPrompt() {
 
 // Initialisation automatique (silencieuse)
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
+        // Nettoyer les anciens Service Workers (surtout en dev avec ngrok)
+        await forceUpdateServiceWorker();
+
+        // En environnement de dev (ngrok), ne pas enregistrer de SW
+        if (isNgrokEnvironment()) {
+            console.log('[PWA] Mode dev - Service Worker désactivé');
+            return;
+        }
+
         navigator.serviceWorker.register('/service-worker.js')
             .then(() => {
                 // Si la permission est déjà accordée, on retente la souscription en silence
                 if (Notification.permission === 'granted') {
                     window.forcePushSubscription(true).catch(e => console.error("Silent sub failed", e));
                 }
-                
+
                 // Mettre à jour l'UI des paramètres si présent
                 checkPushSubscriptionStatus();
-                
+
                 // Montrer le prompt pour la première ouverture PWA
-                setTimeout(showFirstInstallPushPrompt, 2000); // petit délai pour ne pas brusquer
+                setTimeout(showFirstInstallPushPrompt, 2000);
             });
-            
+
         // Écouteur pour la checkbox des paramètres
         document.addEventListener('change', function(e) {
             if (e.target && e.target.id === 'pushNotifCheckbox') {
