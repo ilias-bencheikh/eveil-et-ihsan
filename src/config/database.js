@@ -104,9 +104,10 @@ function initDatabase() {
             db.run(`ALTER TABLE parents ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE parents ADD COLUMN needsEmailUpdate INTEGER DEFAULT 0`, () => {});
 
-            // Migration: Permettre email NULL pour parents sans email
-            db.run(`
-                CREATE TABLE IF NOT EXISTS parents_new (
+            // Migration: Permettre email NULL pour parents sans email (une seule fois)
+            db.get(`SELECT id FROM migrations WHERE id = 'parents_email_nullable'`, (err, row) => {
+                if (row) return; // déjà appliquée
+                db.run(`CREATE TABLE IF NOT EXISTS parents_new (
                     id TEXT PRIMARY KEY,
                     nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
@@ -122,18 +123,16 @@ function initDatabase() {
                     createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
                     notifEmailMessage INTEGER DEFAULT 1,
                     needsEmailUpdate INTEGER DEFAULT 0
-                )
-            `, (err) => {
-                if (err) return;
-
-                // Copier les données existantes
-                db.run(`INSERT OR IGNORE INTO parents_new SELECT * FROM parents`, (err) => {
+                )`, (err) => {
                     if (err) return;
-
-                    // Supprimer l'ancienne table et renommer
-                    db.run(`DROP TABLE parents`, (err) => {
+                    db.run(`INSERT OR IGNORE INTO parents_new SELECT * FROM parents`, (err) => {
                         if (err) return;
-                        db.run(`ALTER TABLE parents_new RENAME TO parents`);
+                        db.run(`DROP TABLE parents`, (err) => {
+                            if (err) return;
+                            db.run(`ALTER TABLE parents_new RENAME TO parents`, () => {
+                                db.run(`INSERT INTO migrations (id) VALUES ('parents_email_nullable')`);
+                            });
+                        });
                     });
                 });
             });
