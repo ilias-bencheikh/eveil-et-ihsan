@@ -716,7 +716,10 @@ router.post('/validate-frais-famille', checkPermission('update'), (req, res) => 
 
 // Mettre à jour un élève
 router.put('/:id', checkPermission('update'), async (req, res) => {
-    const { nom, prenom, dateNaissance, classe, email, photo, tel, fraisInscription, dossierId, nbPaiements } = req.body;
+    const {
+        nom, prenom, dateNaissance, classe, email, photo, tel, fraisInscription, dossierId, nbPaiements,
+        parent2_nom, parent2_prenom, parent2_tel, parent2_adresse, parent2_profession, parent2_email
+    } = req.body;
 
     try {
         // Vérifier que l'email n'est pas déjà utilisé par quelqu'un d'autre
@@ -743,8 +746,17 @@ router.put('/:id', checkPermission('update'), async (req, res) => {
         }
 
         await dbRun(db,
-            'UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, tel = ?, fraisInscription = ?, dossierId = ?, nbPaiements = ? WHERE id = ?',
-            [nom, prenom, dateNaissance || null, classe || null, email || null, photo || null, tel || null, fraisInscription !== undefined ? parseFloat(fraisInscription) : null, dossierId !== undefined ? dossierId : null, nbPaiements !== undefined ? parseInt(nbPaiements) : null, req.params.id]
+            `UPDATE eleves SET nom = ?, prenom = ?, dateNaissance = ?, classe = ?, email = ?, photo = ?, tel = ?,
+             fraisInscription = ?, dossierId = ?, nbPaiements = ?,
+             parent2_nom = ?, parent2_prenom = ?, parent2_tel = ?, parent2_adresse = ?, parent2_profession = ?, parent2_email = ?
+             WHERE id = ?`,
+            [nom, prenom, dateNaissance || null, classe || null, email || null, photo || null, tel || null,
+             fraisInscription !== undefined ? parseFloat(fraisInscription) : null,
+             dossierId !== undefined ? dossierId : null,
+             nbPaiements !== undefined ? parseInt(nbPaiements) : null,
+             parent2_nom || null, parent2_prenom || null, parent2_tel || null,
+             parent2_adresse || null, parent2_profession || null, parent2_email || null,
+             req.params.id]
         );
 
         res.json({ id: req.params.id, nom, prenom, dateNaissance, classe, email, photo, tel });

@@ -115,24 +115,6 @@ router.get('/all', requireAuth, async (req, res) => {
     }
 });
 
-// Mettre à jour un parent par l'administrateur
-router.put('/:id', requireAuth, async (req, res) => {
-    if (req.userRole !== 'admin') {
-        return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
-    }
-    const { id } = req.params;
-    const { nom, prenom, email, tel, adresse, profession } = req.body;
-    try {
-        await dbRun(db, 'UPDATE parents SET nom = ?, prenom = ?, email = ?, tel = ?, adresse = ?, profession = ? WHERE id = ?', [nom || null, prenom || null, email || null, tel || null, adresse || null, profession || null, id]);
-        const parent = await dbGet(db, 'SELECT id, nom, prenom, email, tel, adresse, profession, activated FROM parents WHERE id = ?', [id]);
-        if (!parent) return res.status(404).json({ error: 'Parent non trouvé' });
-        res.json({ message: 'Parent mis à jour', parent });
-    } catch (err) {
-        console.error('Erreur mise à jour parent admin:', err);
-        res.status(500).json({ error: 'Erreur interne du serveur' });
-    }
-});
-
 // Supprimer un parent (et éventuellement liaisons) par l'administrateur
 router.delete('/:id', requireAuth, async (req, res) => {
     if (req.userRole !== 'admin') {
@@ -693,50 +675,66 @@ router.get('/:id', requireAuth, async (req, res) => {
 // Créer un parent (admin/secretariat)
 router.post('/', checkPermission('create'), async (req, res) => {
     const { nom, prenom, email, tel, adresse, profession } = req.body;
-    
-    if (!nom || !prenom || !email) {
-        return res.status(400).json({ error: 'Nom, prénom et email requis' });
+
+    console.log('POST /parents req.body:', JSON.stringify(req.body));
+    console.log('POST /parents userRole:', req.userRole);
+
+    // Email obligatoire pour créer un compte parent (login)
+    if (!email) {
+        console.log('POST /parents: email manquant');
+        return res.status(400).json({ error: 'Email requis pour créer un compte parent' });
     }
-    
+
+    // Vérifier que l'email n'est pas déjà utilisé
+    const emailValue = email.trim() || null;
+
     try {
-        // Vérifier que l'email n'est pas déjà utilisé
-        const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [email]);
-        if (existingParent) {
-            return res.status(400).json({ error: 'Cet email est déjà utilisé par un parent' });
+        if (emailValue) {
+            const existingParent = await dbGet(db, 'SELECT id FROM parents WHERE email = ?', [emailValue]);
+            console.log('POST /parents: existingParent:', existingParent);
+            if (existingParent) {
+                console.log('POST /parents: email déjà utilisé par un parent');
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un parent' });
+            }
+
+            const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [emailValue]);
+            if (existingEleve) {
+                console.log('POST /parents: email déjà utilisé par un élève');
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un élève' });
+            }
+
+            const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [emailValue]);
+            if (existingProf) {
+                console.log('POST /parents: email déjà utilisé par un prof');
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
+            }
+
+            const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [emailValue]);
+            if (existingStaff) {
+                console.log('POST /parents: email déjà utilisé par staff');
+                return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du personnel' });
+            }
         }
-        
-        const existingEleve = await dbGet(db, 'SELECT id FROM eleves WHERE email = ?', [email]);
-        if (existingEleve) {
-            return res.status(400).json({ error: 'Cet email est déjà utilisé par un élève' });
-        }
-        
-        const existingProf = await dbGet(db, 'SELECT id FROM professeurs WHERE email = ?', [email]);
-        if (existingProf) {
-            return res.status(400).json({ error: 'Cet email est déjà utilisé par un professeur' });
-        }
-        
-        const existingStaff = await dbGet(db, 'SELECT id FROM staff WHERE email = ?', [email]);
-        if (existingStaff) {
-            return res.status(400).json({ error: 'Cet email est déjà utilisé par un membre du personnel' });
-        }
-        
+
         const id = generateId('parent');
-        const activationToken = generateToken();
-        
+        const activationToken = emailValue ? generateToken() : null;
+
         await dbRun(db, `
             INSERT INTO parents (id, nom, prenom, email, tel, adresse, profession, activationToken, activated)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
-        `, [id, nom, prenom, email, tel || null, adresse || null, profession || null, activationToken]);
-        
-        const activationLink = `http://${req.headers.host}/activation.html?token=${activationToken}&type=parent`;
-        
+        `, [id, nom || null, prenom || null, emailValue, tel || null, adresse || null, profession || null, activationToken]);
+        console.log('POST /parents: insert OK, id:', id);
+
+        const activationLink = emailValue ? `http://${req.headers.host}/activation.html?token=${activationToken}&type=parent` : null;
+
         res.status(201).json({
-            id, nom, prenom, email, tel, adresse, profession,
+            id, nom: nom || null, prenom: prenom || null, email: emailValue, tel, adresse, profession,
             activationLink,
-            message: 'Parent créé. Envoyez le lien d\'activation au parent.'
+            message: emailValue ? 'Parent créé. Envoyez le lien d\'activation au parent.' : 'Parent créé (sans compte email).'
         });
     } catch (err) {
-        res.status(500).json({ error: 'Erreur interne du serveur' });
+        console.error('Erreur création parent:', err);
+        res.status(500).json({ error: 'Erreur interne du serveur: ' + err.message });
     }
 });
 

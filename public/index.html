@@ -9910,10 +9910,17 @@
 
                 // Chip statut parent
                 let parentChip = "";
-                if (parents.length === 0)
+                if (parents.length === 0 && !hasParent2Data)
                     parentChip = chip(
                         "person_off",
                         "Sans parent",
+                        "var(--md-sys-color-surface-variant)",
+                        "var(--md-sys-color-on-surface-variant)",
+                    );
+                else if (parents.length === 0 && hasParent2Data)
+                    parentChip = chip(
+                        "contact_emergency",
+                        "Contact de secours",
                         "var(--md-sys-color-surface-variant)",
                         "var(--md-sys-color-on-surface-variant)",
                     );
@@ -9933,8 +9940,9 @@
                     );
 
                 // Section parents
+                const hasParent2Data = !!(eleve.parent2_nom || eleve.parent2_prenom || eleve.parent2_tel || eleve.parent2_email);
                 const parentsBody =
-                    parents.length === 0
+                    parents.length === 0 && !hasParent2Data
                         ? `<div style="text-align:center;padding:28px;color:var(--md-sys-color-on-surface-variant);">
                         <span class="material-icons" style="font-size:44px;opacity:.25;display:block;margin-bottom:8px;">person_off</span>
                         <span style="font-size:14px;">Aucun parent enregistré</span>
@@ -9970,7 +9978,23 @@
                         ${infoRow("home", "Adresse", p.adresse)}
                     </div>`;
                               })
-                              .join("");
+                              .join("") +
+                    (hasParent2Data
+                        ? `${parents.length > 0 ? '<div style="border-top:1px solid var(--md-sys-color-outline-variant);padding-top:16px;margin-top:4px;"></div>' : ''}
+                           <div style="margin-top:${parents.length > 0 ? "0" : "0"};">
+                               <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                                   <div style="width:48px;height:48px;border-radius:50%;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;">${(eleve.parent2_prenom || "P")[0].toUpperCase()}</div>
+                                   <div>
+                                       <div style="font-size:16px;font-weight:700;color:var(--md-sys-color-on-surface);">${eleve.parent2_prenom || ""} ${eleve.parent2_nom || ""}</div>
+                                       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;"><span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:12px;font-size:11px;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);">Contact de secours</span></div>
+                                   </div>
+                               </div>
+                               ${infoRow("email", "E-mail", eleve.parent2_email)}
+                               ${infoRow("phone", "Téléphone", eleve.parent2_tel)}
+                               ${infoRow("work", "Profession", eleve.parent2_profession)}
+                               ${infoRow("home", "Adresse", eleve.parent2_adresse)}
+                           </div>`
+                        : "");
 
                 // Section fratrie
                 const siblingsSection =
@@ -10076,16 +10100,16 @@
                     "var(--md-sys-color-secondary-container)",
                     "var(--md-sys-color-on-secondary-container)",
                     "Parent" +
-                        (parents.length > 1 ? "s" : "") +
+                        (parents.length + (hasParent2Data ? 1 : 0) > 1 ? "s" : "") +
                         " / Responsable" +
-                        (parents.length > 1 ? "s" : ""),
-                    parents.length === 0
+                        (parents.length + (hasParent2Data ? 1 : 0) > 1 ? "s" : ""),
+                    parents.length === 0 && !hasParent2Data
                         ? "Aucun parent associé"
-                        : parents.length +
+                        : (parents.length + (hasParent2Data ? 1 : 0)) +
                               " responsable" +
-                              (parents.length > 1 ? "s" : "") +
+                              (parents.length + (hasParent2Data ? 1 : 0) > 1 ? "s" : "") +
                               " enregistré" +
-                              (parents.length > 1 ? "s" : ""),
+                              (parents.length + (hasParent2Data ? 1 : 0) > 1 ? "s" : ""),
                     parentsBody,
                 )}
 
@@ -10205,6 +10229,20 @@
                                 <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
                                 <input type="text" id="edit_eleveAdresse" class="fiche-edit-input" value="${eleve.adresse || ""}" placeholder="Adresse complète">
                             </div>
+                            ${canGererFrais() ? `
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">folder</span>N° Dossier</label>
+                                <input type="text" id="edit_eleveDossierId" class="fiche-edit-input" value="${eleve.dossierId || ""}" placeholder="Ex: FAM-2026-001">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">payments</span>Frais inscription</label>
+                                <input type="number" id="edit_eleveFraisInscription" class="fiche-edit-input" value="${eleve.fraisInscription || 0}" placeholder="0" step="0.01">
+                            </div>
+                            <div class="fiche-edit-item">
+                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">calendar_view_month</span>Nb. paiements</label>
+                                <input type="number" id="edit_eleveNbPaiements" class="fiche-edit-input" value="${eleve.nbPaiements || 1}" placeholder="1" min="1">
+                            </div>
+                            ` : ""}
                         </div>
                     </div>
                 </div>
@@ -10214,60 +10252,207 @@
                     parents.length === 0
                         ? `
                 <div class="fiche-section" style="margin-bottom:20px;">
-                    <div class="fiche-section-header">
-                        <div class="fiche-section-icon" style="background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface-variant);">
-                            <span class="material-icons">person_off</span>
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-secondary-container);">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-secondary);color:white;">
+                            <span class="material-icons">group_add</span>
                         </div>
                         <div>
-                            <h4 style="margin:0;">Aucun parent associé</h4>
-                            <p style="margin:2px 0 0;font-size:13px;color:var(--md-sys-color-on-surface-variant);">Aucun parent à modifier</p>
-                        </div>
-                    </div>
-                </div>`
-                        : parents
-                              .map(
-                                  (parent) => `
-                <div class="fiche-section" style="margin-bottom:20px;border-color:${parent.isPrimary ? "var(--md-sys-color-secondary)" : "var(--md-sys-color-outline-variant)"};">
-                    <div class="fiche-section-header" style="background:${parent.isPrimary ? "var(--md-sys-color-secondary-container)" : "var(--md-sys-color-surface-container)"};">
-                        <div class="md-avatar" style="width:52px;height:52px;font-size:20px;font-weight:700;flex-shrink:0;
-                                    background:${parent.isPrimary ? "var(--md-sys-color-secondary)" : "var(--md-sys-color-secondary-container)"};
-                                    color:${parent.isPrimary ? "white" : "var(--md-sys-color-on-secondary-container)"};">
-                            ${(parent.prenom || "P")[0].toUpperCase()}
-                        </div>
-                        <div>
-                            <h4 style="margin:0;font-size:17px;color:${parent.isPrimary ? "var(--md-sys-color-on-secondary-container)" : "var(--md-sys-color-on-surface)"};">
-                                ${parent.isPrimary ? "Parent principal" : "2<sup>ème</sup> parent / tuteur"}
-                            </h4>
-                            <p style="margin:2px 0 0;font-size:13px;opacity:0.75;">${parent.prenom || ""} ${parent.nom || ""}</p>
+                            <h4 style="margin:0;color:var(--md-sys-color-on-secondary-container);">Aucun parent enregistré</h4>
+                            <p style="margin:2px 0 0;font-size:13px;color:var(--md-sys-color-on-secondary-container);opacity:.8;">Ajoutez les informations des responsables légaux ci-dessous</p>
                         </div>
                     </div>
                     <div class="fiche-section-content">
-                        <div class="fiche-edit-grid">
-                            <div class="fiche-edit-item">
-                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom *</label>
-                                <input type="text" id="edit_parentNom_${parent.id}" class="fiche-edit-input" value="${parent.nom || ""}" placeholder="Nom">
+                        <div id="newParentsContainer" style="display:flex;flex-direction:column;gap:20px;">
+                            <!-- Parent 1 (principal) -->
+                            <div style="border:1px solid var(--md-sys-color-secondary);border-radius:12px;padding:16px;background:var(--md-sys-color-secondary-container);">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                                    <span class="material-icons" style="color:var(--md-sys-color-secondary);">star</span>
+                                    <span style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-secondary-container);">Parent / Responsable principal</span>
+                                </div>
+                                <div class="fiche-edit-grid">
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom</label>
+                                        <input type="text" id="new_parent1_nom" class="fiche-edit-input" placeholder="Nom de famille">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom</label>
+                                        <input type="text" id="new_parent1_prenom" class="fiche-edit-input" placeholder="Prénom">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label>
+                                        <input type="email" id="new_parent1_email" class="fiche-edit-input" placeholder="email@exemple.com">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
+                                        <input type="tel" id="new_parent1_tel" class="fiche-edit-input" placeholder="06 00 00 00 00">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">work</span>Profession</label>
+                                        <input type="text" id="new_parent1_profession" class="fiche-edit-input" placeholder="Profession">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
+                                        <input type="text" id="new_parent1_adresse" class="fiche-edit-input" placeholder="Adresse complète">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="fiche-edit-item">
-                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom *</label>
-                                <input type="text" id="edit_parentPrenom_${parent.id}" class="fiche-edit-input" value="${parent.prenom || ""}" placeholder="Prénom">
-                            </div>
-                            <div class="fiche-edit-item">
-                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label>
-                                <input type="email" id="edit_parentEmail_${parent.id}" class="fiche-edit-input" value="${parent.email || ""}" placeholder="email@exemple.com">
-                            </div>
-                            <div class="fiche-edit-item">
-                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
-                                <input type="tel" id="edit_parentTel_${parent.id}" class="fiche-edit-input" value="${parent.tel || ""}" placeholder="06 00 00 00 00">
-                            </div>
-                            <div class="fiche-edit-item fiche-edit-item--full">
-                                <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
-                                <input type="text" id="edit_parentAdresse_${parent.id}" class="fiche-edit-input" value="${parent.adresse || ""}" placeholder="Adresse complète">
+                            <!-- Parent 2 (optionnel) -->
+                            <div id="newParent2Section" style="border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;padding:16px;background:var(--md-sys-color-surface-container-low);display:none;">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                                    <span class="material-icons" style="color:var(--md-sys-color-on-surface-variant);">person</span>
+                                    <span style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-surface);">2<sup>ème</sup> parent / tuteur</span>
+                                    <button onclick="hideNewParent2()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-sys-color-error);padding:4px;border-radius:50%;display:flex;align-items:center;justify-content:center;" title="Retirer">
+                                        <span class="material-icons" style="font-size:20px;">close</span>
+                                    </button>
+                                </div>
+                                <div class="fiche-edit-grid">
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom</label>
+                                        <input type="text" id="new_parent2_nom" class="fiche-edit-input" value="${eleve.parent2_nom || ""}" placeholder="Nom de famille">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom</label>
+                                        <input type="text" id="new_parent2_prenom" class="fiche-edit-input" value="${eleve.parent2_prenom || ""}" placeholder="Prénom">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label>
+                                        <input type="email" id="new_parent2_email" class="fiche-edit-input" value="${eleve.parent2_email || ""}" placeholder="email@exemple.com">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
+                                        <input type="tel" id="new_parent2_tel" class="fiche-edit-input" value="${eleve.parent2_tel || ""}" placeholder="06 00 00 00 00">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">work</span>Profession</label>
+                                        <input type="text" id="new_parent2_profession" class="fiche-edit-input" value="${eleve.parent2_profession || ""}" placeholder="Profession">
+                                    </div>
+                                    <div class="fiche-edit-item">
+                                        <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
+                                        <input type="text" id="new_parent2_adresse" class="fiche-edit-input" value="${eleve.parent2_adresse || ""}" placeholder="Adresse complète">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <!-- Bouton pour afficher le 2ème parent -->
+                        <div id="btnAddParent2Container" style="margin-top:12px;">
+                            <button class="md-btn md-btn-tonal" onclick="showNewParent2()" style="font-size:13px;">
+                                <span class="material-icons" style="font-size:18px;">add</span> Ajouter un 2<sup>ème</sup> parent
+                            </button>
+                        </div>
                     </div>
-                </div>`,
-                              )
-                              .join("")
+                </div>
+                <` + `/script>`
+                        : `
+                <div class="fiche-section" style="margin-bottom:20px;">
+                    <div class="fiche-section-header" style="background:var(--md-sys-color-secondary-container);">
+                        <div class="fiche-section-icon" style="background:var(--md-sys-color-secondary);color:white;">
+                            <span class="material-icons">group_add</span>
+                        </div>
+                        <div>
+                            <h4 style="margin:0;color:var(--md-sys-color-on-secondary-container);">Parents / Responsables</h4>
+                            <p style="margin:2px 0 0;font-size:13px;color:var(--md-sys-color-on-secondary-container);opacity:.8;">
+                                ${parents.length === 1 ? "1 parent enregistré" : "2 parents enregistrés"}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="fiche-section-content">
+                        <div style="display:flex;flex-direction:column;gap:20px;">
+                            ${parents.map((parent) => `
+                <div style="border:1px solid ${parent.isPrimary ? "var(--md-sys-color-secondary)" : "var(--md-sys-color-outline-variant)"};border-radius:12px;padding:16px;background:${parent.isPrimary ? "var(--md-sys-color-secondary-container)" : "var(--md-sys-color-surface-container-low)"};">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                        <div style="width:40px;height:40px;border-radius:50%;background:${parent.isPrimary ? "var(--md-sys-color-secondary)" : "var(--md-sys-color-secondary-container)"};color:${parent.isPrimary ? "white" : "var(--md-sys-color-on-secondary-container)"};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;">
+                            ${(parent.prenom || "P")[0].toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-weight:700;font-size:15px;color:${parent.isPrimary ? "var(--md-sys-color-on-secondary-container)" : "var(--md-sys-color-on-surface)"};">${parent.isPrimary ? "Parent principal" : "2<sup>ème</sup> parent / tuteur"}</div>
+                            <div style="font-size:13px;opacity:0.75;color:${parent.isPrimary ? "var(--md-sys-color-on-secondary-container)" : "var(--md-sys-color-on-surface)"};">${parent.prenom || ""} ${parent.nom || ""}</div>
+                        </div>
+                    </div>
+                    <div class="fiche-edit-grid">
+                        <div class="fiche-edit-item">
+                            <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom</label>
+                            <input type="text" id="edit_parentNom_${parent.id}" class="fiche-edit-input" value="${parent.nom || ""}" placeholder="Nom">
+                        </div>
+                        <div class="fiche-edit-item">
+                            <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom</label>
+                            <input type="text" id="edit_parentPrenom_${parent.id}" class="fiche-edit-input" value="${parent.prenom || ""}" placeholder="Prénom">
+                        </div>
+                        <div class="fiche-edit-item">
+                            <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label>
+                            <input type="email" id="edit_parentEmail_${parent.id}" class="fiche-edit-input" value="${parent.email || ""}" placeholder="email@exemple.com">
+                        </div>
+                        <div class="fiche-edit-item">
+                            <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label>
+                            <input type="tel" id="edit_parentTel_${parent.id}" class="fiche-edit-input" value="${parent.tel || ""}" placeholder="06 00 00 00 00">
+                        </div>
+                        <div class="fiche-edit-item">
+                            <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">work</span>Profession</label>
+                            <input type="text" id="edit_parentProfession_${parent.id}" class="fiche-edit-input" value="${parent.profession || ""}" placeholder="Profession">
+                        </div>
+                        <div class="fiche-edit-item">
+                            <label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label>
+                            <input type="text" id="edit_parentAdresse_${parent.id}" class="fiche-edit-input" value="${parent.adresse || ""}" placeholder="Adresse complète">
+                        </div>
+                    </div>
+                </div>`).join("")}
+                            ${(() => {
+                                const hasPrimary = parents.some(p => p.isPrimary);
+                                const hasSecondary = parents.some(p => !p.isPrimary);
+                                if (parents.length >= 2) return "";
+                                if (!hasPrimary) {
+                                    return `<div id="btnAddParent1Container" style="text-align:center;">
+                                <button class="md-btn md-btn-tonal" onclick="showNewParent1()" style="font-size:13px;">
+                                    <span class="material-icons" style="font-size:18px;">add</span> Ajouter le parent principal
+                                </button>
+                            </div>
+                            <div id="newParent1Form" style="border:1px solid var(--md-sys-color-secondary);border-radius:12px;padding:16px;background:var(--md-sys-color-secondary-container);display:none;">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                                    <span class="material-icons" style="color:var(--md-sys-color-secondary);">star</span>
+                                    <span style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-secondary-container);">Parent / Responsable principal</span>
+                                    <button onclick="hideNewParent1()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-sys-color-error);padding:4px;border-radius:50%;display:flex;align-items:center;justify-content:center;" title="Retirer">
+                                        <span class="material-icons" style="font-size:20px;">close</span>
+                                    </button>
+                                </div>
+                                <div class="fiche-edit-grid">
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom</label><input type="text" id="new_parent1_nom" class="fiche-edit-input" placeholder="Nom de famille"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom</label><input type="text" id="new_parent1_prenom" class="fiche-edit-input" placeholder="Prénom"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label><input type="email" id="new_parent1_email" class="fiche-edit-input" placeholder="email@exemple.com"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label><input type="tel" id="new_parent1_tel" class="fiche-edit-input" placeholder="06 00 00 00 00"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">work</span>Profession</label><input type="text" id="new_parent1_profession" class="fiche-edit-input" placeholder="Profession"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label><input type="text" id="new_parent1_adresse" class="fiche-edit-input" placeholder="Adresse complète"></div>
+                                </div>
+                            </div>`;
+                                }
+                                if (!hasSecondary) {
+                                    return `<div id="btnAddParent2Container" style="text-align:center;">
+                                <button class="md-btn md-btn-tonal" onclick="showNewParent2()" style="font-size:13px;">
+                                    <span class="material-icons" style="font-size:18px;">add</span> Ajouter un 2<sup>ème</sup> parent
+                                </button>
+                            </div>
+                            <div id="newParent2Section" style="border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;padding:16px;background:var(--md-sys-color-surface-container-low);display:none;">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                                    <span class="material-icons" style="color:var(--md-sys-color-on-surface-variant);">person</span>
+                                    <span style="font-weight:700;font-size:15px;color:var(--md-sys-color-on-surface);">2<sup>ème</sup> parent / tuteur</span>
+                                    <button onclick="hideNewParent2()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-sys-color-error);padding:4px;border-radius:50%;display:flex;align-items:center;justify-content:center;" title="Retirer">
+                                        <span class="material-icons" style="font-size:20px;">close</span>
+                                    </button>
+                                </div>
+                                <div class="fiche-edit-grid">
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">badge</span>Nom</label><input type="text" id="new_parent2_nom" class="fiche-edit-input" value="${eleve.parent2_nom || ""}" placeholder="Nom de famille"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">person</span>Prénom</label><input type="text" id="new_parent2_prenom" class="fiche-edit-input" value="${eleve.parent2_prenom || ""}" placeholder="Prénom"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">email</span>Email</label><input type="email" id="new_parent2_email" class="fiche-edit-input" value="${eleve.parent2_email || ""}" placeholder="email@exemple.com"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">phone</span>Téléphone</label><input type="tel" id="new_parent2_tel" class="fiche-edit-input" value="${eleve.parent2_tel || ""}" placeholder="06 00 00 00 00"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">work</span>Profession</label><input type="text" id="new_parent2_profession" class="fiche-edit-input" value="${eleve.parent2_profession || ""}" placeholder="Profession"></div>
+                                    <div class="fiche-edit-item"><label class="fiche-edit-label"><span class="material-icons fiche-info-icon">home</span>Adresse</label><input type="text" id="new_parent2_adresse" class="fiche-edit-input" value="${eleve.parent2_adresse || ""}" placeholder="Adresse complète"></div>
+                                </div>
+                            </div>`;
+                                }
+                                return "";
+                            })()}
+                        </div>
+                    </div>
+                </div>
+                <` + `/script>`
                 }
 
                 <!-- Barre Sauvegarder / Annuler -->
@@ -10288,6 +10473,35 @@
             `;
             }
 
+            function showNewParent2() {
+                const sec = document.getElementById('newParent2Section');
+                if (sec) sec.style.display = 'block';
+                const btn = document.getElementById('btnAddParent2Container');
+                if (btn) btn.style.display = 'none';
+            }
+            function hideNewParent2() {
+                const sec = document.getElementById('newParent2Section');
+                if (sec) sec.style.display = 'none';
+                ['new_parent2_nom','new_parent2_prenom','new_parent2_email','new_parent2_tel','new_parent2_profession','new_parent2_adresse']
+                    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                const btn = document.getElementById('btnAddParent2Container');
+                if (btn) btn.style.display = '';
+            }
+            function showNewParent1() {
+                const sec = document.getElementById('newParent1Form');
+                if (sec) sec.style.display = 'block';
+                const btn = document.getElementById('btnAddParent1Container');
+                if (btn) btn.style.display = 'none';
+            }
+            function hideNewParent1() {
+                const sec = document.getElementById('newParent1Form');
+                if (sec) sec.style.display = 'none';
+                ['new_parent1_nom','new_parent1_prenom','new_parent1_email','new_parent1_tel','new_parent1_profession','new_parent1_adresse']
+                    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                const btn = document.getElementById('btnAddParent1Container');
+                if (btn) btn.style.display = '';
+            }
+
             async function saveEditMode(eleveId) {
                 const saveBtn = document.getElementById("saveFicheBtn");
                 if (saveBtn) {
@@ -10299,6 +10513,14 @@
                 const errors = [];
                 let parentsOk = 0;
                 let parentsTotal = 0;
+
+                // -- Champs parent 2 (disponibles même sans email) --
+                const newP2Nom = document.getElementById("new_parent2_nom")?.value?.trim();
+                const newP2Prenom = document.getElementById("new_parent2_prenom")?.value?.trim();
+                const newP2Email = document.getElementById("new_parent2_email")?.value?.trim() || null;
+                const newP2Tel = document.getElementById("new_parent2_tel")?.value?.trim() || null;
+                const newP2Profession = document.getElementById("new_parent2_profession")?.value?.trim() || null;
+                const newP2Adresse = document.getElementById("new_parent2_adresse")?.value?.trim() || null;
 
                 // -- Élève --
                 const eleveNom = document
@@ -10339,6 +10561,19 @@
                         document
                             .getElementById("edit_eleveAdresse")
                             ?.value?.trim() || null,
+                    dossierId:
+                        document.getElementById("edit_eleveDossierId")
+                            ?.value?.trim() || null,
+                    fraisInscription:
+                        parseFloat(document.getElementById("edit_eleveFraisInscription")?.value) || 0,
+                    nbPaiements:
+                        parseInt(document.getElementById("edit_eleveNbPaiements")?.value, 10) || 1,
+                    parent2_nom: newP2Nom || null,
+                    parent2_prenom: newP2Prenom || null,
+                    parent2_tel: newP2Tel || null,
+                    parent2_adresse: newP2Adresse || null,
+                    parent2_profession: newP2Profession || null,
+                    parent2_email: newP2Email || null,
                 };
                 try {
                     const r = await fetch(`${API_URL}/eleves/${eleveId}`, {
@@ -10397,14 +10632,116 @@
                     }
                 }
 
+                // -- Nouveaux parents (si aucun parent existant) --
+                const newP1Nom = document.getElementById("new_parent1_nom")?.value?.trim();
+                const newP1Prenom = document.getElementById("new_parent1_prenom")?.value?.trim();
+                const newP1Email = document.getElementById("new_parent1_email")?.value?.trim() || null;
+                const newP1Tel = document.getElementById("new_parent1_tel")?.value?.trim() || null;
+                const newP1Profession = document.getElementById("new_parent1_profession")?.value?.trim() || null;
+                const newP1Adresse = document.getElementById("new_parent1_adresse")?.value?.trim() || null;
+
+                const hasNewParent1 = !!(newP1Email);
+                const hasNewParent2Account = !!(newP2Email);
+
+                // Warn if partial parent 1 data filled without email (parent 1 requires account)
+                const p1Partial = !!(newP1Nom || newP1Prenom || newP1Tel) && !newP1Email;
+                if (p1Partial) {
+                    showSnackbar("L'email est obligatoire pour créer un compte parent.");
+                    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<span class="material-icons">save</span> Sauvegarder'; }
+                    return;
+                }
+
+                if (hasNewParent1) {
+                    parentsTotal++;
+                    try {
+                        const createResp = await fetch(`${API_URL}/parents`, {
+                            method: "POST",
+                            headers: { ...getHeaders(), "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                nom: newP1Nom || null,
+                                prenom: newP1Prenom || null,
+                                email: newP1Email,
+                                tel: newP1Tel,
+                                profession: newP1Profession,
+                                adresse: newP1Adresse,
+                            }),
+                        });
+                        if (createResp.ok) {
+                            const created = await createResp.json();
+                            const newParentId = created.id;
+                            // Lier au nouvel élève
+                            if (newParentId) {
+                                await fetch(`${API_URL}/parents/link`, {
+                                    method: "POST",
+                                    headers: { ...getHeaders(), "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        eleveId: eleveId,
+                                        parentId: newParentId,
+                                        relation: "parent",
+                                        isPrimary: 1,
+                                    }),
+                                });
+                            }
+                            parentsOk++;
+                        } else {
+                            const errData = await createResp.json().catch(() => ({}));
+                            errors.push("parent1: " + (errData.error || "erreur création"));
+                        }
+                    } catch (e) {
+                        errors.push("parent1");
+                    }
+                }
+
+                if (hasNewParent2Account) {
+                    parentsTotal++;
+                    try {
+                        const createResp = await fetch(`${API_URL}/parents`, {
+                            method: "POST",
+                            headers: { ...getHeaders(), "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                nom: newP2Nom || null,
+                                prenom: newP2Prenom || null,
+                                email: newP2Email,
+                                tel: newP2Tel,
+                                profession: newP2Profession,
+                                adresse: newP2Adresse,
+                            }),
+                        });
+                        if (createResp.ok) {
+                            const created = await createResp.json();
+                            const newParentId = created.id;
+                            if (newParentId) {
+                                await fetch(`${API_URL}/parents/link`, {
+                                    method: "POST",
+                                    headers: { ...getHeaders(), "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        eleveId: eleveId,
+                                        parentId: newParentId,
+                                        relation: "parent",
+                                        isPrimary: 0,
+                                    }),
+                                });
+                            }
+                            parentsOk++;
+                        } else {
+                            const errData = await createResp.json().catch(() => ({}));
+                            errors.push("parent2: " + (errData.error || "erreur création"));
+                        }
+                    } catch (e) {
+                        errors.push("parent2");
+                    }
+                }
+
                 await loadEleves();
 
                 if (errors.length === 0) {
-                    showSnackbar(
-                        parentsTotal > 0
-                            ? `Élève et ${parentsOk} parent(s) mis à jour avec succès`
-                            : "Élève mis à jour avec succès",
-                    );
+                    const nbCreated = (hasNewParent1 ? 1 : 0) + (hasNewParent2Account ? 1 : 0);
+                    const nbUpdated = parentsTotal - nbCreated;
+                    let msg = "Élève mis à jour avec succès";
+                    if (nbCreated > 0 && nbUpdated > 0) msg = `${nbUpdated} parent(s) mis à jour, ${nbCreated} créé(s)`;
+                    else if (nbCreated > 0) msg = `${nbCreated} parent(s) créé(s) et lié(s) à l'élève`;
+                    else if (nbUpdated > 0) msg = `Élève et ${nbUpdated} parent(s) mis à jour`;
+                    showSnackbar(msg);
                 } else {
                     showSnackbar(
                         "Certaines modifications n'ont pas pu être enregistrées",
@@ -22634,7 +22971,7 @@
 
                     const typeStr = d.type === 'nouveau' ? '<span style="color:var(--md-sys-color-primary);font-weight:500;">Nouveau</span>' : (d.type === 'reinscription' ? '<span style="color:#ef6c00;font-weight:500;">Réinscription</span>' : '<span style="color:#6a1b9a;font-weight:500;">Mixte</span>');
                     const enfantsCount = Array.isArray(d.enfantsInfo) ? d.enfantsInfo.length : 0;
-                    const initiales = `${(d.parentInfo.nom || 'P')[0].toUpperCase()}${(d.parentInfo.prenom || '')[0]?.toUpperCase() || ''}`;
+                    const initiales = `${(d.parentInfo.nom || d.parentInfo.prenom || 'P')[0].toUpperCase()}`;
 
                     return `
                         <tr onclick="openAdminPreinscriptionModal('${d.id}')" style="cursor:pointer;" class="hover-row">

@@ -69,6 +69,12 @@ function initDatabase() {
             db.run(`ALTER TABLE eleves ADD COLUMN adresse TEXT`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN notifEmailMessage INTEGER DEFAULT 1`, () => {});
             db.run(`ALTER TABLE eleves ADD COLUMN sortieSeul INTEGER DEFAULT 0`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parent2_nom TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parent2_prenom TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parent2_tel TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parent2_adresse TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parent2_profession TEXT`, () => {});
+            db.run(`ALTER TABLE eleves ADD COLUMN parent2_email TEXT`, () => {});
 
             // Table paiements (historique des transactions)
             db.run(`CREATE TABLE IF NOT EXISTS paiements (
@@ -131,6 +137,39 @@ function initDatabase() {
                             if (err) return;
                             db.run(`ALTER TABLE parents_new RENAME TO parents`, () => {
                                 db.run(`INSERT INTO migrations (id) VALUES ('parents_email_nullable')`);
+                            });
+                        });
+                    });
+                });
+            });
+
+            // Migration: Permettre nom et prenom NULL pour parents (contacts partiels)
+            db.get(`SELECT id FROM migrations WHERE id = 'parents_nom_prenom_nullable'`, (err, row) => {
+                if (row) return; // déjà appliquée
+                db.run(`CREATE TABLE IF NOT EXISTS parents_new (
+                    id TEXT PRIMARY KEY,
+                    nom TEXT,
+                    prenom TEXT,
+                    email TEXT UNIQUE,
+                    password TEXT,
+                    tel TEXT,
+                    adresse TEXT,
+                    profession TEXT,
+                    activationToken TEXT,
+                    activated INTEGER DEFAULT 0,
+                    resetToken TEXT,
+                    resetExpires INTEGER,
+                    createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                    notifEmailMessage INTEGER DEFAULT 1,
+                    needsEmailUpdate INTEGER DEFAULT 0
+                )`, (err) => {
+                    if (err) return;
+                    db.run(`INSERT OR IGNORE INTO parents_new SELECT * FROM parents`, (err) => {
+                        if (err) return;
+                        db.run(`DROP TABLE parents`, (err) => {
+                            if (err) return;
+                            db.run(`ALTER TABLE parents_new RENAME TO parents`, () => {
+                                db.run(`INSERT INTO migrations (id) VALUES ('parents_nom_prenom_nullable')`);
                             });
                         });
                     });

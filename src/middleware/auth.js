@@ -11,6 +11,7 @@ function hasPermission(role, action) {
 function checkPermission(action) {
     return (req, res, next) => {
         const userRole = req.userRole || req.headers['x-user-role'];
+        console.log('checkPermission:', action, 'userRole:', userRole, 'permissions:', PERMISSIONS[userRole]);
         if (hasPermission(userRole, action)) {
             next();
         } else {
